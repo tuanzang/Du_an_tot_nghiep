@@ -2,12 +2,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import morgan from "morgan";
-
 import { connectDB } from "./config/db";
-import authRouter from "./routers/auth";
-import productRouter from "./routers/product";
-import categoryRouter from "./routers/category";
-import cartRouter from "./routers/cart";
+import router from "./routes";
+
 const app = express();
 dotenv.config();
 // middleware
@@ -19,8 +16,7 @@ app.use(morgan("tiny"));
 connectDB(process.env.DB_URI);
 
 // routers
-app.use("/api/v1", authRouter);
-app.use("/api/v1", productRouter);
-app.use("/api/v1", categoryRouter);
-app.use("/api/v1", cartRouter);
+router.use('/api', router)
+
+
 export const viteNodeApp = app;
