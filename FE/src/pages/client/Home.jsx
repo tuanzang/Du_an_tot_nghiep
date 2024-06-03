@@ -28,6 +28,7 @@ export default function Home() {
   const fakeHotProduct2s = [];
   for (let i = 1; i <= 4; i++) {
     fakeHotProduct1s.push({
+      key: i,
       image1: `./src/assets/image/product/product-${i}.jpg`,
       image2: `./src/assets/image/product/product-${19 - i}.jpg`,
       title: getTitle(i),
@@ -35,6 +36,7 @@ export default function Home() {
       category: `Category ${i}`,
     });
     fakeHotProduct2s.push({
+      key: i,
       image1: `./src/assets/image/product/product-${i + 1}.jpg`,
       image2: `./src/assets/image/product/product-${19 - i - 1}.jpg`,
       title: getTitle(i),
@@ -47,7 +49,7 @@ export default function Home() {
       <main>
         {/* <!-- hero slider area start --> */}
         <section className="slider-area">
-          <Carousel autoplay>
+          <Carousel autoPlay autoplaySpeed={5000}>
             <div>
               <h3 style={contentStyle}>
                 <img src="./src/assets/image/slider/home1-slide1.jpg" />
@@ -144,18 +146,24 @@ export default function Home() {
                   <div className="product-tab-menu">
                     <ul className="nav justify-content-center">
                       <li>
-                        <a className="active" data-bs-toggle="tab">
+                        <a href="#" className="active" data-bs-toggle="tab">
                           Nhẫn
                         </a>
                       </li>
                       <li>
-                        <a data-bs-toggle="tab">Dây chuyền</a>
+                        <a href="#" data-bs-toggle="tab">
+                          Dây chuyền
+                        </a>
                       </li>
                       <li>
-                        <a data-bs-toggle="tab">Lắc tay</a>
+                        <a href="#" data-bs-toggle="tab">
+                          Lắc tay
+                        </a>
                       </li>
                       <li>
-                        <a data-bs-toggle="tab">Bông tai</a>
+                        <a href="#" data-bs-toggle="tab">
+                          Bông tai
+                        </a>
                       </li>
                     </ul>
                   </div>
@@ -163,16 +171,16 @@ export default function Home() {
 
                   {/* <!-- product tab content start --> */}
                   <div className="tab-content">
-                    <Carousel autoplay>
+                    <Carousel autoPlay autoplaySpeed={5000}>
                       {/* <!-- product item start --> */}
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
                             {fakeHotProduct1s.map((p, index) => (
-                              <Col className="gutter-row" span={6}>
+                              <Col key={p.key} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
-                                    <a>
+                                    <a href="#">
                                       <img
                                         className="pri-img"
                                         src={p.image1}
@@ -191,6 +199,7 @@ export default function Home() {
                                     </div>
                                     <div className="button-group">
                                       <a
+                                        href="#"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="left"
                                         title="Yêu thích"
@@ -198,6 +207,7 @@ export default function Home() {
                                         <i className="pe-7s-like"></i>
                                       </a>
                                       <a
+                                        href="#"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="left"
                                         title="So sánhpare"
@@ -205,6 +215,7 @@ export default function Home() {
                                         <i className="pe-7s-refresh-2"></i>
                                       </a>
                                       <a
+                                        href="#"
                                         data-bs-toggle="modal"
                                         data-bs-target="#quick_view"
                                       >
@@ -225,37 +236,41 @@ export default function Home() {
                                     <div className="product-caption text-center">
                                       <div className="product-identity">
                                         <p className="manufacturer-name">
-                                          <a>{p.title}</a>
+                                          <a href="#">{p.title}</a>
                                         </p>
                                       </div>
                                       <ul className="color-categories">
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-lightblue"
                                             title="LightSteelblue"
                                           ></a>
                                         </li>
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-darktan"
                                             title="Darktan"
                                           ></a>
                                         </li>
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-grey"
                                             title="Grey"
                                           ></a>
                                         </li>
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-brown"
                                             title="Brown"
                                           ></a>
                                         </li>
                                       </ul>
                                       <h6 className="product-name">
-                                        <a>Sản phẩm {index + 1}</a>
+                                        <a href="#">Sản phẩm {index + 1}</a>
                                       </h6>
                                       <div className="price-box">
                                         <span className="price-regular">
@@ -280,10 +295,10 @@ export default function Home() {
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
                             {fakeHotProduct2s.map((p, index) => (
-                              <Col className="gutter-row" span={6}>
+                              <Col key={p.key} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
-                                    <a>
+                                    <a href="#">
                                       <img
                                         className="pri-img"
                                         src={p.image1}
@@ -302,6 +317,7 @@ export default function Home() {
                                     </div>
                                     <div className="button-group">
                                       <a
+                                        href="#"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="left"
                                         title="Yêu thích"
@@ -309,6 +325,7 @@ export default function Home() {
                                         <i className="pe-7s-like"></i>
                                       </a>
                                       <a
+                                        href="#"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="left"
                                         title="So sánhpare"
@@ -316,6 +333,7 @@ export default function Home() {
                                         <i className="pe-7s-refresh-2"></i>
                                       </a>
                                       <a
+                                        href="#"
                                         data-bs-toggle="modal"
                                         data-bs-target="#quick_view"
                                       >
@@ -336,37 +354,41 @@ export default function Home() {
                                     <div className="product-caption text-center">
                                       <div className="product-identity">
                                         <p className="manufacturer-name">
-                                          <a>{p.title}</a>
+                                          <a href="#">{p.title}</a>
                                         </p>
                                       </div>
                                       <ul className="color-categories">
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-lightblue"
                                             title="LightSteelblue"
                                           ></a>
                                         </li>
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-darktan"
                                             title="Darktan"
                                           ></a>
                                         </li>
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-grey"
                                             title="Grey"
                                           ></a>
                                         </li>
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-brown"
                                             title="Brown"
                                           ></a>
                                         </li>
                                       </ul>
                                       <h6 className="product-name">
-                                        <a>Sản phẩm {index + 1}</a>
+                                        <a href="#">Sản phẩm {index + 1}</a>
                                       </h6>
                                       <div className="price-box">
                                         <span className="price-regular">
@@ -401,7 +423,7 @@ export default function Home() {
             <div className="row row-20 mtn-20">
               <div className="col-sm-6">
                 <figure className="banner-statistics mt-20">
-                  <a>
+                  <a href="#">
                     <img
                       src="./src/assets/image/banner/img1-top.jpg"
                       alt="product banner"
@@ -417,7 +439,7 @@ export default function Home() {
               </div>
               <div className="col-sm-6">
                 <figure className="banner-statistics mt-20">
-                  <a>
+                  <a href="#">
                     <img
                       src="./src/assets/image/banner/img2-top.jpg"
                       alt="product banner"
@@ -433,7 +455,7 @@ export default function Home() {
               </div>
               <div className="col-sm-6">
                 <figure className="banner-statistics mt-20">
-                  <a>
+                  <a href="#">
                     <img
                       src="./src/assets/image/banner/img3-top.jpg"
                       alt="product banner"
@@ -449,7 +471,7 @@ export default function Home() {
               </div>
               <div className="col-sm-6">
                 <figure className="banner-statistics mt-20">
-                  <a>
+                  <a href="#">
                     <img
                       src="./src/assets/image/banner/img4-top.jpg"
                       alt="product banner"
@@ -488,18 +510,24 @@ export default function Home() {
                   <div className="product-tab-menu">
                     <ul className="nav justify-content-center">
                       <li>
-                        <a className="active" data-bs-toggle="tab">
+                        <a href="#" className="active" data-bs-toggle="tab">
                           Nhẫn
                         </a>
                       </li>
                       <li>
-                        <a data-bs-toggle="tab">Dây chuyền</a>
+                        <a href="#" data-bs-toggle="tab">
+                          Dây chuyền
+                        </a>
                       </li>
                       <li>
-                        <a data-bs-toggle="tab">Lắc tay</a>
+                        <a href="#" data-bs-toggle="tab">
+                          Lắc tay
+                        </a>
                       </li>
                       <li>
-                        <a data-bs-toggle="tab">Bông tai</a>
+                        <a href="#" data-bs-toggle="tab">
+                          Bông tai
+                        </a>
                       </li>
                     </ul>
                   </div>
@@ -507,16 +535,16 @@ export default function Home() {
 
                   {/* <!-- product tab content start --> */}
                   <div className="tab-content">
-                    <Carousel autoplay>
+                    <Carousel autoPlay autoplaySpeed={5000}>
                       {/* <!-- product item start --> */}
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
                             {fakeHotProduct1s.map((p, index) => (
-                              <Col className="gutter-row" span={6}>
+                              <Col key={p.key} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
-                                    <a>
+                                    <a href="#">
                                       <img
                                         className="pri-img"
                                         src={p.image1}
@@ -535,6 +563,7 @@ export default function Home() {
                                     </div>
                                     <div className="button-group">
                                       <a
+                                        href="#"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="left"
                                         title="Yêu thích"
@@ -542,6 +571,7 @@ export default function Home() {
                                         <i className="pe-7s-like"></i>
                                       </a>
                                       <a
+                                        href="#"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="left"
                                         title="So sánhpare"
@@ -549,6 +579,7 @@ export default function Home() {
                                         <i className="pe-7s-refresh-2"></i>
                                       </a>
                                       <a
+                                        href="#"
                                         data-bs-toggle="modal"
                                         data-bs-target="#quick_view"
                                       >
@@ -569,37 +600,41 @@ export default function Home() {
                                     <div className="product-caption text-center">
                                       <div className="product-identity">
                                         <p className="manufacturer-name">
-                                          <a>{p.title}</a>
+                                          <a href="#">{p.title}</a>
                                         </p>
                                       </div>
                                       <ul className="color-categories">
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-lightblue"
                                             title="LightSteelblue"
                                           ></a>
                                         </li>
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-darktan"
                                             title="Darktan"
                                           ></a>
                                         </li>
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-grey"
                                             title="Grey"
                                           ></a>
                                         </li>
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-brown"
                                             title="Brown"
                                           ></a>
                                         </li>
                                       </ul>
                                       <h6 className="product-name">
-                                        <a>Sản phẩm {index + 1}</a>
+                                        <a href="#">Sản phẩm {index + 1}</a>
                                       </h6>
                                       <div className="price-box">
                                         <span className="price-regular">
@@ -624,10 +659,10 @@ export default function Home() {
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
                             {fakeHotProduct2s.map((p, index) => (
-                              <Col className="gutter-row" span={6}>
+                              <Col key={p.key} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
-                                    <a>
+                                    <a href="#">
                                       <img
                                         className="pri-img"
                                         src={p.image1}
@@ -646,6 +681,7 @@ export default function Home() {
                                     </div>
                                     <div className="button-group">
                                       <a
+                                        href="#"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="left"
                                         title="Yêu thích"
@@ -653,6 +689,7 @@ export default function Home() {
                                         <i className="pe-7s-like"></i>
                                       </a>
                                       <a
+                                        href="#"
                                         data-bs-toggle="tooltip"
                                         data-bs-placement="left"
                                         title="So sánhpare"
@@ -660,6 +697,7 @@ export default function Home() {
                                         <i className="pe-7s-refresh-2"></i>
                                       </a>
                                       <a
+                                        href="#"
                                         data-bs-toggle="modal"
                                         data-bs-target="#quick_view"
                                       >
@@ -680,37 +718,41 @@ export default function Home() {
                                     <div className="product-caption text-center">
                                       <div className="product-identity">
                                         <p className="manufacturer-name">
-                                          <a>{p.title}</a>
+                                          <a href="#">{p.title}</a>
                                         </p>
                                       </div>
                                       <ul className="color-categories">
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-lightblue"
                                             title="LightSteelblue"
                                           ></a>
                                         </li>
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-darktan"
                                             title="Darktan"
                                           ></a>
                                         </li>
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-grey"
                                             title="Grey"
                                           ></a>
                                         </li>
                                         <li>
                                           <a
+                                            href="#"
                                             className="c-brown"
                                             title="Brown"
                                           ></a>
                                         </li>
                                       </ul>
                                       <h6 className="product-name">
-                                        <a>Sản phẩm {index + 1}</a>
+                                        <a href="#">Sản phẩm {index + 1}</a>
                                       </h6>
                                       <div className="price-box">
                                         <span className="price-regular">
@@ -753,16 +795,16 @@ export default function Home() {
               </div>
             </div>
             <div className="tab-content">
-              <Carousel autoplay>
+              <Carousel autoPlay autoplaySpeed={5000}>
                 {/* <!-- product item start --> */}
                 <div className="tab-pane fade show active">
                   <div className="blog-carousel-active slick-row-10 slick-arrow-style">
                     <Row gutter={16}>
                       <Col className="gutter-row" span={8}>
                         {/* <!-- blog post item start --> */}
-                        <div className="blog-post-item">
+                        <div key={1} className="blog-post-item">
                           <figure className="blog-thumb">
-                            <a>
+                            <a href="#">
                               <img
                                 src="./src/assets/image/blog/blog-img1.jpg"
                                 alt="blog image"
@@ -772,11 +814,11 @@ export default function Home() {
                           <div className="blog-content">
                             <div className="blog-meta">
                               <p>
-                                25/03/2024 | <a>F-Bee</a>
+                                25/03/2024 | <a href="#">F-Bee</a>
                               </p>
                             </div>
                             <h5 className="blog-title">
-                              <a>
+                              <a href="#">
                                 Con gái người nổi tiếng chia sẻ về việc có mắt
                               </a>
                             </h5>
@@ -786,9 +828,9 @@ export default function Home() {
                       </Col>
                       <Col className="gutter-row" span={8}>
                         {/* <!-- blog post item start --> */}
-                        <div className="blog-post-item">
+                        <div key={2} className="blog-post-item">
                           <figure className="blog-thumb">
-                            <a>
+                            <a href="#">
                               <img
                                 src="./src/assets/image/blog/blog-img2.jpg"
                                 alt="blog image"
@@ -798,11 +840,11 @@ export default function Home() {
                           <div className="blog-content">
                             <div className="blog-meta">
                               <p>
-                                25/04/2024 | <a>F-Bee</a>
+                                25/04/2024 | <a href="#">F-Bee</a>
                               </p>
                             </div>
                             <h5 className="blog-title">
-                              <a>
+                              <a href="#">
                                 Trẻ em bỏ nhà một mình 4 ngày trong phim truyền
                                 hình
                               </a>
@@ -811,11 +853,11 @@ export default function Home() {
                         </div>
                         {/* <!-- blog post item end --> */}
                       </Col>
-                      <Col className="gutter-row" span={8}>
+                      <Col key={3} className="gutter-row" span={8}>
                         {/* <!-- blog post item start --> */}
                         <div className="blog-post-item">
                           <figure className="blog-thumb">
-                            <a>
+                            <a href="#">
                               <img
                                 src="./src/assets/image/blog/blog-img3.jpg"
                                 alt="blog image"
@@ -825,11 +867,11 @@ export default function Home() {
                           <div className="blog-content">
                             <div className="blog-meta">
                               <p>
-                                25/05/2024 | <a>F-Bee</a>
+                                25/05/2024 | <a href="#">F-Bee</a>
                               </p>
                             </div>
                             <h5 className="blog-title">
-                              <a>
+                              <a href="#">
                                 Người trúng xổ số tặng tiền cho bất kỳ người đàn
                                 ông nào
                               </a>
@@ -850,7 +892,7 @@ export default function Home() {
                         {/* <!-- blog post item start --> */}
                         <div className="blog-post-item">
                           <figure className="blog-thumb">
-                            <a>
+                            <a href="#">
                               <img
                                 src="./src/assets/image/blog/blog-img3.jpg"
                                 alt="blog image"
@@ -860,11 +902,11 @@ export default function Home() {
                           <div className="blog-content">
                             <div className="blog-meta">
                               <p>
-                                25/06/2024 | <a>F-Bee</a>
+                                25/06/2024 | <a href="#">F-Bee</a>
                               </p>
                             </div>
                             <h5 className="blog-title">
-                              <a>
+                              <a href="#">
                                 Người trúng xổ số tặng tiền cho bất kỳ người đàn
                                 ông nào
                               </a>
@@ -877,7 +919,7 @@ export default function Home() {
                         {/* <!-- blog post item start --> */}
                         <div className="blog-post-item">
                           <figure className="blog-thumb">
-                            <a>
+                            <a href="#">
                               <img
                                 src="./src/assets/image/blog/blog-img4.jpg"
                                 alt="blog image"
@@ -887,11 +929,13 @@ export default function Home() {
                           <div className="blog-content">
                             <div className="blog-meta">
                               <p>
-                                25/07/2024 | <a>F-Bee</a>
+                                25/07/2024 | <a href="#">F-Bee</a>
                               </p>
                             </div>
                             <h5 className="blog-title">
-                              <a>Mọi người sẵn sàng nói dối khi có tiền</a>
+                              <a href="#">
+                                Mọi người sẵn sàng nói dối khi có tiền
+                              </a>
                             </h5>
                           </div>
                         </div>
@@ -901,7 +945,7 @@ export default function Home() {
                         {/* <!-- blog post item start --> */}
                         <div className="blog-post-item">
                           <figure className="blog-thumb">
-                            <a>
+                            <a href="#">
                               <img
                                 src="./src/assets/image/blog/blog-img5.jpg"
                                 alt="blog image"
@@ -911,11 +955,13 @@ export default function Home() {
                           <div className="blog-content">
                             <div className="blog-meta">
                               <p>
-                                25/08/2024 | <a>F-Bee</a>
+                                25/08/2024 | <a href="#">F-Bee</a>
                               </p>
                             </div>
                             <h5 className="blog-title">
-                              <a>Chuyện tình lãng mạn lớn nhất Hollywood</a>
+                              <a href="#">
+                                Chuyện tình lãng mạn lớn nhất Hollywood
+                              </a>
                             </h5>
                           </div>
                         </div>

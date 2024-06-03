@@ -1,25 +1,26 @@
-import { createRoute } from "react-router-dom";
-import Home from "../layout/client/Home";
-import Product from "../layout/client/Product";
+import React from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import Header from "../layout/client/Header";
+import Home from "../pages/client/Home";
+import Product from "../pages/client/Product";
+import Footer from "../layout/client/Footer";
+import ClientLogin from "../pages/client/ClientLogin";
+import ProductDetail from "../pages/client/ProductDetail";
+import Cart from "../pages/client/Cart";
 
-const ClientRouter = createRoute([
-  {
-    path: "/home",
-    element: <Home />,
-    index: true,
-    loader: () => {
-      document.title = "F-Shoes - Sản phẩm";
-      return null;
-    },
-  },
-  {
-    path: "/product",
-    element: <Product />,
-    loader: () => {
-      document.title = "F-Shoes - Sản phẩm";
-      return null;
-    },
-  },
-]);
-
-export default ClientRouter;
+export default function ClientRouter() {
+  return (
+    <div>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Navigate to="/home" />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/product" element={<Product />} />
+        <Route path="/product/detail" element={<ProductDetail />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/login" element={<ClientLogin />} />
+      </Routes>
+      <Footer />
+    </div>
+  );
+}

@@ -1,4 +1,10 @@
+import React, { useState } from "react";
+
 const Header = () => {
+  const [openMenuCart, setOpenMenuCart] = useState(false);
+  const handleMenuCartClick = () => {
+    setOpenMenuCart(!openMenuCart);
+  };
   return (
     <div>
       <header className="header-area header-wide bg-gray">
@@ -20,7 +26,7 @@ const Header = () => {
                         Cao Đẳng FPT Polytechnic Hà Nội
                       </li>
                       <li className="language">
-                        <img src="./src/assets/image/icon/vn.gif" alt="flag" />
+                        <img src="../src/assets/image/icon/vn.gif" alt="flag" />
                         Việt Nam
                       </li>
                     </ul>
@@ -37,10 +43,10 @@ const Header = () => {
               <div className="row align-items-center position-relative">
                 {/* start logo area */}
                 <div className="col-lg-2">
-                  <div className="logo" style={{ width: "60%" }}>
+                  <div className="logo" style={{ width: "50%" }}>
                     <a href="/home">
                       <img
-                        src="./src/assets/image/logo/logo.png"
+                        src="../src/assets/image/logo/logo.png"
                         alt="brand logo"
                       />
                     </a>
@@ -121,7 +127,11 @@ const Header = () => {
                           </a>
                         </li>
                         <li>
-                          <a href="#" className="minicart-btn">
+                          <a
+                            href="/cart"
+                            className="minicart-btn"
+                            onClick={() => handleMenuCartClick()}
+                          >
                             <i className="pe-7s-shopbag"></i>
                             <div className="notification">2</div>
                           </a>
@@ -303,6 +313,8 @@ const Header = () => {
           </div>
         </aside>
         {/* offcanvas mobile menu end */}
+
+        {openMenuCart && <div>a</div>}
       </header>
     </div>
   );
