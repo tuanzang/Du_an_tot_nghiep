@@ -1,20 +1,19 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import Header from "./layout/client/Header";
-import Home from "./pages/client/Home";
-import Product from "./pages/client/Product";
-import Footer from "./layout/client/Footer";
+import { Routes, Route } from "react-router-dom";
+import ClientRouter from "./routers/ClientRouter";
+import AdminRouter from "./routers/AdminRouter";
+import NotFound404 from "./routers/NotFound404";
+import AdminLogin from "./pages/admin/login/AdminLogin";
 
 export default function App() {
   return (
     <div>
-      <Header />
       <Routes>
-        <Route path="/" element={<Navigate to="/home" />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/product" element={<Product />} />
+        <Route path="/*" element={<ClientRouter />} />
+        <Route path="/admin/*" element={<AdminRouter />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="*" element={<NotFound404 />} />
       </Routes>
-      <Footer />
     </div>
   );
 }
