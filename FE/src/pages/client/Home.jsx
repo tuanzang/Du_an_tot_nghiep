@@ -1,6 +1,7 @@
 import React from "react";
 import { Carousel, Col, Row } from "antd";
 import "./Home.css";
+import { useQuery } from "@tanstack/react-query";
 
 const contentStyle = {
   height: "530px",
@@ -11,6 +12,12 @@ const contentStyle = {
 };
 
 export default function Home() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["hotProducts"],
+    queryFn: async () => {
+     
+    },
+  });
   const getTitle = (number) => {
     switch (number) {
       case 1:
