@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Carousel, Col, Row } from "antd";
 import "./Home.css";
-import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const contentStyle = {
   height: "530px",
@@ -12,12 +13,31 @@ const contentStyle = {
 };
 
 export default function Home() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["hotProducts"],
-    queryFn: async () => {
-     
-    },
-  });
+  const [product, setProduct] = useState([]);
+
+ useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/api/products`
+      )
+      setProduct(response.data);
+    } catch (error) { 
+      console.log("Khong co du lieu");
+    }
+  } ;
+
+  fetchProducts();
+ },[]);
+
+ if(!product) return null
+
+  // const queryClient = useQueryClient();
+  // const { mutate } = useMutation({
+  //   mutationFn: async (id) => {
+      
+  //   }
+  // })
   const getTitle = (number) => {
     switch (number) {
       case 1:
@@ -547,21 +567,17 @@ export default function Home() {
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
-                            {fakeHotProduct1s.map((p, index) => (
+                            {product.map((p, index) => (
                               <Col key={p.key} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
                                     <a href="#">
                                       <img
                                         className="pri-img"
-                                        src={p.image1}
+                                        src={p.image}
                                         alt="product"
                                       />
-                                      <img
-                                        className="sec-img"
-                                        src={p.image2}
-                                        alt="product"
-                                      />
+                                      
                                     </a>
                                     <div className="product-badge">
                                       <div className="product-label new">
