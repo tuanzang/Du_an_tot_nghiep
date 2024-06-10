@@ -174,123 +174,181 @@
 // export default ProductAdd;
 
 
-import React, { useState } from 'react';
+// import React from 'react';
+// import axios from 'axios';
+// import { Button } from "antd";
+// import { useNavigate } from 'react-router-dom';
+// import { IProduct } from '../../../interface/Products';
+// import { useForm } from 'react-hook-form';
+// import { useMutation } from '@tanstack/react-query';
+
+// const ProductAdd = () => {
+//   const navigate = useNavigate();
+//   const { 
+//     register,
+//     handleSubmit
+//   } = useForm<IProduct>();
+//   const { mutate } = useMutation({
+//     mutationFn: async (product: IProduct) =>{
+//         return await axios.post("http://localhost:3001/api/products/add", product);
+        
+//     }
+//   })
+
+//   const onSubmit = (product: IProduct) => {
+//     mutate(product);
+//     navigate("/admin/product");
+//   }
+
+//   return (
+//     <>
+      
+//       <form onSubmit={handleSubmit(onSubmit)}>
+//       <h1>Add New Product</h1>
+//         <div>
+//           <label>
+//             Name:
+//             <input
+//               type="text"
+//               { ...register("name", { required: true })}
+//             />
+//           </label>
+//         </div>
+//                 <div>
+//           <label>
+//             Ảnh:
+//             <input
+//               type="text"
+//               {...register("image", { required: true })}
+//             />
+//           </label>
+//         </div>
+//         <div>
+//           <label>
+//             Price:
+//             <input
+//               type="number"
+//               {...register("price", { required: true })}
+//             />
+//           </label>
+//         </div>
+//         <div>
+//           <label>
+//             Description:
+//             <textarea
+//               name="description"
+//               required
+//             />
+//           </label>
+//         </div>
+//         <div>
+//           <label>
+//             Quantity:
+//             <input
+//               type="number"
+//               {...register("quantity", { required: true })}
+//             />
+//           </label>
+//         </div>
+        
+//         <Button type="primary" htmlType="submit">
+//           Submit
+//         </Button>
+//       </form>
+//     </>
+//   );
+// };
+
+// export default ProductAdd;
+
+import type { FormProps } from 'antd';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Button, Form, Input } from 'antd';
+type FieldType = {
+  name?: string;
+  price?: string;
+  image?: string;
+  description?: string;
+  quantity?: string;
+};
 
 const ProductAdd = () => {
-  const [product, setProduct] = useState({
-    name: '',
-    price: '',
-    description: '', 
-    quantity: '',
-  });
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
   const navigate = useNavigate()
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProduct({ ...product, [name]: value });
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      const res = await axios.post('http://localhost:3001/api/products/add', product);
-      setSuccess('Success');
-      setProduct({
-        name: '',
-        price: '',
-        imageUrl: '',
-        description: '',
-        quantity: '',
-      });
-      alert('Success')
-      navigate("/admin/products")
+
+  // const onSubmit: SubmitHandler<IProduct> = async (data) => {
+  //   try {
+  //     await axios.put(`http://localhost:3001/api/products/${id}`, data);
+  //     alert('Success')
+  //     navigate("/admin/product")
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // }
+  const onFinish: FormProps<FieldType>['onFinish'] = async  (values) => {
+    console.log('Success:', values);
+      try {
+      await axios.post(`http://localhost:3001/api/products/add`, values);
+      alert( 'Add product success')
+      navigate("/admin/product")
     } catch (err) {
-      setError("Failed to add product. Please try again");
-    } finally {
-      setLoading(false);
+      console.log(err);
     }
   };
 
+  const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
+    console.log('Failed:', errorInfo);
+  };
+
   return (
-    <div>
-      <h1>Add New Product</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>
-            Name:
-            <input
-              type="text"
-              name="name"
-              value={product.name}
-              onChange={handleChange}
-              required
-            />
-          </label>
-        </div>
-                <div>
-          <label>
-            Ảnh:
-            <input
-              type="text"
-              name="image"
-              value={product.imageUrl}
-              onChange={handleChange}
-              required
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            Price:
-            <input
-              type="number"
-              name="price"
-              value={product.price}
-              onChange={handleChange}
-              required
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            Quantity:
-            <input
-              type="number"
-              name="quantity"
-              value={product.quantity}
-              onChange={handleChange}
-              required
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            Description:
-            <textarea
-              name="description"
-              value={product.desc}
-              onChange={handleChange}
-              required
-            />
-          </label>
-        </div>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Adding...' : 'Add Product'}
-        </button>
-      </form>
-    </div>
+    <Form
+      name="basic"
+      labelCol={{ span: 8 }}
+      wrapperCol={{ span: 16 }}
+      style={{ maxWidth: 600 }}
+      onFinish={onFinish}
+      onFinishFailed={onFinishFailed}
+      autoComplete="off"
+    >
+      <Form.Item<FieldType>
+        label="Tên sản phẩm"
+        name="name"
+      >
+        <Input type='text'/>
+      </Form.Item>
+      <Form.Item<FieldType>
+        label="Giá"
+        name="price"
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item<FieldType>
+        label="Số lượng"
+        name="quantity"
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item<FieldType>
+        label="Ảnh"
+        name="image"
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item<FieldType>
+        label="Mô tả"
+        name="description"
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+        <Button type="primary" htmlType="submit">
+          Submit
+        </Button>
+      </Form.Item>
+    </Form>
   );
 };
 
 export default ProductAdd;
-

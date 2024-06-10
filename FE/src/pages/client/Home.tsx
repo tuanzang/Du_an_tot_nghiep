@@ -567,7 +567,7 @@ export default function Home() {
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
-                            {product.map((p, index) => (
+                            {fakeHotProduct2s.map((p, index) => (
                               <Col key={p.key} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">

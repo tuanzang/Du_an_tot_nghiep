@@ -66,8 +66,9 @@ export const createProduct = async (req, res) => {
 }
 
 export const updateProduct = async (req, res) => {
+    
     try {
-        const data = await product.findByIdAndUpdate(req.params.id, body, {new: true})
+        const data = await product.findByIdAndUpdate(req.params.id, req.body, {new: true})
         if(!data || data.length === 0){
             res.status(404).json({
                 message: "Update thất bại !",
