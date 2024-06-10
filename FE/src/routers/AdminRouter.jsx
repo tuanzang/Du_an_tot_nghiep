@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "../pages/admin/dashboard/Dashboard";
 import Bill from "../pages/admin/bill/Bill";
 import Product from "../pages/admin/product/Product";
+import ProductAdd from "../pages/admin/product/productAdd";
 import Size from "../pages/admin/size/Size";
 import Category from "../pages/admin/category/Category";
 import Material from "../pages/admin/material/Material";
@@ -17,7 +18,8 @@ export default function AdminRouter() {
         <Route path="/" element={<Navigate to="/admin/dashboard" />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/bill" element={<Bill />} />
-        <Route path="/product" element={<Product />} />
+        <Route path="/products" element={<Product />} />
+        <Route path="/products/add" element={<ProductAdd />} />
         <Route path="/category" element={<Category />} />
         <Route path="/material" element={<Material />} />
         <Route path="/size" element={<Size />} />

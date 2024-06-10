@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
 import {
@@ -8,6 +8,7 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const customTableHeaderCellStyle = {
   backgroundColor: "#c29957",
@@ -19,6 +20,21 @@ const customTableHeaderCellStyle = {
 
 export default function Product() {
   const [value, setValue] = useState(1);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/api/products");
+      setProducts(response.data);
+      console.log(response.data)
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
   const onChangeRadio = (e) => {
     console.log("radio checked", e.target.value);
     setValue(e.target.value);
@@ -28,55 +44,67 @@ export default function Product() {
     console.log(`switch to ${checked}`);
   };
 
-  const listBestSeller = [
-    {
-      key: "1",
-      img: "../src/assets/image/product/product-1.jpg",
-      name: "p1",
-      quantity: "1",
-      status: true,
-      size: "1",
-    },
-    {
-      key: "2",
-      img: "../src/assets/image/product/product-2.jpg",
-      name: "p2",
-      quantity: "2",
-      status: false,
-      size: "2",
-    },
-    {
-      key: "3",
-      img: "../src/assets/image/product/product-3.jpg",
-      name: "p3",
-      quantity: "3",
-      status: true,
-      size: "3",
-    },
-    {
-      key: "4",
-      img: "../src/assets/image/product/product-3.jpg",
-      name: "p3",
-      quantity: "3",
-      status: false,
-      size: "3",
-    },
-  ];
+  // const listBestSeller = [
+  //   {
+  //     key: "1",
+  //     img: "../src/assets/image/product/product-1.jpg",
+  //     name: "p1",
+  //     quantity: "1",
+  //     status: true,
+  //     size: "1",
+  //   },
+  //   {
+  //     key: "2",
+  //     img: "../src/assets/image/product/product-2.jpg",
+  //     name: "p2",
+  //     quantity: "2",
+  //     status: false,
+  //     size: "2",
+  //   },
+  //   {
+  //     key: "3",
+  //     img: "../src/assets/image/product/product-3.jpg",
+  //     name: "p3",
+  //     quantity: "3",
+  //     status: true,
+  //     size: "3",
+  //   },
+  //   {
+  //     key: "4",
+  //     img: "../src/assets/image/product/product-3.jpg",
+  //     name: "p3",
+  //     quantity: "3",
+  //     status: false,
+  //     size: "3",
+  //   },
+  // ];
 
   const columns = [
     {
+      title: "Tên sản phẩm",
+      dataIndex: "name",
+      key: "name",
+      width: "20%",
+    },
+    {
       title: "Ảnh",
-      dataIndex: "img",
-      key: "img",
+      dataIndex: "image",
+      key: "image",
       width: "20%",
       render: (text) => (
         <img style={{ height: "70px" }} src={text} alt="error" />
       ),
     },
     {
-      title: "Tên sản phẩm",
-      dataIndex: "name",
-      key: "name",
+      title: "Giá sản phẩm",
+      dataIndex: "price",
+      key: "price",
+      width: "20%",
+    },
+    {
+      title: "Mô tả sản phẩm",
+      dataIndex: "description",
+      key: "description",
       width: "20%",
     },
     {
@@ -86,39 +114,32 @@ export default function Product() {
       align: "center",
       width: "10%",
     },
-    {
-      title: "Kích cỡ",
-      dataIndex: "size",
-      key: "size",
-      align: "center",
-      width: "10%",
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      align: "center",
-      width: "30%",
-      render: (key) => (
-        <Switch
-          style={{ backgroundColor: key ? "green" : "gray" }}
-          checked={key}
-          onChange={() => onChangeSwith(key)}
-        />
-      ),
-    },
-    {
-      title: "Hành động",
-      dataIndex: "key",
-      key: "action",
-      align: "center",
-      width: "10%",
-      render: (key) => (
-        <Link to={`/admin/product/detail/${key}`}>
-          <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
-        </Link>
-      ),
-    },
+    // {
+    //   title: "Trạng thái",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   align: "center",
+    //   width: "30%",
+    //   render: (key) => (
+    //     <Switch
+    //       style={{ backgroundColor: key ? "green" : "gray" }}
+    //       checked={key}
+    //       onChange={() => onChangeSwith(key)}
+    //     />
+    //   ),
+    // },
+    // {
+    //   title: "Hành động",
+    //   dataIndex: "key",
+    //   key: "action",
+    //   align: "center",
+    //   width: "10%",
+    //   render: (key) => (
+    //     <Link to={`/admin/product/detail/${key}`}>
+    //       <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
+    //     </Link>
+    //   ),
+    // },
   ];
   return (
     <div>
@@ -150,7 +171,7 @@ export default function Product() {
               Export Excel
             </Button>
             <Button
-              type="default"
+              type="link"
               icon={<PlusSquareOutlined />}
               style={{
                 float: "right",
@@ -158,7 +179,7 @@ export default function Product() {
                 color: "#c29957",
               }}
             >
-              Tạo sản phẩm
+              <Link to="/admin/products/add">Tạo sản phẩm</Link>
             </Button>
           </Col>
         </Row>
@@ -193,7 +214,7 @@ export default function Product() {
               ),
             },
           }}
-          dataSource={listBestSeller}
+          dataSource={products}
           columns={columns}
         />
       </Card>
