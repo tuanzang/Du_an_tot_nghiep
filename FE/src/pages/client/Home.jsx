@@ -12,30 +12,30 @@ const contentStyle = {
   background: "#364d79",
 };
 
-export default function Home() {
-  const [product, setProduct] = useState([]);
+const Home = () => {
+  const [product, setProduct] = useState<Iproduct>();
 
- useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3001/api/products`
-      )
-      setProduct(response.data);
-    } catch (error) { 
-      console.log("Khong co du lieu");
-    }
-  } ;
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/api/products`
+        )
+        setProduct(response.data);
+      } catch (error) {
+        console.log("Khong co du lieu");
+      }
+    };
 
-  fetchProducts();
- },[]);
+    fetchProducts();
+  }, []);
 
- if(!product) return null
+  if (!product) return null
 
   // const queryClient = useQueryClient();
   // const { mutate } = useMutation({
   //   mutationFn: async (id) => {
-      
+
   //   }
   // })
   const getTitle = (number) => {
@@ -567,7 +567,7 @@ export default function Home() {
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
-                            {product.map((p, index) => (
+                            {fakeHotProduct1s.map((p, index) => (
                               <Col key={p.key} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
@@ -577,7 +577,7 @@ export default function Home() {
                                         src={p.image}
                                         alt="product"
                                       />
-                                      
+
                                     </a>
                                     <div className="product-badge">
                                       <div className="product-label new">
@@ -1003,3 +1003,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default Home
