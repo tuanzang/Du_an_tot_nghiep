@@ -191,7 +191,7 @@
 //   const { mutate } = useMutation({
 //     mutationFn: async (product: IProduct) =>{
 //         return await axios.post("http://localhost:3001/api/products/add", product);
-        
+
 //     }
 //   })
 
@@ -202,7 +202,7 @@
 
 //   return (
 //     <>
-      
+
 //       <form onSubmit={handleSubmit(onSubmit)}>
 //       <h1>Add New Product</h1>
 //         <div>
@@ -250,7 +250,7 @@
 //             />
 //           </label>
 //         </div>
-        
+
 //         <Button type="primary" htmlType="submit">
 //           Submit
 //         </Button>
@@ -264,8 +264,10 @@
 import type { FormProps } from 'antd';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, Select } from 'antd';
 import { IProduct } from '../../../interface/Products';
+import { useEffect, useState } from 'react';
+import { ICategory } from '../../../interface/Categories';
 
 
 const ProductAdd = () => {
@@ -281,17 +283,38 @@ const ProductAdd = () => {
   //     console.log(err);
   //   }
   // }
-  const onFinish: FormProps<IProduct>['onFinish'] = async  (values) => {
+  const onFinish: FormProps<IProduct>['onFinish'] = async (values) => {
     console.log('Success:', values);
-      try {
+    try {
       await axios.post(`http://localhost:3001/api/products/add`, values);
-      alert( 'Add product success')
+      alert('Add product success')
       navigate("/admin/product")
     } catch (err) {
       console.log(err);
     }
   };
+  //lấy dữ liệu danh mục với axios
+  const [cates, setCates] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/categories");
+        setCates(response.data?.data);
+        console.log(cates);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
+    fetchData();
+  }, []);
+
+  const dataCates = cates.map((item: ICategory) => {
+    const value = " Size " + item.size + " - " + item.color 
+    return {
+      value, label: value
+    }
+  })
   const onFinishFailed: FormProps<IProduct>['onFinishFailed'] = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
@@ -310,13 +333,30 @@ const ProductAdd = () => {
         label="Tên sản phẩm"
         name="name"
       >
-        <Input type='text'/>
+        <Input type='text' />
       </Form.Item>
       <Form.Item<IProduct>
         label="Giá"
         name="price"
       >
         <Input />
+      </Form.Item>
+      <Form.Item<IProduct>
+        label="Danh mục"
+        name="categoryId"
+      >
+        <Select
+        
+          defaultValue="Chọn danh mục"
+          style={{
+            width: 150,
+          }}
+
+
+          //hàm lặp danh mục
+
+          options={dataCates}
+        />
       </Form.Item>
       <Form.Item<IProduct>
         label="Số lượng"

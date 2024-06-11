@@ -5,9 +5,12 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import ModalAddAndUpdate from "../../../components/ModalAddAndUpdate";
+import { ICategory } from "../../../interface/Categories";
+import axios from "axios";
+import { Link } from "react-router-dom";
 
 const customTableHeaderCellStyle = {
   backgroundColor: "#c29957",
@@ -18,10 +21,38 @@ const customTableHeaderCellStyle = {
 };
 
 export default function Category() {
-  const [openAdd, setOpenAdd] = useState(false);
-  const [openUpdate, setOpenUpdate] = useState(false);
   const [value, setValue] = useState(1);
+  const [cates, setCates] = useState<ICategory[]>([]);
 
+  useEffect(() => {
+    const fetchCate = async () => {
+      try {
+        const  response  = await axios.get("http://localhost:3001/api/categories");
+        setCates(response.data?.data);
+        
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchCate();
+  }, []);
+  const deleteCategory = async (id: number) => {
+   
+    try {
+      //dùng confirm để xóa
+       const confirm = window.confirm("Bạn muốn xóa danh mục này ?");
+       if (confirm) {
+        const response = await axios.delete(`http://localhost:3001/api/categories/${id}`);
+        if (response.status === 200) {
+        const newArr = cates.filter((item) => item["_id"] !== id);
+        setCates(newArr);
+      }
+       }
+    } catch (error) {
+      console.log(error);
+    }
+  }
   const onChangeRadio = (e) => {
     console.log("radio checked", e.target.value);
     setValue(e.target.value);
@@ -31,103 +62,68 @@ export default function Category() {
     console.log(`switch to ${checked}`);
   };
 
-  const listBestSeller = [
-    {
-      key: "1",
-      img: "../src/assets/image/product/product-1.jpg",
-      name: "p1",
-      quantity: "1",
-      status: true,
-      size: "1",
-    },
-    {
-      key: "2",
-      img: "../src/assets/image/product/product-2.jpg",
-      name: "p2",
-      quantity: "2",
-      status: false,
-      size: "2",
-    },
-    {
-      key: "3",
-      img: "../src/assets/image/product/product-3.jpg",
-      name: "p3",
-      quantity: "3",
-      status: true,
-      size: "3",
-    },
-    {
-      key: "4",
-      img: "../src/assets/image/product/product-3.jpg",
-      name: "p3",
-      quantity: "3",
-      status: false,
-      size: "3",
-    },
-  ];
+  
 
   const columns = [
     {
-      title: "Ảnh",
-      dataIndex: "img",
-      key: "img",
-      width: "20%",
-      render: (text) => (
-        <img style={{ height: "70px" }} src={text} alt="error" />
-      ),
-    },
-    {
-      title: "Tên sản phẩm",
-      dataIndex: "name",
-      key: "name",
-      width: "20%",
-    },
-    {
-      title: "Số lượng",
-      dataIndex: "quantity",
-      key: "quantity",
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
       align: "center",
-      width: "10%",
+      width: "5%",
     },
     {
-      title: "Kích cỡ",
+      title: "Size",
       dataIndex: "size",
       key: "size",
       align: "center",
+      width: "20%",
+    },
+    {
+      title: "Color",
+      dataIndex: "color",
+      key: "color",
+      align: "center",
       width: "10%",
     },
     {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
+      title: "Slug",
+      dataIndex: "slug",
+      key: "slug",
       align: "center",
-      width: "30%",
-      render: (key) => (
-        <Switch
-          style={{ backgroundColor: key ? "green" : "gray" }}
-          checked={key}
-          onChange={() => onChangeSwith(key)}
-        />
-      ),
+      width: "10%",
     },
     {
-      title: "Hành động",
+      title: "Cập nhật",
       dataIndex: "key",
-      key: "action",
+      key: "key",
       align: "center",
-      width: "10%",
-      render: (key) => (
-        <Button
-          style={{ border: "none" }}
-          onClick={() => {
-            setOpenUpdate(true);
-            console.log(key);
-          }}
-          icon={<EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />}
-        />
+      width: "2%",
+      render : (value: any) => (
+        <Button><Link to={`/admin/category/${value}`}>Sửa</Link></Button>
+      )
+    },
+    {
+      title: "Xóa",
+      dataIndex: "key",
+      key: "key",
+      align: "center",
+      width: "2%",
+      render: (value: any) => (
+        <Button onClick={() => deleteCategory(value!)} >Xóa</Button> 
       ),
     },
   ];
+
+  const data = cates.map((item: ICategory, index: number) => {
+    return {
+      stt: index + 1,
+      key: item._id,
+      size: item.size,
+      color: item.color,
+      slug: item.slug,
+    };
+  })
   return (
     <div>
       <BreadcrumbsCustom nameHere={"Danh mục"} />
@@ -144,6 +140,7 @@ export default function Category() {
             />
           </Col>
           <Col span={12}>
+          
             <Button
               icon={<DownloadOutlined />}
               style={{
@@ -158,8 +155,7 @@ export default function Category() {
               Export Excel
             </Button>
             <Button
-              type="default"
-              onClick={() => setOpenAdd(true)}
+              type="link"
               icon={<PlusSquareOutlined />}
               style={{
                 float: "right",
@@ -167,44 +163,8 @@ export default function Category() {
                 color: "#c29957",
               }}
             >
-              Tạo danh mục
+              <Link to="/admin/category/add">Tạo Danh Mục</Link>
             </Button>
-            {/* tạo mới */}
-            {openAdd && (
-              <ModalAddAndUpdate
-                open={openAdd}
-                setOpen={setOpenAdd}
-                title={"Thêm mới danh mục"}
-                buttonSubmit={
-                  <Button
-                    style={{ backgroundColor: "green", color: "White" }}
-                    type="default"
-                  >
-                    Thêm
-                  </Button>
-                }
-              >
-                <Input type="number" placeholder="Nhập tên danh mục" />
-              </ModalAddAndUpdate>
-            )}
-            {/* Cập nhật */}
-            {openUpdate && (
-              <ModalAddAndUpdate
-                open={openUpdate}
-                setOpen={setOpenUpdate}
-                title={"Xem chi tiết danh mục"}
-                buttonSubmit={
-                  <Button
-                    style={{ backgroundColor: "green", color: "White" }}
-                    type="default"
-                  >
-                    Cập nhật
-                  </Button>
-                }
-              >
-                <Input type="number" placeholder="Nhập tên danh mục" />
-              </ModalAddAndUpdate>
-            )}
           </Col>
         </Row>
         <Row gutter={16} style={{ marginTop: "12px" }}>
@@ -238,7 +198,7 @@ export default function Category() {
               ),
             },
           }}
-          dataSource={listBestSeller}
+          dataSource={data}
           columns={columns}
         />
       </Card>

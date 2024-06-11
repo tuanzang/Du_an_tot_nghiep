@@ -3,13 +3,8 @@ import axios from 'axios';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Form, Input } from 'antd';
-type FieldType = {
-  name?: string;
-  price?: string;
-  image?: string;
-  description?: string;
-  quantity?: string;
-};
+import { IProduct } from '../../../interface/Products';
+
 
 const ProductEdit = () => {
   const { id } = useParams();
@@ -34,7 +29,7 @@ const ProductEdit = () => {
   //     console.log(err);
   //   }
   // }
-  const onFinish: FormProps<FieldType>['onFinish'] = async  (values) => {
+  const onFinish: FormProps<IProduct>['onFinish'] = async  (values) => {
     console.log('Success:', values);
       try {
       await axios.put(`http://localhost:3001/api/products/${id}`, values);
@@ -45,7 +40,7 @@ const ProductEdit = () => {
     }
   };
 
-  const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
+  const onFinishFailed: FormProps<FieldIProductType>['onFinishFailed'] = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
 
@@ -66,31 +61,31 @@ const ProductEdit = () => {
       onFinishFailed={onFinishFailed}
       autoComplete="off"
     >
-      <Form.Item<FieldType>
+      <Form.Item<IProduct>
         label="Tên sản phẩm"
         name="name"
       >
         <Input type='text'/>
       </Form.Item>
-      <Form.Item<FieldType>
+      <Form.Item<IProduct>
         label="Giá"
         name="price"
       >
         <Input />
       </Form.Item>
-      <Form.Item<FieldType>
+      <Form.Item<IProduct>
         label="Số lượng"
         name="quantity"
       >
         <Input />
       </Form.Item>
-      <Form.Item<FieldType>
+      <Form.Item<IProduct>
         label="Ảnh"
         name="image"
       >
         <Input />
       </Form.Item>
-      <Form.Item<FieldType>
+      <Form.Item<IProduct>
         label="Mô tả"
         name="description"
       >

@@ -52,9 +52,6 @@ export default function Product() {
         setProducts(newArr);
       }
        }
-
-      
-
     } catch (error) {
       console.log(error);
     }
@@ -104,6 +101,12 @@ export default function Product() {
   // ];
 
   const columns = [
+    {
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      align: "center", 
+    },
     {
       title: "Tên sản phẩm",
       dataIndex: "name",
@@ -175,8 +178,9 @@ export default function Product() {
   ];
 
   
-  const data  = products.map((item: IProduct) => {
+  const data  = products.map((item: IProduct, index: number) => {
   return {
+    stt : index + 1,
     key: item._id,
     name: item.name,
     image: item.image,

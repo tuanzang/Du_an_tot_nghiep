@@ -47,15 +47,7 @@ export default function AdminMenu({ small }) {
         {
           key: "category",
           label: <Link to="/admin/category">Danh mục</Link>,
-        },
-        {
-          key: "material",
-          label: <Link to="/admin/material">Chất liệu</Link>,
-        },
-        {
-          key: "size",
-          label: <Link to="/admin/size">Kích cỡ</Link>,
-        },
+        }
       ],
     },
     {
