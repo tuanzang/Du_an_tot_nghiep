@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Carousel, Col, Row } from "antd";
+import { Carousel, Col, Descriptions, Row } from "antd";
 import "./Home.css";
 import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { IProduct } from "../../interface/Products";
 
 const contentStyle = {
   height: "530px",
@@ -13,7 +14,7 @@ const contentStyle = {
 };
 
 export default function Home() {
-  const [product, setProduct] = useState([]);
+  const [product, setProduct] = useState<IProduct[]>([]);
 
  useEffect(() => {
   const fetchProducts = async () => {
@@ -21,7 +22,7 @@ export default function Home() {
       const response = await axios.get(
         `http://localhost:3001/api/products`
       )
-      setProduct(response.data);
+      setProduct(response.data?.data);
     } catch (error) { 
       console.log("Khong co du lieu");
     }
@@ -51,26 +52,27 @@ export default function Home() {
     }
   };
 
-  const fakeHotProduct1s = [];
-  const fakeHotProduct2s = [];
-  for (let i = 1; i <= 4; i++) {
-    fakeHotProduct1s.push({
-      key: i,
-      image1: `./src/assets/image/product/product-${i}.jpg`,
-      image2: `./src/assets/image/product/product-${19 - i}.jpg`,
-      title: getTitle(i),
-      price: (i * 10 + 9.99).toFixed(2),
-      category: `Category ${i}`,
-    });
-    fakeHotProduct2s.push({
-      key: i,
-      image1: `./src/assets/image/product/product-${i + 1}.jpg`,
-      image2: `./src/assets/image/product/product-${19 - i - 1}.jpg`,
-      title: getTitle(i),
-      price: (i * 10 + 9.99).toFixed(2),
-      category: `Category ${i}`,
-    });
-  }
+  // const fakeHotProduct1s = [];
+  // const fakeHotProduct2s = [];
+  // for (let i = 1; i <= 4; i++) {
+  //   fakeHotProduct1s.push({
+  //     key: i,
+  //     image1: `./src/assets/image/product/product-${i}.jpg`,
+  //     image2: `./src/assets/image/product/product-${19 - i}.jpg`,
+  //     title: getTitle(i),
+  //     price: (i * 10 + 9.99).toFixed(2),
+  //     category: `Category ${i}`,
+  //   });
+  //   fakeHotProduct2s.push({
+  //     key: i,
+  //     image1: `./src/assets/image/product/product-${i + 1}.jpg`,
+  //     image2: `./src/assets/image/product/product-${19 - i - 1}.jpg`,
+  //     title: getTitle(i),
+  //     price: (i * 10 + 9.99).toFixed(2),
+  //     category: `Category ${i}`,
+  //   });
+  // }
+
   return (
     <div>
       <main>
@@ -203,19 +205,14 @@ export default function Home() {
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
-                            {fakeHotProduct1s.map((p, index) => (
-                              <Col key={p.key} className="gutter-row" span={6}>
+                            {product.map((p: IProduct, index) => (
+                              <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
                                     <a href="#">
                                       <img
                                         className="pri-img"
-                                        src={p.image1}
-                                        alt="product"
-                                      />
-                                      <img
-                                        className="sec-img"
-                                        src={p.image2}
+                                        src={p.image}
                                         alt="product"
                                       />
                                     </a>
@@ -263,7 +260,7 @@ export default function Home() {
                                     <div className="product-caption text-center">
                                       <div className="product-identity">
                                         <p className="manufacturer-name">
-                                          <a href="#">{p.title}</a>
+                                          <a href="#">{p.name}</a>
                                         </p>
                                       </div>
                                       <ul className="color-categories">
@@ -321,19 +318,19 @@ export default function Home() {
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
-                            {fakeHotProduct2s.map((p, index) => (
-                              <Col key={p.key} className="gutter-row" span={6}>
+                            {product.map((p, index) => (
+                              <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
                                     <a href="#">
                                       <img
                                         className="pri-img"
-                                        src={p.image1}
+                                        src={p.image}
                                         alt="product"
                                       />
                                       <img
                                         className="sec-img"
-                                        src={p.image2}
+                                        src={p.image}
                                         alt="product"
                                       />
                                     </a>
@@ -381,7 +378,7 @@ export default function Home() {
                                     <div className="product-caption text-center">
                                       <div className="product-identity">
                                         <p className="manufacturer-name">
-                                          <a href="#">{p.title}</a>
+                                          <a href="#">{p.name}</a>
                                         </p>
                                       </div>
                                       <ul className="color-categories">
@@ -567,8 +564,8 @@ export default function Home() {
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
-                            {fakeHotProduct2s.map((p, index) => (
-                              <Col key={p.key} className="gutter-row" span={6}>
+                            {product.map((p, index) => (
+                              <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
                                     <a href="#">
@@ -623,7 +620,7 @@ export default function Home() {
                                     <div className="product-caption text-center">
                                       <div className="product-identity">
                                         <p className="manufacturer-name">
-                                          <a href="#">{p.title}</a>
+                                          <a href="#">{p.name}</a>
                                         </p>
                                       </div>
                                       <ul className="color-categories">
@@ -681,19 +678,19 @@ export default function Home() {
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
-                            {fakeHotProduct2s.map((p, index) => (
-                              <Col key={p.key} className="gutter-row" span={6}>
+                            {product.map((p, index) => (
+                              <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
                                     <a href="#">
                                       <img
                                         className="pri-img"
-                                        src={p.image1}
+                                        src={p.image}
                                         alt="product"
                                       />
                                       <img
                                         className="sec-img"
-                                        src={p.image2}
+                                        src={p.image}
                                         alt="product"
                                       />
                                     </a>
@@ -741,7 +738,7 @@ export default function Home() {
                                     <div className="product-caption text-center">
                                       <div className="product-identity">
                                         <p className="manufacturer-name">
-                                          <a href="#">{p.title}</a>
+                                          <a href="#">{p.name}</a>
                                         </p>
                                       </div>
                                       <ul className="color-categories">

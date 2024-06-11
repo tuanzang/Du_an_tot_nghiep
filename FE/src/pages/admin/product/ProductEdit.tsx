@@ -1,6 +1,6 @@
 import type { FormProps } from 'antd';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button, Form, Input } from 'antd';
 type FieldType = {
@@ -12,7 +12,6 @@ type FieldType = {
 };
 
 const ProductEdit = () => {
-  const [product, setProduct] = useState<any>({});
   const { id } = useParams();
   const navigate = useNavigate()
   const [form] = Form.useForm();
@@ -20,8 +19,8 @@ const ProductEdit = () => {
     (async () => {
       const { data } = await axios.get(`http://localhost:3001/api/products/${id}`);
       // setProduct(data.data)
-      const product = data.data
-      form.setFieldsValue(product);
+      // const product = data.data
+      form.setFieldsValue(data.data);
       return data
     })();
   }, [id]);
@@ -40,7 +39,7 @@ const ProductEdit = () => {
       try {
       await axios.put(`http://localhost:3001/api/products/${id}`, values);
       alert( 'Edit product success')
-      // navigate("/admin/product")
+      navigate("/admin/product")
     } catch (err) {
       console.log(err);
     }

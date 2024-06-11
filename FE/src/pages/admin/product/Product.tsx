@@ -7,7 +7,7 @@ import {
   PlusSquareOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { IProduct } from "../../../interface/Products";
 
