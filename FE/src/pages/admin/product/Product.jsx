@@ -108,7 +108,7 @@ export default function Product() {
       width: "20%",
     },
     {
-      title: "Số lượng",
+      title: "Số lượnggggg",
       dataIndex: "quantity",
       key: "quantity",
       align: "center",
