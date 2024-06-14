@@ -46,7 +46,7 @@ export default function AdminMenu({ small }) {
         },
         {
           key: "category",
-          label: <Link to="/admin/category">Danh mục</Link>,
+          label: <Link to="/admin/category">Loại</Link>,
         }
       ],
     },

@@ -32,22 +32,10 @@ const CategoryAdd = () => {
       autoComplete="off"
     >
       <Form.Item<ICategory>
-        label="Size"
-        name="size"
+        label="Loại"
+        name="loai"
       >
         <Input type='text'/>
-      </Form.Item>
-      <Form.Item<ICategory>
-        label="Color"
-        name="color"
-      >
-        <Input />
-      </Form.Item>
-      <Form.Item<ICategory>
-        label="Slug"
-        name="slug"
-      >
-        <Input />
       </Form.Item>
       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
         <Button type="primary" htmlType="submit">

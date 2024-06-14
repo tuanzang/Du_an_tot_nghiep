@@ -1,7 +1,6 @@
+
 export interface ICategory {
     _id: number;
-    size: string;
-    color: string;
-    slug: string;
+    loai: string;
     products: string[];
 }

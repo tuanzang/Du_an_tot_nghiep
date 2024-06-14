@@ -73,25 +73,11 @@ export default function Category() {
       width: "5%",
     },
     {
-      title: "Size",
-      dataIndex: "size",
-      key: "size",
+      title: "Tên danh mục",
+      dataIndex: "loai",
+      key: "loai",
       align: "center",
       width: "20%",
-    },
-    {
-      title: "Color",
-      dataIndex: "color",
-      key: "color",
-      align: "center",
-      width: "10%",
-    },
-    {
-      title: "Slug",
-      dataIndex: "slug",
-      key: "slug",
-      align: "center",
-      width: "10%",
     },
     {
       title: "Cập nhật",
@@ -119,9 +105,7 @@ export default function Category() {
     return {
       stt: index + 1,
       key: item._id,
-      size: item.size,
-      color: item.color,
-      slug: item.slug,
+      loai : item.loai,
     };
   })
   return (

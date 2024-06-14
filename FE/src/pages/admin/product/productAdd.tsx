@@ -272,7 +272,26 @@ import { ICategory } from '../../../interface/Categories';
 
 const ProductAdd = () => {
   const navigate = useNavigate()
+  
+  const [cates, setCates] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/categories");
+        setCates(response.data?.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
+    fetchData();
+  }, []);
+  const dataCates = cates.map((item: ICategory) => {
+    
+    return {
+      value: item._id, label: item.loai
+    }
+  })
 
   // const onSubmit: SubmitHandler<IProduct> = async (data) => {
   //   try {
@@ -284,37 +303,18 @@ const ProductAdd = () => {
   //   }
   // }
   const onFinish: FormProps<IProduct>['onFinish'] = async (values) => {
-    console.log('Success:', values);
-    try {
+      try {
       await axios.post(`http://localhost:3001/api/products/add`, values);
       alert('Add product success')
+      console.log(values);
+      
       navigate("/admin/product")
     } catch (err) {
       console.log(err);
     }
   };
-  //lấy dữ liệu danh mục với axios
-  const [cates, setCates] = useState([]);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/api/categories");
-        setCates(response.data?.data);
-        console.log(cates);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
 
-    fetchData();
-  }, []);
-
-  const dataCates = cates.map((item: ICategory) => {
-    const value = " Size " + item.size + " - " + item.color 
-    return {
-      value, label: value
-    }
-  })
+  
   const onFinishFailed: FormProps<IProduct>['onFinishFailed'] = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
@@ -351,9 +351,6 @@ const ProductAdd = () => {
           style={{
             width: 150,
           }}
-
-
-          //hàm lặp danh mục
 
           options={dataCates}
         />

@@ -2,8 +2,10 @@ export interface IProduct {
   _id: number;
   name: string;
   price: number;
-  categoryId: string;
+  size: string;
   image: string[];
   description: string;
   quantity: number;
+  categoryId: string[];
+
 }

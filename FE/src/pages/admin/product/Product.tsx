@@ -10,6 +10,7 @@ import {
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { IProduct } from "../../../interface/Products";
+import { ICategory } from "../../../interface/Categories";
 
 const customTableHeaderCellStyle = {
   backgroundColor: "#c29957",
@@ -28,6 +29,7 @@ export default function Product() {
       try {
         const  response  = await axios.get("http://localhost:3001/api/products");
         setProducts(response.data?.data);
+        console.log(response.data?.data);
         
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -129,6 +131,12 @@ export default function Product() {
       width: "20%",
     },
     {
+      title: "Loại sản phẩm",
+      dataIndex: "label",
+      key: "label",
+      width: "20%",
+    },
+    {
       title: "Mô tả sản phẩm",
       dataIndex: "description",
       key: "description",
@@ -176,7 +184,26 @@ export default function Product() {
       ),
     },
   ];
+  const [cates, setCates] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/categories");
+        setCates(response.data?.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
+    fetchData();
+  }, []);
+
+  const dataCates = cates.map((item: ICategory) => {
+    
+    return {
+      value: item._id, label: item.loai
+    }
+  })
   
   const data  = products.map((item: IProduct, index: number) => {
   return {
@@ -187,10 +214,12 @@ export default function Product() {
     price: item.price,
     description: item.description,
     quantity: item.quantity,
-    
+    loai: item.categoryId,
     };
   })
-
+  
+  
+  
   return (
     <div>
       <BreadcrumbsCustom nameHere={"Sản phẩm"} />
@@ -264,7 +293,9 @@ export default function Product() {
               ),
             },
           }}
+          
           dataSource={data}
+          dataCates={dataCates} 
           columns={columns}
         />
       </Card>
