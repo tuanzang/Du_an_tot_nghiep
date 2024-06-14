@@ -1,3 +1,4 @@
+import { sanitizeFilter } from "mongoose"
 import product from "../models/product"
 export const getAllProduct = async (req, res) => {
     try {
@@ -44,6 +45,7 @@ export const getDetailProduct = async (req, res) => {
 }
 
 export const createProduct = async (req, res) => {
+    const size = req.body.size
     try {
         const data  = await product.create(req.body)
         if(!data || data.length === 0){
