@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
+import { Button, Card, Col, Descriptions, Input, Radio, Row, Switch, Table } from "antd";
 import {
   DownloadOutlined,
   EyeOutlined,
@@ -9,6 +9,8 @@ import {
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { IProduct } from "../../../interface/Products";
+import { ICategory } from "../../../interface/Categories";
 
 const customTableHeaderCellStyle = {
   backgroundColor: "#c29957",
@@ -20,21 +22,42 @@ const customTableHeaderCellStyle = {
 
 export default function Product() {
   const [value, setValue] = useState(1);
-  const [products, setProducts] = useState([]);
-
+  const [products, setProducts] = useState<IProduct[]>([]);
+  // const [isUpdate, setIsUpdate] = useState(false);
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const  response  = await axios.get("http://localhost:3001/api/products");
+        setProducts(response.data?.data);
+        console.log(response.data?.data);
+        
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
     fetchData();
   }, []);
-
-  const fetchData = async () => {
+  //viết hàm delete
+  
+  const deleteProduct = async (id: number) => {
+   
     try {
-      const response = await axios.get("http://localhost:3001/api/products");
-      setProducts(response.data);
-      console.log(response.data)
+      //dùng confirm để xóa
+       const confirm = window.confirm("Bạn muốn xóa sản phẩm này ?");
+       if (confirm) {
+        const response = await axios.delete(`http://localhost:3001/api/products/${id}`);
+      // setIsUpdate({idDelete: id});
+      // console.log(response);
+        if (response.status === 200) {
+        const newArr = products.filter((item) => item["_id"] !== id);
+        setProducts(newArr);
+      }
+       }
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.log(error);
     }
-  };
+  }
   const onChangeRadio = (e) => {
     console.log("radio checked", e.target.value);
     setValue(e.target.value);
@@ -81,6 +104,12 @@ export default function Product() {
 
   const columns = [
     {
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      align: "center", 
+    },
+    {
       title: "Tên sản phẩm",
       dataIndex: "name",
       key: "name",
@@ -102,6 +131,12 @@ export default function Product() {
       width: "20%",
     },
     {
+      title: "Loại sản phẩm",
+      dataIndex: "label",
+      key: "label",
+      width: "20%",
+    },
+    {
       title: "Mô tả sản phẩm",
       dataIndex: "description",
       key: "description",
@@ -114,33 +149,77 @@ export default function Product() {
       align: "center",
       width: "10%",
     },
-    // {
-    //   title: "Trạng thái",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   align: "center",
-    //   width: "30%",
-    //   render: (key) => (
-    //     <Switch
-    //       style={{ backgroundColor: key ? "green" : "gray" }}
-    //       checked={key}
-    //       onChange={() => onChangeSwith(key)}
-    //     />
-    //   ),
-    // },
-    // {
-    //   title: "Hành động",
-    //   dataIndex: "key",
-    //   key: "action",
-    //   align: "center",
-    //   width: "10%",
-    //   render: (key) => (
-    //     <Link to={`/admin/product/detail/${key}`}>
-    //       <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
-    //     </Link>
-    //   ),
-    // },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      align: "center",
+      width: "30%",
+      render: (key) => (
+        <Switch
+          style={{ backgroundColor: key ? "green" : "gray" }}
+          checked={key}
+          onChange={() => onChangeSwith(key)}
+        />
+      ),
+    },
+    {
+      title: "Hành động",
+      dataIndex: "key",
+      key: "key",
+      align: "center",
+      width: "10%",
+      render: (value: any) => (
+        <Button ><Link to={`/admin/product/${value}`}>Sửa</Link></Button> 
+      ),
+    },
+    {
+      title: "Xóa",
+      dataIndex: "key",
+      key: "key",
+      align: "center",
+      width: "10%",
+      render: (value: any) => (
+        <Button onClick={() => deleteProduct(value!)} >Xoa</Button> 
+      ),
+    },
   ];
+  const [cates, setCates] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/categories");
+        setCates(response.data?.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const dataCates = cates.map((item: ICategory) => {
+    
+    return {
+      value: item._id, label: item.loai
+    }
+  })
+  
+  const data  = products.map((item: IProduct, index: number) => {
+  return {
+    stt : index + 1,
+    key: item._id,
+    name: item.name,
+    image: item.image,
+    price: item.price,
+    description: item.description,
+    quantity: item.quantity,
+    loai: item.categoryId,
+    };
+  })
+  
+  
+  
   return (
     <div>
       <BreadcrumbsCustom nameHere={"Sản phẩm"} />
@@ -179,7 +258,7 @@ export default function Product() {
                 color: "#c29957",
               }}
             >
-              <Link to="/admin/products/add">Tạo sản phẩm</Link>
+              <Link to="/admin/product/add">Tạo sản phẩm</Link>
             </Button>
           </Col>
         </Row>
@@ -214,7 +293,9 @@ export default function Product() {
               ),
             },
           }}
-          dataSource={products}
+          
+          dataSource={data}
+          dataCates={dataCates} 
           columns={columns}
         />
       </Card>

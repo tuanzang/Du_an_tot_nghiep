@@ -10,6 +10,9 @@ import Category from "../pages/admin/category/Category";
 import Material from "../pages/admin/material/Material";
 import Staff from "../pages/admin/account/staff/Staff";
 import Customer from "../pages/admin/account/customer/Customer";
+import ProductEdit from "../pages/admin/product/ProductEdit";
+import CategoryAdd from "../pages/admin/category/CategoryAdd";
+import CategoryEdit from "../pages/admin/category/CategoryEdit";
 
 export default function AdminRouter() {
   return (
@@ -18,11 +21,12 @@ export default function AdminRouter() {
         <Route path="/" element={<Navigate to="/admin/dashboard" />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/bill" element={<Bill />} />
-        <Route path="/products" element={<Product />} />
-        <Route path="/products/add" element={<ProductAdd />} />
+        <Route path="/product" element={<Product />} />
+        <Route path="/product/add" element={<ProductAdd />} />
+        <Route path="/product/:id" element={<ProductEdit />} />
         <Route path="/category" element={<Category />} />
-        <Route path="/material" element={<Material />} />
-        <Route path="/size" element={<Size />} />
+        <Route path="/category/add" element={<CategoryAdd />} />
+        <Route path="/category/:id" element={<CategoryEdit />} />
         <Route path="/staff" element={<Staff />} />
         <Route path="/customer" element={<Customer />} />
       </Routes>
