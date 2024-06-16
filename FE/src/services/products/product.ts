@@ -31,7 +31,7 @@ export const addProduct = async (product: IProduct) => {
 
 export const deleteProduct = async (product: IProduct) => {
     try {
-        const { data } = await axiosInstance.delete(`/products/${product.id}`)
+        const { data } = await axiosInstance.delete(`/products/${product._id}`)
         return data
     } catch (error) {
         console.log(error)
@@ -40,7 +40,7 @@ export const deleteProduct = async (product: IProduct) => {
 
 export const updateProduct = async (product: IProduct) => {
     try {
-        const { data } = await axiosInstance.put(`/products/${product.id}`, product)
+        const { data } = await axiosInstance.put(`/products/${product._id}`, product)
         console.log(data)
         return data
     } catch (error) {

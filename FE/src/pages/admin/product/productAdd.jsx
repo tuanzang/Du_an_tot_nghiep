@@ -174,7 +174,94 @@
 // export default ProductAdd;
 
 
-import React, { useState } from 'react';
+// import React from 'react';
+// import axios from 'axios';
+// import { Button } from "antd";
+// import { useNavigate } from 'react-router-dom';
+// import { IProduct } from '../../../interface/Products';
+// import { useForm } from 'react-hook-form';
+// import { useMutation } from '@tanstack/react-query';
+
+// const ProductAdd = () => {
+//   const navigate = useNavigate();
+//   const { 
+//     register,
+//     handleSubmit
+//   } = useForm<IProduct>();
+//   const { mutate } = useMutation({
+//     mutationFn: async (product: IProduct) =>{
+//         return await axios.post("http://localhost:3001/api/products/add", product);
+
+//     }
+//   })
+
+//   const onSubmit = (product: IProduct) => {
+//     mutate(product);
+//     navigate("/admin/product");
+//   }
+
+//   return (
+//     <>
+
+//       <form onSubmit={handleSubmit(onSubmit)}>
+//       <h1>Add New Product</h1>
+//         <div>
+//           <label>
+//             Name:
+//             <input
+//               type="text"
+//               { ...register("name", { required: true })}
+//             />
+//           </label>
+//         </div>
+//                 <div>
+//           <label>
+//             Ảnh:
+//             <input
+//               type="text"
+//               {...register("image", { required: true })}
+//             />
+//           </label>
+//         </div>
+//         <div>
+//           <label>
+//             Price:
+//             <input
+//               type="number"
+//               {...register("price", { required: true })}
+//             />
+//           </label>
+//         </div>
+//         <div>
+//           <label>
+//             Description:
+//             <textarea
+//               name="description"
+//               required
+//             />
+//           </label>
+//         </div>
+//         <div>
+//           <label>
+//             Quantity:
+//             <input
+//               type="number"
+//               {...register("quantity", { required: true })}
+//             />
+//           </label>
+//         </div>
+
+//         <Button type="primary" htmlType="submit">
+//           Submit
+//         </Button>
+//       </form>
+//     </>
+//   );
+// };
+
+// export default ProductAdd;
+
+import type { FormProps } from 'antd';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -190,28 +277,23 @@ const ProductAdd = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const navigate = useNavigate()
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProduct({ ...product, [name]: value });
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
+
+  // const onSubmit: SubmitHandler<IProduct> = async (data) => {
+  //   try {
+  //     await axios.put(`http://localhost:3001/api/products/${id}`, data);
+  //     alert('Success')
+  //     navigate("/admin/product")
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // }
+  const onFinish: FormProps<IProduct>['onFinish'] = async (values) => {
+    console.log('Success:', values);
     try {
-      const res = await axios.post('http://localhost:3001/api/products/add', product);
-      setSuccess('Success');
-      setProduct({
-        name: '',
-        price: '',
-        imageUrl: '',
-        description: '',
-        quantity: '',
-      });
-      alert('Success')
-      navigate("/admin/products")
+      await axios.post(`http://localhost:3001/api/products/add`, values);
+      alert('Add product success')
+      navigate("/admin/product")
     } catch (err) {
       setError("Failed to add product. Please try again");
     } finally {
