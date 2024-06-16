@@ -45,9 +45,8 @@ export const getDetailProduct = async (req, res) => {
 }
 
 export const createProduct = async (req, res) => {
-    const size = { "M": 0, "L": 1, "XL": 2, "XXL": 3 }
     try {
-        const data  = await product.create(req.body, size)   
+        const data  = await product.create(req.body)   
         if(!data || data.length === 0){
             res.status(404).json({
                 message: "Không thêm được sản phẩm !",
