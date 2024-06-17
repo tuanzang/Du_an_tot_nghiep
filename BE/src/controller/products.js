@@ -1,3 +1,4 @@
+import { sanitizeFilter } from "mongoose"
 import product from "../models/product"
 export const getAllProduct = async (req, res) => {
     try {
@@ -45,7 +46,7 @@ export const getDetailProduct = async (req, res) => {
 
 export const createProduct = async (req, res) => {
     try {
-        const data  = await product.create(req.body)
+        const data  = await product.create(req.body)   
         if(!data || data.length === 0){
             res.status(404).json({
                 message: "Không thêm được sản phẩm !",
@@ -66,8 +67,9 @@ export const createProduct = async (req, res) => {
 }
 
 export const updateProduct = async (req, res) => {
+    
     try {
-        const data = await product.findByIdAndUpdate(req.params.id, body, {new: true})
+        const data = await product.findByIdAndUpdate(req.params.id, req.body, {new: true})
         if(!data || data.length === 0){
             res.status(404).json({
                 message: "Update thất bại !",

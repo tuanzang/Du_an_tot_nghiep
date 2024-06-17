@@ -1,12 +1,15 @@
-import React, { useState } from "react";
-import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
 import {
   DownloadOutlined,
   EyeOutlined,
   PlusSquareOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
+import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
+import React, { useEffect, useState } from "react";
+import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
+import ModalAddAndUpdate from "../../../components/ModalAddAndUpdate";
+import { ICategory } from "../../../interface/Categories";
+import axios from "axios";
 import { Link } from "react-router-dom";
 
 const customTableHeaderCellStyle = {
@@ -17,8 +20,39 @@ const customTableHeaderCellStyle = {
   height: "10px",
 };
 
-export default function Product() {
+export default function Category() {
   const [value, setValue] = useState(1);
+  const [cates, setCates] = useState<ICategory[]>([]);
+
+  useEffect(() => {
+    const fetchCate = async () => {
+      try {
+        const  response  = await axios.get("http://localhost:3001/api/categories");
+        setCates(response.data?.data);
+        
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchCate();
+  }, []);
+  const deleteCategory = async (id: number) => {
+   
+    try {
+      //dùng confirm để xóa
+       const confirm = window.confirm("Bạn muốn xóa danh mục này ?");
+       if (confirm) {
+        const response = await axios.delete(`http://localhost:3001/api/categories/${id}`);
+        if (response.status === 200) {
+        const newArr = cates.filter((item) => item["_id"] !== id);
+        setCates(newArr);
+      }
+       }
+    } catch (error) {
+      console.log(error);
+    }
+  }
   const onChangeRadio = (e) => {
     console.log("radio checked", e.target.value);
     setValue(e.target.value);
@@ -28,101 +62,55 @@ export default function Product() {
     console.log(`switch to ${checked}`);
   };
 
-  const listBestSeller = [
-    {
-      key: "1",
-      img: "../src/assets/image/product/product-1.jpg",
-      name: "p1",
-      quantity: "1",
-      status: true,
-      size: "1",
-    },
-    {
-      key: "2",
-      img: "../src/assets/image/product/product-2.jpg",
-      name: "p2",
-      quantity: "2",
-      status: false,
-      size: "2",
-    },
-    {
-      key: "3",
-      img: "../src/assets/image/product/product-3.jpg",
-      name: "p3",
-      quantity: "3",
-      status: true,
-      size: "3",
-    },
-    {
-      key: "4",
-      img: "../src/assets/image/product/product-3.jpg",
-      name: "p3",
-      quantity: "3",
-      status: false,
-      size: "3",
-    },
-  ];
+  
 
   const columns = [
     {
-      title: "Ảnh",
-      dataIndex: "img",
-      key: "img",
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      align: "center",
+      width: "5%",
+    },
+    {
+      title: "Tên danh mục",
+      dataIndex: "loai",
+      key: "loai",
+      align: "center",
       width: "20%",
-      render: (text) => (
-        <img style={{ height: "70px" }} src={text} alt="error" />
-      ),
     },
     {
-      title: "Tên sản phẩm",
-      dataIndex: "name",
-      key: "name",
-      width: "20%",
-    },
-    {
-      title: "Số lượng",
-      dataIndex: "quantity",
-      key: "quantity",
-      align: "center",
-      width: "10%",
-    },
-    {
-      title: "Kích cỡ",
-      dataIndex: "size",
-      key: "size",
-      align: "center",
-      width: "10%",
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      align: "center",
-      width: "30%",
-      render: (key) => (
-        <Switch
-          style={{ backgroundColor: key ? "green" : "gray" }}
-          checked={key}
-          onChange={() => onChangeSwith(key)}
-        />
-      ),
-    },
-    {
-      title: "Hành động",
+      title: "Cập nhật",
       dataIndex: "key",
-      key: "action",
+      key: "key",
       align: "center",
-      width: "10%",
-      render: (key) => (
-        <Link to={`/admin/product/detail/${key}`}>
-          <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
-        </Link>
+      width: "2%",
+      render : (value: any) => (
+        <Button><Link to={`/admin/category/${value}`}>Sửa</Link></Button>
+      )
+    },
+    {
+      title: "Xóa",
+      dataIndex: "key",
+      key: "key",
+      align: "center",
+      width: "2%",
+      render: (value: any) => (
+        <Button onClick={() => deleteCategory(value!)} >Xóa</Button> 
       ),
     },
   ];
+
+  const data = cates.map((item: ICategory, index: number) => {
+    return {
+      stt: index + 1,
+      key: item._id,
+      loai : item.loai,
+    };
+  })
   return (
     <div>
-      <BreadcrumbsCustom nameHere={"Sản phẩm"} />
+      <BreadcrumbsCustom nameHere={"Danh mục"} />
       {/* filter */}
       <Card bordered={false}>
         <Row gutter={16}>
@@ -131,11 +119,12 @@ export default function Product() {
               id="hd-input-search"
               style={{ width: "100%", borderColor: "#c29957" }}
               size="middle"
-              placeholder="Tìm kiếm sản phẩm"
+              placeholder="Tìm kiếm danh mục"
               prefix={<SearchOutlined style={{ color: "#1890ff" }} />}
             />
           </Col>
           <Col span={12}>
+          
             <Button
               icon={<DownloadOutlined />}
               style={{
@@ -150,7 +139,7 @@ export default function Product() {
               Export Excel
             </Button>
             <Button
-              type="default"
+              type="link"
               icon={<PlusSquareOutlined />}
               style={{
                 float: "right",
@@ -158,7 +147,7 @@ export default function Product() {
                 color: "#c29957",
               }}
             >
-              Tạo sản phẩm
+              <Link to="/admin/category/add">Tạo Danh Mục</Link>
             </Button>
           </Col>
         </Row>
@@ -193,7 +182,7 @@ export default function Product() {
               ),
             },
           }}
-          dataSource={listBestSeller}
+          dataSource={data}
           columns={columns}
         />
       </Card>

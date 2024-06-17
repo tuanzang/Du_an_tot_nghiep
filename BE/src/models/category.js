@@ -2,15 +2,7 @@ import mongoose from "mongoose";
 
 const categorySchema = new mongoose.Schema(
     {
-        size: {
-            type: String,
-            required: true
-        },
-        merterial: {
-            type: String,
-            required: true
-        },
-        slug: {
+        loai: {
             type: String,
             required: true
         },
@@ -18,6 +10,7 @@ const categorySchema = new mongoose.Schema(
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "Product"
+
             }
         ]
     },
