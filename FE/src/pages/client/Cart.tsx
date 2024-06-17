@@ -10,7 +10,7 @@ import React, { useState } from "react";
 // import { ArrowLeftOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 // import { Link } from "react-router-dom";
 // import confirmStatus from "../../components/confirmSatus";
-import { formatCurrency } from "../../services/common/formatCurrency ";
+import { formatCurrency } from "../../services/common/formatCurrency";
 import confirmStatus from "../../components/confirmSatus";
 import { Link } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
