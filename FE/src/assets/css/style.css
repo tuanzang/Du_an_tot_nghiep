@@ -3246,6 +3246,7 @@ textarea:focus {
   line-height: 1;
 }
 .manufacturer-name a {
+  font-family: 'Playfair', sans-serif;
   font-size: 14px;
   line-height: 1;
   color: #777777;

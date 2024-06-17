@@ -6,16 +6,16 @@ import { IProduct } from '../../../interface/Products';
 import { useEffect, useState } from 'react';
 import { ICategory } from '../../../interface/Categories';
 
-
 const ProductAdd = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   
-  const [cates, setCates] = useState([]);
+  const [cates, setCates] = useState<ICategory[]>([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get("http://localhost:3001/api/categories");
-        setCates(response.data?.data);
+        setCates(response.data?.data || []);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -23,35 +23,23 @@ const ProductAdd = () => {
 
     fetchData();
   }, []);
-  const dataCates = cates.map((item: ICategory) => {
-    
-    return {
-      value: item._id, label: item.loai
-    }
-  })
 
-  // const onSubmit: SubmitHandler<IProduct> = async (data) => {
-  //   try {
-  //     await axios.put(`http://localhost:3001/api/products/${id}`, data);
-  //     alert('Success')
-  //     navigate("/admin/product")
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // }
+  const dataCates = cates.map((item: ICategory) => ({
+    value: item._id,
+    label: item.loai
+  }));
+
   const onFinish: FormProps<IProduct>['onFinish'] = async (values) => {
-      try {
+    try {
       await axios.post(`http://localhost:3001/api/products/add`, values);
-      alert('Add product success')
+      alert('Thêm sản phẩm thành công');
       console.log(values);
-      
-      navigate("/admin/product")
+      navigate("/admin/product");
     } catch (err) {
       console.log(err);
     }
   };
 
-  
   const onFinishFailed: FormProps<IProduct>['onFinishFailed'] = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
@@ -66,49 +54,51 @@ const ProductAdd = () => {
       onFinishFailed={onFinishFailed}
       autoComplete="off"
     >
-      <Form.Item<IProduct>
+      <Form.Item
         label="Tên sản phẩm"
         name="name"
-      >
-        <Input type='text' />
-      </Form.Item>
-      <Form.Item<IProduct>
-        label="Giá"
-        name="price"
+        rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm!' }]}
       >
         <Input />
       </Form.Item>
-      <Form.Item<IProduct>
+      <Form.Item
+        label="Giá"
+        name="price"
+        rules={[{ required: true, message: 'Vui lòng nhập giá sản phẩm!' }]}
+      >
+        <Input type="number" />
+      </Form.Item>
+      <Form.Item
         label="Danh mục"
         name="categoryId"
+        rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
       >
         <Select
-        
-          defaultValue="Chọn danh mục"
-          style={{
-            width: 150,
-          }}
-
+          placeholder="Chọn danh mục"
+          style={{ width: '100%' }}
           options={dataCates}
         />
       </Form.Item>
-      <Form.Item<IProduct>
+      <Form.Item
         label="Số lượng"
         name="quantity"
+        rules={[{ required: true, message: 'Vui lòng nhập số lượng sản phẩm!' }]}
       >
-        <Input />
+        <Input type="number" />
       </Form.Item>
-      <Form.Item<IProduct>
+      <Form.Item
         label="Ảnh"
         name="image"
+        rules={[{ required: true, message: 'Vui lòng nhập đường dẫn ảnh sản phẩm!' }]}
       >
         <Input />
       </Form.Item>
-      <Form.Item<IProduct>
+      <Form.Item
         label="Mô tả"
         name="description"
+        rules={[{ required: true, message: 'Vui lòng nhập mô tả sản phẩm!' }]}
       >
-        <Input />
+        <Input.TextArea rows={4} />
       </Form.Item>
       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
         <Button type="primary" htmlType="submit">

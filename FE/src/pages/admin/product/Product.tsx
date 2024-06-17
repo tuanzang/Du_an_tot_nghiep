@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Button, Card, Col, Descriptions, Input, Radio, Row, Switch, Table } from "antd";
-import {
-  DownloadOutlined,
-  EyeOutlined,
-  PlusSquareOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
+import { DownloadOutlined, PlusSquareOutlined, SearchOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { IProduct } from "../../../interface/Products";
 import { ICategory } from "../../../interface/Categories";
+import { ColumnGroupType, ColumnType } from "antd/es/table";
+import { RadioChangeEvent } from "antd/lib";
 
 const customTableHeaderCellStyle = {
   backgroundColor: "#c29957",
@@ -23,91 +20,76 @@ const customTableHeaderCellStyle = {
 export default function Product() {
   const [value, setValue] = useState(1);
   const [products, setProducts] = useState<IProduct[]>([]);
-  // const [isUpdate, setIsUpdate] = useState(false);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const  response  = await axios.get("http://localhost:3001/api/products");
-        setProducts(response.data?.data);
-        console.log(response.data?.data);
-        
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+  const [cates, setCates] = useState<ICategory[]>([]);
 
-    fetchData();
-  }, []);
-  //viết hàm delete
-  
-  const deleteProduct = async (id: number) => {
-   
+useEffect(() => {
+  const fetchData = async () => {
     try {
-      //dùng confirm để xóa
-       const confirm = window.confirm("Bạn muốn xóa sản phẩm này ?");
-       if (confirm) {
+      const [productResponse, categoryResponse] = await Promise.all([
+        axios.get("http://localhost:3001/api/products"),
+        axios.get("http://localhost:3001/api/categories")
+      ]);
+      setProducts(productResponse.data?.data);
+      setCates(categoryResponse.data?.data); // Ensure categories are correctly set
+      console.log(productResponse.data?.data);
+      console.log(categoryResponse.data?.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  fetchData();
+}, []);
+
+
+  const deleteProduct = async (id: number) => {
+    try {
+      const confirm = window.confirm("Bạn muốn xóa sản phẩm này ?");
+      if (confirm) {
         const response = await axios.delete(`http://localhost:3001/api/products/${id}`);
-      // setIsUpdate({idDelete: id});
-      // console.log(response);
         if (response.status === 200) {
-        const newArr = products.filter((item) => item["_id"] !== id);
-        setProducts(newArr);
+          const newArr = products.filter((item) => item["_id"] !== id);
+          setProducts(newArr);
+        }
       }
-       }
     } catch (error) {
       console.log(error);
     }
   }
-  const onChangeRadio = (e) => {
+
+  const onChangeRadio = (e: RadioChangeEvent) => {
     console.log("radio checked", e.target.value);
-    setValue(e.target.value);
+    setValue(Number(e.target.value));
   };
 
-  const onChangeSwith = (checked) => {
+  const onChangeSwitch = (checked: boolean) => {
     console.log(`switch to ${checked}`);
   };
 
-  // const listBestSeller = [
-  //   {
-  //     key: "1",
-  //     img: "../src/assets/image/product/product-1.jpg",
-  //     name: "p1",
-  //     quantity: "1",
-  //     status: true,
-  //     size: "1",
-  //   },
-  //   {
-  //     key: "2",
-  //     img: "../src/assets/image/product/product-2.jpg",
-  //     name: "p2",
-  //     quantity: "2",
-  //     status: false,
-  //     size: "2",
-  //   },
-  //   {
-  //     key: "3",
-  //     img: "../src/assets/image/product/product-3.jpg",
-  //     name: "p3",
-  //     quantity: "3",
-  //     status: true,
-  //     size: "3",
-  //   },
-  //   {
-  //     key: "4",
-  //     img: "../src/assets/image/product/product-3.jpg",
-  //     name: "p3",
-  //     quantity: "3",
-  //     status: false,
-  //     size: "3",
-  //   },
-  // ];
-
-  const columns = [
+  const columns: (ColumnGroupType<{
+    stt: number;
+    key: number;
+    name: string;
+    image: string[];
+    price: number;
+    description: string;
+    quantity: number;
+    loai: string;
+  }> | ColumnType<{
+    stt: number;
+    key: number;
+    name: string;
+    image: string[];
+    price: number;
+    description: string;
+    quantity: number;
+    loai: string;
+  }>)[] = [
     {
       title: "STT",
       dataIndex: "stt",
       key: "stt",
-      align: "center", 
+      align: "center",
     },
     {
       title: "Tên sản phẩm",
@@ -132,8 +114,8 @@ export default function Product() {
     },
     {
       title: "Loại sản phẩm",
-      dataIndex: "label",
-      key: "label",
+      dataIndex: "loai",
+      key: "loai",
       width: "20%",
     },
     {
@@ -143,7 +125,7 @@ export default function Product() {
       width: "20%",
     },
     {
-      title: "Số lượnggggg",
+      title: "Số lượng",
       dataIndex: "quantity",
       key: "quantity",
       align: "center",
@@ -159,7 +141,7 @@ export default function Product() {
         <Switch
           style={{ backgroundColor: key ? "green" : "gray" }}
           checked={key}
-          onChange={() => onChangeSwith(key)}
+          onChange={() => onChangeSwitch(key)}
         />
       ),
     },
@@ -170,7 +152,7 @@ export default function Product() {
       align: "center",
       width: "10%",
       render: (value: any) => (
-        <Button ><Link to={`/admin/product/${value}`}>Sửa</Link></Button> 
+        <Button><Link to={`/admin/product/${value}`}>Sửa</Link></Button>
       ),
     },
     {
@@ -180,49 +162,29 @@ export default function Product() {
       align: "center",
       width: "10%",
       render: (value: any) => (
-        <Button onClick={() => deleteProduct(value!)} >Xoa</Button> 
+        <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
       ),
     },
   ];
-  const [cates, setCates] = useState([]);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("http://localhost:3001/api/categories");
-        setCates(response.data?.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
 
-    fetchData();
-  }, []);
-
-  const dataCates = cates.map((item: ICategory) => {
-    
-    return {
-      value: item._id, label: item.loai
-    }
-  })
-  
-  const data  = products.map((item: IProduct, index: number) => {
+const data = products.map((item: IProduct, index: number) => {
+  const category = cates.find((cate) => cate._id.toString() === item.categoryId.toString());
   return {
-    stt : index + 1,
+    stt: index + 1,
     key: item._id,
     name: item.name,
     image: item.image,
     price: item.price,
     description: item.description,
     quantity: item.quantity,
-    loai: item.categoryId,
-    };
-  })
-  
-  
-  
+    loai: category ? category.loai : "Không có danh mục", // Handle no category case
+  };
+});
+
+
   return (
     <div>
-      <BreadcrumbsCustom nameHere={"Sản phẩm"} />
+      <BreadcrumbsCustom listLink={[]} nameHere={"Sản phẩm"} />
       {/* filter */}
       <Card bordered={false}>
         <Row gutter={16}>
@@ -288,14 +250,12 @@ export default function Product() {
         <Table
           components={{
             header: {
-              cell: (props) => (
+              cell: (props: any) => (
                 <th {...props} style={customTableHeaderCellStyle} />
               ),
             },
           }}
-          
           dataSource={data}
-          dataCates={dataCates} 
           columns={columns}
         />
       </Card>
