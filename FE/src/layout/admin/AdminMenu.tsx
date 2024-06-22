@@ -8,13 +8,13 @@ import {
   BarcodeOutlined,
 } from "@ant-design/icons";
 
-export default function AdminMenu({ small }) {
+export default function AdminMenu({ small }: { small: boolean }) {
   const [openKeys, setOpenKeys] = useState([]);
   const navigate = useNavigate();
 
-  const handleClickMenu = (e) => {
+  const handleClickMenu = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (small) {
-      setOpenKeys([...openKeys, e.key]);
+      setOpenKeys([...openKeys, e.key ]);
     } else {
       navigate(`/admin/${e.key}`);
     }

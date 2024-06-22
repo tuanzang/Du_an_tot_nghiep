@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { ICategory } from "../../../interface/Categories";
 import { toast } from "react-toastify";
 
-const ProductAdd = () => {
+const ProductAdd = () =>   {
   const navigate = useNavigate();
 
   const [cates, setCates] = useState<ICategory[]>([]);

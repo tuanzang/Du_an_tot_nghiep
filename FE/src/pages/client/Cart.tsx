@@ -1,7 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const CartPage: React.FC = () => {
-    // Mảng sản phẩm giả lập
+    // Mock product data
     const products = [
         {
             id: 1,
@@ -33,7 +34,7 @@ const CartPage: React.FC = () => {
         }
     ];
 
-    // Tính tổng tiền
+    // Calculate totals
     const subTotal = products.reduce((acc, product) => acc + (product.price * product.quantity), 0);
     const shipping = 70;
     const total = subTotal + shipping;
@@ -134,7 +135,10 @@ const CartPage: React.FC = () => {
                                             </table>
                                         </div>
                                     </div>
-                                    <a href="checkout.html" className="btn btn-sqr d-block">Proceed Checkout</a>
+                                    <Link to={{
+                                        pathname: "/payment",
+                                        state: { products, subTotal, shipping, total }
+                                    }} className="btn btn-sqr d-block">Proceed to Payment</Link>
                                 </div>
                             </div>
                         </div>

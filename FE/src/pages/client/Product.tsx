@@ -1,38 +1,24 @@
 import { Col, Row, Slider } from "antd";
-import React from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { IProduct } from "../../interface/Products";
 export default function Product() {
-  // data fake
-  const getTitle = (number) => {
-    switch (number) {
-      case 1:
-        return "GOLD";
-      case 2:
-        return "SLIVER";
-      case 3:
-        return "BRONZE";
-      case 4:
-        return "DIAMOND";
-    }
-  };
+  const [product, setProduct] = useState<IProduct[]>([]);
 
-  const fakeHotProduct1s = [];
-  const fakeHotProduct2s = [];
-  for (let i = 1; i <= 4; i++) {
-    fakeHotProduct1s.push({
-      image1: `./src/assets/image/product/product-${i}.jpg`,
-      image2: `./src/assets/image/product/product-${19 - i}.jpg`,
-      title: getTitle(i),
-      price: (i * 10 + 9.99).toFixed(2),
-      category: `Category ${i}`,
-    });
-    fakeHotProduct2s.push({
-      image1: `./src/assets/image/product/product-${i + 1}.jpg`,
-      image2: `./src/assets/image/product/product-${19 - i - 1}.jpg`,
-      title: getTitle(i),
-      price: (i * 10 + 9.99).toFixed(2),
-      category: `Category ${i}`,
-    });
-  }
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/api/products`);
+        setProduct(response.data?.data);
+      } catch (error) {
+        console.log("Khong co du lieu");
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (!product) return null;
   return (
     <div>
       <main>
@@ -153,7 +139,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck2"
+                              htmlFor="customCheck2"
                             >
                               Studio (3)
                             </label>
@@ -168,7 +154,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck3"
+                              htmlFor="customCheck3"
                             >
                               Hastech (4)
                             </label>
@@ -183,7 +169,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck4"
+                              htmlFor="customCheck4"
                             >
                               Quickiin (15)
                             </label>
@@ -198,7 +184,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck1"
+                              htmlFor="customCheck1"
                             >
                               Graphic corner (10)
                             </label>
@@ -213,7 +199,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck5"
+                              htmlFor="customCheck5"
                             >
                               devItems (12)
                             </label>
@@ -247,7 +233,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck12"
+                              htmlFor="customCheck12"
                             >
                               black (20)
                             </label>
@@ -262,7 +248,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck13"
+                              htmlFor="customCheck13"
                             >
                               red (6)
                             </label>
@@ -277,7 +263,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck14"
+                              htmlFor="customCheck14"
                             >
                               blue (8)
                             </label>
@@ -292,7 +278,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck11"
+                              htmlFor="customCheck11"
                             >
                               green (5)
                             </label>
@@ -307,7 +293,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck15"
+                              htmlFor="customCheck15"
                             >
                               pink (4)
                             </label>
@@ -341,7 +327,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck111"
+                              htmlFor="customCheck111"
                             >
                               S (4)
                             </label>
@@ -356,7 +342,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck222"
+                              htmlFor="customCheck222"
                             >
                               M (5)
                             </label>
@@ -371,7 +357,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck333"
+                              htmlFor="customCheck333"
                             >
                               L (7)
                             </label>
@@ -386,7 +372,7 @@ export default function Product() {
                             />
                             <label
                               className="custom-control-label"
-                              for="customCheck444"
+                              htmlFor="customCheck444"
                             >
                               XL (3)
                             </label>
@@ -467,19 +453,19 @@ export default function Product() {
                       gutter={16}
                       style={{ marginLeft: "6px", padding: "0px" }}
                     >
-                      {fakeHotProduct1s.map((p, index) => (
+                      {product.map((p, index) => (
                         <Col className="gutter-row" span={8}>
                           <div className="product-item">
                             <figure className="product-thumb">
                               <a href="#">
                                 <img
                                   className="pri-img"
-                                  src={p.image1}
+                                        src={p.image?.[0]}
                                   alt="product"
                                 />
                                 <img
                                   className="sec-img"
-                                  src={p.image2}
+                                        src={p.image?.[0]}
                                   alt="product"
                                 />
                               </a>
@@ -527,7 +513,7 @@ export default function Product() {
                               <div className="product-caption text-center">
                                 <div className="product-identity">
                                   <p className="manufacturer-name">
-                                    <a href="#">{p.title}</a>
+                                    <a href="#">{p.name}</a>
                                   </p>
                                 </div>
                                 <ul className="color-categories">
@@ -560,9 +546,9 @@ export default function Product() {
                                     ></a>
                                   </li>
                                 </ul>
-                                <h6 className="product-name">
+                                {/* <h6 className="product-name">
                                   <a href="#">Sản phẩm {index + 1}</a>
-                                </h6>
+                                </h6> */}
                                 <div className="price-box">
                                   <span className="price-regular">
                                     {p.price + " "} VNĐ

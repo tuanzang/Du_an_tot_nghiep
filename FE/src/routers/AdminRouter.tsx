@@ -18,6 +18,7 @@ export default function AdminRouter() {
   return (
     <HeaderAdmin>
       <ToastContainer />
+
       <Routes>
         <Route path="/" element={<Navigate to="/admin/dashboard" />} />
         <Route path="/dashboard" element={<Dashboard />} />
