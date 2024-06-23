@@ -3,7 +3,7 @@ import { Carousel, Col, Row } from "antd";
 import "./Home.css";
 import axios from "axios";
 import { IProduct } from "../../interface/Products";
-
+import { Link } from "react-router-dom";
 
 const contentStyle: CSSProperties = {
   height: "530px",
@@ -16,22 +16,20 @@ const contentStyle: CSSProperties = {
 export default function Home() {
   const [product, setProduct] = useState<IProduct[]>([]);
 
- useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3001/api/products`
-      )
-      setProduct(response.data?.data);
-    } catch (error) { 
-      console.log("Khong co du lieu");
-    }
-  } ;
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/api/products`);
+        setProduct(response.data?.data);
+      } catch (error) {
+        console.log("Khong co du lieu");
+      }
+    };
 
-  fetchProducts();
- },[]);
+    fetchProducts();
+  }, []);
 
- if(!product) return null
+  if (!product) return null;
 
   return (
     <div>
@@ -169,13 +167,13 @@ export default function Home() {
                               <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
-                                    <a href="">
+                                    <Link to={`/product/${p._id}`}>
                                       <img
                                         className="pri-img"
-                                        src={p.image?.[0]}
+                                        src={p?.image?.[0]}
                                         alt="product"
                                       />
-                                    </a>
+                                    </Link>
                                     <div className="product-badge">
                                       <div className="product-label new">
                                         <span>HOT</span>
@@ -220,7 +218,9 @@ export default function Home() {
                                     <div className="product-caption text-center">
                                       <div className="product-identity">
                                         <p className="manufacturer-name">
-                                          <a href="{`/product/${p.id}`}">{p.name}</a>
+                                          <Link to={`/product/${p._id}`}>
+                                            {p.name}
+                                          </Link>
                                         </p>
                                       </div>
                                       <ul className="color-categories">
@@ -534,7 +534,6 @@ export default function Home() {
                                         src={p.image?.[0]}
                                         alt="product"
                                       />
-                                      
                                     </a>
                                     <div className="product-badge">
                                       <div className="product-label new">

@@ -7,17 +7,33 @@ import axios from "axios";
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
   const [product, setProduct] = useState<IProduct>();
+  const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
 
   useEffect(() => {
     fetchProduct();
+    fetchRelatedProducts();
   }, []);
+
   const fetchProduct = async () => {
-    if (id) {
-      const response = await axios.get(
-        `http://localhost:3001/api/products/${id}`
-      );
-      console.log(response.data);
-      setProduct(response.data.data);
+    try {
+      if (id) {
+        const response = await axios.get(`http://localhost:3001/api/products/${id}`);
+        console.log("Product API response:", response.data);
+        setProduct(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching product:", error);
+    }
+  };
+
+  const fetchRelatedProducts = async () => {
+    try {
+      // Example: Fetch related products based on some criteria (e.g., same category)
+        const response = await axios.get(`http://localhost:3001/api/products`);
+      console.log("Related Products API response:", response.data);
+      setRelatedProducts(response.data.data);
+    } catch (error) {
+      console.error("Error fetching related products:", error);
     }
   };
   return (
@@ -362,19 +378,19 @@ export default function ProductDetail() {
                   <div className="tab-pane fade show active">
                     <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                       <Row gutter={16}>
-                        {product && (
-                          <Col key={product._id} className="gutter-row" span={6}>
+                      {relatedProducts.map((relatedProduct) => (
+                          <Col key={relatedProduct._id} className="gutter-row" span={6}>
                             <div className="product-item">
                               <figure className="product-thumb">
                                 <a href="#">
                                   <img
                                     className="pri-img"
-                          src={product?.image?.[0]}
+                          src={relatedProduct?.image?.[0]}
                                     alt="product"
                                   />
                                   <img
                                     className="sec-img"
-                          src={product?.image?.[0]}
+                          src={relatedProduct?.image?.[0]}
                                     alt="product"
                                   />
                                 </a>
@@ -422,7 +438,7 @@ export default function ProductDetail() {
                                 <div className="product-caption text-center">
                                   <div className="product-identity">
                                     <p className="manufacturer-name">
-                                      <a href="#">{product.name}</a>
+                                      <a href="#">{relatedProduct.name}</a>
                                     </p>
                                   </div>
                                   <ul className="color-categories">
@@ -460,10 +476,10 @@ export default function ProductDetail() {
                                   </h6> */}
                                   <div className="price-box">
                                     <span className="price-regular">
-                                      {product.price + " "} VNĐ
+                                      {relatedProduct.price + " "} VNĐ
                                     </span>
                                     <span className="price-old">
-                                      <del>{product.price + " "}VND</del>
+                                      <del>{relatedProduct.price + " "}VND</del>
                                     </span>
                                   </div>
                                 </div>
@@ -471,7 +487,7 @@ export default function ProductDetail() {
                             </div>
                             
                           </Col>
-                        )}
+                        ))}
                       </Row>
                     </div>
                   </div>

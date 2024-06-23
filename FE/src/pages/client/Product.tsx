@@ -2,6 +2,7 @@ import { Col, Row, Slider } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { IProduct } from "../../interface/Products";
+import { Link } from "react-router-dom";
 export default function Product() {
   const [product, setProduct] = useState<IProduct[]>([]);
 
@@ -453,22 +454,17 @@ export default function Product() {
                       gutter={16}
                       style={{ marginLeft: "6px", padding: "0px" }}
                     >
-                      {product.map((p, index) => (
+                      {product.map((p: IProduct) => (
                         <Col className="gutter-row" span={8}>
                           <div className="product-item">
                             <figure className="product-thumb">
-                              <a href="#">
+                              <Link to={`/product/${p._id}`}>
                                 <img
                                   className="pri-img"
-                                        src={p.image?.[0]}
+                                  src={p?.image?.[0]}
                                   alt="product"
                                 />
-                                <img
-                                  className="sec-img"
-                                        src={p.image?.[0]}
-                                  alt="product"
-                                />
-                              </a>
+                              </Link>
                               <div className="product-badge">
                                 <div className="product-label new">
                                   <span>HOT</span>
@@ -513,7 +509,9 @@ export default function Product() {
                               <div className="product-caption text-center">
                                 <div className="product-identity">
                                   <p className="manufacturer-name">
-                                    <a href="#">{p.name}</a>
+                                    <Link to={`/product/${p._id}`}>
+                                      {p.name}
+                                    </Link>
                                   </p>
                                 </div>
                                 <ul className="color-categories">
