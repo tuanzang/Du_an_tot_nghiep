@@ -4,6 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { IProduct } from "../../../interface/Products";
 import { ICategory } from "../../../interface/Categories";
+import { toast } from 'react-toastify';
+
 
 const { Option } = Select;
 
@@ -32,7 +34,7 @@ const ProductEdit = () => {
   const onFinish = async (values: IProduct) => {
     try {
       await axios.put(`http://localhost:3001/api/products/${id}`, values);
-      alert("Edit product success");
+    toast.success('Cập nhật sản phẩm thành công');
       navigate("/admin/product");
     } catch (err) {
       console.log(err);

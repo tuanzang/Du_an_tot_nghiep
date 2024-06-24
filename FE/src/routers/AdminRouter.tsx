@@ -1,4 +1,4 @@
-import React from "react";
+// import React from "react";
 import HeaderAdmin from "../layout/admin/HeaderAdmin";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "../pages/admin/dashboard/Dashboard";
@@ -11,10 +11,14 @@ import Customer from "../pages/admin/account/customer/Customer";
 import ProductEdit from "../pages/admin/product/ProductEdit";
 import CategoryAdd from "../pages/admin/category/CategoryAdd";
 import CategoryEdit from "../pages/admin/category/CategoryEdit";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function AdminRouter() {
   return (
     <HeaderAdmin>
+      <ToastContainer />
+
       <Routes>
         <Route path="/" element={<Navigate to="/admin/dashboard" />} />
         <Route path="/dashboard" element={<Dashboard />} />
