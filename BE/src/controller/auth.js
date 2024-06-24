@@ -30,6 +30,7 @@ const signupSchema = Joi.object({
     }),
 });
 
+// test đẩy code
 export const signup = async (req, res) => {
     const { email, password, name, avatar } = req.body;
     const { error } = signupSchema.validate(req.body, { abortEarly: false });
