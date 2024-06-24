@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import morgan from "morgan";
 import router from "./routes";
+import authRouter from "./routes/authRouter";
 import mongoose from "mongoose";
 
 const app = express();
