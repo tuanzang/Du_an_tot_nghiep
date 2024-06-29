@@ -6,33 +6,68 @@ import {
   Card,
   Col,
   Empty,
+  Image,
   Input,
   Modal,
   Pagination,
   Row,
   Select,
   Slider,
+  Space,
   Table,
+  Tooltip,
   Typography,
 } from "antd";
 import formatCurrency from "../../../services/common/formatCurrency";
-import { EditOutlined, SearchOutlined } from "@ant-design/icons";
-import { IProduct } from "../../../interface/Products";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PictureOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
+
+interface IProduct {
+  id: number;
+  name: string;
+}
+
+interface ISize {
+  id: number;
+  name: string;
+}
+
+interface ICategory {
+  id: number;
+  name: string;
+}
+
+interface IProductDetail {
+  product: IProduct | null;
+  price: number | null;
+  amount: number | null;
+  weight: number | null;
+  size: ISize | null;
+  image: string[];
+  description: string | null;
+  quantity: number | null;
+  category: ICategory | null;
+}
 
 export default function ProductDetailAndEdit() {
   const { id } = useParams();
   const [open, setOpen] = useState(false);
-  const [product, setProduct] = useState<IProduct>({
-    _id: 0,
-    name: "",
-    price: 0,
-    size: "",
+  const [openUpdate, setOpenUpdate] = useState(false);
+  const [product, setProduct] = useState<IProductDetail>({
+    product: null,
+    price: null,
+    amount: null,
+    weight: null,
+    size: null,
     image: [],
-    description: "",
-    quantity: 0,
-    categoryId: [],
+    description: null,
+    quantity: null,
+    category: null,
   });
-  const [listUpdate, setListUpdate] = useState([]);
   const [priceMax, setPriceMax] = useState(999999999);
   const listProductDetail = [
     {
@@ -212,7 +247,7 @@ export default function ProductDetailAndEdit() {
           >
             Danh sách sản phẩm
           </Typography.Title>
-          {listUpdate.length > 0 && (
+          {/* {listUpdate.length > 0 && (
             <Button type="primary" style={{ float: "right" }}>
               Lưu thay đổi
             </Button>
@@ -221,7 +256,7 @@ export default function ProductDetailAndEdit() {
             <Button danger style={{ float: "right", marginRight: 16 }}>
               Hủy bỏ thay đổi
             </Button>
-          )}
+          )} */}
           <Table
             dataSource={listProductDetail}
             rowKey="id"
@@ -232,7 +267,7 @@ export default function ProductDetailAndEdit() {
                 title: "STT",
                 dataIndex: "id",
                 key: "id",
-                render: (index) => index + 1,
+                render: (index) => index,
               },
               {
                 title: "Ảnh sản phẩm",
@@ -256,7 +291,6 @@ export default function ProductDetailAndEdit() {
                 title: "Số lượng",
                 dataIndex: "amount",
                 key: "amount",
-                render: (text) => <Input type="number" defaultValue={text} />,
               },
               {
                 title: "Giá bán",
@@ -269,10 +303,12 @@ export default function ProductDetailAndEdit() {
                 key: "action",
                 render: () => (
                   <Fragment>
-                    <Button type="link" icon={<EditOutlined />} />
-                    <Button type="link" danger>
-                      Xóa
-                    </Button>
+                    <Button
+                      type="link"
+                      onClick={() => setOpenUpdate(true)}
+                      icon={<EditOutlined />}
+                    />
+                    <Button type="link" danger icon={<DeleteOutlined />} />
                   </Fragment>
                 ),
               },
@@ -289,10 +325,120 @@ export default function ProductDetailAndEdit() {
           onChange={(page) => setFilter({ ...filter, page })}
           pageSize={filter.size}
         />
-        <Modal title="Thông báo" visible={open}>
+        <Modal title="Thông báo" open={open} onCancel={() => setOpen(false)}>
           <Typography.Title>
             Bạn có muốn lưu các thay đổi không?
           </Typography.Title>
+        </Modal>
+
+        {/* Modal update */}
+        <Modal
+          title="Cập nhật sản phẩm"
+          open={openUpdate}
+          onCancel={() => setOpenUpdate(false)}
+          onOk={() => console.log("aaaa")}
+        >
+          <div>
+            <Space direction="vertical">
+              <Typography.Text style={{ fontWeight: 600, color: "gray" }}>
+                {`${product.category?.name} ${product.product?.name} ${product.size?.name}`}
+              </Typography.Text>
+              {product ? (
+                <Table
+                  style={{ marginTop: "16px", marginBottom: "16px" }}
+                  pagination={false}
+                  rowKey="key"
+                >
+                  <Table.Column
+                    title="Sản phẩm"
+                    render={() => (
+                      <Typography.Text>{product.product?.name}</Typography.Text>
+                    )}
+                  />
+                  <Table.Column
+                    title="Kích cỡ"
+                    render={(_, record: IProductDetail) => (
+                      <Typography.Text>{record.size?.name}</Typography.Text>
+                    )}
+                  />
+                  <Table.Column
+                    title="Cân nặng"
+                    render={(_, record: IProductDetail) => (
+                      <Input
+                        value={record.weight ? Number(record.weight) : 0}
+                        suffix="g"
+                        style={{ textAlign: "center" }}
+                      />
+                    )}
+                  />
+                  <Table.Column
+                    title="Số lượng"
+                    render={(_, record: IProductDetail) => (
+                      <Input
+                        value={record.amount ? Number(record.amount) : 0}
+                      />
+                    )}
+                  />
+                  <Table.Column
+                    title="Giá"
+                    render={(_, record: IProductDetail) => (
+                      <Input
+                        value={record.price ? Number(record.price) : 0}
+                        style={{ textAlign: "center" }}
+                      />
+                    )}
+                  />
+                  <Table.Column
+                    title="Ảnh"
+                    render={(_, record: IProductDetail) => (
+                      <Space direction="horizontal" align="center">
+                        {record.image.length > 0 ? (
+                          record.image.map((ima: string, index: number) => (
+                            <Image
+                              key={`showImage${index}`}
+                              width={100}
+                              height={100}
+                              src={ima}
+                              alt="anh-san-pham"
+                              style={{ border: "1px dashed #ccc" }}
+                            />
+                          ))
+                        ) : (
+                          <Tooltip title="Chỉnh sửa ảnh">
+                            <div
+                              style={{
+                                cursor: "pointer",
+                                border: "1px dashed #ccc",
+                                width: "100px",
+                                height: "100px",
+                                textAlign: "center",
+                                lineHeight: "100px",
+                              }}
+                            >
+                              <PictureOutlined
+                                style={{
+                                  fontSize: "20px",
+                                  marginRight: "5px",
+                                }}
+                              />
+                              Ảnh
+                            </div>
+                          </Tooltip>
+                        )}
+                      </Space>
+                    )}
+                  />
+                </Table>
+              ) : (
+                <img
+                  height={"200px"}
+                  width={"100%"}
+                  src={"../../src/assets/image/404-page.gif"}
+                  alt="no-data"
+                />
+              )}
+            </Space>
+          </div>
         </Modal>
       </Card>
     </div>

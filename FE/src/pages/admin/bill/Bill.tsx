@@ -121,8 +121,8 @@ export default function Bill() {
       title: "Hành động",
       align: "center" as const,
       width: "10%",
-      render: (key: string) => (
-        <Link to={`/admin/bill/detail/${key}`}>
+      render: (bill: BillItem) => (
+        <Link to={`/admin/bill/detail/${bill?.key}`}>
           <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
         </Link>
       ),

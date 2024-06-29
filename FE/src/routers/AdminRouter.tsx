@@ -11,6 +11,7 @@ import CategoryAdd from "../pages/admin/category/CategoryAdd";
 import CategoryEdit from "../pages/admin/category/CategoryEdit";
 import ProductAdd from "../pages/admin/product/ProductAdd";
 import ProductDetailAndEdit from "../pages/admin/product/ProductDetailAndEdit";
+import BillDetail from "../pages/admin/bill/BillDetail";
 
 export default function AdminRouter() {
   return (
@@ -19,6 +20,7 @@ export default function AdminRouter() {
         <Route path="/" element={<Navigate to="/admin/dashboard" />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/bill" element={<Bill />} />
+        <Route path="/bill/detail/:id" element={<BillDetail />} />
         <Route path="/product" element={<Product />} />
         <Route path="/product/detail/:id" element={<ProductDetailAndEdit />} />
         <Route path="/product/add" element={<ProductAdd />} />

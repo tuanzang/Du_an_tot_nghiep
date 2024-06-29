@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
 import {
+  DeleteOutlined,
   DownloadOutlined,
+  EditOutlined,
   PlusSquareOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
@@ -83,7 +85,7 @@ export default function Product() {
       title: "Ảnh",
       dataIndex: "image",
       key: "image",
-      width: "20%" as const,
+      width: "15%" as const,
       render: (text: string) => (
         <img style={{ height: "70px" }} src={text} alt="error" />
       ),
@@ -92,20 +94,20 @@ export default function Product() {
       title: "Giá sản phẩm",
       dataIndex: "price",
       key: "price",
-      width: "20%" as const,
+      width: "15%" as const,
     },
     {
       title: "Loại sản phẩm",
       dataIndex: "loai",
       key: "loai",
-      width: "20%" as const,
+      width: "15%" as const,
     },
-    {
-      title: "Mô tả sản phẩm",
-      dataIndex: "description",
-      key: "description",
-      width: "20%" as const,
-    },
+    // {
+    //   title: "Mô tả sản phẩm",
+    //   dataIndex: "description",
+    //   key: "description",
+    //   width: "20%" as const,
+    // },
     {
       title: "Số lượng",
       dataIndex: "quantity",
@@ -118,7 +120,7 @@ export default function Product() {
       dataIndex: "status",
       key: "status",
       align: "center" as const,
-      width: "30%" as const,
+      width: "15%" as const,
       render: (key: boolean) => (
         <Switch
           style={{ backgroundColor: key ? "green" : "gray" }}
@@ -132,26 +134,17 @@ export default function Product() {
       dataIndex: "_id",
       key: "_id",
       align: "center" as const,
-      width: "10%" as const,
+      width: "15%" as const,
       render: (value: string) => (
         <div>
-          <Button>
-            <Link to={`/admin/product/${value}`}>Sửa</Link>
-          </Button>
-          <Button>
-            <Link to={`/admin/product/detail/${value}`}>Xem</Link>
+          <Button
+            onClick={() => deleteProduct(Number(value))}
+            icon={<DeleteOutlined />}
+          />
+          <Button icon={<EditOutlined />}>
+            <Link to={`/admin/product/detail/${value}`} />
           </Button>
         </div>
-      ),
-    },
-    {
-      title: "Xóa",
-      dataIndex: "_id",
-      key: "_id",
-      align: "center" as const,
-      width: "10%" as const,
-      render: (value: string) => (
-        <Button onClick={() => deleteProduct(Number(value))}>Xóa</Button>
       ),
     },
   ];
