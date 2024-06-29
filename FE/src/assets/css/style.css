@@ -29,9 +29,9 @@ Table of content
 body {
   color: #555555;
   line-height: 1.7;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 400;
-  font-family: "Lato", sans-serif;
+  font-family: "Playfair", sans-serif;
 }
 
 a {
@@ -59,7 +59,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Lato", sans-serif;
+  font-family: "Playfair", sans-serif;
   color: #222222;
   font-weight: 700;
   margin: 0;
@@ -83,7 +83,7 @@ h1,
 
 h2,
 .h2 {
-  font-size: 30px;
+  font-size: 36px;
 }
 
 h3,
@@ -98,12 +98,12 @@ h4,
 
 h5,
 .h5 {
-  font-size: 18px;
+  font-size: 22px;
 }
 
 h6,
 .h6 {
-  font-size: 16px;
+  font-size: 20px;
 }
 
 ul {
@@ -1283,7 +1283,7 @@ textarea:focus {
 }
 .main-menu ul li a {
   color: #222222;
-  font-size: 15px;
+  font-size: 20px;
   padding: 37px 15px;
   font-weight: 400;
   display: block;
@@ -2495,7 +2495,7 @@ textarea:focus {
   padding-bottom: 6px;
   overflow-wrap: break-word;
   text-transform: uppercase;
-  font-family: "Lato", sans-serif;
+  font-family: "Playfair", sans-serif;
 }
 @media only screen and (min-width: 992px) and (max-width: 1199px) {
   .slider-item-content h2 {
@@ -2513,7 +2513,7 @@ textarea:focus {
   font-weight: 400;
   line-height: 1.2;
   text-transform: capitalize;
-  font-family: "Lato", sans-serif;
+  font-family: "Playfair", sans-serif;
 }
 @media only screen and (max-width: 479.98px) {
   .slider-item-content h3 {
@@ -2742,7 +2742,7 @@ textarea:focus {
   }
 }
 .section-title .sub-title {
-  font-size: 15px;
+  font-size: 16px;
   padding-top: 6px;
   color: #555555;
 }
@@ -2956,7 +2956,7 @@ textarea:focus {
   margin-right: 0;
 }
 .product-tab-menu ul li a {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 400;
   line-height: 1.2;
   color: #777777;
@@ -3246,7 +3246,8 @@ textarea:focus {
   line-height: 1;
 }
 .manufacturer-name a {
-  font-size: 14px;
+  font-family: 'Playfair', sans-serif;
+  font-size: 18px;
   line-height: 1;
   color: #777777;
   text-transform: capitalize;
@@ -4541,7 +4542,7 @@ blockquote {
 }
 .top-bar-left .product-amount p {
   color: #777;
-  font-size: 14px;
+  font-size: 16px;
   text-transform: capitalize;
 }
 

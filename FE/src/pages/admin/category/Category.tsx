@@ -1,17 +1,18 @@
 import {
   DownloadOutlined,
+  EyeOutlined,
   PlusSquareOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Col, Input, Radio, Row, Table } from "antd";
-import { useEffect, useState } from "react";
+import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
+import React, { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
+import ModalAddAndUpdate from "../../../components/ModalAddAndUpdate";
 import { ICategory } from "../../../interface/Categories";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { ColumnsType } from "antd/es/table";
 
-const customTableHeaderCellStyle: React.CSSProperties = {
+const customTableHeaderCellStyle = {
   backgroundColor: "#c29957",
   color: "white",
   fontWeight: "bold",
@@ -26,10 +27,9 @@ export default function Category() {
   useEffect(() => {
     const fetchCate = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3001/api/categories"
-        );
+        const  response  = await axios.get("http://localhost:3001/api/categories");
         setCates(response.data?.data);
+        
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -37,31 +37,34 @@ export default function Category() {
 
     fetchCate();
   }, []);
-
   const deleteCategory = async (id: number) => {
+   
     try {
-      // dùng confirm để xóa
-      const confirm = window.confirm("Bạn muốn xóa danh mục này?");
-      if (confirm) {
-        const response = await axios.delete(
-          `http://localhost:3001/api/categories/${id}`
-        );
+      //dùng confirm để xóa
+       const confirm = window.confirm("Bạn muốn xóa danh mục này ?");
+       if (confirm) {
+        const response = await axios.delete(`http://localhost:3001/api/categories/${id}`);
         if (response.status === 200) {
-          const newArr = cates.filter((item) => item["_id"] !== id);
-          setCates(newArr);
-        }
+        const newArr = cates.filter((item) => item["_id"] !== id);
+        setCates(newArr);
       }
+       }
     } catch (error) {
       console.log(error);
     }
+  }
+  const onChangeRadio = (e) => {
+    console.log("radio checked", e.target.value);
+    setValue(e.target.value);
   };
 
-  const onChangeRadio = (value: number) => {
-    console.log("radio checked", value);
-    setValue(value);
+  const onChangeSwith = (checked) => {
+    console.log(`switch to ${checked}`);
   };
 
-  const columns: ColumnsType<{ stt: number; key: number; loai: string }> = [
+  
+
+  const columns = [
     {
       title: "STT",
       dataIndex: "stt",
@@ -82,11 +85,9 @@ export default function Category() {
       key: "key",
       align: "center",
       width: "2%",
-      render: (value: number) => (
-        <Button>
-          <Link to={`/admin/category/${value}`}>Sửa</Link>
-        </Button>
-      ),
+      render : (value: any) => (
+        <Button><Link to={`/admin/category/${value}`}>Sửa</Link></Button>
+      )
     },
     {
       title: "Xóa",
@@ -94,8 +95,8 @@ export default function Category() {
       key: "key",
       align: "center",
       width: "2%",
-      render: (value: number) => (
-        <Button onClick={() => deleteCategory(value)}>Xóa</Button>
+      render: (value: any) => (
+        <Button onClick={() => deleteCategory(value!)} >Xóa</Button> 
       ),
     },
   ];
@@ -104,20 +105,12 @@ export default function Category() {
     return {
       stt: index + 1,
       key: item._id,
-      loai: item.loai,
+      loai : item.loai,
     };
-  });
-
-  // Define the type for Table Header Cell Props
-  type CustomTableHeaderCellProps = React.ComponentProps<"th">;
-
-  const CustomHeaderCell: React.FC<CustomTableHeaderCellProps> = (props) => (
-    <th {...props} style={customTableHeaderCellStyle} />
-  );
-
+  })
   return (
     <div>
-      <BreadcrumbsCustom listLink={[]} nameHere={"Danh mục"} />
+      <BreadcrumbsCustom nameHere={"Danh mục"} />
       {/* filter */}
       <Card bordered={false}>
         <Row gutter={16}>
@@ -131,6 +124,7 @@ export default function Category() {
             />
           </Col>
           <Col span={12}>
+          
             <Button
               icon={<DownloadOutlined />}
               style={{
@@ -160,10 +154,7 @@ export default function Category() {
         <Row gutter={16} style={{ marginTop: "12px" }}>
           <Col span={12}>
             <span>Trạng thái: </span>
-            <Radio.Group
-              onChange={(e) => onChangeRadio(e.target.value)}
-              value={value}
-            >
+            <Radio.Group onChange={onChangeRadio} value={value}>
               <Radio value={1}>Tất cả</Radio>
               <Radio value={2}>Hoạt động</Radio>
               <Radio value={3}>Ngưng hoạt động</Radio>
@@ -186,7 +177,9 @@ export default function Category() {
         <Table
           components={{
             header: {
-              cell: CustomHeaderCell,
+              cell: (props) => (
+                <th {...props} style={customTableHeaderCellStyle} />
+              ),
             },
           }}
           dataSource={data}

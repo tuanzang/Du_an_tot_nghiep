@@ -6,5 +6,7 @@ export interface IProduct {
   image: string[];
   description: string;
   quantity: number;
-  categoryId: string[];
+  categoryId: string;
+  status: boolean;
 }
+ 

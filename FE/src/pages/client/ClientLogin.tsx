@@ -75,7 +75,7 @@ const InputForm = ({
         defaultValue={defaultValue}
         id={id}
         type={isPass && !showPass ? "password" : "text"}
-        style={{ fontFamily: "monospace", width: "100%" }}
+        style={{ fontFamily: "Playfair", width: "100%" }}
       />
     </Form.Item>
   );
@@ -218,7 +218,7 @@ export default function ClientLogin() {
                   style={{
                     fontWeight: "800",
                     textTransform: "none",
-                    fontFamily: "monospace",
+                    fontFamily: "Playfair",
                     fontSize: "20px",
                     color: "black",
                   }}
@@ -236,7 +236,7 @@ export default function ClientLogin() {
                   style={{
                     fontWeight: "800",
                     textTransform: "none",
-                    fontFamily: "monospace",
+                    fontFamily: "Playfair",
                     fontSize: "20px",
                     color: "black",
                   }}

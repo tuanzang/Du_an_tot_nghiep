@@ -4,7 +4,6 @@ import {
   Card,
   Col,
   Divider,
-  Grid,
   Image,
   Input,
   Modal,
@@ -65,7 +64,7 @@ interface IBillDetail {
 
 interface ITransaction {
   id: number;
-  totalMoney: number | null;
+  totalMoney: number;
   createdAt: string;
   type: number;
   paymentMethod: number;

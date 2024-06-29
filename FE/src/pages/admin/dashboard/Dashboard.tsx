@@ -53,7 +53,23 @@ const DashboardCard = function ({
   orderCancel,
   orderReturn,
   color,
+}: {
+  iconCart:
+    | typeof ScheduleOutlined
+    | typeof RiseOutlined
+    | typeof CalendarOutlined
+    | typeof BarChartOutlined
+    | typeof SettingOutlined
+    | typeof DownloadOutlined;
+  title: string;
+  total: number;
+  product: number;
+  order: number;
+  orderCancel: number;
+  orderReturn: number;
+  color: string;
 }) {
+  const IconComponent = iconCart;
   return (
     <Card style={{ padding: "16px", backgroundColor: color, color: "white" }}>
       <div
@@ -65,7 +81,7 @@ const DashboardCard = function ({
           color: "black",
         }}
       >
-        {iconCart}
+        <IconComponent />
       </div>
       <Typography.Text
         style={{
@@ -175,7 +191,7 @@ export default function Dashboard() {
       <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
         <Col span={12}>
           <DashboardCard
-            iconCart={<ScheduleOutlined />}
+            iconCart={ScheduleOutlined }
             title={"Hôm nay"}
             total={1}
             product={1}
@@ -187,7 +203,7 @@ export default function Dashboard() {
         </Col>
         <Col span={12}>
           <DashboardCard
-            iconCart={<RiseOutlined />}
+            iconCart={RiseOutlined }
             title={"Tuần này"}
             total={1}
             product={1}
@@ -199,7 +215,7 @@ export default function Dashboard() {
         </Col>
         <Col span={12}>
           <DashboardCard
-            iconCart={<CalendarOutlined />}
+            iconCart={CalendarOutlined}
             title={"Tháng này"}
             total={1}
             product={1}
@@ -211,7 +227,7 @@ export default function Dashboard() {
         </Col>
         <Col span={12}>
           <DashboardCard
-            iconCart={<BarChartOutlined />}
+            iconCart={BarChartOutlined }
             title={"Năm nay"}
             total={1}
             product={1}
@@ -224,7 +240,7 @@ export default function Dashboard() {
         {indexButton === 5 && (
           <Col span={24}>
             <DashboardCard
-              iconCart={<SettingOutlined />}
+              iconCart={SettingOutlined }
               title={"Tùy chỉnh"}
               total={1}
               product={1}
@@ -333,7 +349,7 @@ export default function Dashboard() {
             <Table
               components={{
                 header: {
-                  cell: (props) => (
+                  cell: (props:any) => (
                     <th {...props} style={customTableHeaderCellStyle} />
                   ),
                 },
