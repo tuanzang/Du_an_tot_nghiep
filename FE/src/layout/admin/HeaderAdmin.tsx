@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, ReactNode } from "react";
 import {
   Layout,
   Menu,
@@ -7,7 +7,8 @@ import {
   Dropdown,
   Tooltip,
   Button,
-  Grid,
+  Row,
+  Col,
 } from "antd";
 import {
   AiOutlineMenuFold,
@@ -18,14 +19,29 @@ import {
 } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { ClockCircleOutlined, UserOutlined } from "@ant-design/icons";
 import AdminMenu from "./AdminMenu";
 import "./HeaderAdmin.css";
 
+dayjs.extend(relativeTime);
+
 const { Header, Sider, Content } = Layout;
 
-export default function HeaderAdmin({ children }) {
-  const notification = [];
+type Notification = {
+  createdAt: number;
+  status: string;
+  title: string;
+  content: string;
+  image?: string;
+};
+
+type HeaderAdminProps = {
+  children: ReactNode;
+};
+
+export default function HeaderAdmin({ children }: HeaderAdminProps) {
+  const notification: Notification[] = [];
   const [collapsed, setCollapsed] = useState(false);
 
   const menu = (
@@ -62,10 +78,9 @@ export default function HeaderAdmin({ children }) {
     <Menu>
       {notification
         .sort((a, b) => b.createdAt - a.createdAt)
-        .map((notification, index) => (
-          <>
+        .map((noti, index) => (
+          <React.Fragment key={index}>
             <Menu.Item
-              key={index}
               style={{
                 margin: "3px",
                 borderRadius: "5px",
@@ -82,8 +97,8 @@ export default function HeaderAdmin({ children }) {
                   height: "70px",
                 }}
               >
-                <Grid container spacing={2}>
-                  <Grid item xs={3}>
+                <Row gutter={8}>
+                  <Col span={6}>
                     <div
                       style={{
                         display: "flex",
@@ -96,8 +111,8 @@ export default function HeaderAdmin({ children }) {
                     >
                       <img
                         src={
-                          notification.image
-                            ? notification.image
+                          noti.image
+                            ? noti.image
                             : "https://res.cloudinary.com/dioxktgsm/image/upload/v1701498532/zl87yxsvlm2luo5rjnyl.png"
                         }
                         alt=""
@@ -108,8 +123,8 @@ export default function HeaderAdmin({ children }) {
                         }}
                       />
                     </div>
-                  </Grid>
-                  <Grid item xs={8}>
+                  </Col>
+                  <Col span={16}>
                     <div
                       style={{
                         flexDirection: "column",
@@ -117,15 +132,15 @@ export default function HeaderAdmin({ children }) {
                         marginLeft: "5px",
                       }}
                     >
-                      {notification.status === "HOAT_DONG" ? (
+                      {noti.status === "HOAT_DONG" ? (
                         <span>
-                          <b>{notification.title}</b>
-                          <p style={{ margin: 0 }}>{notification.content} </p>
+                          <b>{noti.title}</b>
+                          <p style={{ margin: 0 }}>{noti.content}</p>
                         </span>
                       ) : (
                         <span style={{ color: "gray" }}>
-                          <b>{notification.title}</b>
-                          <p style={{ margin: 0 }}>{notification.content} </p>
+                          <b>{noti.title}</b>
+                          <p style={{ margin: 0 }}>{noti.content}</p>
                         </span>
                       )}
                       <div
@@ -138,26 +153,22 @@ export default function HeaderAdmin({ children }) {
                           style={{
                             width: "17px",
                             color:
-                              notification.status === "HOAT_DONG"
-                                ? "#FC7C27"
-                                : "gray",
+                              noti.status === "HOAT_DONG" ? "#FC7C27" : "gray",
                             marginRight: "5px",
                           }}
                         />
                         <span
                           style={{
                             color:
-                              notification.status === "HOAT_DONG"
-                                ? "#FC7C27"
-                                : "gray",
+                              noti.status === "HOAT_DONG" ? "#FC7C27" : "gray",
                           }}
                         >
-                          {dayjs(notification.createdAt).fromNow()}
+                          {dayjs(noti.createdAt).fromNow()}
                         </span>
                       </div>
                     </div>
-                  </Grid>
-                  <Grid item xs={1}>
+                  </Col>
+                  <Col span={2}>
                     <div
                       style={{
                         display: "flex",
@@ -172,21 +183,19 @@ export default function HeaderAdmin({ children }) {
                           height: "15px",
                           width: "15px",
                           backgroundColor:
-                            notification.status === "HOAT_DONG"
-                              ? "#faebd2"
-                              : "gray",
+                            noti.status === "HOAT_DONG" ? "#faebd2" : "gray",
                           borderRadius: "50%",
                         }}
                       />
                     </div>
-                  </Grid>
-                </Grid>
+                  </Col>
+                </Row>
               </div>
             </Menu.Item>
             {index < notification.length - 1 && (
               <hr style={{ padding: 0, margin: 0 }} />
             )}
-          </>
+          </React.Fragment>
         ))}
     </Menu>
   );
@@ -214,7 +223,7 @@ export default function HeaderAdmin({ children }) {
             }}
           >
             <img
-              src="../src/assets/image/logo/logo.png"
+              src="../../src/assets/image/logo/logo.png"
               alt="logo"
               style={{
                 width: collapsed ? "100%" : "75%",
@@ -222,7 +231,7 @@ export default function HeaderAdmin({ children }) {
               }}
             />
           </div>
-          <AdminMenu collapsed={collapsed} />
+          <AdminMenu small={collapsed} />
         </div>
       </Sider>
       <Layout>

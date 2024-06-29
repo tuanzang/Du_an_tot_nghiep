@@ -1,10 +1,14 @@
-import React from "react";
 import Breadcrumb from "antd/lib/breadcrumb";
 import Typography from "antd/lib/typography";
 import { Link } from "react-router-dom";
 
-export default function BreadcrumbsCustom({ listLink, nameHere }) {
-  let items = [];
+type Props = {
+  listLink: { link?: string; name: string }[];
+  nameHere: string;
+};
+
+export default function BreadcrumbsCustom({ listLink, nameHere }: Props) {
+  let items: { key: string; title: React.ReactNode }[] = [];
 
   if (Array.isArray(listLink)) {
     items = listLink.map((e, index) => ({

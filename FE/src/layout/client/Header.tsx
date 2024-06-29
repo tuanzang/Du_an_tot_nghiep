@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 const Header = () => {
   const [openMenuCart, setOpenMenuCart] = useState(false);
@@ -26,7 +26,10 @@ const Header = () => {
                         Cao Đẳng FPT Polytechnic Hà Nội
                       </li>
                       <li className="language">
-                        <img src="../src/assets/image/icon/vn.gif" alt="flag" />
+                        <img
+                          src="../../src/assets/image/icon/vn.gif"
+                          alt="flag"
+                        />
                         Việt Nam
                       </li>
                     </ul>
@@ -46,7 +49,7 @@ const Header = () => {
                   <div className="logo" style={{ width: "50%" }}>
                     <a href="/home">
                       <img
-                        src="../src/assets/image/logo/logo.png"
+                        src="../../src/assets/image/logo/logo.png"
                         alt="brand logo"
                       />
                     </a>

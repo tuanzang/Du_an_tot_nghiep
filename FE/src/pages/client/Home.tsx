@@ -1,11 +1,10 @@
-import { CSSProperties, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Carousel, Col, Row } from "antd";
 import "./Home.css";
 import axios from "axios";
 import { IProduct } from "../../interface/Products";
-import { Link } from "react-router-dom";
 
-const contentStyle: CSSProperties = {
+const contentStyle: React.CSSProperties = {
   height: "530px",
   color: "#fff",
   lineHeight: "160px",
@@ -31,12 +30,19 @@ export default function Home() {
 
   if (!product) return null;
 
+  // const queryClient = useQueryClient();
+  // const { mutate } = useMutation({
+  //   mutationFn: async (id) => {
+
+  //   }
+  // })
+
   return (
     <div>
       <main>
         {/* <!-- hero slider area start --> */}
         <section className="slider-area">
-          <Carousel autoplay autoplaySpeed={3000}>
+          <Carousel autoplay={true} autoplaySpeed={5000}>
             <div>
               <h3 style={contentStyle}>
                 <img src="./src/assets/image/slider/home1-slide1.jpg" />
@@ -158,139 +164,19 @@ export default function Home() {
 
                   {/* <!-- product tab content start --> */}
                   <div className="tab-content">
-                    <Carousel autoplay autoplaySpeed={5000}>
+                    <Carousel autoplay={true} autoplaySpeed={5000}>
                       {/* <!-- product item start --> */}
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
-                            {product.map((p: IProduct) => (
-                              <Col key={p._id} className="gutter-row" span={6}>
-                                <div className="product-item">
-                                  <figure className="product-thumb">
-                                    <Link to={`/product/${p._id}`}>
-                                      <img
-                                        className="pri-img"
-                                        src={p?.image?.[0]}
-                                        alt="product"
-                                      />
-                                    </Link>
-                                    <div className="product-badge">
-                                      <div className="product-label new">
-                                        <span>HOT</span>
-                                      </div>
-                                    </div>
-                                    <div className="button-group">
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="left"
-                                        title="Yêu thích"
-                                      >
-                                        <i className="pe-7s-like"></i>
-                                      </a>
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="left"
-                                        title="So sánhpare"
-                                      >
-                                        <i className="pe-7s-refresh-2"></i>
-                                      </a>
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#quick_view"
-                                      >
-                                        <span
-                                          data-bs-toggle="tooltip"
-                                          data-bs-placement="left"
-                                          title="Xem chi tiết"
-                                        >
-                                          <i className="pe-7s-search"></i>
-                                        </span>
-                                      </a>
-                                    </div>
-                                    <div className="cart-hover">
-                                      <button className="btn btn-cart">
-                                        Thêm vào giỏ hàng
-                                      </button>
-                                    </div>
-                                    <div className="product-caption text-center">
-                                      <div className="product-identity">
-                                        <p className="manufacturer-name">
-                                          <Link to={`/product/${p._id}`}>
-                                            {p.name}
-                                          </Link>
-                                        </p>
-                                      </div>
-                                      <ul className="color-categories">
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-lightblue"
-                                            title="LightSteelblue"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-darktan"
-                                            title="Darktan"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-grey"
-                                            title="Grey"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-brown"
-                                            title="Brown"
-                                          ></a>
-                                        </li>
-                                      </ul>
-                                      {/* <h6 className="product-name">
-                                        <a href="#">{p.name}</a>
-                                      </h6> */}
-                                      <div className="price-box">
-                                        <span className="price-regular">
-                                          {p.price + " "} VNĐ
-                                        </span>
-                                        <span className="price-old">
-                                          <del>{p.price + " "}VND</del>
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </figure>
-                                </div>
-                              </Col>
-                            ))}
-                          </Row>
-                        </div>
-                      </div>
-                      {/* <!-- product item end --> */}
-
-                      {/* <!-- product item start --> */}
-                      <div className="tab-pane fade show active">
-                        <div className="product-carousel-4 slick-row-10 slick-arrow-style">
-                          <Row gutter={16}>
-                            {product.map((p) => (
+                            {product.map((p: IProduct, index) => (
                               <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
                                     <a href="#">
                                       <img
                                         className="pri-img"
-                                        src={p.image?.[0]}
-                                        alt="product"
-                                      />
-                                      <img
-                                        className="sec-img"
-                                        src={p.image?.[0]}
+                                        src={`${p?.image}`}
                                         alt="product"
                                       />
                                     </a>
@@ -371,9 +257,127 @@ export default function Home() {
                                           ></a>
                                         </li>
                                       </ul>
-                                      {/* <h6 className="product-name">
+                                      <h6 className="product-name">
                                         <a href="#">Sản phẩm {index + 1}</a>
-                                      </h6> */}
+                                      </h6>
+                                      <div className="price-box">
+                                        <span className="price-regular">
+                                          {p.price + " "} VNĐ
+                                        </span>
+                                        <span className="price-old">
+                                          <del>{p.price + " "}VND</del>
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </figure>
+                                </div>
+                              </Col>
+                            ))}
+                          </Row>
+                        </div>
+                      </div>
+                      {/* <!-- product item end --> */}
+
+                      {/* <!-- product item start --> */}
+                      <div className="tab-pane fade show active">
+                        <div className="product-carousel-4 slick-row-10 slick-arrow-style">
+                          <Row gutter={16}>
+                            {product.map((p, index) => (
+                              <Col key={p._id} className="gutter-row" span={6}>
+                                <div className="product-item">
+                                  <figure className="product-thumb">
+                                    <a href="#">
+                                      <img
+                                        className="pri-img"
+                                        src={`${p?.image}`}
+                                        alt="product"
+                                      />
+                                      <img
+                                        className="sec-img"
+                                        src={`${p?.image}`}
+                                        alt="product"
+                                      />
+                                    </a>
+                                    <div className="product-badge">
+                                      <div className="product-label new">
+                                        <span>HOT</span>
+                                      </div>
+                                    </div>
+                                    <div className="button-group">
+                                      <a
+                                        href="#"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="left"
+                                        title="Yêu thích"
+                                      >
+                                        <i className="pe-7s-like"></i>
+                                      </a>
+                                      <a
+                                        href="#"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="left"
+                                        title="So sánhpare"
+                                      >
+                                        <i className="pe-7s-refresh-2"></i>
+                                      </a>
+                                      <a
+                                        href="#"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#quick_view"
+                                      >
+                                        <span
+                                          data-bs-toggle="tooltip"
+                                          data-bs-placement="left"
+                                          title="Xem chi tiết"
+                                        >
+                                          <i className="pe-7s-search"></i>
+                                        </span>
+                                      </a>
+                                    </div>
+                                    <div className="cart-hover">
+                                      <button className="btn btn-cart">
+                                        Thêm vào giỏ hàng
+                                      </button>
+                                    </div>
+                                    <div className="product-caption text-center">
+                                      <div className="product-identity">
+                                        <p className="manufacturer-name">
+                                          <a href="#">{p.name}</a>
+                                        </p>
+                                      </div>
+                                      <ul className="color-categories">
+                                        <li>
+                                          <a
+                                            href="#"
+                                            className="c-lightblue"
+                                            title="LightSteelblue"
+                                          ></a>
+                                        </li>
+                                        <li>
+                                          <a
+                                            href="#"
+                                            className="c-darktan"
+                                            title="Darktan"
+                                          ></a>
+                                        </li>
+                                        <li>
+                                          <a
+                                            href="#"
+                                            className="c-grey"
+                                            title="Grey"
+                                          ></a>
+                                        </li>
+                                        <li>
+                                          <a
+                                            href="#"
+                                            className="c-brown"
+                                            title="Brown"
+                                          ></a>
+                                        </li>
+                                      </ul>
+                                      <h6 className="product-name">
+                                        <a href="#">Sản phẩm {index + 1}</a>
+                                      </h6>
                                       <div className="price-box">
                                         <span className="price-regular">
                                           {p.price + " "} VNĐ
@@ -519,19 +523,19 @@ export default function Home() {
 
                   {/* <!-- product tab content start --> */}
                   <div className="tab-content">
-                    <Carousel autoplay autoplaySpeed={5000}>
+                    <Carousel autoplay={true} autoplaySpeed={5000}>
                       {/* <!-- product item start --> */}
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
-                            {product.map((p) => (
+                            {product.map((p, index) => (
                               <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
                                     <a href="#">
                                       <img
                                         className="pri-img"
-                                        src={p.image?.[0]}
+                                        src={`${p?.image}`}
                                         alt="product"
                                       />
                                     </a>
@@ -612,9 +616,9 @@ export default function Home() {
                                           ></a>
                                         </li>
                                       </ul>
-                                      {/* <h6 className="product-name">
+                                      <h6 className="product-name">
                                         <a href="#">Sản phẩm {index + 1}</a>
-                                      </h6> */}
+                                      </h6>
                                       <div className="price-box">
                                         <span className="price-regular">
                                           {p.price + " "} VNĐ
@@ -637,19 +641,19 @@ export default function Home() {
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
-                            {product.map((p) => (
+                            {product.map((p, index) => (
                               <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
                                     <a href="#">
                                       <img
                                         className="pri-img"
-                                        src={p.image?.[0]}
+                                        src={`${p?.image}`}
                                         alt="product"
                                       />
                                       <img
                                         className="sec-img"
-                                        src={p.image?.[0]}
+                                        src={`${p?.image}`}
                                         alt="product"
                                       />
                                     </a>
@@ -730,9 +734,9 @@ export default function Home() {
                                           ></a>
                                         </li>
                                       </ul>
-                                      {/* <h6 className="product-name">
+                                      <h6 className="product-name">
                                         <a href="#">Sản phẩm {index + 1}</a>
-                                      </h6> */}
+                                      </h6>
                                       <div className="price-box">
                                         <span className="price-regular">
                                           {p.price + " "} VNĐ
@@ -774,7 +778,7 @@ export default function Home() {
               </div>
             </div>
             <div className="tab-content">
-              <Carousel autoplay autoplaySpeed={5000}>
+              <Carousel autoplay={true} autoplaySpeed={5000}>
                 {/* <!-- product item start --> */}
                 <div className="tab-pane fade show active">
                   <div className="blog-carousel-active slick-row-10 slick-arrow-style">
