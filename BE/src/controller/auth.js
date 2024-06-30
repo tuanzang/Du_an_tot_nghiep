@@ -25,9 +25,9 @@ const signupSchema = Joi.object({
         "any.required": " Confirm Password là bắt buộc",
         "any.only": "Mật khẩu không trùng khớp",
     }),
-    avatar: Joi.string().uri().messages({
-        "string.uri": " Avatar phải là đường dẫn hợp lệ",
-    }),
+    // avatar: Joi.string().uri().messages({
+    //     "string.uri": " Avatar phải là đường dẫn hợp lệ",
+    // }),
 });
 
 // test đẩy code
