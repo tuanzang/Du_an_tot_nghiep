@@ -22,10 +22,10 @@ const userSchema = new Schema(
             enum: ["user", "admin"],
             default: "user",
         },
-        avatar: {
-            type: String,
-            default: "../upload/default-avatar.jpeg",
-        },
+        // avatar: {
+        //     type: String,
+        //     default: "../upload/default-avatar.jpeg",
+        // },
     },
     { timestamps: true, versionKey: false }
 );
