@@ -9,9 +9,9 @@ import Customer from "../pages/admin/account/customer/Customer";
 import ProductEdit from "../pages/admin/product/ProductEdit";
 import CategoryAdd from "../pages/admin/category/CategoryAdd";
 import CategoryEdit from "../pages/admin/category/CategoryEdit";
-import ProductAdd from "../pages/admin/product/ProductAdd";
 import ProductDetailAndEdit from "../pages/admin/product/ProductDetailAndEdit";
 import BillDetail from "../pages/admin/bill/BillDetail";
+import ProductAdd from "../pages/admin/product/productAdd";
 
 export default function AdminRouter() {
   return (
