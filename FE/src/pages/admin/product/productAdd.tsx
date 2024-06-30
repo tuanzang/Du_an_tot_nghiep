@@ -84,13 +84,14 @@ const ProductAdd = () => {
       <Form.Item<IProduct>
         label="Danh mục"
         name="categoryId"
-        rules={[{ required: true, message: 'Vui lý chon danh mục!' }]}
       >
         <Select
+        
           defaultValue="Chọn danh mục"
           style={{
             width: 150,
           }}
+
           options={dataCates}
         />
       </Form.Item>
@@ -115,7 +116,6 @@ const ProductAdd = () => {
       >
         <Input />
       </Form.Item>
-      
       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
         <Button type="primary" htmlType="submit">
           Submit
