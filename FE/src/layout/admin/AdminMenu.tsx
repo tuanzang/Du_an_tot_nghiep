@@ -55,19 +55,9 @@ export default function AdminMenu({ small }: Props) {
       ],
     },
     {
-      key: "account",
+      key: "users",
       icon: <UserOutlined />,
-      label: "Tài khoản",
-      children: [
-        {
-          key: "staff",
-          label: <Link to="/admin/staff">Nhân viên</Link>,
-        },
-        {
-          key: "customer",
-          label: <Link to="/admin/customer">Khách hàng</Link>,
-        },
-      ],
+      label: <Link to="/admin/users">Tài khoản</Link>
     },
   ];
 

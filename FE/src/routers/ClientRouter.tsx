@@ -18,6 +18,7 @@ export default function ClientRouter() {
         <Route path="/product/detail/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/login" element={<ClientLogin />} />
+        <Route path="/register" element={<ClientLogin />} />
       </Routes>
       <Footer />
     </div>

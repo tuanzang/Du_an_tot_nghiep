@@ -1,10 +1,16 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ACCESS_TOKEN_STORAGE_KEY, USER_INFO_STORAGE_KEY } from "../../services/constants";
 
 const Header = () => {
   const [openMenuCart, setOpenMenuCart] = useState(false);
   const handleMenuCartClick = () => {
     setOpenMenuCart(!openMenuCart);
   };
+
+  const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+  const userInfo = JSON.parse(localStorage.getItem(USER_INFO_STORAGE_KEY) as string) || '';
+
   return (
     <div>
       <header className="header-area header-wide bg-gray">
@@ -108,19 +114,26 @@ const Header = () => {
                     <div className="header-configure-area">
                       <ul className="nav justify-content-end">
                         <li className="user-hover">
-                          <a href="#">
+                          <div className="user-info">
                             <i className="pe-7s-user"></i>
-                          </a>
+
+                            {isLogged && <p>{userInfo?.name}</p>}
+                          </div>
                           <ul className="dropdown-list">
-                            <li>
-                              <a href="login-register.html">Đăng nhập</a>
-                            </li>
-                            <li>
-                              <a href="login-register.html">Đăng ký</a>
-                            </li>
-                            <li>
-                              <a href="my-account.html">Tài khoản của tôi</a>
-                            </li>
+                            {isLogged ? (
+                              <li>
+                                <a href="my-account.html">Tài khoản của tôi</a>
+                              </li>
+                            ) : (
+                              <>
+                                <li>
+                                  <Link to="/login">Đăng nhập</Link>
+                                </li>
+                                <li>
+                                  <Link to="/register">Đăng ký</Link>
+                                </li>
+                              </>
+                            )}
                           </ul>
                         </li>
                         <li>
@@ -264,15 +277,20 @@ const Header = () => {
                         className="dropdown-menu"
                         aria-labelledby="myaccount"
                       >
-                        <a className="dropdown-item" href="my-account.html">
-                          Tài khoản của tôi
-                        </a>
-                        <a className="dropdown-item" href="login-register.html">
-                          Đăng ký
-                        </a>
-                        <a className="dropdown-item" href="login-register.html">
-                          Đăng nhập
-                        </a>
+                        {isLogged ? (
+                          <a className="dropdown-item" href="my-account.html">
+                            Tài khoản của tôi
+                          </a>
+                        ) : (
+                          <>
+                            <Link to="/register" className="dropdown-item">
+                              Đăng ký
+                            </Link>
+                            <Link to="/login" className="dropdown-item">
+                              Đăng nhập
+                            </Link>
+                          </>
+                        )}
                       </div>
                     </div>
                   </li>
