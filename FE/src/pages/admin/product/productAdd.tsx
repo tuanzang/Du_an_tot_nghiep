@@ -15,13 +15,14 @@ import {
   Tooltip,
 } from "antd";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   CloseOutlined,
   DeleteOutlined,
   PictureOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
+import axios from "axios";
 interface IProduct {
   id: number;
   name: string;
@@ -100,55 +101,63 @@ export default function ProductAdd() {
     { id: 2, name: "M" },
     { id: 3, name: "L" },
   ];
-  const categorys = [
-    { value: 1, label: "Nhẫn" },
-    { value: 2, label: "Lắc tay" },
-    { value: 3, label: "Dây chuyền" },
-  ];
+  const [cates, setCates] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/categories");
+        setCates(response.data?.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-  function removeErrorByKey(key: string) {
-    setListErr((prevErrors: IError[]) =>
-      prevErrors.filter((error: IError) => error.key !== key)
-    );
-  }
+    fetchData();
+  }, []);
 
-  const updateNewProductDetail = (productDetail: INewProducts) => {
-    if (productDetail?.key) {
-      removeErrorByKey(productDetail?.key);
-      setNewProductDetails((prevDetails) => {
-        return prevDetails.map((detail) => {
-          if (detail.key === productDetail.key) {
-            return productDetail;
-          }
-          return detail;
-        });
-      });
-    } else {
-      return;
+    function removeErrorByKey(key: string) {
+      setListErr((prevErrors: IError[]) =>
+        prevErrors.filter((error: IError) => error.key !== key)
+      );
     }
-  };
 
-  function deleteNewProduct(productDetail: INewProducts) {
-    const preNewProductDetails = [...newProductDetails];
-    preNewProductDetails.splice(preNewProductDetails.indexOf(productDetail), 1);
-    setNewProductDetails(preNewProductDetails);
+    const updateNewProductDetail = (productDetail: INewProducts) => {
+      if (productDetail?.key) {
+        removeErrorByKey(productDetail?.key);
+        setNewProductDetails((prevDetails) => {
+          return prevDetails.map((detail) => {
+            if (detail.key === productDetail.key) {
+              return productDetail;
+            }
+            return detail;
+          });
+        });
+      } else {
+        return;
+      }
+    };
 
-    const preProductChecks = [...productsCheck];
-    preProductChecks.splice(preProductChecks.indexOf(productDetail), 1);
-    setProductsCheck(preProductChecks);
+    function deleteNewProduct(productDetail: INewProducts) {
+      const preNewProductDetails = [...newProductDetails];
+      preNewProductDetails.splice(preNewProductDetails.indexOf(productDetail), 1);
+      setNewProductDetails(preNewProductDetails);
 
-    setProductDelete([...productDelete, productDetail]);
-  }
+      const preProductChecks = [...productsCheck];
+      preProductChecks.splice(preProductChecks.indexOf(productDetail), 1);
+      setProductsCheck(preProductChecks);
 
-  const genNewProductDetail = (newProducts: IProductDetail) => {
-    setNewProducts(newProducts);
-    console.log(newProducts);
+      setProductDelete([...productDelete, productDetail]);
+    }
 
-    if (newProductIsUndefined(newProducts)) {
-      const preNewProductDetails: INewProducts[] = [];
+    const genNewProductDetail = (newProducts: IProductDetail) => {
+      setNewProducts(newProducts);
+      console.log(newProducts);
 
-      newProducts.size.forEach((siz, index) => {
-        preNewProductDetails.push({
+      if (newProductIsUndefined(newProducts)) {
+        const preNewProductDetails: INewProducts[] = [];
+
+        newProducts.size.forEach((siz, index) => {
+          preNewProductDetails.push({
           key: `${index}`,
           product: newProducts?.product,
           price: 100000,
