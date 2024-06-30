@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Menu } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -8,19 +8,23 @@ import {
   BarcodeOutlined,
 } from "@ant-design/icons";
 
-export default function AdminMenu({ small }: { small: boolean }) {
-  const [openKeys, setOpenKeys] = useState([]);
+type Props = {
+  small: boolean;
+};
+
+export default function AdminMenu({ small }: Props) {
+  const [openKeys, setOpenKeys] = useState<string[]>([]);
   const navigate = useNavigate();
 
-  const handleClickMenu = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleClickMenu = (e: { key: string }) => {
     if (small) {
-      setOpenKeys([...openKeys, e.key ]);
+      setOpenKeys([...openKeys, e.key]);
     } else {
       navigate(`/admin/${e.key}`);
     }
   };
 
-  const handleOpenChange = (keys) => {
+  const handleOpenChange = (keys: string[]) => {
     setOpenKeys(keys);
   };
 
@@ -47,7 +51,7 @@ export default function AdminMenu({ small }: { small: boolean }) {
         {
           key: "category",
           label: <Link to="/admin/category">Loại</Link>,
-        }
+        },
       ],
     },
     {

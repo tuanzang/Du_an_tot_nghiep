@@ -1,41 +1,46 @@
 import { Carousel, Col, Image, Row } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { IProduct } from "../../interface/Products";
-import axios from "axios";
 
 export default function ProductDetail() {
-  const { id } = useParams(); // Lấy ID sản phẩm từ URL params
-  const [product, setProduct] = useState<IProduct>();
-  const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
+  const { id } = useParams();
+  console.log(id);
 
-  useEffect(() => {
-    fetchProduct();
-    fetchRelatedProducts();
-  }, []);
-
-  const fetchProduct = async () => {
-    try {
-      if (id) {
-        const response = await axios.get(`http://localhost:3001/api/products/${id}`);
-        console.log("Product API response:", response.data);
-        setProduct(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching product:", error);
+  const getTitle = (number: number) => {
+    switch (number) {
+      case 1:
+        return "GOLD";
+      case 2:
+        return "SLIVER";
+      case 3:
+        return "BRONZE";
+      case 4:
+        return "DIAMOND";
     }
   };
+  const fakeHotProduct1s = [];
+  const fakeHotProduct2s = [];
+  for (let i = 1; i <= 4; i++) {
+    fakeHotProduct1s.push({
+      key: i,
+      image1: `../../src/assets/image/product/product-${i}.jpg`,
+      image2: `../../src/assets/image/product/product-${19 - i}.jpg`,
+      title: getTitle(i),
+      price: (i * 10 + 9.99).toFixed(2),
+      category: `Category ${i}`,
+    });
+    fakeHotProduct2s.push({
+      key: i,
+      image1: `./src/assets/image/product/product-${i + 1}.jpg`,
+      image2: `./src/assets/image/product/product-${19 - i - 1}.jpg`,
+      title: getTitle(i),
+      price: (i * 10 + 9.99).toFixed(2),
+      category: `Category ${i}`,
+    });
+  }
 
-  const fetchRelatedProducts = async () => {
-    try {
-      // Example: Fetch related products based on some criteria (e.g., same category)
-        const response = await axios.get(`http://localhost:3001/api/products`);
-      console.log("Related Products API response:", response.data);
-      setRelatedProducts(response.data.data);
-    } catch (error) {
-      console.error("Error fetching related products:", error);
-    }
-  };
+  const [imgDetail, setImgDetail] = useState(fakeHotProduct1s[0].image1);
+
   return (
     <div>
       <main>
@@ -89,20 +94,53 @@ export default function ProductDetail() {
                       >
                         <Image
                           width={"100%"}
-                          src={product?.image?.[0]}
+                          src={imgDetail}
                           alt="product-details"
                         />
                       </div>
                       <div className="tab-content">
+                        <Carousel
+                          autoplay
+                          autoplaySpeed={3000}
+                          slidesToShow={4}
+                          slidesToScroll={1}
+                          arrows={false}
+                          dots={false}
+                        >
+                          {fakeHotProduct1s.map((p) => (
+                            <Col
+                              key={p.key}
+                              className="gutter-row"
+                              span={24}
+                              style={{
+                                justifyContent: "center",
+                                alignContent: "center",
+                                display: "flex",
+                              }}
+                            >
+                              <Image
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setImgDetail(p.image1);
+                                }}
+                                width={"95%"}
+                                height={"95%"}
+                                sizes="small"
+                                preview={false}
+                                src={p.image1}
+                              />
+                            </Col>
+                          ))}
+                        </Carousel>
                       </div>
                     </div>
                     <div className="col-lg-7">
                       <div className="product-details-des">
                         <div className="manufacturer-name">
-                          <a href="product-details.html">HOT</a>
+                          <a>HasTech</a>
                         </div>
                         <h3 className="product-name">
-                          {product?.name}
+                          Handmade Golden Necklace Full Family Package
                         </h3>
                         <div className="ratings d-flex">
                           <span>
@@ -125,14 +163,14 @@ export default function ProductDetail() {
                           </div>
                         </div>
                         <div className="price-box">
-                          <span className="price-regular">{product?.price}.VNĐ</span>
+                          <span className="price-regular">$70.00</span>
                           <span className="price-old">
-                            <del>{product?.price}.VNĐ</del>
+                            <del>$90.00</del>
                           </span>
                         </div>
-                        {/* <h5 className="offer-text">
+                        <h5 className="offer-text">
                           <strong>Hurry up</strong>! offer ends in:
-                        </h5> */}
+                        </h5>
                         <div
                           className="product-countdown"
                           data-countdown="2022/12/20"
@@ -141,18 +179,16 @@ export default function ProductDetail() {
                           <i className="fa fa-check-circle"></i>
                           <span>200 in stock</span>
                         </div>
-                        <p className="pro-desc">Mô tả sản phẩm: {product?.description}</p>
+                        <p className="pro-desc">Mô tả sản phẩm</p>
                         <div className="quantity-cart-box d-flex align-items-center">
-                          <h6 className="option-title">Số lượng:</h6>
+                          <h6 className="option-title">qty:</h6>
                           <div className="quantity">
                             <div className="pro-qty">
                               <input type="text" value="1" />
                             </div>
                           </div>
                           <div className="action_link">
-                            <a className="btn btn-cart2" href="#">
-                              Add to cart
-                            </a>
+                            <a className="btn btn-cart2">Add to cart</a>
                           </div>
                         </div>
                         <div className="useful-links">
@@ -215,7 +251,7 @@ export default function ProductDetail() {
                             id="tab_one"
                           >
                             <div className="tab-one">
-                              <p>{product?.description}</p>
+                              <p>Mô tả sản phẩm</p>
                             </div>
                           </div>
                           <div className="tab-pane fade" id="tab_two">
@@ -378,19 +414,19 @@ export default function ProductDetail() {
                   <div className="tab-pane fade show active">
                     <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                       <Row gutter={16}>
-                      {relatedProducts.map((relatedProduct) => (
-                          <Col key={relatedProduct._id} className="gutter-row" span={6}>
+                        {fakeHotProduct1s.map((p, index) => (
+                          <Col key={p.key} className="gutter-row" span={6}>
                             <div className="product-item">
                               <figure className="product-thumb">
                                 <a href="#">
                                   <img
                                     className="pri-img"
-                          src={relatedProduct?.image?.[0]}
+                                    src={p.image1}
                                     alt="product"
                                   />
                                   <img
                                     className="sec-img"
-                          src={relatedProduct?.image?.[0]}
+                                    src={p.image2}
                                     alt="product"
                                   />
                                 </a>
@@ -438,7 +474,7 @@ export default function ProductDetail() {
                                 <div className="product-caption text-center">
                                   <div className="product-identity">
                                     <p className="manufacturer-name">
-                                      <a href="#">{relatedProduct.name}</a>
+                                      <a href="#">{p.title}</a>
                                     </p>
                                   </div>
                                   <ul className="color-categories">
@@ -471,21 +507,20 @@ export default function ProductDetail() {
                                       ></a>
                                     </li>
                                   </ul>
-                                  {/* <h6 className="product-name">
+                                  <h6 className="product-name">
                                     <a href="#">Sản phẩm {index + 1}</a>
-                                  </h6> */}
+                                  </h6>
                                   <div className="price-box">
                                     <span className="price-regular">
-                                      {relatedProduct.price + " "} VNĐ
+                                      {p.price + " "} VNĐ
                                     </span>
                                     <span className="price-old">
-                                      <del>{relatedProduct.price + " "}VND</del>
+                                      <del>{p.price + " "}VND</del>
                                     </span>
                                   </div>
                                 </div>
                               </figure>
                             </div>
-                            
                           </Col>
                         ))}
                       </Row>
@@ -494,7 +529,121 @@ export default function ProductDetail() {
                   {/* <!-- product item end --> */}
 
                   {/* <!-- product item start --> */}
-                  
+                  <div className="tab-pane fade show active">
+                    <div className="product-carousel-4 slick-row-10 slick-arrow-style">
+                      <Row gutter={16}>
+                        {fakeHotProduct2s.map((p, index) => (
+                          <Col key={p.key} className="gutter-row" span={6}>
+                            <div className="product-item">
+                              <figure className="product-thumb">
+                                <a href="#">
+                                  <img
+                                    className="pri-img"
+                                    src={p.image1}
+                                    alt="product"
+                                  />
+                                  <img
+                                    className="sec-img"
+                                    src={p.image2}
+                                    alt="product"
+                                  />
+                                </a>
+                                <div className="product-badge">
+                                  <div className="product-label new">
+                                    <span>HOT</span>
+                                  </div>
+                                </div>
+                                <div className="button-group">
+                                  <a
+                                    href="#"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="left"
+                                    title="Yêu thích"
+                                  >
+                                    <i className="pe-7s-like"></i>
+                                  </a>
+                                  <a
+                                    href="#"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="left"
+                                    title="So sánhpare"
+                                  >
+                                    <i className="pe-7s-refresh-2"></i>
+                                  </a>
+                                  <a
+                                    href="#"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#quick_view"
+                                  >
+                                    <span
+                                      data-bs-toggle="tooltip"
+                                      data-bs-placement="left"
+                                      title="Xem chi tiết"
+                                    >
+                                      <i className="pe-7s-search"></i>
+                                    </span>
+                                  </a>
+                                </div>
+                                <div className="cart-hover">
+                                  <button className="btn btn-cart">
+                                    Thêm vào giỏ hàng
+                                  </button>
+                                </div>
+                                <div className="product-caption text-center">
+                                  <div className="product-identity">
+                                    <p className="manufacturer-name">
+                                      <a href="#">{p.title}</a>
+                                    </p>
+                                  </div>
+                                  <ul className="color-categories">
+                                    <li>
+                                      <a
+                                        href="#"
+                                        className="c-lightblue"
+                                        title="LightSteelblue"
+                                      ></a>
+                                    </li>
+                                    <li>
+                                      <a
+                                        href="#"
+                                        className="c-darktan"
+                                        title="Darktan"
+                                      ></a>
+                                    </li>
+                                    <li>
+                                      <a
+                                        href="#"
+                                        className="c-grey"
+                                        title="Grey"
+                                      ></a>
+                                    </li>
+                                    <li>
+                                      <a
+                                        href="#"
+                                        className="c-brown"
+                                        title="Brown"
+                                      ></a>
+                                    </li>
+                                  </ul>
+                                  <h6 className="product-name">
+                                    <a href="#">Sản phẩm {index + 1}</a>
+                                  </h6>
+                                  <div className="price-box">
+                                    <span className="price-regular">
+                                      {p.price + " "} VNĐ
+                                    </span>
+                                    <span className="price-old">
+                                      <del>{p.price + " "}VND</del>
+                                    </span>
+                                  </div>
+                                </div>
+                              </figure>
+                            </div>
+                          </Col>
+                        ))}
+                      </Row>
+                    </div>
+                  </div>
                   {/* <!-- product item end --> */}
                 </Carousel>
               </div>
@@ -507,75 +656,3 @@ export default function ProductDetail() {
     </div>
   );
 }
-
-// import { Carousel, Col, Image } from "antd";
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
-// import { useParams } from "react-router-dom";
-// import { IProduct } from "../../interface/Products";
-
-// export default function ProductDetail() {
-//   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
-//   const [product, setProduct] = useState<IProduct>();
-
-//   useEffect(() => {
-//     fetchProduct();
-//   }, []);
-// const fetchProduct = async () => {
-//     if (id) {
-//         const response = await axios.get(`http://localhost:3001/api/products/${id}`);
-//       console.log(response.data);
-//       setProduct(response.data.data);
-//     }
-//   };
-//   return (
-//     <div>
-//       <main>
-//         {/* Bắt đầu breadcrumb area */}
-//         <div className="breadcrumb-area">
-//           <div className="container">
-//             <div className="row">
-//               <div className="col-12">
-//                 <div className="breadcrumb-wrap">
-//                   <nav aria-label="breadcrumb">
-//                     <ul className="breadcrumb">
-//                       <li className="breadcrumb-item">
-//                         <a href="/home">
-//                           <i className="fa fa-home"></i>
-//                         </a>
-//                       </li>
-//                       <li
-//                         className="breadcrumb-item active"
-//                         aria-current="page"
-//                       >
-//                         <a href="/product">Sản phẩm</a>
-//                       </li>
-//                       <li
-//                         className="breadcrumb-item active"
-//                         aria-current="page"
-//                       >
-//                         Sản phẩm chi tiết
-//                       </li>
-//                     </ul>
-//                   </nav>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//         <div>
-//           {product && (
-//         <div>
-//           <img src={`${product.image}`} alt={`${product.name}`} width={300} />
-//           <h3>{product.name}</h3>
-//           <strong className="text-warning">{product.price}</strong>
-//           <p>{product.description}</p>
-//         </div>
-//       )}
-//         </div>
-//         {/* Kết thúc breadcrumb area */}
-
-//       </main>
-//     </div>
-//   );
-// }

@@ -1,5 +1,3 @@
-import React from "react";
-
 const Footer = () => {
   return (
     <div>
@@ -14,7 +12,7 @@ const Footer = () => {
                     <div className="widget-logo">
                       <a href="index.html">
                         <img
-                          src="../src/assets/image/logo/logo.png"
+                          src="../../src/assets/image/logo/logo.png"
                           alt="brand logo"
                         />
                       </a>
@@ -130,7 +128,7 @@ const Footer = () => {
               <div className="col-md-6">
                 <div className="footer-payment">
                   <img
-                    src="./src/assets/image/payment.png"
+                    src="../../src/assets/image/payment.png"
                     alt="payment method"
                   />
                 </div>

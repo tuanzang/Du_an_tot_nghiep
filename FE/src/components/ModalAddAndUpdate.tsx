@@ -1,5 +1,15 @@
-import React from "react";
+import { ReactNode } from "react";
 import { Button, Modal, Typography, Space } from "antd";
+
+type ModalAddAndUpdateProps = {
+  children: ReactNode;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  title: string;
+  buttonSubmit: ReactNode;
+  width?: number;
+  closeButton?: boolean;
+};
 
 export default function ModalAddAndUpdate({
   children,
@@ -9,14 +19,12 @@ export default function ModalAddAndUpdate({
   buttonSubmit,
   width,
   closeButton,
-}) {
+}: ModalAddAndUpdateProps) {
   return (
     <Modal
-      width={width ? width : 520} // 'xs' in Material-UI is approximately 520px in width
+      width={width || 520} // 'xs' in Material-UI is approximately 520px in width
       open={open}
-      onCancel={() => {
-        setOpen(false);
-      }}
+      onCancel={() => setOpen(false)}
       footer={null}
       centered
     >
@@ -40,13 +48,7 @@ export default function ModalAddAndUpdate({
             justifyContent: "center",
           }}
         >
-          <Button
-            onClick={() => {
-              setOpen(false);
-            }}
-            type="primary"
-            danger
-          >
+          <Button onClick={() => setOpen(false)} type="primary" danger>
             Đóng
           </Button>
           {buttonSubmit}

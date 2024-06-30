@@ -1,18 +1,24 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Input, Button, Typography, Layout, Form } from "antd";
 import { UserOutlined, LockOutlined, LoginOutlined } from "@ant-design/icons";
 
 const { Content } = Layout;
 const { Title } = Typography;
 
+interface UserLogin {
+  email: string;
+  password: string;
+}
+
 export default function AdminLogin() {
-  const [userLogin, setUserLogin] = useState({
-    email: "", // Không có giá trị mặc định
-    password: "", // Không có giá trị mặc định
+  const [userLogin, setUserLogin] = useState<UserLogin>({
+    email: "",
+    password: "",
   });
 
-  const onSubmit = (userLogin) => {
-    console.log(userLogin);
+  const onSubmit = (values: UserLogin) => {
+    console.log(values);
+    // Handle login logic here
   };
 
   return (
@@ -33,7 +39,7 @@ export default function AdminLogin() {
           marginTop: "100px",
         }}
       >
-        <Form>
+        <Form onFinish={() => onSubmit(userLogin)}>
           <LoginOutlined style={{ fontSize: "4rem", color: "#c29957" }} />
           <Title
             level={2}
@@ -74,7 +80,6 @@ export default function AdminLogin() {
               type="primary"
               htmlType="submit"
               style={{ width: "100%", fontSize: "1rem" }}
-              onClick={() => onSubmit(userLogin)}
             >
               Đăng nhập
             </Button>

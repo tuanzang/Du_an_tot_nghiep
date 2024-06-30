@@ -9,7 +9,7 @@ import React, { useState } from "react";
 import BreadcrumbsCustom from "../../../../components/BreadcrumbsCustom";
 import ModalAddAndUpdate from "../../../../components/ModalAddAndUpdate";
 
-const customTableHeaderCellStyle = {
+const customTableHeaderCellStyle: React.CSSProperties = {
   backgroundColor: "#c29957",
   color: "white",
   fontWeight: "bold",
@@ -22,12 +22,12 @@ export default function Staff() {
   const [openUpdate, setOpenUpdate] = useState(false);
   const [value, setValue] = useState(1);
 
-  const onChangeRadio = (e) => {
-    console.log("radio checked", e.target.value);
-    setValue(e.target.value);
+  const onChangeRadio = (value: number) => {
+    console.log("radio checked", value);
+    setValue(value);
   };
 
-  const onChangeSwith = (checked) => {
+  const onChangeSwith = (checked: boolean) => {
     console.log(`switch to ${checked}`);
   };
 
@@ -72,7 +72,7 @@ export default function Staff() {
       dataIndex: "img",
       key: "img",
       width: "20%",
-      render: (text) => (
+      render: (text: string) => (
         <img style={{ height: "70px" }} src={text} alt="error" />
       ),
     },
@@ -86,23 +86,23 @@ export default function Staff() {
       title: "Số lượng",
       dataIndex: "quantity",
       key: "quantity",
-      align: "center",
+      align: "center" as const,
       width: "10%",
     },
     {
       title: "Kích cỡ",
       dataIndex: "size",
       key: "size",
-      align: "center",
+      align: "center" as const,
       width: "10%",
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      align: "center",
+      align: "center" as const,
       width: "30%",
-      render: (key) => (
+      render: (key: boolean) => (
         <Switch
           style={{ backgroundColor: key ? "green" : "gray" }}
           checked={key}
@@ -114,23 +114,29 @@ export default function Staff() {
       title: "Hành động",
       dataIndex: "key",
       key: "action",
-      align: "center",
+      align: "center" as const,
       width: "10%",
-      render: (key) => (
+      render: () => (
         <Button
           style={{ border: "none" }}
           onClick={() => {
             setOpenUpdate(true);
-            console.log(key);
           }}
           icon={<EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />}
         />
       ),
     },
   ];
+
+  // Define the type for Table Header Cell Props
+  type CustomTableHeaderCellProps = React.ComponentProps<"th">;
+
+  const CustomHeaderCell: React.FC<CustomTableHeaderCellProps> = (props) => (
+    <th {...props} style={customTableHeaderCellStyle} />
+  );
   return (
     <div>
-      <BreadcrumbsCustom nameHere={"Nhân viên"} />
+      <BreadcrumbsCustom listLink={[]} nameHere={"Nhân viên"} />
       {/* filter */}
       <Card bordered={false}>
         <Row gutter={16}>
@@ -210,7 +216,10 @@ export default function Staff() {
         <Row gutter={16} style={{ marginTop: "12px" }}>
           <Col span={12}>
             <span>Trạng thái: </span>
-            <Radio.Group onChange={onChangeRadio} value={value}>
+            <Radio.Group
+              onChange={(e) => onChangeRadio(e.target.value)}
+              value={value}
+            >
               <Radio value={1}>Tất cả</Radio>
               <Radio value={2}>Hoạt động</Radio>
               <Radio value={3}>Ngưng hoạt động</Radio>
@@ -233,9 +242,7 @@ export default function Staff() {
         <Table
           components={{
             header: {
-              cell: (props) => (
-                <th {...props} style={customTableHeaderCellStyle} />
-              ),
+              cell: CustomHeaderCell,
             },
           }}
           dataSource={listBestSeller}

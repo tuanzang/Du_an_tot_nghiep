@@ -19,9 +19,25 @@ import {
 } from "@ant-design/icons";
 import { Link, Navigate } from "react-router-dom";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
+// import { jwtDecode } from "jwt-decode";
 
-const InputForm = ({ label, Icon, id, isPass, defaultValue, chagneValue }) => {
+interface Props {
+  label: string;
+  Icon: React.ReactNode;
+  id: string;
+  isPass?: boolean;
+  defaultValue?: string;
+  changeValue: (value: string) => void;
+}
+
+const InputForm = ({
+  label,
+  Icon,
+  id,
+  isPass,
+  defaultValue,
+  changeValue,
+}: Props) => {
   const [showPass, setShowPass] = useState(false);
 
   return (
@@ -33,7 +49,7 @@ const InputForm = ({ label, Icon, id, isPass, defaultValue, chagneValue }) => {
       wrapperCol={{ span: 24 }}
     >
       <Input
-        prefix={<Icon style={{ color: "black" }} />}
+        prefix={Icon}
         suffix={
           isPass ? (
             showPass ? (
@@ -54,7 +70,7 @@ const InputForm = ({ label, Icon, id, isPass, defaultValue, chagneValue }) => {
           ) : null
         }
         onChange={(e) => {
-          chagneValue(e.target.value);
+          changeValue(e.target.value);
         }}
         defaultValue={defaultValue}
         id={id}
@@ -68,24 +84,31 @@ const InputForm = ({ label, Icon, id, isPass, defaultValue, chagneValue }) => {
 const RegisterPanel = () => {
   return (
     <Form>
-      <InputForm label="Họ và tên *" Icon={UserOutlined} id="reg-input-user" />
+      <InputForm
+        label="Họ và tên *"
+        Icon={<UserOutlined color="black" />}
+        id="reg-input-user"
+        changeValue={() => {}}
+      />
       <InputForm
         label="Địa chỉ email *"
-        Icon={MailOutlined}
+        Icon={<MailOutlined color="black" />}
         id="reg-input-email"
-        type="email"
+        changeValue={() => {}}
       />
       <InputForm
         label="Mật khẩu *"
-        Icon={LockOutlined}
+        Icon={<LockOutlined color="black" />}
         id="reg-input-pass"
         isPass={true}
+        changeValue={() => {}}
       />
       <InputForm
         isPass={true}
         label="Nhập lại mật khẩu *"
-        Icon={LockOutlined}
+        Icon={<LockOutlined color="black" />}
         id="reg-input-repass"
+        changeValue={() => {}}
       />
       <Button type="primary" style={{ marginRight: "15px" }}>
         Đăng ký
@@ -100,9 +123,9 @@ const LoginPanel = () => {
     password: "123456",
   });
 
-  const loginGoogle = (decoded) => {
-    console.log(decoded);
-  };
+  // const loginGoogle = (decoded: string) => {
+  //   console.log(decoded);
+  // };
 
   return (
     <Form>
@@ -138,10 +161,11 @@ const LoginPanel = () => {
           </Button>
           <GoogleOAuthProvider clientId="520968091112-fcbec2sb49beti8ugc2rmqngkdobq4j7.apps.googleusercontent.com">
             <GoogleLogin
-              onSuccess={(credentialResponse) => {
-                const decoded = jwtDecode(credentialResponse.credential);
-                loginGoogle(decoded);
-              }}
+              // onSuccess={(credentialResponse) => {
+              //   const decoded = jwtDecode(credentialResponse.credential);
+              //   loginGoogle(decoded);
+              // }}
+              onSuccess={(e) => console.log(e)}
               onError={() => {
                 message.error("Đăng nhập Google không thành công!");
               }}
@@ -159,18 +183,18 @@ const LoginPanel = () => {
 const { Content } = Layout;
 const { TabPane } = Tabs;
 export default function ClientLogin() {
-  const getCookie = (name) => {
+  const getCookie = (name: string) => {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(";").shift();
+    if (parts.length === 2) return parts.pop()?.split(";").shift();
   };
 
   const token = getCookie("ClientToken");
 
   const [value, setValue] = useState(0);
 
-  const handleChange = (key) => {
-    setValue(Number(key));
+  const handleChange = (key: number) => {
+    setValue(key);
   };
 
   return token ? (
@@ -184,7 +208,10 @@ export default function ClientLogin() {
     >
       <Content style={{ maxWidth: "600px", width: "100%", padding: "20px" }}>
         <Card bordered={false} style={{ padding: "20px" }}>
-          <Tabs activeKey={String(value)} onChange={handleChange}>
+          <Tabs
+            activeKey={String(value)}
+            onChange={(value) => handleChange(Number(value))}
+          >
             <TabPane
               tab={
                 <Typography.Text
@@ -219,7 +246,7 @@ export default function ClientLogin() {
               }
               key="1"
             >
-              <RegisterPanel setValue={setValue} />
+              <RegisterPanel />
             </TabPane>
           </Tabs>
         </Card>

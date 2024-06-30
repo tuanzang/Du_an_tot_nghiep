@@ -1,5 +1,5 @@
-import { Modal } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { Modal } from "antd";
 
 type Props = {
   title: string;
@@ -7,7 +7,7 @@ type Props = {
 };
 
 export default function confirmStatus({ title, text }: Props) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     Modal.confirm({
       title: title,
       content: text,
@@ -24,7 +24,7 @@ export default function confirmStatus({ title, text }: Props) {
         resolve(true);
       },
       onCancel() {
-        reject(false);
+        resolve(false);
       },
     });
   });
