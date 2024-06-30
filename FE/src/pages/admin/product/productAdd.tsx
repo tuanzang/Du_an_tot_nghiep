@@ -1,16 +1,20 @@
 import type { FormProps } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Button, Form, Input, Select } from "antd";
+import { Button, Form, Input, Select, Upload } from "antd";
+import { UploadOutlined } from '@ant-design/icons';
 import { IProduct } from "../../../interface/Products";
 import { useEffect, useState } from "react";
 import { ICategory } from "../../../interface/Categories";
 import { toast } from "react-toastify";
+import { uploadImage } from "../../../services/upload/upload";
+import { UploadFile } from "antd/lib";
 
-const ProductAdd = () =>   {
+const ProductAdd = () => {
   const navigate = useNavigate();
 
   const [cates, setCates] = useState<ICategory[]>([]);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,19 +36,34 @@ const ProductAdd = () =>   {
     label: item.loai,
   }));
 
-  const onFinish: FormProps<IProduct>["onFinish"] = async (values) => {
+  const onFinish: FormProps<IProduct[]>["onFinish"] = async (values) => {
     try {
-      await axios.post(`http://localhost:3001/api/products/add`, values);
-      toast.success("Thêm sản phẩm thành công");
-      console.log(values);
-      navigate("/admin/product");
+      // Upload images
+       // Lấy danh sách các file từ fileList
+       const imageFiles: File[] = fileList.map(file => file.originFileObj as File);
+
+       // Upload images
+       const uploadedImageUrls = await uploadImage(imageFiles);
+      //  console.log("Uploaded image URLs:", uploadedImageUrls);
+ 
+       // Update values with uploaded image URLs
+       const updatedValues = { ...values, image: uploadedImageUrls };
+ 
+       // Send product data to server
+       await axios.post(`http://localhost:3001/api/products/add`, updatedValues);
+       
+       toast.success("Thêm sản phẩm thành công");
+       navigate("/admin/product");
     } catch (err) {
       console.log(err);
     }
   };
 
-  const onFinishFailed: FormProps<IProduct>["onFinishFailed"] = (errorInfo) => {
+  const onFinishFailed: FormProps<IProduct[]>["onFinishFailed"] = (errorInfo) => {
     console.log("Failed:", errorInfo);
+  };
+  const handleUploadChange = ({ fileList }: { fileList: UploadFile[] }) => {
+    setFileList(fileList);
   };
 
   return (
@@ -91,15 +110,28 @@ const ProductAdd = () =>   {
       >
         <Input type="number" />
       </Form.Item>
+
+      {/* upload ảnh */}
       <Form.Item
         label="Ảnh"
         name="image"
         rules={[
-          { required: true, message: "Vui lòng nhập đường dẫn ảnh sản phẩm!" },
+          { required: true, message: "Vui lòng tải lên ảnh sản phẩm!" },
         ]}
       >
-        <Input />
+        <Upload
+          name="image"
+          listType="picture"
+          // maxCount={1}
+          beforeUpload={() => false}
+          multiple
+          accept=".jpg,.png,.jpeg"
+          onChange={handleUploadChange}
+        >
+          <Button icon={<UploadOutlined />}>Tải ảnh lên</Button>
+        </Upload>
       </Form.Item>
+
       <Form.Item
         label="Mô tả"
         name="description"
