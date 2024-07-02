@@ -6,6 +6,7 @@ import Footer from "../layout/client/Footer";
 import ClientLogin from "../pages/client/ClientLogin";
 import ProductDetail from "../pages/client/ProductDetail";
 import Cart from "../pages/client/Cart";
+import Checkout from "../pages/client/Checkout";
 
 export default function ClientRouter() {
   return (
@@ -17,7 +18,9 @@ export default function ClientRouter() {
         <Route path="/product" element={<Product />} />
         <Route path="/product/detail/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
         <Route path="/login" element={<ClientLogin />} />
+        <Route path="/register" element={<ClientLogin />} />
       </Routes>
       <Footer />
     </div>

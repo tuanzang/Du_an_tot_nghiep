@@ -5,12 +5,13 @@ import Bill from "../pages/admin/bill/Bill";
 import Product from "../pages/admin/product/Product";
 import Category from "../pages/admin/category/Category";
 import Staff from "../pages/admin/account/staff/Staff";
-import Customer from "../pages/admin/account/customer/Customer";
 import ProductEdit from "../pages/admin/product/ProductEdit";
 import CategoryAdd from "../pages/admin/category/CategoryAdd";
 import CategoryEdit from "../pages/admin/category/CategoryEdit";
 import ProductDetailAndEdit from "../pages/admin/product/ProductDetailAndEdit";
 import BillDetail from "../pages/admin/bill/BillDetail";
+
+import Users from "../pages/admin/users/Users";
 import ProductAdd from "../pages/admin/product/productAdd";
 
 export default function AdminRouter() {
@@ -29,7 +30,7 @@ export default function AdminRouter() {
         <Route path="/category/add" element={<CategoryAdd />} />
         <Route path="/category/:id" element={<CategoryEdit />} />
         <Route path="/staff" element={<Staff />} />
-        <Route path="/customer" element={<Customer />} />
+        <Route path="/users" element={<Users />} />
       </Routes>
     </HeaderAdmin>
   );

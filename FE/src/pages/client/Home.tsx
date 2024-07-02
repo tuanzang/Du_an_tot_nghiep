@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Carousel, Col, Row } from "antd";
+import { Carousel, Col, Row, message } from "antd";
 import "./Home.css";
 import axios from "axios";
 import { IProduct } from "../../interface/Products";
+import useCartMutation from "../../hooks/useCart";
+import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
 
 const contentStyle: React.CSSProperties = {
   height: "530px",
@@ -13,7 +15,14 @@ const contentStyle: React.CSSProperties = {
 };
 
 export default function Home() {
+  const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const [product, setProduct] = useState<IProduct[]>([]);
+  const { mutate } = useCartMutation({
+    action: "ADD",
+    onSuccess: () => {
+      message.success("Đã thêm SP vào giỏ hàng");
+    },
+  });
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -27,6 +36,17 @@ export default function Home() {
 
     fetchProducts();
   }, []);
+
+  const onAddCart = (productData: IProduct) => {
+    if (!isLogged) {
+      return message.info("Vui lòng đăng nhập tài khoản!");
+    }
+
+    mutate({
+      productId: productData._id,
+      quantity: 1,
+    });
+  };
 
   if (!product) return null;
 
@@ -217,7 +237,10 @@ export default function Home() {
                                       </a>
                                     </div>
                                     <div className="cart-hover">
-                                      <button className="btn btn-cart">
+                                      <button
+                                        className="btn btn-cart"
+                                        onClick={() => onAddCart(p)}
+                                      >
                                         Thêm vào giỏ hàng
                                       </button>
                                     </div>
