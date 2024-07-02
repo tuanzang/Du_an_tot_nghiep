@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import ClientRouter from "./routers/ClientRouter";
 import AdminRouter from "./routers/AdminRouter";
 import NotFound404 from "./routers/NotFound404";
-import AdminLogin from "./pages/admin/login/AdminLogin";
 import PrivateRouter from "./components/PrivateRouter";
 
 export default function App() {
@@ -19,7 +18,6 @@ export default function App() {
             </PrivateRouter>
           }
         />
-        <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="*" element={<NotFound404 />} />
       </Routes>
     </div>

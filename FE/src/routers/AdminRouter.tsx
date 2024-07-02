@@ -10,8 +10,8 @@ import CategoryAdd from "../pages/admin/category/CategoryAdd";
 import CategoryEdit from "../pages/admin/category/CategoryEdit";
 import ProductDetailAndEdit from "../pages/admin/product/ProductDetailAndEdit";
 import BillDetail from "../pages/admin/bill/BillDetail";
-import ProductAdd from "../pages/admin/product/productAdd";
 import Users from "../pages/admin/users/Users";
+import ProductAdd from "../pages/admin/product/ProductAdd";
 
 export default function AdminRouter() {
   return (
