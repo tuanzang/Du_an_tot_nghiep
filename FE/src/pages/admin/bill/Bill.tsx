@@ -1,9 +1,15 @@
-import React, { useState } from "react";
-import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Card, Col, Modal, Row, Table, Tabs } from "antd";
-import Scanner from "./Scanner";
-
-import { DatePicker, Button, Input } from "antd";
+import { useState } from "react";
+import {
+  DatePicker,
+  Button,
+  Input,
+  Card,
+  Col,
+  Row,
+  Table,
+  Tabs,
+  Modal,
+} from "antd";
 import {
   SearchOutlined,
   PlusSquareOutlined,
@@ -12,55 +18,64 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import TabPane from "antd/es/tabs/TabPane";
-import { statusHoaDon } from "../../../services/constants/statusHoaDon";
-import { formatCurrency } from "../../../services/common/formatCurrency ";
+import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
+import Scanner from "./Scanner";
 import { Link } from "react-router-dom";
+import formatCurrency from "../../../services/common/formatCurrency";
+import statusHoaDon from "../../../services/constants/statusHoaDon";
 
 const { RangePicker } = DatePicker;
 
+interface BillItem {
+  key: string;
+  img: string;
+  name: string;
+  quantity: number;
+  price: number;
+  size: number;
+}
+
 export default function Bill() {
-  const scanQr = () => {};
   const [qrScannerVisible, setQrScannerVisible] = useState(false);
+  const [valueTabHD, setValueTabHD] = useState<string>("all");
 
-  const [valueTabHD, setValueTabHD] = React.useState("all");
-  const listSttHD = [0, 1, 2, 3, 4, 5, 6, 7];
-
-  const handleChangeTab = (event, newValue) => {
+  const scanQr = () => {};
+  const handleChangeTab = (newValue: string) => {
     setValueTabHD(newValue);
   };
 
-  const listBestSeller = [
+  const listBestSeller: BillItem[] = [
     {
       key: "1",
       img: "../src/assets/image/product/product-1.jpg",
       name: "p1",
-      quantity: "1",
-      price: "1",
-      size: "1",
+      quantity: 1,
+      price: 1,
+      size: 1,
     },
     {
       key: "2",
       img: "../src/assets/image/product/product-2.jpg",
       name: "p2",
-      quantity: "2",
-      price: "2",
-      size: "2",
+      quantity: 2,
+      price: 2,
+      size: 2,
     },
     {
       key: "3",
       img: "../src/assets/image/product/product-3.jpg",
       name: "p3",
-      quantity: "3",
-      price: "3",
-      size: "3",
+      quantity: 3,
+      price: 3,
+      size: 3,
     },
     {
       key: "4",
       img: "../src/assets/image/product/product-3.jpg",
       name: "p3",
-      quantity: "3",
-      price: "3",
-      size: "3",
+      quantity: 3,
+      price: 3,
+      size: 3,
     },
   ];
 
@@ -70,7 +85,7 @@ export default function Bill() {
       dataIndex: "img",
       key: "img",
       width: "20%",
-      render: (text) => (
+      render: (text: string) => (
         <img style={{ height: "70px" }} src={text} alt="error" />
       ),
     },
@@ -84,43 +99,42 @@ export default function Bill() {
       title: "Số lượng",
       dataIndex: "quantity",
       key: "quantity",
-      align: "center",
+      align: "center" as const,
       width: "10%",
     },
     {
       title: "Giá tiền",
       dataIndex: "price",
       key: "price",
-      align: "center",
+      align: "center" as const,
       width: "30%",
-      render: (text) => formatCurrency(text),
+      render: (text: string) => formatCurrency({ money: text }),
     },
     {
       title: "Kích cỡ",
       dataIndex: "size",
       key: "size",
-      align: "center",
+      align: "center" as const,
       width: "10%",
     },
     {
       title: "Hành động",
-      dataIndex: "key",
-      key: "action",
-      align: "center",
+      align: "center" as const,
       width: "10%",
-      render: (key) => (
-        <Link to={`/admin/bill/detail/${key}`}>
+      render: (bill: BillItem) => (
+        <Link to={`/admin/bill/detail/${bill?.key}`}>
           <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
         </Link>
       ),
     },
   ];
 
+  const listSttHD = [0, 1, 2, 3, 4, 5, 6, 7];
   return (
     <div>
-      <BreadcrumbsCustom nameHere={"Đơn hàng"} />
+      <BreadcrumbsCustom listLink={[]} nameHere={"Đơn hàng"} />
       <Modal
-        open={qrScannerVisible}
+        visible={qrScannerVisible}
         onCancel={() => setQrScannerVisible(false)}
         footer={null}
       >
@@ -128,6 +142,7 @@ export default function Bill() {
           style={{
             top: "50%",
             left: "50%",
+            transform: "translate(-50%, -50%)",
             boxShadow: "0 0 24px rgba(0, 0, 0, 0.2)",
             padding: 16,
           }}
@@ -135,7 +150,6 @@ export default function Bill() {
           <Scanner handleScan={scanQr} setOpen={setQrScannerVisible} />
         </div>
       </Modal>
-      {/* filter */}
       <Card bordered={false}>
         <Row gutter={16}>
           <Col span={12}>
@@ -194,7 +208,7 @@ export default function Bill() {
             <span>Thời gian: </span>
             <RangePicker
               format="DD-MM-YYYY"
-              onChange={(_, value) => console.log(value)}
+              onChange={(_, dateStrings) => console.log(dateStrings)}
               placeholder={["Từ ngày", "Đến ngày"]}
               style={{
                 borderColor: "#c29957",
@@ -218,7 +232,7 @@ export default function Bill() {
         <Tabs activeKey={valueTabHD} onChange={handleChangeTab}>
           <TabPane tab="Tất cả" key="all"></TabPane>
           {listSttHD.map((row) => (
-            <TabPane tab={statusHoaDon(row)} key={row}></TabPane>
+            <TabPane tab={statusHoaDon({ status: row })} key={row}></TabPane>
           ))}
         </Tabs>
         <Table dataSource={listBestSeller} columns={columns} />

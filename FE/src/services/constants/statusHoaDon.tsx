@@ -1,4 +1,8 @@
-export const statusHoaDon = (status) => {
+type Props = {
+  status: number;
+};
+
+export default function statusHoaDon({ status }: Props) {
   switch (status) {
     case 0:
       return "Đã hủy";
@@ -20,4 +24,4 @@ export const statusHoaDon = (status) => {
       console.error("Trạng thái hóa đơn không hợp lệ");
       break;
   }
-};
+}

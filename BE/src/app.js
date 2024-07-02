@@ -2,7 +2,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import morgan from "morgan";
-import router from "./routes";
+import router from "./routes/index.js";
+// import authRouter from "./routes/authRouter";
 import mongoose from "mongoose";
 
 const app = express();
@@ -13,19 +14,19 @@ app.use(express.json());
 app.use(cors());
 
 // connect db
-mongoose 
-    .connect(process.env.DB_URI)
-    .then(() => {
-        console.log("Connected to db")
-    })
-    .catch ((err) => {
-        console.log("Connected db failed")
-    });
+mongoose
+  .connect(process.env.DB_URI)
+  .then(() => {
+    console.log("Connected to db");
+  })
+  .catch((err) => {
+    console.log("Connected db failed");
+  });
 // routers
-app.use("/api", router)
+app.use("/api", router);
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+  console.log(`Example app listening on port ${port}`);
 });
 
 export const viteNodeApp = app;

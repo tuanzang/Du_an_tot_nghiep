@@ -1,8 +1,12 @@
 import { Modal } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
-// import React from "react";
 
-export default function confirmStatus(title: string, text: string) {
+type Props = {
+  title: string;
+  text: string;
+};
+
+export default function confirmStatus({ title, text }: Props) {
   return new Promise((resolve, reject) => {
     Modal.confirm({
       title: title,

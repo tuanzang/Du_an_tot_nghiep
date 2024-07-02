@@ -1,24 +1,22 @@
-import type { FormProps } from "antd";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { Button, Form, Input, Select } from "antd";
-import { IProduct } from "../../../interface/Products";
-import { useEffect, useState } from "react";
-import { ICategory } from "../../../interface/Categories";
-import { toast } from "react-toastify";
 
-const ProductAdd = () =>   {
-  const navigate = useNavigate();
+import type { FormProps } from 'antd';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { Button, Form, Input, Select } from 'antd';
+import { IProduct } from '../../../interface/Products';
+import { useEffect, useState } from 'react';
+import { ICategory } from '../../../interface/Categories';
 
-  const [cates, setCates] = useState<ICategory[]>([]);
 
+const ProductAdd = () => {
+  const navigate = useNavigate()
+  
+  const [cates, setCates] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3001/api/categories"
-        );
-        setCates(response.data?.data || []);
+        const response = await axios.get("http://localhost:3001/api/categories");
+        setCates(response.data?.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -26,25 +24,37 @@ const ProductAdd = () =>   {
 
     fetchData();
   }, []);
+  const dataCates = cates.map((item: ICategory) => {
+    
+    return {
+      value: item._id, label: item.loai
+    }
+  })
 
-  const dataCates = cates.map((item: ICategory) => ({
-    value: item._id,
-    label: item.loai,
-  }));
-
-  const onFinish: FormProps<IProduct>["onFinish"] = async (values) => {
-    try {
+  // const onSubmit: SubmitHandler<IProduct> = async (data) => {
+  //   try {
+  //     await axios.put(`http://localhost:3001/api/products/${id}`, data);
+  //     alert('Success')
+  //     navigate("/admin/product")
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // }
+  const onFinish: FormProps<IProduct>['onFinish'] = async (values) => {
+      try {
       await axios.post(`http://localhost:3001/api/products/add`, values);
-      toast.success("Thêm sản phẩm thành công");
+      alert('Add product success')
       console.log(values);
-      navigate("/admin/product");
+      
+      navigate("/admin/product")
     } catch (err) {
       console.log(err);
     }
   };
 
-  const onFinishFailed: FormProps<IProduct>["onFinishFailed"] = (errorInfo) => {
-    console.log("Failed:", errorInfo);
+  
+  const onFinishFailed: FormProps<IProduct>['onFinishFailed'] = (errorInfo) => {
+    console.log('Failed:', errorInfo);
   };
 
   return (
@@ -57,55 +67,49 @@ const ProductAdd = () =>   {
       onFinishFailed={onFinishFailed}
       autoComplete="off"
     >
-      <Form.Item
+      <Form.Item<IProduct>
         label="Tên sản phẩm"
         name="name"
-        rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}
+      >
+        <Input type='text' />
+      </Form.Item>
+      <Form.Item<IProduct>
+        label="Giá"
+        name="price"
       >
         <Input />
       </Form.Item>
-      <Form.Item
-        label="Giá"
-        name="price"
-        rules={[{ required: true, message: "Vui lòng nhập giá sản phẩm!" }]}
-      >
-        <Input type="number" />
-      </Form.Item>
-      <Form.Item
+      <Form.Item<IProduct>
         label="Danh mục"
         name="categoryId"
-        rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
       >
         <Select
-          placeholder="Chọn danh mục"
-          style={{ width: "100%" }}
+        
+          defaultValue="Chọn danh mục"
+          style={{
+            width: 150,
+          }}
+
           options={dataCates}
         />
       </Form.Item>
-      <Form.Item
+      <Form.Item<IProduct>
         label="Số lượng"
         name="quantity"
-        rules={[
-          { required: true, message: "Vui lòng nhập số lượng sản phẩm!" },
-        ]}
-      >
-        <Input type="number" />
-      </Form.Item>
-      <Form.Item
-        label="Ảnh"
-        name="image"
-        rules={[
-          { required: true, message: "Vui lòng nhập đường dẫn ảnh sản phẩm!" },
-        ]}
       >
         <Input />
       </Form.Item>
-      <Form.Item
+      <Form.Item<IProduct>
+        label="Ảnh"
+        name="image"
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item<IProduct>
         label="Mô tả"
         name="description"
-        rules={[{ required: true, message: "Vui lòng nhập mô tả sản phẩm!" }]}
       >
-        <Input.TextArea rows={4} />
+        <Input />
       </Form.Item>
       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
         <Button type="primary" htmlType="submit">

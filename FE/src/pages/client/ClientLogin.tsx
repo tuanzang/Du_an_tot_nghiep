@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Form,
   Input,
@@ -10,84 +10,146 @@ import {
   Card,
   message,
 } from "antd";
-import {
-  EyeInvisibleOutlined,
-  EyeOutlined,
-  LockOutlined,
-  MailOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { Link, Navigate } from "react-router-dom";
+import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
+import AuthApi, { ISignInBody } from "../../config/authApi";
+import {
+  ACCESS_TOKEN_STORAGE_KEY,
+  USER_INFO_STORAGE_KEY,
+} from "../../services/constants";
 
-const InputForm = ({ label, Icon, id, isPass, defaultValue, chagneValue }) => {
-  const [showPass, setShowPass] = useState(false);
-
-  return (
-    <Form.Item
-      label={label}
-      htmlFor={id}
-      style={{ width: "100%", marginBottom: "20px" }}
-      labelCol={{ span: 24 }}
-      wrapperCol={{ span: 24 }}
-    >
-      <Input
-        prefix={<Icon style={{ color: "black" }} />}
-        suffix={
-          isPass ? (
-            showPass ? (
-              <EyeInvisibleOutlined
-                onClick={() => {
-                  setShowPass(!showPass);
-                }}
-                style={{ color: "black" }}
-              />
-            ) : (
-              <EyeOutlined
-                onClick={() => {
-                  setShowPass(!showPass);
-                }}
-                style={{ color: "black" }}
-              />
-            )
-          ) : null
-        }
-        onChange={(e) => {
-          chagneValue(e.target.value);
-        }}
-        defaultValue={defaultValue}
-        id={id}
-        type={isPass && !showPass ? "password" : "text"}
-        style={{ fontFamily: "Playfair", width: "100%" }}
-      />
-    </Form.Item>
-  );
-};
+interface IFormData {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
 
 const RegisterPanel = () => {
+  const [form] = Form.useForm();
+  const navigate = useNavigate();
+
+  const selectPassword = Form.useWatch("password", form);
+
+  const onSubmit = async (formData: IFormData) => {
+    try {
+      await AuthApi.signUp(formData);
+      message.success("Đăng ký thành công, vui lòng đăng nhập");
+      navigate("/login");
+    } catch (error: any) {
+      message.info(
+        error?.response?.data?.messages || "Có lỗi xảy ra, vui lòng thử lại"
+      );
+      console.log(error);
+    }
+  };
+
   return (
-    <Form>
-      <InputForm label="Họ và tên *" Icon={UserOutlined} id="reg-input-user" />
-      <InputForm
-        label="Địa chỉ email *"
-        Icon={MailOutlined}
-        id="reg-input-email"
-        type="email"
-      />
-      <InputForm
-        label="Mật khẩu *"
-        Icon={LockOutlined}
-        id="reg-input-pass"
-        isPass={true}
-      />
-      <InputForm
-        isPass={true}
-        label="Nhập lại mật khẩu *"
-        Icon={LockOutlined}
-        id="reg-input-repass"
-      />
-      <Button type="primary" style={{ marginRight: "15px" }}>
+    <Form onFinish={onSubmit} form={form}>
+      <Form.Item
+        label="Họ và tên"
+        style={{ width: "100%", marginBottom: "20px" }}
+        labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }}
+        rules={[
+          {
+            required: true,
+            message: "Vui lòng nhập họ tên",
+          },
+          {
+            min: 3,
+            message: "Vui lòng nhập tối thiểu 3 ký tự",
+          },
+          {
+            max: 30,
+            message: "Tên dài tối đa 30 ký tự",
+          },
+        ]}
+        name="name"
+      >
+        <Input
+          prefix={<UserOutlined color="black" />}
+          style={{ fontFamily: "Playfair", width: "100%" }}
+          placeholder="Nhập họ tên"
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Email"
+        style={{ width: "100%", marginBottom: "20px" }}
+        labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }}
+        name="email"
+        rules={[
+          {
+            required: true,
+            message: "Vui lòng nhập email",
+          },
+          {
+            pattern: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+            message: "Email không đúng định dạng",
+          },
+        ]}
+      >
+        <Input
+          prefix={<MailOutlined color="black" />}
+          placeholder="Nhập email"
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Mật khẩu"
+        style={{ width: "100%", marginBottom: "20px" }}
+        labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }}
+        rules={[
+          {
+            required: true,
+            message: "Vui lòng nhập mật khẩu",
+          },
+          {
+            min: 6,
+            message: "Mật khẩu tối thiểu 6 ký tự",
+          },
+        ]}
+        name="password"
+      >
+        <Input.Password
+          prefix={<LockOutlined color="black" />}
+          placeholder="Nhập mật khẩu"
+        />
+      </Form.Item>
+
+      <Form.Item
+        dependencies={["password"]}
+        label="Xác nhận mật khẩu"
+        style={{ width: "100%", marginBottom: "20px" }}
+        labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }}
+        rules={[
+          {
+            required: true,
+            message: "Vui lòng nhập lại mật khẩu",
+          },
+          {
+            validator: (_, value) => {
+              if (value && value !== selectPassword) {
+                return Promise.reject("Mật khẩu xác nhận không chính xác");
+              }
+              return Promise.resolve();
+            },
+          },
+        ]}
+        name="confirmPassword"
+      >
+        <Input.Password
+          prefix={<LockOutlined color="black" />}
+          placeholder="Nhập lại mật khẩu"
+        />
+      </Form.Item>
+
+      <Button type="primary" htmlType="submit" style={{ marginRight: "15px" }}>
         Đăng ký
       </Button>
     </Form>
@@ -95,40 +157,47 @@ const RegisterPanel = () => {
 };
 
 const LoginPanel = () => {
-  const [user, setUser] = useState({
-    email: "lyntph25593@fpt.edu.vn",
-    password: "123456",
-  });
+  const onSubmit = async (formData: ISignInBody) => {
+    try {
+      const { data } = await AuthApi.signIn(formData);
+      localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data?.token);
+      localStorage.setItem(USER_INFO_STORAGE_KEY, JSON.stringify(data?.user));
 
-  const loginGoogle = (decoded) => {
-    console.log(decoded);
+      if (data?.user?.role === "admin") {
+        window.location.href = "/admin";
+      } else {
+        window.location.href = "/";
+      }
+    } catch (error: any) {
+      message.error(
+        error?.response?.data?.messages || "Có lỗi xảy ra, vui lòng thử lại"
+      );
+      console.log(error);
+    }
   };
 
   return (
-    <Form>
+    <Form onFinish={onSubmit}>
       <Form.Item
         name="email"
         rules={[
           { required: true, message: "Vui lòng nhập địa chỉ email của bạn!" },
+          {
+            pattern: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+            message: "Email không đúng định dạng",
+          },
         ]}
-        initialValue={user.email}
       >
         <Input
           prefix={<UserOutlined />}
           placeholder="Địa chỉ email của bạn *"
-          onChange={(e) => setUser({ ...user, email: e.target.value })}
         />
       </Form.Item>
       <Form.Item
         name="password"
         rules={[{ required: true, message: "Vui lòng nhập mật khẩu của bạn!" }]}
-        initialValue={user.password}
       >
-        <Input.Password
-          prefix={<LockOutlined />}
-          placeholder="Mật khẩu *"
-          onChange={(e) => setUser({ ...user, password: e.target.value })}
-        />
+        <Input.Password prefix={<LockOutlined />} placeholder="Mật khẩu *" />
       </Form.Item>
 
       <Form.Item>
@@ -138,10 +207,7 @@ const LoginPanel = () => {
           </Button>
           <GoogleOAuthProvider clientId="520968091112-fcbec2sb49beti8ugc2rmqngkdobq4j7.apps.googleusercontent.com">
             <GoogleLogin
-              onSuccess={(credentialResponse) => {
-                const decoded = jwtDecode(credentialResponse.credential);
-                loginGoogle(decoded);
-              }}
+              onSuccess={(e) => console.log(e)}
               onError={() => {
                 message.error("Đăng nhập Google không thành công!");
               }}
@@ -159,21 +225,18 @@ const LoginPanel = () => {
 const { Content } = Layout;
 const { TabPane } = Tabs;
 export default function ClientLogin() {
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(";").shift();
+  const navigate = useNavigate();
+
+  const params = useParams();
+  const activeTab = params["*"] === "login" ? "0" : "1";
+
+  const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+
+  const onTabChange = (tab: string) => {
+    navigate(tab === "0" ? "/login" : "/register");
   };
 
-  const token = getCookie("ClientToken");
-
-  const [value, setValue] = useState(0);
-
-  const handleChange = (key) => {
-    setValue(Number(key));
-  };
-
-  return token ? (
+  return isLogged ? (
     <Navigate to="/home" />
   ) : (
     <Layout
@@ -184,7 +247,7 @@ export default function ClientLogin() {
     >
       <Content style={{ maxWidth: "600px", width: "100%", padding: "20px" }}>
         <Card bordered={false} style={{ padding: "20px" }}>
-          <Tabs activeKey={String(value)} onChange={handleChange}>
+          <Tabs activeKey={activeTab} onChange={onTabChange}>
             <TabPane
               tab={
                 <Typography.Text
@@ -219,7 +282,7 @@ export default function ClientLogin() {
               }
               key="1"
             >
-              <RegisterPanel setValue={setValue} />
+              <RegisterPanel />
             </TabPane>
           </Tabs>
         </Card>

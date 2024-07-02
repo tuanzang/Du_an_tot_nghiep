@@ -1,153 +1,296 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  Button,
+  InputNumber,
+  Popconfirm,
+  Table,
+  Typography,
+  // notification,
+} from "antd";
+import { useMemo } from "react";
+// import confirmStatus from "../../components/confirmSatus";
+import { Link } from "react-router-dom";
+import { ArrowLeftOutlined } from "@ant-design/icons";
+import useCartMutation, { useMyCartQuery } from "../../hooks/useCart";
+import { formatPrice } from "../../services/common/formatCurrency";
 
-const CartPage: React.FC = () => {
-    // Mock product data
-    const products = [
-        {
-            id: 1,
-            name: 'Diamond Exclusive Ornament',
-            price: 295.00,
-            quantity: 1,
-            image: 'https://cdn.pnj.io/images/detailed/113/SBXMXMW000055-SMXMXMW000038-SNXMXMW000053-SVXMXMW000013.png'
-        },
-        {
-            id: 2,
-            name: 'Perfect Diamond Jewelry',
-            price: 275.00,
-            quantity: 2,
-            image: 'https://cdn.pnj.io/images/detailed/137/bo-trang-suc-bac-dinh-da-pnjsilver-hoa-cua-me-00063-00122.png'
-        },
-        {
-            id: 3,
-            name: 'Handmade Golden Necklace',
-            price: 295.00,
-            quantity: 1,
-            image: 'https://esme.vn/wp-content/uploads/2024/02/025142-18d8366f-29c9-4b55-9f76-9530e7c163ec-1.jpg'
-        },
-        {
-            id: 4,
-            name: 'Diamond Exclusive Ornament',
-            price: 110.00,
-            quantity: 3,
-            image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqUWpqiqN6W6flokBYWxTLMlQmfXyg6AplMA&s'
-        }
-    ];
+const { Text } = Typography;
 
-    // Calculate totals
-    const subTotal = products.reduce((acc, product) => acc + (product.price * product.quantity), 0);
-    const shipping = 70;
-    const total = subTotal + shipping;
+export default function Cart() {
+  const { data } = useMyCartQuery();
+  const { mutate: onUpdateQuantity } = useCartMutation({
+    action: "UPDATE",
+  });
+  const { mutate: onDeleteProduct } = useCartMutation({
+    action: "DELETE",
+  });
+  // const [productSelect, setProductSelect] = useState([]);
+  // const [dataCart, setDataCart] = useState({ label: "Tổng tiền", value: 0 });
 
-    return (
-        <main>
-            {/* breadcrumb area start */}
-            <div className="breadcrumb-area">
-                <div className="container">
-                    <div className="row">
-                        <div className="col-12">
-                            <div className="breadcrumb-wrap">
-                                <nav aria-label="breadcrumb">
-                                    <ul className="breadcrumb">
-                                        <li className="breadcrumb-item"><a href="index.html"><i className="fa fa-home"></i></a></li>
-                                        <li className="breadcrumb-item"><a href="shop.html">shop</a></li>
-                                        <li className="breadcrumb-item active" aria-current="page">cart</li>
-                                    </ul>
-                                </nav>
-                            </div>
-                        </div>
-                    </div>
+  // const onChangeSL = (cart, num) => {
+  //   const soluong = cart.soLuong + num;
+
+  //   const updatedProduct = {
+  //     ...cart,
+  //     soLuong: soluong,
+  //   };
+
+  //   const updatedAmount = productSelect.reduce(
+  //     (total, item) =>
+  //       total +
+  //       (item.id === cart.id ? updatedProduct.soLuong : item.soLuong) *
+  //         item.gia,
+  //     0
+  //   );
+
+  //   if (updatedAmount > 50000000) {
+  //     notification.error({
+  //       message: "Error",
+  //       description: "Tổng số tiền sản phẩm không được vượt quá 50tr VND",
+  //     });
+  //     return;
+  //   }
+
+  //   if (soluong <= 0) {
+  //     const title = "Bạn có muốn xóa sản phẩm ra khỏi giỏ hàng không?";
+  //     const text = "";
+  //     confirmStatus(title, text).then((result) => {
+  //       if (result.isConfirmed) {
+  //         const preProductSelect = [...productSelect];
+  //         const index = preProductSelect.findIndex((e) => e.id === cart.id);
+  //         if (index !== -1) {
+  //           preProductSelect.splice(index, 1);
+  //           setProductSelect(preProductSelect);
+  //         }
+  //       }
+  //     });
+  //   } else {
+  //     const preProductSelect = [...productSelect];
+  //     const index = preProductSelect.findIndex((e) => e.id === cart.id);
+  //     if (index !== -1) {
+  //       preProductSelect[index] = updatedProduct;
+  //       setProductSelect(preProductSelect);
+  //     }
+  //   }
+  //   setDataCart({ ...dataCart, value: updatedAmount });
+  // };
+
+  // const rowSelection = {
+  //   selectedRowKeys: productSelect.map((item) => item.key),
+  //   onChange: (selectedRowKeys, selectedRows) => {
+  //     setProductSelect(selectedRows);
+  //     const updatedAmount = selectedRows.reduce(
+  //       (total, item) => total + item.quantity * item.price,
+  //       0
+  //     );
+  //     setDataCart({ ...dataCart, value: updatedAmount });
+  //   },
+  // };
+
+  // const getTitle = (number) => {
+  //   switch (number) {
+  //     case 1:
+  //       return "GOLD";
+  //     case 2:
+  //       return "SLIVER";
+  //     case 3:
+  //       return "BRONZE";
+  //     case 4:
+  //       return "DIAMOND";
+  //   }
+  // };
+
+  // const fakeHotProduct1s = [];
+  // const fakeHotProduct2s = [];
+  // for (let i = 1; i <= 4; i++) {
+  //   fakeHotProduct1s.push({
+  //     key: i,
+  //     image1: `./src/assets/image/product/product-${i}.jpg`,
+  //     image2: `./src/assets/image/product/product-${19 - i}.jpg`,
+  //     title: getTitle(i),
+  //     price: (i * 10 + 9.99).toFixed(2),
+  //     quantity: i,
+  //     category: `Category ${i}`,
+  //   });
+  //   fakeHotProduct2s.push({
+  //     key: i,
+  //     image1: `./src/assets/image/product/product-${i + 1}.jpg`,
+  //     image2: `./src/assets/image/product/product-${19 - i - 1}.jpg`,
+  //     title: getTitle(i),
+  //     price: (i * 10 + 9.99).toFixed(2),
+  //     quantity: i,
+  //     category: `Category ${i}`,
+  //   });
+  // }
+
+  const productsFormatted = useMemo(() => {
+    return data?.data?.products?.map((it) => ({
+      ...it.product,
+      ...it,
+      key: it._id,
+    }));
+  }, [data?.data]);
+
+  const handleUpdateQuantity = (productId: string, quantity: number) => {
+    onUpdateQuantity({
+      productId: productId,
+      quantity: quantity,
+    });
+  };
+
+  return (
+    <div>
+      <main>
+        {/* <!-- breadcrumb area start --> */}
+        <div className="breadcrumb-area">
+          <div className="container">
+            <div className="row">
+              <div className="col-12">
+                <div className="breadcrumb-wrap">
+                  <nav aria-label="breadcrumb">
+                    <ul className="breadcrumb">
+                      <li className="breadcrumb-item">
+                        <a href="/home">
+                          <i className="fa fa-home"></i>
+                        </a>
+                      </li>
+                      <li
+                        className="breadcrumb-item active"
+                        aria-current="page"
+                      >
+                        <a href="/cart">Giỏ hàng</a>
+                      </li>
+                    </ul>
+                  </nav>
                 </div>
+              </div>
             </div>
-            {/* breadcrumb area end */}
+          </div>
+        </div>
+        {/* <!-- breadcrumb area end --> */}
 
-            {/* cart main wrapper start */}
-            <div className="cart-main-wrapper section-padding">
-                <div className="container">
-                    <div className="section-bg-color">
-                        <div className="row">
-                            <div className="col-lg-12">
-                                {/* Cart Table Area */}
-                                <div className="cart-table table-responsive">
-                                    <table className="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th className="pro-thumbnail">Thumbnail</th>
-                                                <th className="pro-title">Product</th>
-                                                <th className="pro-price">Price</th>
-                                                <th className="pro-quantity">Quantity</th>
-                                                <th className="pro-subtotal">Total</th>
-                                                <th className="pro-remove">Remove</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {products.map(product => (
-                                                <tr key={product.id}>
-                                                    <td className="pro-thumbnail"><a href="#"><img className="img-fluid" src={product.image} alt="Product" /></a></td>
-                                                    <td className="pro-title"><a href="#">{product.name}</a></td>
-                                                    <td className="pro-price"><span>${product.price.toFixed(2)}</span></td>
-                                                    <td className="pro-quantity">
-                                                        <div className="pro-qty"><input type="text" defaultValue={product.quantity.toString()} /></div>
-                                                    </td>
-                                                    <td className="pro-subtotal"><span>${(product.price * product.quantity).toFixed(2)}</span></td>
-                                                    <td className="pro-remove"><a href="#"><i className="fa fa-trash-o"></i></a></td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {/* Cart Update Option */}
-                                <div className="cart-update-option d-block d-md-flex justify-content-between">
-                                    <div className="apply-coupon-wrapper">
-                                        <form action="#" method="post" className="d-block d-md-flex">
-                                            <input type="text" placeholder="Enter Your Coupon Code" required />
-                                            <button className="btn btn-sqr">Apply Coupon</button>
-                                        </form>
-                                    </div>
-                                    <div className="cart-update">
-                                        <a href="#" className="btn btn-sqr">Update Cart</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-lg-5 ml-auto">
-                                {/* Cart Calculation Area */}
-                                <div className="cart-calculator-wrapper">
-                                    <div className="cart-calculate-items">
-                                        <h6>Cart Totals</h6>
-                                        <div className="table-responsive">
-                                            <table className="table">
-                                                <tbody>
-                                                    <tr>
-                                                        <td>Sub Total</td>
-                                                        <td>${subTotal.toFixed(2)}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Shipping</td>
-                                                        <td>${shipping.toFixed(2)}</td>
-                                                    </tr>
-                                                    <tr className="total">
-                                                        <td>Total</td>
-                                                        <td className="total-amount">${total.toFixed(2)}</td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    <Link to={{
-                                        pathname: "/payment",
-                                        state: { products, subTotal, shipping, total }
-                                    }} className="btn btn-sqr d-block">Proceed to Payment</Link>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <div
+          className="shop-main-wrapper section-padding"
+          style={{ paddingTop: "30px" }}
+        >
+          <div className="container">
+            <div className="row">
+              <div className="col-lg-8">
+                <div className="sidebar-single">
+                  <h5 className="sidebar-title">
+                    <span>Sản phẩm của bạn</span>
+                  </h5>
+                  <Text
+                    style={{
+                      fontSize: "17px",
+                      marginLeft: "12px",
+                      marginBottom: "12px",
+                      marginTop: "8px",
+                    }}
+                  >
+                    Bạn đang có{" "}
+                    <Text strong>
+                      {data?.data?.products?.length || 0} sản phẩm
+                    </Text>{" "}
+                    trong giỏ hàng
+                  </Text>
+                  <div className="row">
+                    <Table
+                      dataSource={productsFormatted}
+                      rowKey="key"
+                      pagination={false}
+                      className="cart-table"
+                      // rowSelection={rowSelection}
+                    >
+                      <Table.Column
+                        title="Sản phẩm"
+                        dataIndex="name"
+                        key="name"
+                      />
+                      <Table.Column
+                        title="Giá"
+                        dataIndex="price"
+                        key="price"
+                        render={(val) => formatPrice(val)}
+                      />
+                      <Table.Column
+                        title="Số lượng"
+                        dataIndex="quantity"
+                        key="quantity"
+                        render={(value, record: any) => (
+                          <InputNumber
+                            min={1}
+                            value={value}
+                            onStep={(quantity) =>
+                              handleUpdateQuantity(record.product._id, quantity)
+                            }
+                          />
+                        )}
+                      />
+                      <Table.Column
+                        title="Thành tiền"
+                        dataIndex="totalPrice"
+                        key="totalPrice"
+                        render={(_, record: any) =>
+                          formatPrice(record.quantity * record.price)
+                        }
+                      />
+                      <Table.Column
+                        title="Hành động"
+                        key="action"
+                        render={(_, record: any) => (
+                          <Popconfirm
+                            title="Bạn có muốn xóa sản phẩm này khỏi giỏ hàng không?"
+                            okText="Yes"
+                            cancelText="No"
+                            onConfirm={() =>
+                              onDeleteProduct(record.product._id)
+                            }
+                          >
+                            <Button danger>Xóa</Button>
+                          </Popconfirm>
+                        )}
+                      />
+                    </Table>
+                  </div>
+                  <div style={{ marginTop: "20px" }}>
+                    <Link to="/product">
+                      <Button icon={<ArrowLeftOutlined />}>
+                        Tiếp tục mua hàng
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
+              </div>
+              <div className="col-lg-4">
+                <div className="sidebar-single">
+                  <h5 className="sidebar-title">
+                    <span>Thông tin đơn hàng</span>
+                  </h5>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "10px 20px",
+                      borderTop: "1px solid gray",
+                    }}
+                  >
+                    <span>Tổng tiền</span>
+                    <Text style={{ fontWeight: 800, color: "red" }}>
+                      {formatPrice(data?.data?.totalPrice)}
+                    </Text>
+                  </div>
+                  <Link to="/checkout">
+                    <Button type="primary" style={{ float: "right" }}>
+                      Thanh toán
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </div>
-            {/* cart main wrapper end */}
-        </main>
-    );
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 }
-
-export default CartPage;
