@@ -12,7 +12,7 @@ import ProductDetailAndEdit from "../pages/admin/product/ProductDetailAndEdit";
 import BillDetail from "../pages/admin/bill/BillDetail";
 
 import Users from "../pages/admin/users/Users";
-import ProductAdd from "../pages/admin/product/ProductAdd";
+import ProductAdd from "../pages/admin/product/productAdd";
 
 export default function AdminRouter() {
   return (
