@@ -18,6 +18,8 @@ export const checkAuth = async (req, res, next) => {
     if (user.role !== "admin") {
       return res.status(401).json({ error: "Unauthorized" });
     }
+
+    req.profile = user;
     next();
   } catch (error) {
     console.log(error);

@@ -1,15 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ACCESS_TOKEN_STORAGE_KEY, USER_INFO_STORAGE_KEY } from "../../services/constants";
+import {
+  ACCESS_TOKEN_STORAGE_KEY,
+  USER_INFO_STORAGE_KEY,
+} from "../../services/constants";
+import { useMyCartQuery } from "../../hooks/useCart";
 
 const Header = () => {
   const [openMenuCart, setOpenMenuCart] = useState(false);
+  const { data } = useMyCartQuery();
+
   const handleMenuCartClick = () => {
     setOpenMenuCart(!openMenuCart);
   };
 
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
-  const userInfo = JSON.parse(localStorage.getItem(USER_INFO_STORAGE_KEY) as string) || '';
+  const userInfo =
+    JSON.parse(localStorage.getItem(USER_INFO_STORAGE_KEY) as string) || "";
 
   return (
     <div>
@@ -53,12 +60,12 @@ const Header = () => {
                 {/* start logo area */}
                 <div className="col-lg-2">
                   <div className="logo" style={{ width: "50%" }}>
-                    <a href="/home">
+                    <Link to="/home">
                       <img
                         src="../../src/assets/image/logo/logo.png"
                         alt="brand logo"
                       />
-                    </a>
+                    </Link>
                   </div>
                 </div>
                 {/* start logo area */}
@@ -143,14 +150,16 @@ const Header = () => {
                           </a>
                         </li>
                         <li>
-                          <a
-                            href="/cart"
+                          <Link
+                            to="/cart"
                             className="minicart-btn"
                             onClick={() => handleMenuCartClick()}
                           >
                             <i className="pe-7s-shopbag"></i>
-                            <div className="notification">2</div>
-                          </a>
+                            <div className="notification">
+                              {data?.data?.products?.length || 0}
+                            </div>
+                          </Link>
                         </li>
                       </ul>
                     </div>
