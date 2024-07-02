@@ -1134,7 +1134,7 @@ textarea:focus {
     margin-left: 14px;
   }
 }
-.header-configure-area ul li a {
+.header-configure-area ul li a, .header-configure-area .user-info i {
   font-size: 26px;
   line-height: 1;
   color: #222222;
@@ -1201,6 +1201,13 @@ textarea:focus {
   -webkit-transform: none;
   -ms-transform: none;
   transform: none;
+}
+
+.header-configure-area .user-info {
+  display: flex;
+  column-gap: 4px;
+  align-items: center;
+  cursor: pointer;
 }
 
 /*----------- header mini cart area end -----------*/

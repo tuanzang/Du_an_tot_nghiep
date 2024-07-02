@@ -1,123 +1,143 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Button,
   InputNumber,
   Popconfirm,
   Table,
   Typography,
-  notification,
+  // notification,
 } from "antd";
-import React, { useState } from "react";
-// import { ArrowLeftOutlined, ShoppingCartOutlined } from "@ant-design/icons";
-// import { Link } from "react-router-dom";
+import { useMemo } from "react";
 // import confirmStatus from "../../components/confirmSatus";
-import confirmStatus from "../../components/confirmSatus";
 import { Link } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
-import formatCurrency from "../../services/common/formatCurrency";
+import useCartMutation, { useMyCartQuery } from "../../hooks/useCart";
+import { formatPrice } from "../../services/common/formatCurrency";
 
 const { Text } = Typography;
 
 export default function Cart() {
-  const [productSelect, setProductSelect] = useState([]);
-  const [dataCart, setDataCart] = useState({ label: "Tổng tiền", value: 0 });
+  const { data } = useMyCartQuery();
+  const { mutate: onUpdateQuantity } = useCartMutation({
+    action: "UPDATE",
+  });
+  const { mutate: onDeleteProduct } = useCartMutation({
+    action: "DELETE",
+  });
+  // const [productSelect, setProductSelect] = useState([]);
+  // const [dataCart, setDataCart] = useState({ label: "Tổng tiền", value: 0 });
 
-  const onChangeSL = (cart, num) => {
-    const soluong = cart.soLuong + num;
+  // const onChangeSL = (cart, num) => {
+  //   const soluong = cart.soLuong + num;
 
-    const updatedProduct = {
-      ...cart,
-      soLuong: soluong,
-    };
+  //   const updatedProduct = {
+  //     ...cart,
+  //     soLuong: soluong,
+  //   };
 
-    const updatedAmount = productSelect.reduce(
-      (total, item) =>
-        total +
-        (item.id === cart.id ? updatedProduct.soLuong : item.soLuong) *
-          item.gia,
-      0
-    );
+  //   const updatedAmount = productSelect.reduce(
+  //     (total, item) =>
+  //       total +
+  //       (item.id === cart.id ? updatedProduct.soLuong : item.soLuong) *
+  //         item.gia,
+  //     0
+  //   );
 
-    if (updatedAmount > 50000000) {
-      notification.error({
-        message: "Error",
-        description: "Tổng số tiền sản phẩm không được vượt quá 50tr VND",
-      });
-      return;
-    }
+  //   if (updatedAmount > 50000000) {
+  //     notification.error({
+  //       message: "Error",
+  //       description: "Tổng số tiền sản phẩm không được vượt quá 50tr VND",
+  //     });
+  //     return;
+  //   }
 
-    if (soluong <= 0) {
-      const title = "Bạn có muốn xóa sản phẩm ra khỏi giỏ hàng không?";
-      const text = "";
-      confirmStatus(title, text).then((result) => {
-        if (result.isConfirmed) {
-          const preProductSelect = [...productSelect];
-          const index = preProductSelect.findIndex((e) => e.id === cart.id);
-          if (index !== -1) {
-            preProductSelect.splice(index, 1);
-            setProductSelect(preProductSelect);
-          }
-        }
-      });
-    } else {
-      const preProductSelect = [...productSelect];
-      const index = preProductSelect.findIndex((e) => e.id === cart.id);
-      if (index !== -1) {
-        preProductSelect[index] = updatedProduct;
-        setProductSelect(preProductSelect);
-      }
-    }
-    setDataCart({ ...dataCart, value: updatedAmount });
-  };
+  //   if (soluong <= 0) {
+  //     const title = "Bạn có muốn xóa sản phẩm ra khỏi giỏ hàng không?";
+  //     const text = "";
+  //     confirmStatus(title, text).then((result) => {
+  //       if (result.isConfirmed) {
+  //         const preProductSelect = [...productSelect];
+  //         const index = preProductSelect.findIndex((e) => e.id === cart.id);
+  //         if (index !== -1) {
+  //           preProductSelect.splice(index, 1);
+  //           setProductSelect(preProductSelect);
+  //         }
+  //       }
+  //     });
+  //   } else {
+  //     const preProductSelect = [...productSelect];
+  //     const index = preProductSelect.findIndex((e) => e.id === cart.id);
+  //     if (index !== -1) {
+  //       preProductSelect[index] = updatedProduct;
+  //       setProductSelect(preProductSelect);
+  //     }
+  //   }
+  //   setDataCart({ ...dataCart, value: updatedAmount });
+  // };
 
-  const rowSelection = {
-    selectedRowKeys: productSelect.map((item) => item.key),
-    onChange: (selectedRowKeys, selectedRows) => {
-      setProductSelect(selectedRows);
-      const updatedAmount = selectedRows.reduce(
-        (total, item) => total + item.quantity * item.price,
-        0
-      );
-      setDataCart({ ...dataCart, value: updatedAmount });
-    },
-  };
+  // const rowSelection = {
+  //   selectedRowKeys: productSelect.map((item) => item.key),
+  //   onChange: (selectedRowKeys, selectedRows) => {
+  //     setProductSelect(selectedRows);
+  //     const updatedAmount = selectedRows.reduce(
+  //       (total, item) => total + item.quantity * item.price,
+  //       0
+  //     );
+  //     setDataCart({ ...dataCart, value: updatedAmount });
+  //   },
+  // };
 
-  const getTitle = (number) => {
-    switch (number) {
-      case 1:
-        return "GOLD";
-      case 2:
-        return "SLIVER";
-      case 3:
-        return "BRONZE";
-      case 4:
-        return "DIAMOND";
-    }
-  };
+  // const getTitle = (number) => {
+  //   switch (number) {
+  //     case 1:
+  //       return "GOLD";
+  //     case 2:
+  //       return "SLIVER";
+  //     case 3:
+  //       return "BRONZE";
+  //     case 4:
+  //       return "DIAMOND";
+  //   }
+  // };
 
-  const fakeHotProduct1s = [];
-  const fakeHotProduct2s = [];
-  for (let i = 1; i <= 4; i++) {
-    fakeHotProduct1s.push({
-      key: i,
-      image1: `./src/assets/image/product/product-${i}.jpg`,
-      image2: `./src/assets/image/product/product-${19 - i}.jpg`,
-      title: getTitle(i),
-      price: (i * 10 + 9.99).toFixed(2),
-      quantity: i,
-      category: `Category ${i}`,
+  // const fakeHotProduct1s = [];
+  // const fakeHotProduct2s = [];
+  // for (let i = 1; i <= 4; i++) {
+  //   fakeHotProduct1s.push({
+  //     key: i,
+  //     image1: `./src/assets/image/product/product-${i}.jpg`,
+  //     image2: `./src/assets/image/product/product-${19 - i}.jpg`,
+  //     title: getTitle(i),
+  //     price: (i * 10 + 9.99).toFixed(2),
+  //     quantity: i,
+  //     category: `Category ${i}`,
+  //   });
+  //   fakeHotProduct2s.push({
+  //     key: i,
+  //     image1: `./src/assets/image/product/product-${i + 1}.jpg`,
+  //     image2: `./src/assets/image/product/product-${19 - i - 1}.jpg`,
+  //     title: getTitle(i),
+  //     price: (i * 10 + 9.99).toFixed(2),
+  //     quantity: i,
+  //     category: `Category ${i}`,
+  //   });
+  // }
+
+  const productsFormatted = useMemo(() => {
+    return data?.data?.products?.map((it) => ({
+      ...it.product,
+      ...it,
+      key: it._id,
+    }));
+  }, [data?.data]);
+
+  const handleUpdateQuantity = (productId: string, quantity: number) => {
+    onUpdateQuantity({
+      productId: productId,
+      quantity: quantity,
     });
-    fakeHotProduct2s.push({
-      key: i,
-      image1: `./src/assets/image/product/product-${i + 1}.jpg`,
-      image2: `./src/assets/image/product/product-${19 - i - 1}.jpg`,
-      title: getTitle(i),
-      price: (i * 10 + 9.99).toFixed(2),
-      quantity: i,
-      category: `Category ${i}`,
-    });
-  }
+  };
 
-  const amountProduct = fakeHotProduct1s.length;
   return (
     <div>
       <main>
@@ -168,61 +188,66 @@ export default function Cart() {
                       marginTop: "8px",
                     }}
                   >
-                    Bạn đang có <Text strong>{amountProduct} sản phẩm</Text>{" "}
+                    Bạn đang có{" "}
+                    <Text strong>
+                      {data?.data?.products?.length || 0} sản phẩm
+                    </Text>{" "}
                     trong giỏ hàng
                   </Text>
                   <div className="row">
                     <Table
-                      dataSource={fakeHotProduct1s}
+                      dataSource={productsFormatted}
                       rowKey="key"
                       pagination={false}
                       className="cart-table"
-                      rowSelection={rowSelection}
+                      // rowSelection={rowSelection}
                     >
                       <Table.Column
                         title="Sản phẩm"
-                        dataIndex="title"
-                        key="title"
+                        dataIndex="name"
+                        key="name"
                       />
                       <Table.Column
                         title="Giá"
                         dataIndex="price"
                         key="price"
-                        render={(text) => formatCurrency(text)}
+                        render={(val) => formatPrice(val)}
                       />
                       <Table.Column
                         title="Số lượng"
                         dataIndex="quantity"
                         key="quantity"
-                        render={(text, cart) => (
+                        render={(value, record: any) => (
                           <InputNumber
                             min={1}
-                            max={cart.soLuongTon}
-                            value={cart.quantity}
-                            onChange={(value) =>
-                              onChangeSL(cart, value - cart.soLuong)
+                            value={value}
+                            onStep={(quantity) =>
+                              handleUpdateQuantity(record.product._id, quantity)
                             }
                           />
                         )}
                       />
                       <Table.Column
                         title="Thành tiền"
-                        dataIndex="thanhTien"
-                        key="thanhTien"
-                        render={(text, cart) =>
-                          formatCurrency(cart.price * cart.quantity)
+                        dataIndex="totalPrice"
+                        key="totalPrice"
+                        render={(_, record: any) =>
+                          formatPrice(record.quantity * record.price)
                         }
                       />
                       <Table.Column
                         title="Hành động"
                         key="action"
-                        render={() => (
+                        render={(_, record: any) => (
                           <Popconfirm
                             title="Bạn có muốn xóa sản phẩm này khỏi giỏ hàng không?"
                             okText="Yes"
                             cancelText="No"
+                            onConfirm={() =>
+                              onDeleteProduct(record.product._id)
+                            }
                           >
-                            <Button type="danger">Xóa</Button>
+                            <Button danger>Xóa</Button>
                           </Popconfirm>
                         )}
                       />
@@ -250,18 +275,16 @@ export default function Cart() {
                       borderTop: "1px solid gray",
                     }}
                   >
-                    <span>{dataCart?.label}</span>
+                    <span>Tổng tiền</span>
                     <Text style={{ fontWeight: 800, color: "red" }}>
-                      {formatCurrency(dataCart?.value)}
+                      {formatPrice(data?.data?.totalPrice)}
                     </Text>
                   </div>
-                  <Button
-                    type="primary"
-                    style={{ float: "right" }}
-                    disabled={productSelect.length === 0}
-                  >
-                    Thanh toán
-                  </Button>
+                  <Link to="/checkout">
+                    <Button type="primary" style={{ float: "right" }}>
+                      Thanh toán
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
