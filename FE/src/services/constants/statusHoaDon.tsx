@@ -4,8 +4,7 @@ type Props = {
 
 export default function statusHoaDon({ status }: Props) {
   switch (status) {
-    case 0:
-      return "Đã hủy";
+    
     case 1:
       return "Chờ xác nhận";
     case 2:
@@ -20,6 +19,8 @@ export default function statusHoaDon({ status }: Props) {
       return "Chờ thanh toán";
     case 7:
       return "Hoàn thành";
+    case 8:
+      return "Đã hủy";
     default:
       console.error("Trạng thái hóa đơn không hợp lệ");
       break;

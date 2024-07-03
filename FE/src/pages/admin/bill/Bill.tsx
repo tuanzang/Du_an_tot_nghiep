@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DatePicker,
   Button,
@@ -23,77 +23,57 @@ import Scanner from "./Scanner";
 import { Link } from "react-router-dom";
 import formatCurrency from "../../../services/common/formatCurrency";
 import statusHoaDon from "../../../services/constants/statusHoaDon";
+import { IOrder } from "../../../interface/Orders";
+import axios from "axios";
 
 const { RangePicker } = DatePicker;
 
-interface BillItem {
-  key: string;
-  img: string;
-  name: string;
-  quantity: number;
-  price: number;
-  size: number;
-}
+
 
 export default function Bill() {
   const [qrScannerVisible, setQrScannerVisible] = useState(false);
   const [valueTabHD, setValueTabHD] = useState<string>("all");
+
+  const [bills, setBills] = useState<IOrder[]>([]);
+  useEffect(() =>{
+    const fetchOrder = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/orders");
+        setBills(response.data?.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchOrder();
+  }, [])
 
   const scanQr = () => {};
   const handleChangeTab = (newValue: string) => {
     setValueTabHD(newValue);
   };
 
-  const listBestSeller: BillItem[] = [
-    {
-      key: "1",
-      img: "../src/assets/image/product/product-1.jpg",
-      name: "p1",
-      quantity: 1,
-      price: 1,
-      size: 1,
-    },
-    {
-      key: "2",
-      img: "../src/assets/image/product/product-2.jpg",
-      name: "p2",
-      quantity: 2,
-      price: 2,
-      size: 2,
-    },
-    {
-      key: "3",
-      img: "../src/assets/image/product/product-3.jpg",
-      name: "p3",
-      quantity: 3,
-      price: 3,
-      size: 3,
-    },
-    {
-      key: "4",
-      img: "../src/assets/image/product/product-3.jpg",
-      name: "p3",
-      quantity: 3,
-      price: 3,
-      size: 3,
-    },
-  ];
-
   const columns = [
     {
-      title: "Ảnh",
-      dataIndex: "img",
-      key: "img",
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
       width: "20%",
-      render: (text: string) => (
-        <img style={{ height: "70px" }} src={text} alt="error" />
-      ),
+      align: "center" as const,
     },
     {
-      title: "Tên sản phẩm",
-      dataIndex: "name",
-      key: "name",
-      width: "20%",
+      title: "Tên khách hàng",
+      dataIndex: "customerName",
+      key: "customerName",
+      align: "center" as const,
+      width: "30%",
+    },
+    {
+      title: "Tên sản phẩm",
+      dataIndex: "productName",
+      key: "productName",
+      align: "center" as const,
+      width: "30%",
     },
     {
       title: "Số lượng",
@@ -111,9 +91,16 @@ export default function Bill() {
       render: (text: string) => formatCurrency({ money: text }),
     },
     {
-      title: "Kích cỡ",
-      dataIndex: "size",
-      key: "size",
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      align: "center" as const,
+      width: "30%",
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "st",
+      key: "st",
       align: "center" as const,
       width: "10%",
     },
@@ -129,7 +116,20 @@ export default function Bill() {
     },
   ];
 
+  const data = bills.map((item: IOrder, index: number) => {
+    return {
+      stt: index + 1,
+      key: item._id,
+      customerName: item.customerName,
+      productName: item.products.name,
+      quantity: item.products.length,
+      price : item.totalPrice,
+      createdAt : item.createdAt,
+    };
+  });
+
   const listSttHD = [0, 1, 2, 3, 4, 5, 6, 7];
+
   return (
     <div>
       <BreadcrumbsCustom listLink={[]} nameHere={"Đơn hàng"} />
@@ -235,7 +235,7 @@ export default function Bill() {
             <TabPane tab={statusHoaDon({ status: row })} key={row}></TabPane>
           ))}
         </Tabs>
-        <Table dataSource={listBestSeller} columns={columns} />
+        <Table dataSource={data} columns={columns} />
       </Card>
     </div>
   );

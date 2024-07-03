@@ -14,6 +14,16 @@ import BillDetail from "../pages/admin/bill/BillDetail";
 import Users from "../pages/admin/users/Users";
 import ProductAdd from "../pages/admin/product/productAdd";
 
+// order management
+import AllOrder from "../pages/admin/OrderManagement/views/All";
+import WaitingForComfirmationOrder from "../pages/admin/OrderManagement/views/WaitForConfirmation";
+import WaitingForDeliveryOrder from "../pages/admin/OrderManagement/views/WaitingForDelivery";
+import BeingShippedOrder from "../pages/admin/OrderManagement/views/BeingShipped";
+import DeliveredOrder from "../pages/admin/OrderManagement/views/Delivered";
+import WaitForPayOrder from "../pages/admin/OrderManagement/views/WaitForPay";
+import PaidOrder from "../pages/admin/OrderManagement/views/Paid";
+import CompleteOrder from "../pages/admin/OrderManagement/views/Complete";
+
 export default function AdminRouter() {
   return (
     <HeaderAdmin>
@@ -31,6 +41,14 @@ export default function AdminRouter() {
         <Route path="/category/:id" element={<CategoryEdit />} />
         <Route path="/staff" element={<Staff />} />
         <Route path="/users" element={<Users />} />
+        <Route path="/order/all" element={<AllOrder />} />
+        <Route path="/order/wait-for-confirmation" element={<WaitingForComfirmationOrder />} />
+        <Route path="/order/waiting-for-delivery" element={<WaitingForDeliveryOrder />} />
+        <Route path="/order/being-shipped" element={<BeingShippedOrder />} />
+        <Route path="/order/delivered" element={<DeliveredOrder />} />
+        <Route path="/order/wait-for-pay" element={<WaitForPayOrder />} />
+        <Route path="/order/paid" element={<PaidOrder />} />
+        <Route path="/order/complete" element={<CompleteOrder />} />
       </Routes>
     </HeaderAdmin>
   );

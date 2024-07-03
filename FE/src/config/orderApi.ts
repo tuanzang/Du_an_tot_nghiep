@@ -3,7 +3,7 @@ import axiosInstance from "./axios";
 
 const OrderApi = {
   createOrder: (data: any) => {
-    return axiosInstance.post("/orders", data);
+    return axiosInstance.post("/orders/add-order", data);
   },
 };
 
