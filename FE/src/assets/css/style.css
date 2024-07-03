@@ -29,7 +29,7 @@ Table of content
 body {
   color: #555555;
   line-height: 1.7;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 400;
   font-family: "Playfair", sans-serif;
 }
@@ -3382,8 +3382,48 @@ textarea:focus {
 .ratings span {
   margin-right: 3px;
 }
+/* Nút cộng trừ */
+.quantity-controls {
+  display: flex;
+  align-items: center;
+}
+
+.quantity-btn {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 5px; /* Thay đổi khoảng cách giữa các nút cộng trừ */
+}
+
+.quantity-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.quantity-input {
+  width: 60px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  margin: 0 10px; /* Thay đổi khoảng cách giữa ô nhập số lượng và các nút cộng trừ */
+  padding: 10px;
+}
+
+.quantity-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
 
 .price-box {
+  font-family: "Fair play";
   font-size: 15px;
   line-height: 1;
 }
@@ -3392,9 +3432,9 @@ textarea:focus {
   font-weight: 500;
 }
 .price-old {
-  color: #999;
+  color: red;
+  font-weight: 500;
   padding-left: 5px;
-  font-weight: 300;
 }
 
 /*------- product item end -------*/

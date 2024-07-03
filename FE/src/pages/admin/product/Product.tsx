@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
 import {
@@ -12,10 +12,9 @@ import { IProduct } from "../../../interface/Products";
 import { ICategory } from "../../../interface/Categories";
 import { ColumnGroupType, ColumnType } from "antd/es/table";
 import { RadioChangeEvent } from "antd/lib";
-import { confirmAlert } from 'react-confirm-alert';
-import 'react-confirm-alert/src/react-confirm-alert.css';
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 import { toast } from "react-toastify";
-
 
 const customTableHeaderCellStyle = {
   backgroundColor: "#c29957",
@@ -49,36 +48,35 @@ export default function Product() {
     fetchData();
   }, []);
 
-const deleteProduct = async (id: number) => {
-  try {
-    confirmAlert({
-      title: 'Xác nhận xoá',
-      message: 'Bạn có chắc muốn xoá sản phẩm này?',
-      buttons: [
-        {
-          label: 'Có',
-          onClick: async () => {
-            const response = await axios.delete(
-              `http://localhost:3001/api/products/${id}`
-            );
-            if (response.status === 200) {
-              const newArr = products.filter((item) => item["_id"] !== id);
-              setProducts(newArr);
-              toast.success('Xoá sản phẩm thành công!');
-            }
-          }
-        },
-        {
-          label: 'Không',
-          onClick: () => {}
-        }
-      ]
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
+  const deleteProduct = async (id: number) => {
+    try {
+      confirmAlert({
+        title: "Xác nhận xoá",
+        message: "Bạn có chắc muốn xoá sản phẩm này?",
+        buttons: [
+          {
+            label: "Có",
+            onClick: async () => {
+              const response = await axios.delete(
+                `http://localhost:3001/api/products/${id}`
+              );
+              if (response.status === 200) {
+                const newArr = products.filter((item) => item["_id"] !== id);
+                setProducts(newArr);
+                toast.success("Xoá sản phẩm thành công!");
+              }
+            },
+          },
+          {
+            label: "Không",
+            onClick: () => {},
+          },
+        ],
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const onChangeRadio = (e: RadioChangeEvent) => {
     console.log("radio checked", e.target.value);
@@ -139,6 +137,12 @@ const deleteProduct = async (id: number) => {
       width: "20%",
     },
     {
+      title: "Giá cũ sản phẩm",
+      dataIndex: "priceOld",
+      key: "priceOld",
+      width: "20%",
+    },
+    {
       title: "Loại sản phẩm",
       dataIndex: "loai",
       key: "loai",
@@ -149,6 +153,20 @@ const deleteProduct = async (id: number) => {
       dataIndex: "description",
       key: "description",
       width: "20%",
+      render: (text) => (
+        <span
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "150px",
+            display: "inline-block",
+            verticalAlign: "top",
+          }}
+        >
+          {text}
+        </span>
+      ),
     },
     {
       title: "Số lượng",
@@ -205,6 +223,7 @@ const deleteProduct = async (id: number) => {
       name: item.name,
       image: item.image,
       price: item.price,
+      priceOld: item.priceOld,
       description: item.description,
       quantity: item.quantity,
       loai: category ? category.loai : "Không có danh mục", // Handle no category case

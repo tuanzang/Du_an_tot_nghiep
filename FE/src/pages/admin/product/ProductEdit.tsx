@@ -40,7 +40,7 @@ const ProductEdit = () => {
     }
   };
 
-  const onFinishFailed: FormProps<FieldIProductType>['onFinishFailed'] = (errorInfo) => {
+  const onFinishFailed: FormProps<IProduct>['onFinishFailed'] = (errorInfo) => {
     console.log('Failed:', errorInfo);
   };
 
@@ -70,6 +70,12 @@ const ProductEdit = () => {
       <Form.Item<IProduct>
         label="Giá"
         name="price"
+      >
+        <Input />
+      </Form.Item>
+      <Form.Item<IProduct>
+        label="Giá cũ"
+        name="priceOld"
       >
         <Input />
       </Form.Item>

@@ -143,12 +143,7 @@ const Header = () => {
                             )}
                           </ul>
                         </li>
-                        <li>
-                          <a href="wishlist.html">
-                            <i className="pe-7s-like"></i>
-                            <div className="notification">0</div>
-                          </a>
-                        </li>
+                        
                         <li>
                           <Link
                             to="/cart"
@@ -344,7 +339,7 @@ const Header = () => {
         </aside>
         {/* offcanvas mobile menu end */}
 
-        {openMenuCart && <div>a</div>}
+        {openMenuCart && <div></div>}
       </header>
     </div>
   );

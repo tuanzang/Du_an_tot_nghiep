@@ -2,6 +2,7 @@ export interface IProduct {
   _id: number;
   name: string;
   price: number;
+  priceOld: number;
   size: string;
   image: string[];
   description: string;

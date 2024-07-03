@@ -50,14 +50,14 @@ export default function AdminMenu({ small }: Props) {
         },
         {
           key: "category",
-          label: <Link to="/admin/category">Loại</Link>,
+          label: <Link to="/admin/category">Danh mục</Link>,
         },
       ],
     },
     {
       key: "users",
       icon: <UserOutlined />,
-      label: <Link to="/admin/users">Tài khoản</Link>
+      label: <Link to="/admin/users">Tài khoản</Link>,
     },
   ];
 
