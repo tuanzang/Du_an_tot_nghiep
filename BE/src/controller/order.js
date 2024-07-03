@@ -14,7 +14,6 @@ export const createOrder = async (req, res) => {
       name: item.product.name,
       price: item.product.price,
       quantity: item.quantity,
-      image: item.product.image,
     }));
 
     const totalPrice = cart.products.reduce((total, curr) => {
@@ -28,12 +27,14 @@ export const createOrder = async (req, res) => {
       userId,
       totalPrice,
       products,
+      status: "Chờ xác nhận"
     }).save();
 
     await Cart.findOneAndDelete({ userId }).exec();
 
     res.json(orders);
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       message: "Internal server error",
     });
@@ -63,21 +64,30 @@ export const getMyOrders = async (req, res) => {
 }
 
 export const getAllOrders = async (req, res) => {
+  const statusReq = req.query.status;
+
   try {
-    const orders = await Order.find();
+    let query = {};
+
+    if (statusReq) {
+      query = { status: statusReq };
+    }
+
+    const orders = await Order.find(query);
+
     if (!orders || orders.length === 0) {
       return res.status(404).json({
-        message: "Không tìm thấy đơn hàng !",
+        message: "Không tìm thấy đơn hàng!",
         data: [],
       });
     }
-      
+
     return res.status(200).json({
       message: "Success",
       data: orders,
     });
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       message: "Internal server error",
     });
   }
