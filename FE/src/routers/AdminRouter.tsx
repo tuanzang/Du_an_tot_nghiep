@@ -20,7 +20,6 @@ import WaitingForComfirmationOrder from "../pages/admin/OrderManagement/views/Wa
 import WaitingForDeliveryOrder from "../pages/admin/OrderManagement/views/WaitingForDelivery";
 import BeingShippedOrder from "../pages/admin/OrderManagement/views/BeingShipped";
 import DeliveredOrder from "../pages/admin/OrderManagement/views/Delivered";
-import WaitForPayOrder from "../pages/admin/OrderManagement/views/WaitForPay";
 import PaidOrder from "../pages/admin/OrderManagement/views/Paid";
 import CompleteOrder from "../pages/admin/OrderManagement/views/Complete";
 
@@ -46,7 +45,6 @@ export default function AdminRouter() {
         <Route path="/order/waiting-for-delivery" element={<WaitingForDeliveryOrder />} />
         <Route path="/order/being-shipped" element={<BeingShippedOrder />} />
         <Route path="/order/delivered" element={<DeliveredOrder />} />
-        <Route path="/order/wait-for-pay" element={<WaitForPayOrder />} />
         <Route path="/order/paid" element={<PaidOrder />} />
         <Route path="/order/complete" element={<CompleteOrder />} />
       </Routes>

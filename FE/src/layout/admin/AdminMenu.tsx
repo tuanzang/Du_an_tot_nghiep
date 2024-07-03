@@ -73,10 +73,6 @@ export default function AdminMenu({ small }: Props) {
         },
       
         {
-          key: "wait-for-pay",
-          label: <Link to="/admin/order/wait-for-pay">Chờ thanh toán</Link>,
-        },
-        {
           key: "paid",
           label: <Link to="/admin/order/paid">Đã thanh toán</Link>,
         },

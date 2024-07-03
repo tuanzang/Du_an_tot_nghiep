@@ -29,10 +29,11 @@ import { log } from "console";
 import formatCurrency from "../../../../../services/common/formatCurrency";
 import formatDate from "../../../../../services/common/formatDate";
 import { render } from "react-dom";
+import ModalDetailOrder from "../../components/ModalDetailOrder";
 const { RangePicker } = DatePicker;
 
 
-const columns = ({formatCurrency: any,  currentPage, pageSize}) =>[
+const columns = ({formatCurrency: any,  currentPage, pageSize, handleClickDetailOrder}) =>[
   {
     title: "STT",
     dataIndex: "stt",
@@ -99,22 +100,21 @@ const columns = ({formatCurrency: any,  currentPage, pageSize}) =>[
       }
     }
   },
-  // {
-  //   title: "Hành động",
-  //   align: "center" as const,
-  //   width: "10%",
-  //   render: (bill: BillItem) => (
-  //     <Link to={`/admin/bill/detail/${bill?.key}`}>
-  //       <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
-  //     </Link>
-  //   ),
-  // },
+  {
+    title: "Thao tác",
+    align: "center" as const,
+    width: "10%",
+    render: (value, record) => (
+        <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} onClick={() => handleClickDetailOrder(record)}/>
+    ),
+  },
 ];
 export default function AllOrder() { 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [listOrder, setListOrder] = useState([]);
-   
+   const [isOpenModalDetailOrder, setIsOpenModalDetailOrder] = useState(false);
+   const [rowDataCurrent, setRowDataCurrent] = useState({});
   const handleTableChange = (pagination: any) => {
     setCurrentPage(pagination.current);
     setPageSize(pagination.pageSize);
@@ -124,21 +124,29 @@ export default function AllOrder() {
     try {
       const res = await axios.get("http://localhost:3001/api/orders", {
         params: {
-          status: "Chờ xác nhận",
+          status: "Chờ xác nhận"
         }
       });
       setListOrder(res.data.data);
-      console.log(res.data.data);
       
     } catch (error) {
       console.log(error);
     }
   };
 
-  
+  // function handle
+  const handleClickDetailOrder = (order) => {
+    // console.log(order);
+    setRowDataCurrent(order);
+    setIsOpenModalDetailOrder(!isOpenModalDetailOrder);
+  }
+  const [isUpdateOrder, setIsUpdateOrder] = useState(null);
+  const handleIsUpdateOrder = (value) => {
+    setIsUpdateOrder(value);
+  }
   useEffect(() => { 
     getListOrder();
-  }, []);
+  }, [isUpdateOrder]);
 
   return (
     <div>
@@ -211,8 +219,14 @@ export default function AllOrder() {
       </Card>
       <Card style={{ marginTop: "12px" }}>
         
-        <Table dataSource={listOrder} columns={columns({formatCurrency, currentPage, pageSize})}   onChange={handleTableChange} />
+        <Table dataSource={listOrder} columns={columns({formatCurrency, currentPage, pageSize, handleClickDetailOrder})}   onChange={handleTableChange} />
       </Card>
+      <ModalDetailOrder 
+        isOpenModalDetailOrder={isOpenModalDetailOrder}
+        onChangeModalDetailOrder={handleClickDetailOrder}
+        curData={rowDataCurrent}
+        isUpdateOrder={handleIsUpdateOrder}
+      />
     </div>
   );
 }
