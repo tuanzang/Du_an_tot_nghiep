@@ -1,50 +1,84 @@
-import { Carousel, Col, Image, Row } from "antd";
-import { useState } from "react";
+import { Carousel, Col, Image, Row, message } from "antd";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { IProduct } from "../../interface/Products";
+import axios from "axios";
+import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
+import useCartMutation from "../../hooks/useCart";
 
 export default function ProductDetail() {
-  const { id } = useParams();
-  console.log(id);
+  const { id } = useParams(); // Lấy ID sản phẩm từ URL params
+  const [product, setProduct] = useState<IProduct>();
+  const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
+  const [quantity, setQuantity] = useState(1); // State for quantity
 
-  const getTitle = (number: number) => {
-    switch (number) {
-      case 1:
-        return "GOLD";
-      case 2:
-        return "SLIVER";
-      case 3:
-        return "BRONZE";
-      case 4:
-        return "DIAMOND";
+  const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+  const { mutate } = useCartMutation({
+    action: "ADD",
+    onSuccess: () => {
+      message.success("Đã thêm sản phẩm vào giỏ hàng");
+    },
+  });
+
+  useEffect(() => {
+    fetchProduct();
+    fetchRelatedProducts();
+  }, [id]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
+
+  const fetchProduct = async () => {
+    try {
+      if (id) {
+        const response = await axios.get(`http://localhost:3001/api/products/${id}`);
+        console.log("Product API response:", response.data);
+        setProduct(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching product:", error);
     }
   };
-  const fakeHotProduct1s = [];
-  const fakeHotProduct2s = [];
-  for (let i = 1; i <= 4; i++) {
-    fakeHotProduct1s.push({
-      key: i,
-      image1: `../../src/assets/image/product/product-${i}.jpg`,
-      image2: `../../src/assets/image/product/product-${19 - i}.jpg`,
-      title: getTitle(i),
-      price: (i * 10 + 9.99).toFixed(2),
-      category: `Category ${i}`,
-    });
-    fakeHotProduct2s.push({
-      key: i,
-      image1: `./src/assets/image/product/product-${i + 1}.jpg`,
-      image2: `./src/assets/image/product/product-${19 - i - 1}.jpg`,
-      title: getTitle(i),
-      price: (i * 10 + 9.99).toFixed(2),
-      category: `Category ${i}`,
-    });
-  }
 
-  const [imgDetail, setImgDetail] = useState(fakeHotProduct1s[0].image1);
+  const fetchRelatedProducts = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/products`);
+      console.log("Related Products API response:", response.data);
+      setRelatedProducts(response.data.data);
+    } catch (error) {
+      console.error("Error fetching related products:", error);
+    }
+  };
+
+  const handleQuantityIncrease = () => {
+    setQuantity(quantity + 1);
+  };
+
+  const handleQuantityDecrease = () => {
+    setQuantity(quantity > 1 ? quantity - 1 : 1); // Giới hạn số lượng không được dưới 1
+  };
+
+  const handleQuantityChange = (event: React.FormEvent<HTMLInputElement>) => {
+    const value = Number((event.target as HTMLInputElement).value);
+    if (value > 0) {
+      setQuantity(value);
+    }
+  };
+
+  const onAddCart = (productData: IProduct) => {
+    if (!isLogged) {
+      return message.info("Vui lòng đăng nhập tài khoản!");
+    }
+
+    if (productData) {
+      mutate({
+        productId: productData._id,
+        quantity: quantity, // Use the state quantity here
+      });
+    }
+  };
 
   return (
     <div>
       <main>
-        {/* <!-- breadcrumb area start --> */}
+        {/* breadcrumb area start */}
         <div className="breadcrumb-area">
           <div className="container">
             <div className="row">
@@ -57,16 +91,10 @@ export default function ProductDetail() {
                           <i className="fa fa-home"></i>
                         </a>
                       </li>
-                      <li
-                        className="breadcrumb-item active"
-                        aria-current="page"
-                      >
+                      <li className="breadcrumb-item active" aria-current="page">
                         <a href="/product">Sản phẩm</a>
                       </li>
-                      <li
-                        className="breadcrumb-item active"
-                        aria-current="page"
-                      >
+                      <li className="breadcrumb-item active" aria-current="page">
                         Sản phẩm chi tiết
                       </li>
                     </ul>
@@ -76,119 +104,77 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
-        {/* <!-- breadcrumb area end --> */}
+        {/* breadcrumb area end */}
 
-        {/* <!-- page main wrapper start --> */}
+        {/* page main wrapper start */}
         <div className="shop-main-wrapper section-padding pb-0">
           <div className="container">
             <div className="row" style={{ marginBottom: "5rem" }}>
-              {/* <!-- product details wrapper start --> */}
+              {/* product details wrapper start */}
               <div className="col-lg-12 order-1 order-lg-2">
-                {/* <!-- product details inner end --> */}
+                {/* product details inner end */}
                 <div className="product-details-inner">
                   <div className="row">
                     <div className="col-lg-5">
-                      <div
-                        className="pro-large-img img-zoom"
-                        style={{ marginBottom: "10px" }}
-                      >
+                      <div className="pro-large-img img-zoom" style={{ marginBottom: "10px" }}>
                         <Image
                           width={"100%"}
-                          src={imgDetail}
+                          src={product?.image?.[0]}
                           alt="product-details"
                         />
                       </div>
-                      <div className="tab-content">
-                        <Carousel
-                          autoplay
-                          autoplaySpeed={3000}
-                          slidesToShow={4}
-                          slidesToScroll={1}
-                          arrows={false}
-                          dots={false}
-                        >
-                          {fakeHotProduct1s.map((p) => (
-                            <Col
-                              key={p.key}
-                              className="gutter-row"
-                              span={24}
-                              style={{
-                                justifyContent: "center",
-                                alignContent: "center",
-                                display: "flex",
-                              }}
-                            >
-                              <Image
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setImgDetail(p.image1);
-                                }}
-                                width={"95%"}
-                                height={"95%"}
-                                sizes="small"
-                                preview={false}
-                                src={p.image1}
-                              />
-                            </Col>
-                          ))}
-                        </Carousel>
-                      </div>
+                      <div className="tab-content"></div>
                     </div>
                     <div className="col-lg-7">
                       <div className="product-details-des">
                         <div className="manufacturer-name">
-                          <a>HasTech</a>
+                          <a href="#">HOT</a>
                         </div>
-                        <h3 className="product-name">
-                          Handmade Golden Necklace Full Family Package
-                        </h3>
-                        <div className="ratings d-flex">
-                          <span>
-                            <i className="fa fa-star-o"></i>
-                          </span>
-                          <span>
-                            <i className="fa fa-star-o"></i>
-                          </span>
-                          <span>
-                            <i className="fa fa-star-o"></i>
-                          </span>
-                          <span>
-                            <i className="fa fa-star-o"></i>
-                          </span>
-                          <span>
-                            <i className="fa fa-star-o"></i>
-                          </span>
-                          <div className="pro-review">
-                            <span>1 Reviews</span>
-                          </div>
-                        </div>
+                        <h3 className="product-name">{product?.name}</h3>
                         <div className="price-box">
-                          <span className="price-regular">$70.00</span>
+                          <span className="price-regular">
+                            {product?.price} VNĐ
+                          </span>
                           <span className="price-old">
-                            <del>$90.00</del>
+                            <del>{product?.priceOld} VNĐ</del>
                           </span>
                         </div>
-                        <h5 className="offer-text">
-                          <strong>Hurry up</strong>! offer ends in:
-                        </h5>
-                        <div
-                          className="product-countdown"
-                          data-countdown="2022/12/20"
-                        ></div>
                         <div className="availability">
                           <i className="fa fa-check-circle"></i>
                           <span>200 in stock</span>
                         </div>
-                        <p className="pro-desc">Mô tả sản phẩm</p>
+                        <p className="pro-desc">Mô tả sản phẩm:</p>
+                        <p>{product?.description}</p>
                         <div className="quantity-cart-box d-flex align-items-center">
-                          <h6 className="option-title">qty:</h6>
-                          <div className="quantity">
-                            <div className="pro-qty">
-                              <input type="text" value="1" />
-                            </div>
+                          <h6 className="option-title">Số lượng:</h6>
+                          <div className="quantity-controls">
+                            <button
+                              className="quantity-btn"
+                              onClick={handleQuantityDecrease}
+                            >
+                              -
+                            </button>
+                            <input
+                              type="number"
+                              value={quantity}
+                              onChange={handleQuantityChange}
+                              min="1"
+                              className="quantity-input"
+                            />
+                            <button
+                              className="quantity-btn"
+                              onClick={handleQuantityIncrease}
+                            >
+                              +
+                            </button>
                           </div>
                           <div className="action_link">
-                            <a className="btn btn-cart2">Add to cart</a>
+                            <button
+                              className="btn btn-cart2"
+                              onClick={product ? () => onAddCart(product) : undefined}
+                            >
+                              Thêm vào giỏ hàng
+                            </button>
                           </div>
                         </div>
                         <div className="useful-links">
@@ -217,9 +203,9 @@ export default function ProductDetail() {
                     </div>
                   </div>
                 </div>
-                {/* <!-- product details inner end --> */}
+                {/* product details inner end */}
 
-                {/* <!-- product details reviews start --> */}
+                {/* product details reviews start */}
                 <div className="product-details-reviews section-padding pb-0">
                   <div className="row">
                     <div className="col-lg-12">
@@ -241,161 +227,136 @@ export default function ProductDetail() {
                           </li>
                           <li>
                             <a data-bs-toggle="tab" href="#tab_three">
-                              bình luận và đánh giá
+                              Bình luận và đánh giá
                             </a>
                           </li>
                         </ul>
-                        <div className="tab-content reviews-tab">
-                          <div
-                            className="tab-pane fade show active"
-                            id="tab_one"
-                          >
-                            <div className="tab-one">
-                              <p>Mô tả sản phẩm</p>
+                        <div className="tab-content">
+                          <div id="tab_one" className="tab-pane fade show active">
+                            <div className="product-tab-content">
+                              <h6 className="product-tab-title">Mô tả sản phẩm</h6>
+                              <p>{product?.description}</p>
                             </div>
                           </div>
-                          <div className="tab-pane fade" id="tab_two">
-                            <table className="table table-bordered">
-                              <tbody>
-                                <tr>
-                                  <td>color</td>
-                                  <td>black, blue, red</td>
-                                </tr>
-                                <tr>
-                                  <td>size</td>
-                                  <td>L, M, S</td>
-                                </tr>
-                              </tbody>
-                            </table>
+                          <div id="tab_two" className="tab-pane fade">
+                            <div className="product-tab-content">
+                              <h6 className="product-tab-title">Thông tin sản phẩm</h6>
+                              <ul>
+                                <li>
+                                  {/* <span>Danh mục:</span> {product?.category} */}
+                                </li>
+                                <li>
+                                  {/* <span>Thương hiệu:</span> {product?.brand} */}
+                                </li>
+                              </ul>
+                            </div>
                           </div>
-                          <div className="tab-pane fade" id="tab_three">
-                            <form action="#" className="review-form">
-                              <h5>
-                                1 review for <span>Chaz Kangeroo</span>
-                              </h5>
-                              <div className="total-reviews">
-                                <div className="rev-avatar">
-                                  <img
-                                    src="../src/assets/img/about/avatar.jpg"
-                                    alt=""
-                                  />
-                                </div>
-                                <div className="review-box">
-                                  <div className="ratings">
-                                    <span className="good">
-                                      <i className="fa fa-star"></i>
-                                    </span>
-                                    <span className="good">
-                                      <i className="fa fa-star"></i>
-                                    </span>
-                                    <span className="good">
-                                      <i className="fa fa-star"></i>
-                                    </span>
-                                    <span className="good">
-                                      <i className="fa fa-star"></i>
-                                    </span>
-                                    <span>
-                                      <i className="fa fa-star"></i>
-                                    </span>
+                          <div id="tab_three" className="tab-pane fade">
+                            <div className="product-tab-content">
+                              <div className="reviews">
+                                <div className="review-content">
+                                  <div className="rev-author">
+                                    <img
+                                      src="https://via.placeholder.com/100"
+                                      alt="avatar"
+                                    />
                                   </div>
-                                  <div className="post-author">
+                                  <div className="rev-content">
+                                    <div className="post-author">
+                                      <p>
+                                        <span>Admin -</span> 30 Jan, 2019
+                                      </p>
+                                    </div>
                                     <p>
-                                      <span>admin -</span> 30 Mar, 2019
+                                      Aliquam dignissim nonummy ultricies. Nulla
+                                      quis nibh. Proin ac neque. Nunc tincidunt
+                                      ante vitae massa. Donec viverra, pede ac
+                                      diam. Cras interdum. Nunc tincidunt ante
+                                      vitae massa. Donec viverra, pede ac diam.
+                                      Cras interdum.
                                     </p>
                                   </div>
-                                  <p>
-                                    Aliquam fringilla euismod risus ac bibendum.
-                                    Sed sit amet sem varius ante feugiat
-                                    lacinia. Nunc ipsum nulla, vulputate ut
-                                    venenatis vitae, malesuada ut mi. Quisque
-                                    iaculis, dui congue placerat pretium, augue
-                                    erat accumsan lacus
-                                  </p>
                                 </div>
-                              </div>
-                              <div className="form-group row">
-                                <div className="col">
-                                  <label className="col-form-label">
-                                    <span className="text-danger">*</span>
-                                    Your Name
-                                  </label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    required
-                                  />
+                                <div className="form-group row">
+                                  <div className="col">
+                                    <label className="col-form-label">
+                                      Your Rating
+                                    </label>
+                                    <div className="ratings">
+                                      <span className="good">
+                                        <i className="fa fa-star"></i>
+                                      </span>
+                                      <span className="good">
+                                        <i className="fa fa-star"></i>
+                                      </span>
+                                      <span className="good">
+                                        <i className="fa fa-star"></i>
+                                      </span>
+                                      <span className="good">
+                                        <i className="fa fa-star"></i>
+                                      </span>
+                                      <span>
+                                        <i className="fa fa-star"></i>
+                                      </span>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="form-group row">
-                                <div className="col">
-                                  <label className="col-form-label">
-                                    <span className="text-danger">*</span>
-                                    Your Email
-                                  </label>
-                                  <input
-                                    type="email"
-                                    className="form-control"
-                                    required
-                                  />
+                                <div className="form-group row">
+                                  <div className="col">
+                                    <label htmlFor="review" className="col-form-label">
+                                      Your Review
+                                    </label>
+                                    <textarea
+                                      className="form-control"
+                                      id="review"
+                                      rows={3}
+                                    ></textarea>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="form-group row">
-                                <div className="col">
-                                  <label className="col-form-label">
-                                    <span className="text-danger">*</span>
-                                    Your Review
-                                  </label>
-                                  <textarea
-                                    className="form-control"
-                                    required
-                                  ></textarea>
-                                  <div className="help-block pt-10">
-                                    <span className="text-danger">Note:</span>
-                                    HTML is not translated!
+                                <div className="form-group row">
+                                  <div className="col">
+                                    <label htmlFor="name" className="col-form-label">
+                                      Name
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className="form-control"
+                                      id="name"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="form-group row">
+                                  <div className="col">
+                                    <label htmlFor="email" className="col-form-label">
+                                      Email
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className="form-control"
+                                      id="email"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="form-group row">
+                                  <div className="col">
+                                    <button className="btn btn-secondary">
+                                      Submit
+                                    </button>
                                   </div>
                                 </div>
                               </div>
-                              <div className="form-group row">
-                                <div className="col">
-                                  <label className="col-form-label">
-                                    <span className="text-danger">*</span>
-                                    Rating
-                                  </label>
-                                  &nbsp;&nbsp;&nbsp; Bad&nbsp;
-                                  <input type="radio" value="1" name="rating" />
-                                  &nbsp;
-                                  <input type="radio" value="2" name="rating" />
-                                  &nbsp;
-                                  <input type="radio" value="3" name="rating" />
-                                  &nbsp;
-                                  <input type="radio" value="4" name="rating" />
-                                  &nbsp;
-                                  <input
-                                    type="radio"
-                                    value="5"
-                                    name="rating"
-                                    checked
-                                  />
-                                  &nbsp;Good
-                                </div>
-                              </div>
-                              <div className="buttons">
-                                <button className="btn btn-sqr" type="submit">
-                                  Continue
-                                </button>
-                              </div>
-                            </form>
-                            {/* <!-- end of review-form --> */}
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                {/* <!-- product details reviews end --> */}
+                {/* product details reviews end */}
               </div>
-              {/* <!-- product details wrapper end --> */}
+              {/* product details wrapper end */}
             </div>
+            {/* Sản phẩm liên quan */}
             <div className="row" style={{ marginBottom: "5rem" }}>
               <div className="row">
                 <div className="col-12">
@@ -410,23 +371,22 @@ export default function ProductDetail() {
               {/* <!-- product tab content start --> */}
               <div className="tab-content">
                 <Carousel autoplay autoplaySpeed={5000}>
-                  {/* <!-- product item start --> */}
                   <div className="tab-pane fade show active">
                     <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                       <Row gutter={16}>
-                        {fakeHotProduct1s.map((p, index) => (
-                          <Col key={p.key} className="gutter-row" span={6}>
+                        {relatedProducts.map((relatedProduct) => (
+                          <Col key={relatedProduct._id} className="gutter-row" span={6}>
                             <div className="product-item">
                               <figure className="product-thumb">
                                 <a href="#">
                                   <img
                                     className="pri-img"
-                                    src={p.image1}
+                                    src={relatedProduct?.image?.[0]}
                                     alt="product"
                                   />
                                   <img
                                     className="sec-img"
-                                    src={p.image2}
+                                    src={relatedProduct?.image?.[0]}
                                     alt="product"
                                   />
                                 </a>
@@ -448,7 +408,7 @@ export default function ProductDetail() {
                                     href="#"
                                     data-bs-toggle="tooltip"
                                     data-bs-placement="left"
-                                    title="So sánhpare"
+                                    title="So sánh"
                                   >
                                     <i className="pe-7s-refresh-2"></i>
                                   </a>
@@ -474,7 +434,7 @@ export default function ProductDetail() {
                                 <div className="product-caption text-center">
                                   <div className="product-identity">
                                     <p className="manufacturer-name">
-                                      <a href="#">{p.title}</a>
+                                      <a href="#">{relatedProduct.name}</a>
                                     </p>
                                   </div>
                                   <ul className="color-categories">
@@ -507,15 +467,12 @@ export default function ProductDetail() {
                                       ></a>
                                     </li>
                                   </ul>
-                                  <h6 className="product-name">
-                                    <a href="#">Sản phẩm {index + 1}</a>
-                                  </h6>
                                   <div className="price-box">
                                     <span className="price-regular">
-                                      {p.price + " "} VNĐ
+                                      {relatedProduct.price} VNĐ
                                     </span>
                                     <span className="price-old">
-                                      <del>{p.price + " "}VND</del>
+                                      <del>{relatedProduct.priceOld} VNĐ</del>
                                     </span>
                                   </div>
                                 </div>
@@ -526,125 +483,6 @@ export default function ProductDetail() {
                       </Row>
                     </div>
                   </div>
-                  {/* <!-- product item end --> */}
-
-                  {/* <!-- product item start --> */}
-                  <div className="tab-pane fade show active">
-                    <div className="product-carousel-4 slick-row-10 slick-arrow-style">
-                      <Row gutter={16}>
-                        {fakeHotProduct2s.map((p, index) => (
-                          <Col key={p.key} className="gutter-row" span={6}>
-                            <div className="product-item">
-                              <figure className="product-thumb">
-                                <a href="#">
-                                  <img
-                                    className="pri-img"
-                                    src={p.image1}
-                                    alt="product"
-                                  />
-                                  <img
-                                    className="sec-img"
-                                    src={p.image2}
-                                    alt="product"
-                                  />
-                                </a>
-                                <div className="product-badge">
-                                  <div className="product-label new">
-                                    <span>HOT</span>
-                                  </div>
-                                </div>
-                                <div className="button-group">
-                                  <a
-                                    href="#"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="left"
-                                    title="Yêu thích"
-                                  >
-                                    <i className="pe-7s-like"></i>
-                                  </a>
-                                  <a
-                                    href="#"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="left"
-                                    title="So sánhpare"
-                                  >
-                                    <i className="pe-7s-refresh-2"></i>
-                                  </a>
-                                  <a
-                                    href="#"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#quick_view"
-                                  >
-                                    <span
-                                      data-bs-toggle="tooltip"
-                                      data-bs-placement="left"
-                                      title="Xem chi tiết"
-                                    >
-                                      <i className="pe-7s-search"></i>
-                                    </span>
-                                  </a>
-                                </div>
-                                <div className="cart-hover">
-                                  <button className="btn btn-cart">
-                                    Thêm vào giỏ hàng
-                                  </button>
-                                </div>
-                                <div className="product-caption text-center">
-                                  <div className="product-identity">
-                                    <p className="manufacturer-name">
-                                      <a href="#">{p.title}</a>
-                                    </p>
-                                  </div>
-                                  <ul className="color-categories">
-                                    <li>
-                                      <a
-                                        href="#"
-                                        className="c-lightblue"
-                                        title="LightSteelblue"
-                                      ></a>
-                                    </li>
-                                    <li>
-                                      <a
-                                        href="#"
-                                        className="c-darktan"
-                                        title="Darktan"
-                                      ></a>
-                                    </li>
-                                    <li>
-                                      <a
-                                        href="#"
-                                        className="c-grey"
-                                        title="Grey"
-                                      ></a>
-                                    </li>
-                                    <li>
-                                      <a
-                                        href="#"
-                                        className="c-brown"
-                                        title="Brown"
-                                      ></a>
-                                    </li>
-                                  </ul>
-                                  <h6 className="product-name">
-                                    <a href="#">Sản phẩm {index + 1}</a>
-                                  </h6>
-                                  <div className="price-box">
-                                    <span className="price-regular">
-                                      {p.price + " "} VNĐ
-                                    </span>
-                                    <span className="price-old">
-                                      <del>{p.price + " "}VND</del>
-                                    </span>
-                                  </div>
-                                </div>
-                              </figure>
-                            </div>
-                          </Col>
-                        ))}
-                      </Row>
-                    </div>
-                  </div>
-                  {/* <!-- product item end --> */}
                 </Carousel>
               </div>
               {/* <!-- product tab content end --> */}

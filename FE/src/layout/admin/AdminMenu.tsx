@@ -41,11 +41,11 @@ export default function AdminMenu({ small }: Props) {
       icon: <DashboardOutlined />,
       label: <Link to="/admin/dashboard">Thống kê</Link>,
     },
-    {
-      key: "ss",
-      icon: <DashboardOutlined />,
-      label: <Link to="/admin/bill">Bill</Link>,
-    },
+    // {
+    //   key: "ss",
+    //   icon: <DashboardOutlined />,
+    //   label: <Link to="/admin/bill">Bill</Link>,
+    // },
     {
       key: "bill",
       icon: <FileDoneOutlined />,
