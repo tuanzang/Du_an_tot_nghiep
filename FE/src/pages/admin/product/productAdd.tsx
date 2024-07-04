@@ -142,11 +142,13 @@ console.log(responseSizes.data?.data);
         />
       </Form.Item> */}
 
-        {dataSize.map((size) => (
-          <Checkbox key={size.value} value={size.value}>
-            {size.label}
-          </Checkbox>
-        ))}
+      <Form.Item<IProduct>
+        label="Size"
+        name="sizeId"
+        rules={[{ required: true, message: 'Vui lòng chọn size!' }]}
+      >
+        <Checkbox.Group options={dataSize} />
+      </Form.Item>
 
       <Form.Item<IProduct>
         label="Số lượng"
