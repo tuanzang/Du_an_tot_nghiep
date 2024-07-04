@@ -1,5 +1,6 @@
 import Order from "../models/order.js";
 import Cart from "../models/cart.js";
+import product from "../models/product.js";
 
 export const createOrder = async (req, res) => {
   try {
@@ -22,9 +23,20 @@ export const createOrder = async (req, res) => {
       return total;
     }, 0);
 
+    for (let item of cart.products) {
+      await product.findByIdAndUpdate(
+        item.product._id,
+        {
+          $inc: { quantity: -item.quantity },
+        },
+        { new: true }
+      );
+    }
+
     const orders = await new Order({
       ...req.body,
       userId,
+      quantity: cart.products.length,
       totalPrice,
       products,
       status: "Chờ xác nhận"

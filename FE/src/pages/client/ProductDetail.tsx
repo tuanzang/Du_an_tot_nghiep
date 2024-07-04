@@ -1,6 +1,6 @@
 import { Carousel, Col, Image, Row, message } from "antd";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { IProduct } from "../../interface/Products";
 import axios from "axios";
 import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
@@ -378,7 +378,7 @@ export default function ProductDetail() {
                           <Col key={relatedProduct._id} className="gutter-row" span={6}>
                             <div className="product-item">
                               <figure className="product-thumb">
-                                <a href="#">
+                                <Link to={`/product/${relatedProduct._id}`}>
                                   <img
                                     className="pri-img"
                                     src={relatedProduct?.image?.[0]}
@@ -389,7 +389,7 @@ export default function ProductDetail() {
                                     src={relatedProduct?.image?.[0]}
                                     alt="product"
                                   />
-                                </a>
+                                </Link>
                                 <div className="product-badge">
                                   <div className="product-label new">
                                     <span>HOT</span>
