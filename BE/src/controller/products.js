@@ -1,5 +1,6 @@
 import { sanitizeFilter } from "mongoose";
 import product from "../models/product.js";
+
 export const getAllProduct = async (req, res) => {
   try {
     const data = await product.find();

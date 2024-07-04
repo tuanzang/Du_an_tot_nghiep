@@ -10,7 +10,8 @@ import CategoryAdd from "../pages/admin/category/CategoryAdd";
 import CategoryEdit from "../pages/admin/category/CategoryEdit";
 import ProductDetailAndEdit from "../pages/admin/product/ProductDetailAndEdit";
 import BillDetail from "../pages/admin/bill/BillDetail";
-
+import Size from "../pages/admin/size/Size";
+import SizeAdd from "../pages/admin/size/SizeAdd";
 import Users from "../pages/admin/users/Users";
 import ProductAdd from "../pages/admin/product/productAdd";
 
@@ -22,6 +23,7 @@ import BeingShippedOrder from "../pages/admin/OrderManagement/views/BeingShipped
 import DeliveredOrder from "../pages/admin/OrderManagement/views/Delivered";
 import PaidOrder from "../pages/admin/OrderManagement/views/Paid";
 import CompleteOrder from "../pages/admin/OrderManagement/views/Complete";
+
 
 export default function AdminRouter() {
   return (
@@ -38,6 +40,8 @@ export default function AdminRouter() {
         <Route path="/category" element={<Category />} />
         <Route path="/category/add" element={<CategoryAdd />} />
         <Route path="/category/:id" element={<CategoryEdit />} />
+        <Route path="/size" element={<Size />} />
+        <Route path="/size/add" element={<SizeAdd />} />
         <Route path="/staff" element={<Staff />} />
         <Route path="/users" element={<Users />} />
         <Route path="/order/all" element={<AllOrder />} />

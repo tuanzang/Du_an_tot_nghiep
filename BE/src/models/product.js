@@ -29,7 +29,11 @@ const productSchema = new mongoose.Schema(
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "Category",
             }
-        ]
+        ],
+        sizeId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Size"
+        }
     }, {
     timestamps: true,
     versionKey: false

@@ -96,6 +96,10 @@ export default function AdminMenu({ small }: Props) {
           key: "category",
           label: <Link to="/admin/category">Loại</Link>,
         },
+        {
+          key: "size",
+          label: <Link to="/admin/size">Size</Link>,
+        }
       ],
     },
     {
