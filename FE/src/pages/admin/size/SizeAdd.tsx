@@ -12,7 +12,7 @@ const SizeAdd = () => {
 
     const sizeCode = generateRandomNumber();
 
-    const data = { ...values, sizeCode, status: false };
+    const data = { ...values, sizeCode};
     console.log('Data to send:', data); 
 
     try {
@@ -46,7 +46,7 @@ const SizeAdd = () => {
     >
       <Form.Item<ISize>
         label="Size"
-        name="size"
+        name="name"
       >
         <Input type='text'/>
       </Form.Item>
