@@ -9,7 +9,7 @@ import { ICategory } from '../../../interface/Categories';
 import { toast } from "react-toastify";
 import { uploadImage } from "../../../services/upload/upload";
 import { UploadFile } from "antd/lib";
-import { List, Card, notification } from 'antd';
+// import { List, Card, notification } from 'antd';
 import { ISize } from '../../../interface/Size';
 
 
@@ -28,7 +28,6 @@ const ProductAdd = () => {
 
         const responseSizes = await axios.get("http://localhost:3001/api/sizes");
         setSizes(responseSizes.data?.data);
-console.log(responseSizes.data?.data);
 
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -52,15 +51,6 @@ console.log(responseSizes.data?.data);
     }
   })
 
-  // const onSubmit: SubmitHandler<IProduct> = async (data) => {
-  //   try {
-  //     await axios.put(`http://localhost:3001/api/products/${id}`, data);
-  //     alert('Success')
-  //     navigate("/admin/product")
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // }
   const onFinish: FormProps<IProduct[]>["onFinish"] = async (values) => {
     try {
       // Upload images
@@ -128,19 +118,6 @@ console.log(responseSizes.data?.data);
           options={dataCates}
         />
       </Form.Item>
-
-      {/* <Form.Item<ISize>
-        label="Size"
-        // name="size"
-      >
-        <Select
-          defaultValue="Chọn size"
-          style={{
-            width: 150,
-          }}
-          options={dataSize}
-        />
-      </Form.Item> */}
 
       <Form.Item<IProduct>
         label="Size"

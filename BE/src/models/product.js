@@ -30,10 +30,12 @@ const productSchema = new mongoose.Schema(
                 ref: "Category",
             }
         ],
-        sizeId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Size"
-        }
+        sizeId: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Size"
+            }
+        ]
     }, {
     timestamps: true,
     versionKey: false
