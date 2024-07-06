@@ -1,41 +1,43 @@
-import { Col, Row, Slider } from "antd";
+import { Col, Row, Slider, message } from "antd";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { IProduct } from "../../interface/Products";
 import { Link } from "react-router-dom";
-
+import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
+import useCartMutation from "../../hooks/useCart";
 export default function Product() {
-  // data fake
-  const getTitle = (number: number) => {
-    switch (number) {
-      case 1:
-        return "GOLD";
-      case 2:
-        return "SLIVER";
-      case 3:
-        return "BRONZE";
-      case 4:
-        return "DIAMOND";
-    }
-  };
+  const [product, setProduct] = useState<IProduct[]>([]);
+  const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+  const { mutate } = useCartMutation({
+    action: "ADD",
+    onSuccess: () => {
+      message.success("Đã thêm sản phẩm vào giỏ hàng");
+    },
+  });
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/api/products`);
+        setProduct(response.data?.data);
+      } catch (error) {
+        console.log("Khong co du lieu");
+      }
+    };
 
-  const fakeHotProduct1s = [];
-  const fakeHotProduct2s = [];
-  for (let i = 1; i <= 4; i++) {
-    fakeHotProduct1s.push({
-      key: i,
-      image1: `./src/assets/image/product/product-${i}.jpg`,
-      image2: `./src/assets/image/product/product-${19 - i}.jpg`,
-      title: getTitle(i),
-      price: (i * 10 + 9.99).toFixed(2),
-      category: `Category ${i}`,
+    fetchProducts();
+  }, []);
+
+  const onAddCart = (productData: IProduct) => {
+    if (!isLogged) {
+      return message.info("Vui lòng đăng nhập tài khoản!");
+    }
+
+    mutate({
+      productId: productData._id,
+      quantity: 1,
     });
-    fakeHotProduct2s.push({
-      key: i,
-      image1: `./src/assets/image/product/product-${i + 1}.jpg`,
-      image2: `./src/assets/image/product/product-${19 - i - 1}.jpg`,
-      title: getTitle(i),
-      price: (i * 10 + 9.99).toFixed(2),
-      category: `Category ${i}`,
-    });
-  }
+  };
+  if (!product) return null;
   return (
     <div>
       <main>
@@ -83,27 +85,27 @@ export default function Product() {
                     <div className="sidebar-body">
                       <ul className="shop-categories">
                         <li>
-                          <a>
+                          <a href="#">
                             Tất cả <span>(100)</span>
                           </a>
                         </li>
                         <li>
-                          <a>
+                          <a href="#">
                             Nhẫn <span>(10)</span>
                           </a>
                         </li>
                         <li>
-                          <a>
+                          <a href="#">
                             Dây chuyền <span>(5)</span>
                           </a>
                         </li>
                         <li>
-                          <a>
+                          <a href="#">
                             Lắc tay <span>(8)</span>
                           </a>
                         </li>
                         <li>
-                          <a>
+                          <a href="#">
                             Bông tai <span>(4)</span>
                           </a>
                         </li>
@@ -403,7 +405,7 @@ export default function Product() {
                   {/* <!-- single sidebar start --> */}
                   <div className="sidebar-banner">
                     <div className="img-container">
-                      <a>
+                      <a href="#">
                         <img
                           src="./src/assets/image/banner/sidebar-banner.jpg"
                           alt=""
@@ -426,6 +428,7 @@ export default function Product() {
                         <div className="top-bar-left">
                           <div className="product-view-mode">
                             <a
+                              href="#"
                               className="active"
                               data-target="grid-view"
                               data-bs-toggle="tooltip"
@@ -434,6 +437,7 @@ export default function Product() {
                               <i className="fa fa-th"></i>
                             </a>
                             <a
+                              href="#"
                               data-target="list-view"
                               data-bs-toggle="tooltip"
                               title="List View"
@@ -468,102 +472,113 @@ export default function Product() {
                       gutter={16}
                       style={{ marginLeft: "6px", padding: "0px" }}
                     >
-                      {fakeHotProduct1s.map((p, index) => (
-                        <Col className="gutter-row" span={8} key={p.key}>
-                          <Link to={`/product/detail/${p.key}`}>
-                            <div className="product-item">
-                              <figure className="product-thumb">
-                                <a>
-                                  <img
-                                    className="pri-img"
-                                    src={p.image1}
-                                    alt="product"
-                                  />
-                                  <img
-                                    className="sec-img"
-                                    src={p.image2}
-                                    alt="product"
-                                  />
+                      {product.map((p: IProduct) => (
+                        <Col className="gutter-row" span={8}>
+                          <div className="product-item">
+                            <figure className="product-thumb">
+                              <Link to={`/product/${p._id}`}>
+                                <img
+                                  className="pri-img"
+                                  src={p?.image?.[0]}
+                                  alt="product"
+                                />
+                              </Link>
+                              <div className="product-badge">
+                                <div className="product-label new">
+                                  <span>HOT</span>
+                                </div>
+                              </div>
+                              <div className="button-group">
+                                <a
+                                  href="#"
+                                  data-bs-toggle="tooltip"
+                                  data-bs-placement="left"
+                                  title="Yêu thích"
+                                >
+                                  <i className="pe-7s-like"></i>
                                 </a>
-                                <div className="product-badge">
-                                  <div className="product-label new">
-                                    <span>HOT</span>
-                                  </div>
-                                </div>
-                                <div className="button-group">
-                                  <a
+                                <a
+                                  href="#"
+                                  data-bs-toggle="tooltip"
+                                  data-bs-placement="left"
+                                  title="So sánhpare"
+                                >
+                                  <i className="pe-7s-refresh-2"></i>
+                                </a>
+                                <a
+                                  href="#"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#quick_view"
+                                >
+                                  <span
                                     data-bs-toggle="tooltip"
                                     data-bs-placement="left"
-                                    title="Yêu thích"
+                                    title="Xem chi tiết"
                                   >
-                                    <i className="pe-7s-like"></i>
-                                  </a>
-                                  <a
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="left"
-                                    title="So sánhpare"
-                                  >
-                                    <i className="pe-7s-refresh-2"></i>
-                                  </a>
-                                  <a
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#quick_view"
-                                  >
-                                    <span
-                                      data-bs-toggle="tooltip"
-                                      data-bs-placement="left"
-                                      title="Xem chi tiết"
-                                    >
-                                      <i className="pe-7s-search"></i>
-                                    </span>
-                                  </a>
+                                    <i className="pe-7s-search"></i>
+                                  </span>
+                                </a>
+                              </div>
+                              <div className="cart-hover">
+                                <button
+                                  className="btn btn-cart"
+                                  onClick={() => onAddCart(p)}
+                                >
+                                  Thêm vào giỏ hàng
+                                </button>
+                              </div>
+                              <div className="product-caption text-center">
+                                <div className="product-identity">
+                                  <p className="manufacturer-name">
+                                    <Link to={`/product/${p._id}`}>
+                                      {p.name}
+                                    </Link>
+                                  </p>
                                 </div>
-                                <div className="cart-hover">
-                                  <button className="btn btn-cart">
-                                    Thêm vào giỏ hàng
-                                  </button>
+                                <ul className="color-categories">
+                                  <li>
+                                    <a
+                                      href="#"
+                                      className="c-lightblue"
+                                      title="LightSteelblue"
+                                    ></a>
+                                  </li>
+                                  <li>
+                                    <a
+                                      href="#"
+                                      className="c-darktan"
+                                      title="Darktan"
+                                    ></a>
+                                  </li>
+                                  <li>
+                                    <a
+                                      href="#"
+                                      className="c-grey"
+                                      title="Grey"
+                                    ></a>
+                                  </li>
+                                  <li>
+                                    <a
+                                      href="#"
+                                      className="c-brown"
+                                      title="Brown"
+                                    ></a>
+                                  </li>
+                                </ul>
+                                {/* <h6 className="product-name">
+                                  <a href="#">Sản phẩm {index + 1}</a>
+                                </h6> */}
+                                <div className="price-box">
+                                  <span className="price-regular">
+                                    {p.price + " "} VNĐ
+                                  </span>
+                                  <span className="price-old">
+                                    <del>{p.priceOld + " "}VND</del>
+                                  </span>
                                 </div>
-                                <div className="product-caption text-center">
-                                  <div className="product-identity">
-                                    <p className="manufacturer-name">
-                                      <a>{p.title}</a>
-                                    </p>
-                                  </div>
-                                  <ul className="color-categories">
-                                    <li>
-                                      <a
-                                        className="c-lightblue"
-                                        title="LightSteelblue"
-                                      ></a>
-                                    </li>
-                                    <li>
-                                      <a
-                                        className="c-darktan"
-                                        title="Darktan"
-                                      ></a>
-                                    </li>
-                                    <li>
-                                      <a className="c-grey" title="Grey"></a>
-                                    </li>
-                                    <li>
-                                      <a className="c-brown" title="Brown"></a>
-                                    </li>
-                                  </ul>
-                                  <h6 className="product-name">
-                                    <a>Sản phẩm {index + 1}</a>
-                                  </h6>
-                                  <div className="price-box">
-                                    <span className="price-regular">
-                                      {p.price + " "} VNĐ
-                                    </span>
-                                    <span className="price-old">
-                                      <del>{p.price + " "}VND</del>
-                                    </span>
-                                  </div>
-                                </div>
-                              </figure>
-                            </div>
-                          </Link>
+                              </div>
+                            </figure>
+                          </div>
                         </Col>
                       ))}
                     </Row>
@@ -574,21 +589,21 @@ export default function Product() {
                   <div className="paginatoin-area text-center">
                     <ul className="pagination-box">
                       <li>
-                        <a className="previous">
+                        <a href="#" className="previous">
                           <i className="pe-7s-angle-left"></i>
                         </a>
                       </li>
                       <li className="active">
-                        <a>1</a>
+                        <a href="#">1</a>
                       </li>
                       <li>
-                        <a>2</a>
+                        <a href="#">2</a>
                       </li>
                       <li>
-                        <a>3</a>
+                        <a href="#">3</a>
                       </li>
                       <li>
-                        <a className="next">
+                        <a href="#" className="next">
                           <i className="pe-7s-angle-right"></i>
                         </a>
                       </li>

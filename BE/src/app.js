@@ -2,9 +2,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import morgan from "morgan";
-import router from "./routes/index.js";
 // import authRouter from "./routes/authRouter";
 import mongoose from "mongoose";
+import router from "./routes";
 
 const app = express();
 const port = 3001;

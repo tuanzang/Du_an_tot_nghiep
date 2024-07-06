@@ -5,6 +5,7 @@ import axios from "axios";
 import { IProduct } from "../../interface/Products";
 import useCartMutation from "../../hooks/useCart";
 import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
+import { Link } from "react-router-dom";
 
 const contentStyle: React.CSSProperties = {
   height: "530px",
@@ -20,7 +21,7 @@ export default function Home() {
   const { mutate } = useCartMutation({
     action: "ADD",
     onSuccess: () => {
-      message.success("Đã thêm SP vào giỏ hàng");
+      message.success("Đã thêm sản phẩm vào giỏ hàng");
     },
   });
 
@@ -184,7 +185,7 @@ export default function Home() {
 
                   {/* <!-- product tab content start --> */}
                   <div className="tab-content">
-                    <Carousel autoplay={true} autoplaySpeed={5000}>
+                    <Carousel autoplay={true} autoplaySpeed={2000}>
                       {/* <!-- product item start --> */}
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
@@ -193,13 +194,13 @@ export default function Home() {
                               <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
-                                    <a href="#">
+                                    <Link to={`/product/${p._id}`}>
                                       <img
                                         className="pri-img"
                                         src={`${p?.image}`}
                                         alt="product"
                                       />
-                                    </a>
+                                    </Link>
                                     <div className="product-badge">
                                       <div className="product-label new">
                                         <span>HOT</span>
@@ -247,8 +248,9 @@ export default function Home() {
                                     <div className="product-caption text-center">
                                       <div className="product-identity">
                                         <p className="manufacturer-name">
-                                          <a href="#">{p.name}</a>
-                                        </p>
+                                          <Link to={`/product/${p._id}`}>
+                                            {p.name}
+                                          </Link>                                        </p>
                                       </div>
                                       <ul className="color-categories">
                                         <li>
@@ -280,15 +282,12 @@ export default function Home() {
                                           ></a>
                                         </li>
                                       </ul>
-                                      <h6 className="product-name">
-                                        <a href="#">Sản phẩm {index + 1}</a>
-                                      </h6>
                                       <div className="price-box">
                                         <span className="price-regular">
-                                          {p.price + " "} VNĐ
+                                          {p.price + ""} VNĐ
                                         </span>
                                         <span className="price-old">
-                                          <del>{p.price + " "}VND</del>
+                                          <del>{p.priceOld+ " "}VNĐ</del>
                                         </span>
                                       </div>
                                     </div>
@@ -309,7 +308,7 @@ export default function Home() {
                               <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
-                                    <a href="#">
+                                    <a href="">
                                       <img
                                         className="pri-img"
                                         src={`${p?.image}`}
@@ -398,15 +397,15 @@ export default function Home() {
                                           ></a>
                                         </li>
                                       </ul>
-                                      <h6 className="product-name">
+                                      {/* <h6 className="product-name">
                                         <a href="#">Sản phẩm {index + 1}</a>
-                                      </h6>
+                                      </h6> */}
                                       <div className="price-box">
                                         <span className="price-regular">
                                           {p.price + " "} VNĐ
                                         </span>
                                         <span className="price-old">
-                                          <del>{p.price + " "}VND</del>
+                                          <del>{p.priceOld + " "}VNĐ</del>
                                         </span>
                                       </div>
                                     </div>
