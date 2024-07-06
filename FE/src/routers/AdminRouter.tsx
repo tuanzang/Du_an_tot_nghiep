@@ -22,6 +22,7 @@ import BeingShippedOrder from "../pages/admin/OrderManagement/views/BeingShipped
 import DeliveredOrder from "../pages/admin/OrderManagement/views/Delivered";
 import PaidOrder from "../pages/admin/OrderManagement/views/Paid";
 import CompleteOrder from "../pages/admin/OrderManagement/views/Complete";
+import PageComment from "../pages/admin/comment/PageComment";
 
 export default function AdminRouter() {
   return (
@@ -40,9 +41,16 @@ export default function AdminRouter() {
         <Route path="/category/:id" element={<CategoryEdit />} />
         <Route path="/staff" element={<Staff />} />
         <Route path="/users" element={<Users />} />
+        <Route path="/comments" element={<PageComment />} />
         <Route path="/order/all" element={<AllOrder />} />
-        <Route path="/order/wait-for-confirmation" element={<WaitingForComfirmationOrder />} />
-        <Route path="/order/waiting-for-delivery" element={<WaitingForDeliveryOrder />} />
+        <Route
+          path="/order/wait-for-confirmation"
+          element={<WaitingForComfirmationOrder />}
+        />
+        <Route
+          path="/order/waiting-for-delivery"
+          element={<WaitingForDeliveryOrder />}
+        />
         <Route path="/order/being-shipped" element={<BeingShippedOrder />} />
         <Route path="/order/delivered" element={<DeliveredOrder />} />
         <Route path="/order/paid" element={<PaidOrder />} />

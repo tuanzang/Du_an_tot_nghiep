@@ -1,13 +1,19 @@
 import { Carousel, Col, Image, Row, message } from "antd";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { IProduct } from "../../interface/Products";
 import axios from "axios";
 import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
 import useCartMutation from "../../hooks/useCart";
+import dayjs from "dayjs";
+import { IComment } from "../../interface/Comments";
+import { IUser } from "../../interface/Users";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
+  const idUser = "6687fecfed4d73c8f419c10e"; // chưa lấy được từ auth nên đang fix cứng
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
@@ -23,12 +29,15 @@ export default function ProductDetail() {
   useEffect(() => {
     fetchProduct();
     fetchRelatedProducts();
-  }, [id]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
+    findUserById(idUser ? idUser : null);
+  }, [id, idUser]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
 
   const fetchProduct = async () => {
     try {
       if (id) {
-        const response = await axios.get(`http://localhost:3001/api/products/${id}`);
+        const response = await axios.get(
+          `http://localhost:3001/api/products/${id}`
+        );
         console.log("Product API response:", response.data);
         setProduct(response.data.data);
       }
@@ -75,9 +84,121 @@ export default function ProductDetail() {
     }
   };
 
+  /** API bình luận sản phẩm */
+  const [listComment, setListComment] = useState<IComment[]>([]);
+  const fetchComment = async (idProduct: string | null) => {
+    if (idProduct === null) {
+      return setListComment([]);
+    } else {
+      try {
+        const response = await axios.post(
+          "http://localhost:3001/api/comments/findByIdProduct",
+          {
+            idProduct: idProduct,
+          }
+        );
+        setListComment(response.data?.data);
+      } catch (error) {
+        console.log("Khong co du lieu");
+      }
+    }
+  };
+
+  const [user, setUser] = useState<IUser>({
+    _id: "",
+    email: "",
+    password: "",
+    name: "",
+    role: "",
+    avatar: "",
+  });
+  const findUserById = async (idUser: string | null) => {
+    if (idUser === null) {
+      return setUser({
+        _id: "",
+        email: "",
+        password: "",
+        name: "",
+        role: "",
+        avatar: "",
+      });
+    } else {
+      try {
+        const response = await axios.post(
+          "http://localhost:3001/api/comments/findUserById",
+          { _id: idUser }
+        );
+        setUser(response.data?.data);
+      } catch (error) {
+        console.log("Khong co du lieu");
+      }
+    }
+  };
+
+  const [textComment, setTextComment] = useState("");
+  const [newComment, setNewComment] = useState<IComment | null>({
+    _id: "",
+    idUser: "",
+    idProduct: "",
+    fullName: "",
+    productName: "",
+    avatar: "",
+    comment: "",
+    createdAt: "",
+  });
+  const handleChangeTextComment = (comment: string) => {
+    setTextComment(comment);
+
+    // Giả sử rằng `product` và `user` đã được xác định trước đó
+    changeDataComment(comment);
+  };
+  const changeDataComment = (comment: string) => {
+    if (product === undefined) {
+      toast.warning("Thông tin sản phẩm sai!");
+      return;
+    }
+    setNewComment({
+      _id: null,
+      idUser: user._id,
+      idProduct: String(product._id),
+      fullName: user.name,
+      productName: product.name,
+      avatar: user.avatar,
+      comment: comment,
+      createdAt: "",
+    });
+  };
+  const createComment = async (newComment: IComment | null) => {
+    if (
+      newComment?.comment === "" ||
+      newComment?.comment === undefined ||
+      newComment?.comment === null
+    ) {
+      toast.warning("Bạn chưa nhập bình luận!");
+      return;
+    }
+    if (newComment === null) {
+      toast.error("Không thể bình luận");
+      return;
+    }
+
+    try {
+      // Gửi yêu cầu tạo bình luận
+      await axios.post("http://localhost:3001/api/comments/add", newComment);
+      fetchComment(newComment.idProduct);
+      setTextComment("");
+      setNewComment(null);
+      toast.success("Bình luận thành công");
+    } catch (error) {
+      console.error("Error creating comment:", error); // In lỗi ra console để kiểm tra
+      toast.error("Bình luận thất bại");
+    }
+  };
+
   return (
     <div>
       <main>
+        {/* breadcrumb area start */}
         {/* breadcrumb area start */}
         <div className="breadcrumb-area">
           <div className="container">
@@ -91,10 +212,16 @@ export default function ProductDetail() {
                           <i className="fa fa-home"></i>
                         </a>
                       </li>
-                      <li className="breadcrumb-item active" aria-current="page">
+                      <li
+                        className="breadcrumb-item active"
+                        aria-current="page"
+                      >
                         <a href="/product">Sản phẩm</a>
                       </li>
-                      <li className="breadcrumb-item active" aria-current="page">
+                      <li
+                        className="breadcrumb-item active"
+                        aria-current="page"
+                      >
                         Sản phẩm chi tiết
                       </li>
                     </ul>
@@ -105,37 +232,52 @@ export default function ProductDetail() {
           </div>
         </div>
         {/* breadcrumb area end */}
+        {/* breadcrumb area end */}
 
+        {/* page main wrapper start */}
         {/* page main wrapper start */}
         <div className="shop-main-wrapper section-padding pb-0">
           <div className="container">
             <div className="row" style={{ marginBottom: "5rem" }}>
               {/* product details wrapper start */}
+              {/* product details wrapper start */}
               <div className="col-lg-12 order-1 order-lg-2">
+                {/* product details inner end */}
                 {/* product details inner end */}
                 <div className="product-details-inner">
                   <div className="row">
                     <div className="col-lg-5">
-                      <div className="pro-large-img img-zoom" style={{ marginBottom: "10px" }}>
+                      <div
+                        className="pro-large-img img-zoom"
+                        style={{ marginBottom: "10px" }}
+                      >
                         <Image
                           width={"100%"}
+                          src={product?.image?.[0]}
                           src={product?.image?.[0]}
                           alt="product-details"
                         />
                       </div>
+                      <div className="tab-content"></div>
                       <div className="tab-content"></div>
                     </div>
                     <div className="col-lg-7">
                       <div className="product-details-des">
                         <div className="manufacturer-name">
                           <a href="#">HOT</a>
+                          <a href="#">HOT</a>
                         </div>
+                        <h3 className="product-name">{product?.name}</h3>
                         <h3 className="product-name">{product?.name}</h3>
                         <div className="price-box">
                           <span className="price-regular">
                             {product?.price} VNĐ
                           </span>
+                          <span className="price-regular">
+                            {product?.price} VNĐ
+                          </span>
                           <span className="price-old">
+                            <del>{product?.priceOld} VNĐ</del>
                             <del>{product?.priceOld} VNĐ</del>
                           </span>
                         </div>
@@ -143,6 +285,8 @@ export default function ProductDetail() {
                           <i className="fa fa-check-circle"></i>
                           <span>200 in stock</span>
                         </div>
+                        <p className="pro-desc">Mô tả sản phẩm:</p>
+                        <p>{product?.description}</p>
                         <p className="pro-desc">Mô tả sản phẩm:</p>
                         <p>{product?.description}</p>
                         <div className="quantity-cart-box d-flex align-items-center">
@@ -167,117 +311,183 @@ export default function ProductDetail() {
                             >
                               +
                             </button>
+                            <h6 className="option-title">Số lượng:</h6>
+                            <div className="quantity-controls">
+                              <button
+                                className="quantity-btn"
+                                onClick={handleQuantityDecrease}
+                              >
+                                -
+                              </button>
+                              <input
+                                type="number"
+                                value={quantity}
+                                onChange={handleQuantityChange}
+                                min="1"
+                                className="quantity-input"
+                              />
+                              <button
+                                className="quantity-btn"
+                                onClick={handleQuantityIncrease}
+                              >
+                                +
+                              </button>
+                            </div>
+                            <div className="action_link">
+                              <button
+                                className="btn btn-cart2"
+                                onClick={
+                                  product ? () => onAddCart(product) : undefined
+                                }
+                              >
+                                Thêm vào giỏ hàng
+                              </button>
+                            </div>
                           </div>
-                          <div className="action_link">
-                            <button
-                              className="btn btn-cart2"
-                              onClick={product ? () => onAddCart(product) : undefined}
+                          <div className="useful-links">
+                            <a
+                              href="#"
+                              data-bs-toggle="tooltip"
+                              title="Compare"
                             >
-                              Thêm vào giỏ hàng
-                            </button>
+                              <i className="pe-7s-refresh-2"></i>compare
+                            </a>
+                            <a
+                              href="#"
+                              data-bs-toggle="tooltip"
+                              title="Wishlist"
+                            >
+                              <i className="pe-7s-like"></i>wishlist
+                            </a>
                           </div>
-                        </div>
-                        <div className="useful-links">
-                          <a href="#" data-bs-toggle="tooltip" title="Compare">
-                            <i className="pe-7s-refresh-2"></i>compare
-                          </a>
-                          <a href="#" data-bs-toggle="tooltip" title="Wishlist">
-                            <i className="pe-7s-like"></i>wishlist
-                          </a>
-                        </div>
-                        <div className="like-icon">
-                          <a className="facebook" href="#">
-                            <i className="fa fa-facebook"></i>like
-                          </a>
-                          <a className="twitter" href="#">
-                            <i className="fa fa-twitter"></i>tweet
-                          </a>
-                          <a className="pinterest" href="#">
-                            <i className="fa fa-pinterest"></i>save
-                          </a>
-                          <a className="google" href="#">
-                            <i className="fa fa-google-plus"></i>share
-                          </a>
+                          <div className="like-icon">
+                            <a className="facebook" href="#">
+                              <i className="fa fa-facebook"></i>like
+                            </a>
+                            <a className="twitter" href="#">
+                              <i className="fa fa-twitter"></i>tweet
+                            </a>
+                            <a className="pinterest" href="#">
+                              <i className="fa fa-pinterest"></i>save
+                            </a>
+                            <a className="google" href="#">
+                              <i className="fa fa-google-plus"></i>share
+                            </a>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                {/* product details inner end */}
+                  {/* product details inner end */}
+                  {/* product details inner end */}
 
-                {/* product details reviews start */}
-                <div className="product-details-reviews section-padding pb-0">
-                  <div className="row">
-                    <div className="col-lg-12">
-                      <div className="product-review-info">
-                        <ul className="nav review-tab">
-                          <li>
-                            <a
-                              className="active"
-                              data-bs-toggle="tab"
-                              href="#tab_one"
+                  {/* product details reviews start */}
+                  {/* product details reviews start */}
+                  <div className="product-details-reviews section-padding pb-0">
+                    <div className="row">
+                      <div className="col-lg-12">
+                        <div className="product-review-info">
+                          <ul className="nav review-tab">
+                            <li>
+                              <a
+                                className="active"
+                                data-bs-toggle="tab"
+                                href="#tab_one"
+                              >
+                                Mô tả
+                              </a>
+                            </li>
+                            <li>
+                              <a data-bs-toggle="tab" href="#tab_two">
+                                Thông tin
+                              </a>
+                            </li>
+                            <li onClick={() => fetchComment(id ? id : null)}>
+                              <a data-bs-toggle="tab" href="#tab_three">
+                                Bình luận
+                              </a>
+                            </li>
+                          </ul>
+                          <div className="tab-content">
+                            <div
+                              id="tab_one"
+                              className="tab-pane fade show active"
                             >
-                              Mô tả
-                            </a>
-                          </li>
-                          <li>
-                            <a data-bs-toggle="tab" href="#tab_two">
-                              Thông tin
-                            </a>
-                          </li>
-                          <li>
-                            <a data-bs-toggle="tab" href="#tab_three">
-                              Bình luận và đánh giá
-                            </a>
-                          </li>
-                        </ul>
-                        <div className="tab-content">
-                          <div id="tab_one" className="tab-pane fade show active">
-                            <div className="product-tab-content">
-                              <h6 className="product-tab-title">Mô tả sản phẩm</h6>
-                              <p>{product?.description}</p>
+                              <div className="product-tab-content">
+                                <h6 className="product-tab-title">
+                                  Mô tả sản phẩm
+                                </h6>
+                                <p>{product?.description}</p>
+                              </div>
                             </div>
-                          </div>
-                          <div id="tab_two" className="tab-pane fade">
-                            <div className="product-tab-content">
-                              <h6 className="product-tab-title">Thông tin sản phẩm</h6>
-                              <ul>
-                                <li>
-                                  {/* <span>Danh mục:</span> {product?.category} */}
-                                </li>
-                                <li>
-                                  {/* <span>Thương hiệu:</span> {product?.brand} */}
-                                </li>
-                              </ul>
+                            <div id="tab_two" className="tab-pane fade">
+                              <div className="product-tab-content">
+                                <h6 className="product-tab-title">
+                                  Thông tin sản phẩm
+                                </h6>
+                                <ul>
+                                  <li>
+                                    {/* <span>Danh mục:</span> {product?.category} */}
+                                  </li>
+                                  <li>
+                                    {/* <span>Thương hiệu:</span> {product?.brand} */}
+                                  </li>
+                                </ul>
+                              </div>
                             </div>
-                          </div>
-                          <div id="tab_three" className="tab-pane fade">
-                            <div className="product-tab-content">
-                              <div className="reviews">
-                                <div className="review-content">
-                                  <div className="rev-author">
-                                    <img
-                                      src="https://via.placeholder.com/100"
-                                      alt="avatar"
-                                    />
+                            <div id="tab_three" className="tab-pane fade">
+                              <div className="product-tab-content">
+                                <div className="reviews">
+                                  <div
+                                    className="reviews"
+                                    style={{
+                                      maxHeight: "310px",
+                                      overflowY: "scroll", // Cho phép cuộn nội dung theo chiều dọc
+                                      scrollbarWidth: "none", // Ẩn thanh cuộn trên Firefox
+                                      msOverflowStyle: "none", // Ẩn thanh cuộn trên IE và Edge
+                                    }}
+                                  >
+                                    {listComment.length > 0 ? (
+                                      listComment.map((comment) => (
+                                        <div
+                                          className="review-content"
+                                          key={comment._id}
+                                        >
+                                          <div className="rev-author">
+                                            <img
+                                              src={comment.avatar}
+                                              alt="avatar"
+                                              style={{ marginRight: "10px" }}
+                                            />
+                                            <span>{comment.fullName}</span>
+                                            <span style={{ float: "right" }}>
+                                              {dayjs(comment.createdAt).format(
+                                                "DD/MM/YYYY HH:mm:ss"
+                                              )}
+                                            </span>
+                                          </div>
+                                          <div className="rev-content">
+                                            <p style={{ paddingLeft: "20px" }}>
+                                              {comment.comment}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <div className="form-group row">
+                                        <div className="col">
+                                          <label
+                                            htmlFor="review"
+                                            className="col-form-label"
+                                          >
+                                            Sản phẩm chưa có bình luận
+                                          </label>
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
-                                  <div className="rev-content">
-                                    <div className="post-author">
-                                      <p>
-                                        <span>Admin -</span> 30 Jan, 2019
-                                      </p>
-                                    </div>
-                                    <p>
-                                      Aliquam dignissim nonummy ultricies. Nulla
-                                      quis nibh. Proin ac neque. Nunc tincidunt
-                                      ante vitae massa. Donec viverra, pede ac
-                                      diam. Cras interdum. Nunc tincidunt ante
-                                      vitae massa. Donec viverra, pede ac diam.
-                                      Cras interdum.
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="form-group row">
+
+                                  {/* <div className="form-group row">
                                   <div className="col">
                                     <label className="col-form-label">
                                       Your Rating
@@ -300,22 +510,32 @@ export default function ProductDetail() {
                                       </span>
                                     </div>
                                   </div>
-                                </div>
-                                <div className="form-group row">
-                                  <div className="col">
-                                    <label htmlFor="review" className="col-form-label">
-                                      Your Review
-                                    </label>
-                                    <textarea
-                                      className="form-control"
-                                      id="review"
-                                      rows={3}
-                                    ></textarea>
+                                </div> */}
+                                  <div
+                                    className="form-group row"
+                                    style={{ marginTop: "20px" }}
+                                  >
+                                    <div className="col">
+                                      <textarea
+                                        className="form-control"
+                                        id="review"
+                                        placeholder="Bình luận của bạn"
+                                        value={textComment}
+                                        onChange={(e) =>
+                                          handleChangeTextComment(
+                                            e.target.value
+                                          )
+                                        }
+                                        rows={3}
+                                      />
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="form-group row">
+                                  {/* <div className="form-group row">
                                   <div className="col">
-                                    <label htmlFor="name" className="col-form-label">
+                                    <label
+                                      htmlFor="name"
+                                      className="col-form-label"
+                                    >
                                       Name
                                     </label>
                                     <input
@@ -327,7 +547,10 @@ export default function ProductDetail() {
                                 </div>
                                 <div className="form-group row">
                                   <div className="col">
-                                    <label htmlFor="email" className="col-form-label">
+                                    <label
+                                      htmlFor="email"
+                                      className="col-form-label"
+                                    >
                                       Email
                                     </label>
                                     <input
@@ -336,12 +559,23 @@ export default function ProductDetail() {
                                       id="email"
                                     />
                                   </div>
-                                </div>
-                                <div className="form-group row">
-                                  <div className="col">
-                                    <button className="btn btn-secondary">
-                                      Submit
-                                    </button>
+                                </div> */}
+                                  <div className="form-group row">
+                                    <div className="col">
+                                      <button
+                                        className="btn btn-secondary"
+                                        style={{
+                                          backgroundColor: "#c29957",
+                                          width: "100px",
+                                          height: "30px",
+                                        }}
+                                        onClick={() =>
+                                          createComment(newComment)
+                                        }
+                                      >
+                                        Submit
+                                      </button>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -353,9 +587,12 @@ export default function ProductDetail() {
                   </div>
                 </div>
                 {/* product details reviews end */}
+                {/* product details reviews end */}
               </div>
               {/* product details wrapper end */}
+              {/* product details wrapper end */}
             </div>
+            {/* Sản phẩm liên quan */}
             {/* Sản phẩm liên quan */}
             <div className="row" style={{ marginBottom: "5rem" }}>
               <div className="row">
@@ -375,10 +612,14 @@ export default function ProductDetail() {
                     <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                       <Row gutter={16}>
                         {relatedProducts.map((relatedProduct) => (
-                          <Col key={relatedProduct._id} className="gutter-row" span={6}>
+                          <Col
+                            key={relatedProduct._id}
+                            className="gutter-row"
+                            span={6}
+                          >
                             <div className="product-item">
                               <figure className="product-thumb">
-                                <Link to={`/product/${relatedProduct._id}`}>
+                                <a href="#">
                                   <img
                                     className="pri-img"
                                     src={relatedProduct?.image?.[0]}
@@ -389,7 +630,7 @@ export default function ProductDetail() {
                                     src={relatedProduct?.image?.[0]}
                                     alt="product"
                                   />
-                                </Link>
+                                </a>
                                 <div className="product-badge">
                                   <div className="product-label new">
                                     <span>HOT</span>
