@@ -265,19 +265,13 @@ export default function ProductDetail() {
                       <div className="product-details-des">
                         <div className="manufacturer-name">
                           <a href="#">HOT</a>
-                          <a href="#">HOT</a>
                         </div>
-                        <h3 className="product-name">{product?.name}</h3>
                         <h3 className="product-name">{product?.name}</h3>
                         <div className="price-box">
                           <span className="price-regular">
                             {product?.price} VNĐ
                           </span>
-                          <span className="price-regular">
-                            {product?.price} VNĐ
-                          </span>
                           <span className="price-old">
-                            <del>{product?.priceOld} VNĐ</del>
                             <del>{product?.priceOld} VNĐ</del>
                           </span>
                         </div>
@@ -287,8 +281,7 @@ export default function ProductDetail() {
                         </div>
                         <p className="pro-desc">Mô tả sản phẩm:</p>
                         <p>{product?.description}</p>
-                        <p className="pro-desc">Mô tả sản phẩm:</p>
-                        <p>{product?.description}</p>
+                        
                         <div className="quantity-cart-box d-flex align-items-center">
                           <h6 className="option-title">Số lượng:</h6>
                           <div className="quantity-controls">
@@ -311,28 +304,6 @@ export default function ProductDetail() {
                             >
                               +
                             </button>
-                            <h6 className="option-title">Số lượng:</h6>
-                            <div className="quantity-controls">
-                              <button
-                                className="quantity-btn"
-                                onClick={handleQuantityDecrease}
-                              >
-                                -
-                              </button>
-                              <input
-                                type="number"
-                                value={quantity}
-                                onChange={handleQuantityChange}
-                                min="1"
-                                className="quantity-input"
-                              />
-                              <button
-                                className="quantity-btn"
-                                onClick={handleQuantityIncrease}
-                              >
-                                +
-                              </button>
-                            </div>
                             <div className="action_link">
                               <button
                                 className="btn btn-cart2"
