@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { createOrder, deleteOrder, getAllOrders, getMyOrders, updateOrder } from "../controller/order.js";
+import {
+  createOrder,
+  deleteOrder,
+  getAllOrders,
+  getMyOrders,
+  updateOrder,
+} from "../controller/order.js";
 import { checkAuth } from "../middleware/checkAuth.js";
 
 const orderRouter = Router();
@@ -9,6 +15,5 @@ orderRouter.get("/", getAllOrders);
 orderRouter.get("/:id", getMyOrders);
 orderRouter.put("/:id", updateOrder);
 orderRouter.delete("/:id", deleteOrder);
-
 
 export default orderRouter;

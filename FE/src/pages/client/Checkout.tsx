@@ -1,9 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMyCartQuery } from "../../hooks/useCart";
 import { formatPrice } from "../../services/common/formatCurrency";
 import { SubmitHandler, useForm } from "react-hook-form";
 import OrderApi from "../../config/orderApi";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { ICartItem } from "./Cart";
+import {
+  resetProductSelected,
+  selectProductSelected,
+  selectTotalPrice,
+} from "../../store/cartSlice";
 
 type Inputs = {
   customerName: string;
@@ -15,7 +23,11 @@ type Inputs = {
 };
 
 const Checkout = () => {
-  const { data, refetch } = useMyCartQuery();
+  const dispatch = useDispatch();
+  const productSelected: ICartItem[] = useSelector(selectProductSelected);
+  const totalPrice = useSelector(selectTotalPrice);
+
+  const { refetch } = useMyCartQuery();
   const navigate = useNavigate();
 
   const { register, handleSubmit } = useForm<Inputs>({
@@ -26,10 +38,20 @@ const Checkout = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      await OrderApi.createOrder(data);
-      message.success("Đặt hàng thành công!");
-      navigate("/");
-      refetch();
+      const productSelectedIds = productSelected.map((it) => it.product._id);
+      const res = await OrderApi.createOrder({
+        ...data,
+        productSelectedIds,
+      });
+
+      if (data?.paymentMethod === "COD") {
+        message.success("Đặt hàng thành công!");
+        navigate("/");
+        refetch();
+        dispatch(resetProductSelected());
+      } else {
+        window.location.href = res?.data?.paymentUrl;
+      }
     } catch (error) {
       console.log(data);
     }
@@ -121,7 +143,7 @@ const Checkout = () => {
                 />
                 <label className="form-check-label" htmlFor="myCheckbox">
                   {" "}
-                  Thanh toán qua tài khoản ngân hàng{" "}
+                  VNPay
                 </label>
               </div>
             </div>
@@ -149,7 +171,7 @@ const Checkout = () => {
               </tr>
             </thead>
             <tbody>
-              {data?.data?.products.map((item) => (
+              {productSelected?.map((item) => (
                 <tr key={item._id}>
                   <td>{item.product.name}</td>
                   <td>{formatPrice(item.product.price)}</td>
@@ -159,7 +181,7 @@ const Checkout = () => {
               ))}
             </tbody>
           </table>
-          <h4>Tổng tiền: {formatPrice(data?.data?.totalPrice)}</h4>
+          <h4>Tổng tiền: {formatPrice(totalPrice)}</h4>
         </div>
       </div>
     </div>

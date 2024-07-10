@@ -7,6 +7,7 @@ import ClientLogin from "../pages/client/ClientLogin";
 import Cart from "../pages/client/Cart";
 import Checkout from "../pages/client/Checkout";
 import ProductDetail from "../pages/client/ProductDetail";
+import VNPayCallback from "../pages/client/VNPayCallback";
 
 export default function ClientRouter() {
   return (
@@ -21,6 +22,7 @@ export default function ClientRouter() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/login" element={<ClientLogin />} />
         <Route path="/register" element={<ClientLogin />} />
+        <Route path="/vnpay-callback" element={<VNPayCallback />} />
       </Routes>
       <Footer />
     </div>
