@@ -3,7 +3,11 @@ import { formatPrice } from "../../services/common/formatCurrency";
 import { SubmitHandler, useForm } from "react-hook-form";
 import OrderApi from "../../config/orderApi";
 import { useNavigate } from "react-router-dom";
-import { message } from "antd";
+import { toast } from "react-toastify";
+import { IHistoryBill } from "../../interface/HistoryBill";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { IUser } from "../../interface/Users";
 
 type Inputs = {
   customerName: string;
@@ -16,6 +20,7 @@ type Inputs = {
 
 const Checkout = () => {
   const { data, refetch } = useMyCartQuery();
+  const idUser = "6684b89e5934b50d4f1ac280"; // chưa lấy được từ auth nên đang fix cứng
   const navigate = useNavigate();
 
   const { register, handleSubmit } = useForm<Inputs>({
@@ -26,14 +31,80 @@ const Checkout = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      await OrderApi.createOrder(data);
-      message.success("Đặt hàng thành công!");
+      const dataBill = await OrderApi.createOrder(data);
+      createNewHistory(dataBill.data._id, dataBill.data.status);
+      toast.success("Đặt hàng thành công!");
       navigate("/");
       refetch();
     } catch (error) {
       console.log(data);
     }
   };
+
+  const [user, setUser] = useState<IUser>({
+    _id: "",
+    email: "",
+    password: "",
+    name: "",
+    role: "",
+    avatar: "",
+  });
+  const findUserById = async (idUser: string | null) => {
+    if (idUser === null) {
+      return setUser({
+        _id: "",
+        email: "",
+        password: "",
+        name: "",
+        role: "",
+        avatar: "",
+      });
+    } else {
+      try {
+        const response = await axios.post(
+          "http://localhost:3001/api/users/findUserById",
+          { _id: idUser }
+        );
+        setUser(response.data?.data);
+      } catch (error) {
+        toast.error("Không tìm thấy tài khoản người dùng");
+      }
+    }
+  };
+
+  const createNewHistory = async (
+    idBill: string | null,
+    statusBill: string | null
+  ) => {
+    if (idBill === null || statusBill === null) {
+      toast.warning("Không thể tạo lịch sử đơn hàng!");
+      return;
+    }
+    const dataHistoryBill: IHistoryBill = {
+      _id: null,
+      idUser: idUser,
+      idBill: idBill,
+      creator: user.name,
+      role: user.role,
+      statusBill: statusBill,
+      note: "",
+      createdAt: "",
+    };
+
+    try {
+      // Gửi yêu cầu tạo lịch sử
+      await axios.post(
+        "http://localhost:3001/api//history-bill/add",
+        dataHistoryBill
+      );
+    } catch (error) {
+      toast.error("Tạo lịch sử thất bại");
+    }
+  };
+
+  useEffect(() => {
+    findUserById(idUser ? idUser : null);
+  }, [idUser]);
 
   return (
     <div className="container mt-5">
@@ -120,8 +191,7 @@ const Checkout = () => {
                   {...register("paymentMethod")}
                 />
                 <label className="form-check-label" htmlFor="myCheckbox">
-                  {" "}
-                  Thanh toán qua tài khoản ngân hàng{" "}
+                  Thanh toán ngay
                 </label>
               </div>
             </div>

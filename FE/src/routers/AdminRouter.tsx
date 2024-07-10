@@ -10,19 +10,14 @@ import CategoryAdd from "../pages/admin/category/CategoryAdd";
 import CategoryEdit from "../pages/admin/category/CategoryEdit";
 import ProductDetailAndEdit from "../pages/admin/product/ProductDetailAndEdit";
 import BillDetail from "../pages/admin/bill/BillDetail";
+<<<<<<< HEAD
 import Size from "../pages/admin/size/Size";
 import SizeAdd from "../pages/admin/size/SizeAdd";
+=======
+>>>>>>> 4a750a9f47f8095b0286710a0234a58ecb7a0e94
 import Users from "../pages/admin/users/Users";
 import ProductAdd from "../pages/admin/product/productAdd";
-
-// order management
-import AllOrder from "../pages/admin/OrderManagement/views/All";
-import WaitingForComfirmationOrder from "../pages/admin/OrderManagement/views/WaitForConfirmation";
-import WaitingForDeliveryOrder from "../pages/admin/OrderManagement/views/WaitingForDelivery";
-import BeingShippedOrder from "../pages/admin/OrderManagement/views/BeingShipped";
-import DeliveredOrder from "../pages/admin/OrderManagement/views/Delivered";
-import PaidOrder from "../pages/admin/OrderManagement/views/Paid";
-import CompleteOrder from "../pages/admin/OrderManagement/views/Complete";
+import PageComment from "../pages/admin/comment/PageComment";
 
 
 export default function AdminRouter() {
@@ -44,13 +39,7 @@ export default function AdminRouter() {
         <Route path="/size/add" element={<SizeAdd />} />
         <Route path="/staff" element={<Staff />} />
         <Route path="/users" element={<Users />} />
-        <Route path="/order/all" element={<AllOrder />} />
-        <Route path="/order/wait-for-confirmation" element={<WaitingForComfirmationOrder />} />
-        <Route path="/order/waiting-for-delivery" element={<WaitingForDeliveryOrder />} />
-        <Route path="/order/being-shipped" element={<BeingShippedOrder />} />
-        <Route path="/order/delivered" element={<DeliveredOrder />} />
-        <Route path="/order/paid" element={<PaidOrder />} />
-        <Route path="/order/complete" element={<CompleteOrder />} />
+        <Route path="/comments" element={<PageComment />} />
       </Routes>
     </HeaderAdmin>
   );
