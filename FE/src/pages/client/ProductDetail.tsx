@@ -13,7 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
-  const idUser = "6687fecfed4d73c8f419c10e"; // chưa lấy được từ auth nên đang fix cứng
+  const idUser = "6684b89e5934b50d4f1ac280"; // chưa lấy được từ auth nên đang fix cứng
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity

@@ -93,8 +93,9 @@ export const detailOrder = async (req, res) => {
  * @param {*} res
  * @returns
  */
+
 export const getAllOrders = async (req, res) => {
-  const { status, code, createAtFrom, createAtTo, page = 1 } = req.body;
+  const { status, code, createdAtFrom, createdAtTo, page = 1 } = req.body;
   const pageSize = 10;
 
   try {
@@ -105,16 +106,16 @@ export const getAllOrders = async (req, res) => {
     }
 
     if (code) {
-      query.code = { $regex: code, $options: "i" }; // Tìm kiếm mã hóa đơn với regex, không phân biệt hoa thường, tìm kiếm theo like
+      query.code = { $regex: code, $options: "i" }; // Tìm kiếm mã hóa đơn với regex, không phân biệt hoa thường
     }
 
-    if (createAtFrom || createAtTo) {
+    if (createdAtFrom || createdAtTo) {
       query.createdAt = {};
-      if (createAtFrom) {
-        query.createdAt.$gte = new Date(createAtFrom);
+      if (createdAtFrom) {
+        query.createdAt.$gte = new Date(createdAtFrom);
       }
-      if (createAtTo) {
-        query.createdAt.$lte = new Date(createAtTo);
+      if (createdAtTo) {
+        query.createdAt.$lte = new Date(createdAtTo);
       }
     }
 
@@ -126,7 +127,7 @@ export const getAllOrders = async (req, res) => {
     const total = await Order.countDocuments(query);
 
     if (!orders || orders.length === 0) {
-      return res.status(200).json({
+      return res.status(404).json({
         message: "Không tìm thấy đơn hàng!",
         data: [],
         total: 0,
@@ -140,12 +141,13 @@ export const getAllOrders = async (req, res) => {
       size: pageSize,
     });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Lỗi:", error);
     return res.status(500).json({
-      message: "Internal server error",
+      message: "Lỗi máy chủ nội bộ",
     });
   }
 };
+
 
 /**
  * API cập nhật trạng thái hóa đơn

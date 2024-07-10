@@ -56,7 +56,7 @@ export default function Bill() {
 
   const fetchOrder = async (filter: IFilterBill, currentPage: number) => {
     try {
-      const response = await axios.post("http://localhost:3001/api/orders", {
+      const response = await axios.get("http://localhost:3001/api/orders", {
         ...filter,
         page: currentPage,
       });
