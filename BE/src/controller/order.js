@@ -1,7 +1,13 @@
 import Order from "../models/order.js";
 import Cart from "../models/cart.js";
 import product from "../models/product.js";
+import dayjs from "dayjs";
 
+/**
+ * API tạo mới hóa đơn
+ * @param {*} req
+ * @param {*} res
+ */
 export const createOrder = async (req, res) => {
   try {
     const userId = req.profile._id;
@@ -35,11 +41,12 @@ export const createOrder = async (req, res) => {
 
     const orders = await new Order({
       ...req.body,
+      code: `HD${dayjs().format("YYYYMMDDHHmmss")}`,
       userId,
       quantity: cart.products.length,
       totalPrice,
       products,
-      status: "Chờ xác nhận"
+      status: "1",
     }).save();
 
     await Cart.findOneAndDelete({ userId }).exec();
@@ -53,7 +60,13 @@ export const createOrder = async (req, res) => {
   }
 };
 
-export const getMyOrders = async (req, res) => {
+/**
+ * API xem chi tiết đơn hàng
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+export const detailOrder = async (req, res) => {
   try {
     const orders = await Order.findById(req.params.id);
     if (!orders || orders.length === 0) {
@@ -62,7 +75,7 @@ export const getMyOrders = async (req, res) => {
         data: [],
       });
     }
-      
+
     return res.status(200).json({
       message: "Success",
       data: orders,
@@ -72,39 +85,69 @@ export const getMyOrders = async (req, res) => {
       message: "Internal server error",
     });
   }
+};
 
-}
-
+/**
+ * API danh sách hóa đơn
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
 export const getAllOrders = async (req, res) => {
-  const statusReq = req.query.status;
+  const { status, code, createAtFrom, createAtTo, page = 1 } = req.body;
+  const pageSize = 10;
 
   try {
     let query = {};
 
-    if (statusReq) {
-      query = { status: statusReq };
+    if (status) {
+      query.status = status;
     }
 
-    const orders = await Order.find(query);
+    if (code) {
+      query.code = { $regex: code, $options: "i" }; // Tìm kiếm mã hóa đơn với regex, không phân biệt hoa thường, tìm kiếm theo like
+    }
+
+    if (createAtFrom || createAtTo) {
+      query.createdAt = {};
+      if (createAtFrom) {
+        query.createdAt.$gte = new Date(createAtFrom);
+      }
+      if (createAtTo) {
+        query.createdAt.$lte = new Date(createAtTo);
+      }
+    }
+
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
+
+    const total = await Order.countDocuments(query);
 
     if (!orders || orders.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         message: "Không tìm thấy đơn hàng!",
         data: [],
+        total: 0,
       });
     }
 
     return res.status(200).json({
       message: "Success",
       data: orders,
+      total: total,
+      size: pageSize,
     });
   } catch (error) {
+    console.error("Error:", error);
     return res.status(500).json({
       message: "Internal server error",
     });
   }
-}
+};
 
+<<<<<<< HEAD
 
 
 function isValidDate(date) {
@@ -117,33 +160,43 @@ function isValidDate(date) {
 
 
 export const deleteOrder = async (req, res) => {
+=======
+/**
+ * API cập nhật trạng thái hóa đơn
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+export const updateOrderStatus = async (req, res) => {
+>>>>>>> 19cc6fdcb4b71a4894734fe7cf0fdcda3cd93567
   try {
-    const id = req.params.id;
-    const orders = await Order.findByIdAndDelete(id).exec();
-    return res.status(200).json({
-      message: "Success",
-      data: orders,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Internal server error",
-    });
-  } 
-}
+    const { id, status } = req.body;
 
-export const updateOrder = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const orders = await Order.findByIdAndUpdate(id, req.body, {
-      new: true,
-    }).exec();
+    if (!status) {
+      return res.status(400).json({
+        message: "Chuyển trạng thái thất bại",
+      });
+    }
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      { $set: { status: status } },
+      { new: true }
+    ).exec();
+
+    if (!updatedOrder) {
+      return res.status(404).json({
+        message: "Không tìm thấy hóa đơn",
+      });
+    }
+
     return res.status(200).json({
       message: "Success",
-      data: orders,
+      data: updatedOrder,
     });
   } catch (error) {
     res.status(500).json({
       message: "Internal server error",
     });
   }
-}
+};

@@ -1,17 +1,8 @@
-import { Table, Tag } from "antd";
+import { Table } from "antd";
 import dayjs from "dayjs";
 import formatCurrency from "../../../services/common/formatCurrency";
-
-interface ITransaction {
-  id: number;
-  totalMoney: number | null;
-  createdAt: string;
-  type: number;
-  paymentMethod: number;
-  status: number;
-  note: string;
-  fullName: string;
-}
+import { ITransaction } from "../../../interface/Transaction";
+import { CheckCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
 
 interface Props {
   listTransaction: ITransaction[];
@@ -25,6 +16,12 @@ const AdBillTransaction = ({ listTransaction }: Props) => {
       pagination={false}
       style={{ marginTop: 16 }}
       columns={[
+        {
+          title: "Mã giao dịch",
+          dataIndex: "transCode",
+          key: "transCode",
+          align: "center",
+        },
         {
           title: "Số tiền",
           dataIndex: "totalMoney",
@@ -42,49 +39,24 @@ const AdBillTransaction = ({ listTransaction }: Props) => {
           render: (text: string) => dayjs(text).format("DD-MM-YYYY HH:mm:ss"),
         },
         {
-          title: "Loại giao dịch",
-          dataIndex: "type",
-          key: "type",
-          align: "center",
-          render: (text: number) => (
-            <Tag color={text ? "green" : "blue"}>
-              {text ? "Hoàn tiền" : "Thanh toán"}
-            </Tag>
-          ),
-        },
-        {
-          title: "PTTT",
-          dataIndex: "paymentMethod",
-          key: "paymentMethod",
-          align: "center",
-          render: (text: number) => (
-            <Tag color={text === 1 ? "geekblue" : "volcano"}>
-              {text === 1 ? "Tiền mặt" : "Chuyển khoản"}
-            </Tag>
-          ),
-        },
-        {
-          title: "Trạng thái",
-          dataIndex: "status",
-          key: "status",
-          align: "center",
-          render: (text: number) => (
-            <Tag color={text === 0 ? "success" : "error"}>
-              {text === 0 ? "Thành công" : "Không thành công"}
-            </Tag>
-          ),
-        },
-        {
           title: "Ghi chú",
           dataIndex: "note",
           key: "note",
           align: "center",
         },
         {
-          title: "Nhân viên xác nhận",
-          dataIndex: "fullName",
-          key: "fullName",
+          title: "Trạng thái",
+          dataIndex: "status",
+          key: "status",
           align: "center",
+          render: (text: boolean) =>
+            text ? (
+              <CheckCircleOutlined
+                style={{ color: "green", fontSize: "20px" }}
+              />
+            ) : (
+              <InfoCircleOutlined style={{ color: "red", fontSize: "20px" }} />
+            ),
         },
       ]}
     />

@@ -48,42 +48,47 @@ export default function AdminMenu({ small }: Props) {
     {
       key: "bill",
       icon: <FileDoneOutlined />,
-      label: "Quản lý đơn hàng",
-      children: [
-        {
-          key: "all",
-          label: <Link to="/admin/order/all">Tất cả</Link>,
-        },
-        {
-          key: "wait-for-confirmation",
-          label: (
-            <Link to="/admin/order/wait-for-confirmation">Chờ xác nhận</Link>
-          ),
-        },
-        {
-          key: "waiting-for-delivery",
-          label: (
-            <Link to="/admin/order/waiting-for-delivery">Chờ giao hàng</Link>
-          ),
-        },
-        {
-          key: "being-shipped",
-          label: <Link to="/admin/order/being-shipped">Đang vận chuyển</Link>,
-        },
-        {
-          key: "delivered",
-          label: <Link to="/admin/order/delivered">Đã giao hàng</Link>,
-        },
-        {
-          key: "paid",
-          label: <Link to="/admin/order/paid">Đã thanh toán</Link>,
-        },
-        {
-          key: "complete",
-          label: <Link to="/admin/order/complete">Hoàn thành</Link>,
-        },
-      ],
+      label: <Link to="/admin/bill">Đơn hàng</Link>,
     },
+    // {
+    //   key: "bill",
+    //   icon: <FileDoneOutlined />,
+    //   label: "Quản lý đơn hàng",
+    //   children: [
+    //     {
+    //       key: "all",
+    //       label: <Link to="/admin/order/all">Tất cả</Link>,
+    //     },
+    //     {
+    //       key: "wait-for-confirmation",
+    //       label: (
+    //         <Link to="/admin/order/wait-for-confirmation">Chờ xác nhận</Link>
+    //       ),
+    //     },
+    //     {
+    //       key: "waiting-for-delivery",
+    //       label: (
+    //         <Link to="/admin/order/waiting-for-delivery">Chờ giao hàng</Link>
+    //       ),
+    //     },
+    //     {
+    //       key: "being-shipped",
+    //       label: <Link to="/admin/order/being-shipped">Đang vận chuyển</Link>,
+    //     },
+    //     {
+    //       key: "delivered",
+    //       label: <Link to="/admin/order/delivered">Đã giao hàng</Link>,
+    //     },
+    //     {
+    //       key: "paid",
+    //       label: <Link to="/admin/order/paid">Đã thanh toán</Link>,
+    //     },
+    //     {
+    //       key: "complete",
+    //       label: <Link to="/admin/order/complete">Hoàn thành</Link>,
+    //     },
+    //   ],
+    // },
     {
       key: "products",
       icon: <BarcodeOutlined />,
