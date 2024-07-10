@@ -30,3 +30,6 @@ app.listen(port, () => {
 });
 
 export const viteNodeApp = app;
+// em reta
+//kih nao loi e là sao thế a  loi say ra khi naokhi mình k thể lấy dduocj dữ liệu bên mongodb. demo a xem
+// ở bên này e có hết data nhma k thể render ra màn hình tự nhiên bây giờ lại nhận giữ liệu a ạ 
