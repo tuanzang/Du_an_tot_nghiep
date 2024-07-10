@@ -13,7 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
-  const idUser = "6687fecfed4d73c8f419c10e"; // chưa lấy được từ auth nên đang fix cứng
+  const idUser = "6684b89e5934b50d4f1ac280"; // chưa lấy được từ auth nên đang fix cứng
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
@@ -27,12 +27,12 @@ export default function ProductDetail() {
   });
 
   useEffect(() => {
-    fetchProduct();
+    fetchProduct(String(id));
     fetchRelatedProducts();
     findUserById(idUser ? idUser : null);
   }, [id, idUser]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
 
-  const fetchProduct = async () => {
+  const fetchProduct = async (id: string) => {
     try {
       if (id) {
         const response = await axios.get(
@@ -125,7 +125,7 @@ export default function ProductDetail() {
     } else {
       try {
         const response = await axios.post(
-          "http://localhost:3001/api/comments/findUserById",
+          "http://localhost:3001/api/users/findUserById",
           { _id: idUser }
         );
         setUser(response.data?.data);
@@ -199,7 +199,6 @@ export default function ProductDetail() {
     <div>
       <main>
         {/* breadcrumb area start */}
-        {/* breadcrumb area start */}
         <div className="breadcrumb-area">
           <div className="container">
             <div className="row">
@@ -232,17 +231,13 @@ export default function ProductDetail() {
           </div>
         </div>
         {/* breadcrumb area end */}
-        {/* breadcrumb area end */}
 
-        {/* page main wrapper start */}
         {/* page main wrapper start */}
         <div className="shop-main-wrapper section-padding pb-0">
           <div className="container">
             <div className="row" style={{ marginBottom: "5rem" }}>
               {/* product details wrapper start */}
-              {/* product details wrapper start */}
               <div className="col-lg-12 order-1 order-lg-2">
-                {/* product details inner end */}
                 {/* product details inner end */}
                 <div className="product-details-inner">
                   <div className="row">
@@ -254,11 +249,9 @@ export default function ProductDetail() {
                         <Image
                           width={"100%"}
                           src={product?.image?.[0]}
-                          src={product?.image?.[0]}
                           alt="product-details"
                         />
                       </div>
-                      <div className="tab-content"></div>
                       <div className="tab-content"></div>
                     </div>
                     <div className="col-lg-7">
@@ -281,7 +274,6 @@ export default function ProductDetail() {
                         </div>
                         <p className="pro-desc">Mô tả sản phẩm:</p>
                         <p>{product?.description}</p>
-                        
                         <div className="quantity-cart-box d-flex align-items-center">
                           <h6 className="option-title">Số lượng:</h6>
                           <div className="quantity-controls">
@@ -315,44 +307,12 @@ export default function ProductDetail() {
                               </button>
                             </div>
                           </div>
-                          <div className="useful-links">
-                            <a
-                              href="#"
-                              data-bs-toggle="tooltip"
-                              title="Compare"
-                            >
-                              <i className="pe-7s-refresh-2"></i>compare
-                            </a>
-                            <a
-                              href="#"
-                              data-bs-toggle="tooltip"
-                              title="Wishlist"
-                            >
-                              <i className="pe-7s-like"></i>wishlist
-                            </a>
-                          </div>
-                          <div className="like-icon">
-                            <a className="facebook" href="#">
-                              <i className="fa fa-facebook"></i>like
-                            </a>
-                            <a className="twitter" href="#">
-                              <i className="fa fa-twitter"></i>tweet
-                            </a>
-                            <a className="pinterest" href="#">
-                              <i className="fa fa-pinterest"></i>save
-                            </a>
-                            <a className="google" href="#">
-                              <i className="fa fa-google-plus"></i>share
-                            </a>
-                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                   {/* product details inner end */}
-                  {/* product details inner end */}
 
-                  {/* product details reviews start */}
                   {/* product details reviews start */}
                   <div className="product-details-reviews section-padding pb-0">
                     <div className="row">
@@ -457,31 +417,6 @@ export default function ProductDetail() {
                                       </div>
                                     )}
                                   </div>
-
-                                  {/* <div className="form-group row">
-                                  <div className="col">
-                                    <label className="col-form-label">
-                                      Your Rating
-                                    </label>
-                                    <div className="ratings">
-                                      <span className="good">
-                                        <i className="fa fa-star"></i>
-                                      </span>
-                                      <span className="good">
-                                        <i className="fa fa-star"></i>
-                                      </span>
-                                      <span className="good">
-                                        <i className="fa fa-star"></i>
-                                      </span>
-                                      <span className="good">
-                                        <i className="fa fa-star"></i>
-                                      </span>
-                                      <span>
-                                        <i className="fa fa-star"></i>
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div> */}
                                   <div
                                     className="form-group row"
                                     style={{ marginTop: "20px" }}
@@ -501,36 +436,7 @@ export default function ProductDetail() {
                                       />
                                     </div>
                                   </div>
-                                  {/* <div className="form-group row">
-                                  <div className="col">
-                                    <label
-                                      htmlFor="name"
-                                      className="col-form-label"
-                                    >
-                                      Name
-                                    </label>
-                                    <input
-                                      type="text"
-                                      className="form-control"
-                                      id="name"
-                                    />
-                                  </div>
-                                </div>
-                                <div className="form-group row">
-                                  <div className="col">
-                                    <label
-                                      htmlFor="email"
-                                      className="col-form-label"
-                                    >
-                                      Email
-                                    </label>
-                                    <input
-                                      type="text"
-                                      className="form-control"
-                                      id="email"
-                                    />
-                                  </div>
-                                </div> */}
+
                                   <div className="form-group row">
                                     <div className="col">
                                       <button
@@ -558,12 +464,9 @@ export default function ProductDetail() {
                   </div>
                 </div>
                 {/* product details reviews end */}
-                {/* product details reviews end */}
               </div>
               {/* product details wrapper end */}
-              {/* product details wrapper end */}
             </div>
-            {/* Sản phẩm liên quan */}
             {/* Sản phẩm liên quan */}
             <div className="row" style={{ marginBottom: "5rem" }}>
               <div className="row">
@@ -596,47 +499,11 @@ export default function ProductDetail() {
                                     src={relatedProduct?.image?.[0]}
                                     alt="product"
                                   />
-                                  <img
-                                    className="sec-img"
-                                    src={relatedProduct?.image?.[0]}
-                                    alt="product"
-                                  />
                                 </a>
                                 <div className="product-badge">
                                   <div className="product-label new">
                                     <span>HOT</span>
                                   </div>
-                                </div>
-                                <div className="button-group">
-                                  <a
-                                    href="#"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="left"
-                                    title="Yêu thích"
-                                  >
-                                    <i className="pe-7s-like"></i>
-                                  </a>
-                                  <a
-                                    href="#"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="left"
-                                    title="So sánh"
-                                  >
-                                    <i className="pe-7s-refresh-2"></i>
-                                  </a>
-                                  <a
-                                    href="#"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#quick_view"
-                                  >
-                                    <span
-                                      data-bs-toggle="tooltip"
-                                      data-bs-placement="left"
-                                      title="Xem chi tiết"
-                                    >
-                                      <i className="pe-7s-search"></i>
-                                    </span>
-                                  </a>
                                 </div>
                                 <div className="cart-hover">
                                   <button className="btn btn-cart">
@@ -649,36 +516,6 @@ export default function ProductDetail() {
                                       <a href="#">{relatedProduct.name}</a>
                                     </p>
                                   </div>
-                                  <ul className="color-categories">
-                                    <li>
-                                      <a
-                                        href="#"
-                                        className="c-lightblue"
-                                        title="LightSteelblue"
-                                      ></a>
-                                    </li>
-                                    <li>
-                                      <a
-                                        href="#"
-                                        className="c-darktan"
-                                        title="Darktan"
-                                      ></a>
-                                    </li>
-                                    <li>
-                                      <a
-                                        href="#"
-                                        className="c-grey"
-                                        title="Grey"
-                                      ></a>
-                                    </li>
-                                    <li>
-                                      <a
-                                        href="#"
-                                        className="c-brown"
-                                        title="Brown"
-                                      ></a>
-                                    </li>
-                                  </ul>
                                   <div className="price-box">
                                     <span className="price-regular">
                                       {relatedProduct.price} VNĐ

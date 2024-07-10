@@ -5,7 +5,6 @@ import {
   detailComment,
   findAllProduct,
   findAllUser,
-  findUserById,
   getAllComment,
   getCommentByIdProduct,
   updateComment,
@@ -18,8 +17,7 @@ commentRouter.post("/findByIdProduct", getCommentByIdProduct);
 commentRouter.post("/add", createComment);
 commentRouter.post("/update", updateComment);
 commentRouter.post("/delete", deleteComment);
-commentRouter.post("/detail", detailComment);
-commentRouter.post("/findUserById", findUserById);
+commentRouter.post("/detail/:id", detailComment);
 commentRouter.get("/allUser", findAllUser);
 commentRouter.get("/allProduct", findAllProduct);
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import {
   Card,
@@ -23,6 +23,7 @@ import {
 } from "@ant-design/icons";
 import PieChartDashBoard from "./PieChartDashBoard";
 import formatCurrency from "../../../services/common/formatCurrency";
+import axios from "axios";
 // import { LineChart } from "./LineChartDashBoard"; // Assuming you have a LineChartDashBoard component
 
 const { Title } = Typography;
@@ -51,7 +52,6 @@ const DashboardCard = function ({
   product,
   order,
   orderCancel,
-  orderReturn,
   color,
 }: {
   iconCart:
@@ -66,7 +66,6 @@ const DashboardCard = function ({
   product: number;
   order: number;
   orderCancel: number;
-  orderReturn: number;
   color: string;
 }) {
   const IconComponent = iconCart;
@@ -130,7 +129,6 @@ const DashboardCard = function ({
             <td style={{ fontWeight: "bold" }}>{product}</td>
             <td style={{ fontWeight: "bold" }}>{order}</td>
             <td style={{ fontWeight: "bold" }}>{orderCancel}</td>
-            <td style={{ fontWeight: "bold" }}>{orderReturn}</td>
           </tr>
         </tbody>
       </table>
@@ -145,6 +143,254 @@ export default function Dashboard() {
     page: 1,
     size: 5,
   });
+
+  const [listOrder, setListOrder] = useState([]);
+  const [totalOrdersToday, setTotalOrdersToday] = useState(0);
+  const [totalOrdersThisWeek, setTotalOrdersThisWeek] = useState(0);
+  const [totalOrdersThisMonth, setTotalOrdersThisMonth] = useState(0);
+  const [totalOrdersThisYear, setTotalOrdersThisYear] = useState(0);
+  const [completedOrdersDay, setCompletedOrdersDay] = useState(0);
+  const [canceledOrdersDay, setCanceledOrdersDay] = useState(0);
+  const [completedOrdersWeek, setCompletedOrdersWeek] = useState(0);
+  const [canceledOrdersWeek, setCanceledOrdersWeek] = useState(0);
+  const [completedOrdersMonth, setCompletedOrdersMonth] = useState(0);
+  const [canceledOrdersMonth, setCanceledOrdersMonth] = useState(0);
+  const [completedOrdersYear, setCompletedOrdersYear] = useState(0);
+  const [canceledOrdersYear, setCanceledOrdersYear] = useState(0);
+
+  useEffect(() => {
+    const fetchAllOrders = async () => {
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        // tính tuần
+
+        // Lấy tổng số đơn hàng
+        const resAllOrders = await axios.get(`http://localhost:3001/api/orders`);
+        const allOrders = resAllOrders.data.data;
+        console.log(allOrders);
+        
+        setListOrder(allOrders);
+
+        // Tính tổng số đơn hàng thành công và bị hủy theo ngày
+        const resOrdersByDay = await getOrdersByDayStatus(today);
+        setTotalOrdersToday(resOrdersByDay.orderByDay);
+        setCompletedOrdersDay(resOrdersByDay.completed);
+        setCanceledOrdersDay(resOrdersByDay.canceled);
+
+        // Tính tổng số đơn hàng thành công và bị hủy theo tuần
+        const resOrdersByWeek = await getOrdersByWeekStatus();  
+        setTotalOrdersThisWeek(resOrdersByWeek.orderByWeek);
+        setCompletedOrdersWeek(resOrdersByWeek.completed);
+        setCanceledOrdersWeek(resOrdersByWeek.canceled);
+
+        // Tính tổng số đơn hàng thành công và bị hủy theo tháng
+        const resOrdersByMonth = await getOrdersByMonthStatus();
+        setTotalOrdersThisMonth(resOrdersByMonth.orderByMonth);
+        setCompletedOrdersMonth(resOrdersByMonth.completed);
+        setCanceledOrdersMonth(resOrdersByMonth.canceled);
+
+        // Tính tổng số đơn hàng thành công và bị hủy theo năm
+        const resOrdersByYear = await getOrdersByYearStatus();
+        setTotalOrdersThisYear(resOrdersByYear.orderByYear);
+        setCompletedOrdersYear(resOrdersByYear.completed);
+        setCanceledOrdersYear(resOrdersByYear.canceled);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchAllOrders();
+  }, []);
+
+  const getOrdersByDayStatus = async (date) => {
+    try {
+      const resAllOrdersByDay = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          dateNow: date,
+        }
+      })
+      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "Hoàn thành",
+          dateNow: date,
+        },
+      });
+
+      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "Đã hủy",
+          dateNow: date,
+        },
+      });
+
+      return {
+        orderByDay: resAllOrdersByDay.data.data.length,
+        completed: resCompleted.data.data.length,
+        canceled: resCanceled.data.data.length,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        completed: 0,
+        canceled: 0,
+      };
+    }
+  };
+
+  const getOrdersByWeekStatus = async () => {
+    try {
+      const { startDate, endDate } = getWeekRange();
+      const resAllOrdersByWeek = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+          
+        }
+        
+      })
+      console.log(startDate, endDate);
+      
+      
+      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "Hoàn thành",
+          dateStart: startDate,
+          dateEnd: endDate,
+        },
+      });
+
+      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "Đã hủy",
+          dateStart: startDate,
+          dateEnd: endDate,
+        },
+      });
+
+      return {
+        orderByWeek: resAllOrdersByWeek.data.data.length,
+        completed: resCompleted.data.data.length,
+        canceled: resCanceled.data.data.length,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        completed: 0,
+        canceled: 0,
+      };
+    }
+  };
+
+  const getWeekRange = () => {
+    const currentDate = new Date();
+    const startOfWeek = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay() + 1));
+    const endOfWeek = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay() + 7));
+    
+    return {
+      startDate: startOfWeek.toISOString().split('T')[0],
+      endDate: endOfWeek.toISOString().split('T')[0],
+    };
+  };
+
+  const getOrdersByMonthStatus = async () => {
+    try {
+      const { startDate, endDate } = getMonthRange();
+      const resAllOrdersByMonth = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
+      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "Hoàn thành",
+          dateStart: startDate,
+          dateEnd: endDate,
+        },
+      });
+
+      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "Đã hủy",
+          dateStart: startDate,
+          dateEnd: endDate,
+        },
+      });
+
+      return {
+        orderByMonth: resAllOrdersByMonth.data.data.length,
+        completed: resCompleted.data.data.length,
+        canceled: resCanceled.data.data.length,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        completed: 0,
+        canceled: 0,
+      };
+    }
+  };
+
+  const getMonthRange = () => {
+    const currentDate = new Date();
+    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    
+    return {
+      startDate: startOfMonth.toISOString().split('T')[0],
+      endDate: endOfMonth.toISOString().split('T')[0],
+    };
+  };
+
+  const getOrdersByYearStatus = async () => {
+    try {
+      const { startDate, endDate } = getYearRange();
+      const resAllOrdersByYear = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
+      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "Hoàn thành",
+          dateStart: startDate,
+          dateEnd: endDate,
+        },
+      });
+
+      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "Đã hủy",
+          dateStart: startDate,
+          dateEnd: endDate,
+        },
+      });
+
+      return {
+        orderByYear: resAllOrdersByYear.data.data.length,
+        completed: resCompleted.data.data.length,
+        canceled: resCanceled.data.data.length,
+      };
+    } catch (error) {
+      console.log(error);
+      return {
+        completed: 0,
+        canceled: 0,
+      };
+    }
+  };
+
+  const getYearRange = () => {
+    const currentDate = new Date();
+    const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
+    const endOfYear = new Date(currentDate.getFullYear(), 11, 31);
+    
+    return {
+      startDate: startOfYear.toISOString().split('T')[0],
+      endDate: endOfYear.toISOString().split('T')[0],
+    };
+  };
 
   const handleChangeButton = (indexButton: number, nameButton: string) => {
     setIndexButton(indexButton);
@@ -189,69 +435,51 @@ export default function Dashboard() {
 
       {/* thống kê luôn hiển thị theo ngày, tuần, tháng , năm và tùy chỉnh */}
       <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
-        <Col span={12}>
-          <DashboardCard
-            iconCart={ScheduleOutlined }
-            title={"Hôm nay"}
-            total={1}
-            product={1}
-            order={1}
-            orderCancel={1}
-            orderReturn={1}
-            color={"#e3d7c3"}
-          />
-        </Col>
-        <Col span={12}>
-          <DashboardCard
-            iconCart={RiseOutlined }
-            title={"Tuần này"}
-            total={1}
-            product={1}
-            order={1}
-            orderCancel={1}
-            orderReturn={1}
-            color={"#e0ccab"}
-          />
-        </Col>
-        <Col span={12}>
-          <DashboardCard
-            iconCart={CalendarOutlined}
-            title={"Tháng này"}
-            total={1}
-            product={1}
-            order={1}
-            orderCancel={1}
-            orderReturn={1}
-            color={"#e0ccab"}
-          />
-        </Col>
-        <Col span={12}>
-          <DashboardCard
-            iconCart={BarChartOutlined }
-            title={"Năm nay"}
-            total={1}
-            product={1}
-            order={1}
-            orderCancel={1}
-            orderReturn={1}
-            color={"#e3d7c3"}
-          />
-        </Col>
-        {indexButton === 5 && (
-          <Col span={24}>
-            <DashboardCard
-              iconCart={SettingOutlined }
-              title={"Tùy chỉnh"}
-              total={1}
-              product={1}
-              order={1}
-              orderCancel={1}
-              orderReturn={1}
-              color={"#e3d7c3"}
-            />
-          </Col>
-        )}
-      </Row>
+      <Col span={12}>
+        <DashboardCard
+          iconCart={ScheduleOutlined}
+          title={"Hôm nay"}
+          total={totalOrdersToday}
+          product={completedOrdersDay}
+          order={completedOrdersDay}
+          orderCancel={canceledOrdersDay}
+          color={"#e3d7c3"}
+        />
+      </Col>
+      <Col span={12}>
+        <DashboardCard
+          iconCart={RiseOutlined}
+          title={"Tuần này"}
+          total={totalOrdersThisWeek}
+          product={totalOrdersThisWeek}
+          order={completedOrdersWeek}
+          orderCancel={canceledOrdersWeek}
+          color={"#e0ccab"}
+        />
+      </Col>
+      <Col span={12}>
+        <DashboardCard
+          iconCart={CalendarOutlined}
+          title={"Tháng này"}
+          total={totalOrdersThisMonth}
+          product={totalOrdersThisMonth}
+          order={completedOrdersMonth}
+          orderCancel={canceledOrdersMonth}
+          color={"#e0ccab"}
+        />
+      </Col>
+      <Col span={12}>
+        <DashboardCard
+          iconCart={BarChartOutlined}
+          title={"Năm nay"}
+          total={totalOrdersThisYear}
+          product={totalOrdersThisYear}
+          order={completedOrdersYear}
+          orderCancel={canceledOrdersYear}
+          color={"#e3d7c3"}
+        />
+      </Col>
+    </Row>
 
       {/* bộ lọc (bộ filter) theo ngày tuần tháng năm */}
       <Card bordered={false}>

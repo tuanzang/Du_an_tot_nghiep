@@ -2,21 +2,14 @@ import { Modal, Button, Table, Tag } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import statusHoaDon from "../../../services/constants/statusHoaDon";
-
-interface OrderTimelineItem {
-  id: string;
-  createdAt: string;
-  role: number;
-  fullName: string;
-  codeAccount: string;
-  statusBill: number | null;
-  note: string;
-}
+import { IHistoryBill } from "../../../interface/HistoryBill";
+import "./BillStyle.css";
+import styleHoaDon from "../../../services/constants/styleHoaDon";
 
 interface BillHistoryDialogProps {
   openDialog: boolean;
   setOpenDialog: (open: boolean) => void;
-  listOrderTimeLine: OrderTimelineItem[];
+  listOrderTimeLine: IHistoryBill[];
 }
 
 const BillHistoryDialog = ({
@@ -28,22 +21,20 @@ const BillHistoryDialog = ({
     setOpenDialog(false);
   };
 
-  // Function to generate order history
-  const genOrderHistory = (listOrderTimeLine: OrderTimelineItem[]) => {
+  const genOrderHistory = (listOrderTimeLine: IHistoryBill[]) => {
     if (listOrderTimeLine[0]) {
       let tempStatus = listOrderTimeLine[0].statusBill;
       return listOrderTimeLine.map((his, index) => {
         if (
-          (his.statusBill === null || his.statusBill === 10) &&
+          (his.statusBill === null || Number(his.statusBill) === 10) &&
           listOrderTimeLine[index - 1].statusBill !== null &&
-          (his.statusBill === null || his.statusBill === 10) &&
-          listOrderTimeLine[index - 1].statusBill !== 10
+          (his.statusBill === null || Number(his.statusBill) === 10) &&
+          Number(listOrderTimeLine[index - 1].statusBill) !== 10
         ) {
           tempStatus = listOrderTimeLine[index - 1].statusBill;
         }
 
-        // Add a condition to treat statusBill === 10 as null
-        if (his.statusBill === null || his.statusBill === 10) {
+        if (his.statusBill === null || Number(his.statusBill) === 10) {
           return { ...his, statusBill: tempStatus };
         } else {
           return his;
@@ -53,24 +44,35 @@ const BillHistoryDialog = ({
     return [];
   };
 
-  // Columns definition for the Ant Design Table
   const columns = [
     {
       title: "Thời gian",
       dataIndex: "createdAt",
       key: "createdAt",
-      align: "center" as const, // Type assertion to satisfy TypeScript
+      align: "center" as const,
+      width: "15%",
       render: (text: string) => dayjs(text).format("DD-MM-YYYY HH:mm:ss"),
     },
     {
       title: "Người chỉnh sửa",
-      dataIndex: "fullName",
-      key: "fullName",
+      dataIndex: "creator",
+      key: "creator",
       align: "center" as const,
-      render: (record: OrderTimelineItem) => (
+      width: "20%",
+    },
+    {
+      title: "Vai trò",
+      dataIndex: "role",
+      key: "role",
+      align: "center" as const,
+      width: "15%",
+      render: (text: string) => (
         <span>
-          {record.role === 2 ? "Khách hàng - " : "Nhân viên - "}
-          {record.fullName} - {record.codeAccount}
+          {text === "customer"
+            ? "Khách hàng"
+            : text === "staff"
+            ? "Nhân viên"
+            : "admin"}
         </span>
       ),
     },
@@ -79,15 +81,19 @@ const BillHistoryDialog = ({
       dataIndex: "statusBill",
       key: "statusBill",
       align: "center" as const,
-      render: (statusBill: number) => (
-        <Tag>{statusHoaDon({ status: statusBill })}</Tag>
+      width: "10%",
+      render: (statusBill: string) => (
+        <Tag className={styleHoaDon({ status: statusBill })}>
+          {statusHoaDon({ status: statusBill })}
+        </Tag>
       ),
     },
     {
       title: "Ghi chú",
       dataIndex: "note",
       key: "note",
-      align: "center" as const,
+      align: "left" as const,
+      width: "40%",
     },
   ];
 

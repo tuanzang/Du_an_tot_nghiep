@@ -5,9 +5,15 @@ import querystring from "qs";
 import crypto from "crypto";
 import dateFormat from "dayjs";
 import dotenv from "dotenv";
+import dayjs from "dayjs";
 
 dotenv.config();
 
+/**
+ * API tạo mới hóa đơn
+ * @param {*} req
+ * @param {*} res
+ */
 export const createOrder = async (req, res) => {
   try {
     const { productSelectedIds, paymentMethod, ...bodyData } = req.body;
@@ -45,13 +51,15 @@ export const createOrder = async (req, res) => {
     }
 
     const orders = await new Order({
-      ...bodyData,
+      ...req.body,
+      code: `HD${dayjs().format("YYYYMMDDHHmmss")}`,
       userId,
       quantity: cartProducts.length,
       totalPrice,
+      quantity: cart.products.length,
       products,
       paymentMethod,
-      status: paymentMethod === "COD" ? "Chờ xác nhận" : "Chờ thanh toán",
+      status: paymentMethod === "COD"?"1":"5"
     }).save();
 
     cart.products = cart.products.filter(
@@ -89,7 +97,13 @@ export const createOrder = async (req, res) => {
   }
 };
 
-export const getMyOrders = async (req, res) => {
+/**
+ * API xem chi tiết đơn hàng
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+export const detailOrder = async (req, res) => {
   try {
     const orders = await Order.findById(req.params.id);
     if (!orders || orders.length === 0) {
@@ -108,37 +122,68 @@ export const getMyOrders = async (req, res) => {
       message: "Internal server error",
     });
   }
-};
+}
+
+/**
+ * API danh sách hóa đơn
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
 
 export const getAllOrders = async (req, res) => {
-  const statusReq = req.query.status;
+  const { status, code, createdAtFrom, createdAtTo, page = 1 } = req.body;
+  const pageSize = 10;
 
   try {
     let query = {};
 
-    if (statusReq) {
-      query = { status: statusReq };
+    if (status) {
+      query.status = status;
     }
 
-    const orders = await Order.find(query);
+    if (code) {
+      query.code = { $regex: code, $options: "i" }; // Tìm kiếm mã hóa đơn với regex, không phân biệt hoa thường
+    }
+
+    if (createdAtFrom || createdAtTo) {
+      query.createdAt = {};
+      if (createdAtFrom) {
+        query.createdAt.$gte = new Date(createdAtFrom);
+      }
+      if (createdAtTo) {
+        query.createdAt.$lte = new Date(createdAtTo);
+      }
+    }
+
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize);
+
+    const total = await Order.countDocuments(query);
 
     if (!orders || orders.length === 0) {
       return res.status(404).json({
         message: "Không tìm thấy đơn hàng!",
         data: [],
+        total: 0,
       });
     }
 
     return res.status(200).json({
       message: "Success",
       data: orders,
+      total: total,
+      size: pageSize,
     });
   } catch (error) {
+    console.error("Lỗi:", error);
     return res.status(500).json({
-      message: "Internal server error",
+      message: "Lỗi máy chủ nội bộ",
     });
   }
-};
+}
 
 export const deleteOrder = async (req, res) => {
   try {
@@ -152,18 +197,40 @@ export const deleteOrder = async (req, res) => {
     res.status(500).json({
       message: "Internal server error",
     });
-  }
-};
+  } 
+}
 
-export const updateOrder = async (req, res) => {
+/**
+ * API cập nhật trạng thái hóa đơn
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
+export const updateOrderStatus = async (req, res) => {
   try {
-    const id = req.params.id;
-    const orders = await Order.findByIdAndUpdate(id, req.body, {
-      new: true,
-    }).exec();
+    const { id, status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        message: "Chuyển trạng thái thất bại",
+      });
+    }
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      { $set: { status: status } },
+      { new: true }
+    ).exec();
+
+    if (!updatedOrder) {
+      return res.status(404).json({
+        message: "Không tìm thấy hóa đơn",
+      });
+    }
+
     return res.status(200).json({
       message: "Success",
-      data: orders,
+      data: updatedOrder,
     });
   } catch (error) {
     res.status(500).json({
@@ -171,7 +238,6 @@ export const updateOrder = async (req, res) => {
     });
   }
 };
-
 const createPaymentUrl = (ipAddr, orderId, orderInfo, amount) => {
   const tmnCode = process.env.VNPAY_TMN_CODE;
   const secretKey = process.env.VNPAY_SECRET_KEY;

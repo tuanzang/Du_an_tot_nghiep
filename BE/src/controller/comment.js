@@ -184,7 +184,7 @@ export const deleteComment = async (req, res) => {
  */
 export const detailComment = async (req, res) => {
   try {
-    const data = await comment.findById(req.body._id);
+    const data = await comment.findById(req.params.id);
     if (!data || data.length === 0) {
       return res.status(404).json({
         message: "Không tìm thấy bình luận!",
@@ -194,33 +194,6 @@ export const detailComment = async (req, res) => {
 
     return res.status(200).json({
       message: "Đã tìm thấy bình luận",
-      data,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: error.message,
-    });
-  }
-};
-
-/**
- * API tìm kiếm thông tin tài khoản
- * @param {*} req
- * @param {*} res
- * @returns
- */
-export const findUserById = async (req, res) => {
-  try {
-    const data = await user.findById(req.body._id);
-    if (!data || data.length === 0) {
-      return res.status(404).json({
-        message: "Không tìm thấy tài khoản!",
-        data: [],
-      });
-    }
-
-    return res.status(200).json({
-      message: "Đã tìm thấy tài khoản",
       data,
     });
   } catch (error) {
