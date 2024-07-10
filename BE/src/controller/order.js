@@ -105,6 +105,17 @@ export const getAllOrders = async (req, res) => {
   }
 }
 
+
+
+function isValidDate(date) {
+  return date instanceof Date && !isNaN(date);
+}
+
+
+
+
+
+
 export const deleteOrder = async (req, res) => {
   try {
     const id = req.params.id;
