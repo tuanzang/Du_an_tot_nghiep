@@ -147,20 +147,6 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
-
-
-function isValidDate(date) {
-  return date instanceof Date && !isNaN(date);
-}
-
-
-
-
-
-
-export const deleteOrder = async (req, res) => {
-=======
 /**
  * API cập nhật trạng thái hóa đơn
  * @param {*} req
@@ -168,7 +154,6 @@ export const deleteOrder = async (req, res) => {
  * @returns
  */
 export const updateOrderStatus = async (req, res) => {
->>>>>>> 19cc6fdcb4b71a4894734fe7cf0fdcda3cd93567
   try {
     const { id, status } = req.body;
 
