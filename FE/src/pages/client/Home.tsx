@@ -51,19 +51,12 @@ export default function Home() {
 
   if (!product) return null;
 
-  // const queryClient = useQueryClient();
-  // const { mutate } = useMutation({
-  //   mutationFn: async (id) => {
-
-  //   }
-  // })
-
   return (
     <div>
       <main>
         {/* <!-- hero slider area start --> */}
         <section className="slider-area">
-          <Carousel autoplay={true} autoplaySpeed={5000}>
+          <Carousel autoplay={true} autoplaySpeed={2000}>
             <div>
               <h3 style={contentStyle}>
                 <img src="./src/assets/image/slider/home1-slide1.jpg" />
