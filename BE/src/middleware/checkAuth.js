@@ -15,9 +15,9 @@ export const checkAuth = async (req, res, next) => {
       }
       return await User.findOne({ _id: decoded.userId });
     });
-    if (user.role !== "admin") {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    // if (user.role !== "admin") {
+    //   return res.status(401).json({ error: "Unauthorized" });
+    // }
 
     req.profile = user;
     next();
