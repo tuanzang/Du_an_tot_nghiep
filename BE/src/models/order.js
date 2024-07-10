@@ -6,6 +6,10 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",
     },
+    code: {
+      type: String,
+      require: true,
+    },
     products: [
       {
         name: String,
@@ -20,7 +24,6 @@ const orderSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      
     },
     customerName: {
       type: String,
@@ -46,7 +49,7 @@ const orderSchema = new mongoose.Schema(
       type: String,
       enum: ["COD", "VNPAY"],
       default: "COD",
-    }
+    },
   },
   {
     timestamps: true,

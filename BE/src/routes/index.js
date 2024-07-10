@@ -6,6 +6,8 @@ import userRouter from "./users.js";
 import cartRouter from "./carts.js";
 import orderRouter from "./order.js";
 import commentRouter from "./comment.js";
+import historyBillRouter from "./historyBill.js";
+import transBillRouter from "./transaction.js";
 
 const router = Router();
 
@@ -16,5 +18,7 @@ router.use("/comments", commentRouter);
 router.use("/users", userRouter);
 router.use("/carts", cartRouter);
 router.use("/orders", orderRouter);
+router.use("/history-bill", historyBillRouter);
+router.use("/trans", transBillRouter);
 
 export default router;

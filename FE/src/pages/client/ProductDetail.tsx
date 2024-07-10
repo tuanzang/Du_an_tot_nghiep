@@ -27,12 +27,12 @@ export default function ProductDetail() {
   });
 
   useEffect(() => {
-    fetchProduct();
+    fetchProduct(String(id));
     fetchRelatedProducts();
     findUserById(idUser ? idUser : null);
   }, [id, idUser]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
 
-  const fetchProduct = async () => {
+  const fetchProduct = async (id: string) => {
     try {
       if (id) {
         const response = await axios.get(
@@ -125,7 +125,7 @@ export default function ProductDetail() {
     } else {
       try {
         const response = await axios.post(
-          "http://localhost:3001/api/comments/findUserById",
+          "http://localhost:3001/api/users/findUserById",
           { _id: idUser }
         );
         setUser(response.data?.data);
@@ -254,7 +254,6 @@ export default function ProductDetail() {
                         <Image
                           width={"100%"}
                           src={product?.image?.[0]}
-                          src={product?.image?.[0]}
                           alt="product-details"
                         />
                       </div>
@@ -268,16 +267,11 @@ export default function ProductDetail() {
                           <a href="#">HOT</a>
                         </div>
                         <h3 className="product-name">{product?.name}</h3>
-                        <h3 className="product-name">{product?.name}</h3>
                         <div className="price-box">
                           <span className="price-regular">
                             {product?.price} VNĐ
                           </span>
-                          <span className="price-regular">
-                            {product?.price} VNĐ
-                          </span>
                           <span className="price-old">
-                            <del>{product?.priceOld} VNĐ</del>
                             <del>{product?.priceOld} VNĐ</del>
                           </span>
                         </div>
@@ -285,8 +279,6 @@ export default function ProductDetail() {
                           <i className="fa fa-check-circle"></i>
                           <span>200 in stock</span>
                         </div>
-                        <p className="pro-desc">Mô tả sản phẩm:</p>
-                        <p>{product?.description}</p>
                         <p className="pro-desc">Mô tả sản phẩm:</p>
                         <p>{product?.description}</p>
                         <div className="quantity-cart-box d-flex align-items-center">
@@ -311,28 +303,6 @@ export default function ProductDetail() {
                             >
                               +
                             </button>
-                            <h6 className="option-title">Số lượng:</h6>
-                            <div className="quantity-controls">
-                              <button
-                                className="quantity-btn"
-                                onClick={handleQuantityDecrease}
-                              >
-                                -
-                              </button>
-                              <input
-                                type="number"
-                                value={quantity}
-                                onChange={handleQuantityChange}
-                                min="1"
-                                className="quantity-input"
-                              />
-                              <button
-                                className="quantity-btn"
-                                onClick={handleQuantityIncrease}
-                              >
-                                +
-                              </button>
-                            </div>
                             <div className="action_link">
                               <button
                                 className="btn btn-cart2"
@@ -344,7 +314,7 @@ export default function ProductDetail() {
                               </button>
                             </div>
                           </div>
-                          <div className="useful-links">
+                          {/* <div className="useful-links">
                             <a
                               href="#"
                               data-bs-toggle="tooltip"
@@ -359,8 +329,8 @@ export default function ProductDetail() {
                             >
                               <i className="pe-7s-like"></i>wishlist
                             </a>
-                          </div>
-                          <div className="like-icon">
+                          </div> */}
+                          {/* <div className="like-icon">
                             <a className="facebook" href="#">
                               <i className="fa fa-facebook"></i>like
                             </a>
@@ -373,7 +343,7 @@ export default function ProductDetail() {
                             <a className="google" href="#">
                               <i className="fa fa-google-plus"></i>share
                             </a>
-                          </div>
+                          </div> */}
                         </div>
                       </div>
                     </div>

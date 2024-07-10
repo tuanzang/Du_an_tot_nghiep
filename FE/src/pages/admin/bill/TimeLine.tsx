@@ -4,60 +4,43 @@ import { FaRegFileAlt, FaTruck } from "react-icons/fa";
 import { GiConfirmed } from "react-icons/gi";
 import { IoCloudDoneSharp } from "react-icons/io5";
 import { MdPaid } from "react-icons/md";
-import { AiOutlineDeliveredProcedure } from "react-icons/ai";
+import { AiFillCheckCircle, AiOutlineDeliveredProcedure } from "react-icons/ai";
 import dayjs from "dayjs";
 import statusHoaDon from "../../../services/constants/statusHoaDon";
+import { IHistoryBill } from "../../../interface/HistoryBill";
 
 const { Text } = Typography;
 
-interface IOrderTimeline {
-  id: string;
-  createdAt: string;
-  role: number;
-  fullName: string;
-  codeAccount: string;
-  statusBill: number | null;
-  note: string;
-}
-
 type Props = {
-  orderTimeLine: IOrderTimeline[];
+  orderTimeLine: IHistoryBill[];
 };
 
 const TimeLine = ({ orderTimeLine }: Props) => {
   const filteredTimeLine = orderTimeLine.filter(
-    (item) => item.statusBill !== null && item.statusBill !== 10
+    (item) =>
+      Number(item.statusBill) !== null && Number(Number(item.statusBill)) !== 10
   );
 
   const getIconAndColor = (statusBill: number) => {
     switch (statusBill) {
-      case 1:
-      case 8:
-        return { color: "#00CC00", icon: <FaRegFileAlt /> };
-      case 2:
-        return { color: "#FFD700", icon: <GiConfirmed /> };
-      case 3:
-        return { color: "#FF5733", icon: <FaTruck /> };
-      case 4:
-        return { color: "#FF9933", icon: <AiOutlineDeliveredProcedure /> };
-      case 5:
-        return { color: "#FFC733", icon: <MdPaid /> };
-      case 6:
-        return { color: "#FFAA33", icon: <FaRegFileAlt /> };
-      case 7:
-        return { color: "#00BB00", icon: <IoCloudDoneSharp /> };
-      case 9:
-        return { color: "#FF1233", icon: <IoCloudDoneSharp /> };
-      case 10:
-        return { color: "#FF9933", icon: <IoCloudDoneSharp /> };
-      case 11:
-        return { color: "#FF9933", icon: <IoCloudDoneSharp /> };
-      case 12:
-        return { color: "#FF9933", icon: <IoCloudDoneSharp /> };
       case 0:
-        return { color: "gray", icon: <DeleteOutlined /> };
+        return { color: "gray", icon: <DeleteOutlined /> }; // Đã hủy
+      case 1:
+        return { color: "#00CC00", icon: <FaRegFileAlt /> }; // Chờ xác nhận
+      case 2:
+        return { color: "#FFD700", icon: <GiConfirmed /> }; // Chờ giao hàng
+      case 3:
+        return { color: "#FF5733", icon: <FaTruck /> }; // Đang vận chuyển
+      case 4:
+        return { color: "#FF9933", icon: <AiOutlineDeliveredProcedure /> }; // Đã giao hàng
+      case 5:
+        return { color: "#FFC733", icon: <MdPaid /> }; // Chờ thanh toán
+      case 6:
+        return { color: "#FFAA33", icon: <AiFillCheckCircle /> }; // Đã thanh toán
+      case 7:
+        return { color: "#00BB00", icon: <IoCloudDoneSharp /> }; // Hoàn thành
       default:
-        return { color: "#000000", icon: <FaRegFileAlt /> };
+        return { color: "#000000", icon: <FaRegFileAlt /> }; // Mặc định
     }
   };
 
@@ -66,7 +49,7 @@ const TimeLine = ({ orderTimeLine }: Props) => {
       <Timeline mode="left">
         {filteredTimeLine.map((item, index) => {
           const { color, icon } = getIconAndColor(
-            item.statusBill ? item.statusBill : -1
+            Number(item.statusBill) ? Number(item.statusBill) : -1
           );
           return (
             <Timeline.Item
@@ -81,7 +64,7 @@ const TimeLine = ({ orderTimeLine }: Props) => {
             >
               <h5 style={{ margin: "8px 0" }}>
                 {statusHoaDon({
-                  status: item.statusBill ? item.statusBill : -1,
+                  status: item.statusBill,
                 })}
               </h5>
               <Text type="secondary">
