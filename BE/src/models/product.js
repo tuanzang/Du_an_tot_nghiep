@@ -20,26 +20,17 @@ const productSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        quantity: {
-            type: Number,
-            required: true
-        },
         categoryId: [
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "Category",
             }
-        ],
-        sizeId: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Size"
-            }
         ]
     }, {
-    timestamps: true,
-    versionKey: false
-}
-)
+        timestamps: true,
+        versionKey: false
+    }
+);
+
 
 export default mongoose.model("Product", productSchema)

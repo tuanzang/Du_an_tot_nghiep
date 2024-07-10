@@ -11,6 +11,7 @@ import { uploadImage } from "../../../services/upload/upload";
 import { UploadFile } from "antd/lib";
 // import { List, Card, notification } from 'antd';
 import { ISize } from '../../../interface/Size';
+import { IProductSize } from '../../../interface/ProductSize';
 
 
 const ProductAdd = () => {
@@ -51,7 +52,9 @@ const ProductAdd = () => {
     }
   })
 
-  const onFinish: FormProps<IProduct[]>["onFinish"] = async (values) => {
+        
+  const [quantity, setQuantity] = useState<Number>(0)
+  const onFinish: FormProps<IProduct>["onFinish"] = async (values) => {
     try {
       // Upload images
       // Lấy danh sách các file từ fileList
@@ -64,9 +67,17 @@ const ProductAdd = () => {
       // Update values with uploaded image URLs
       const updatedValues = { ...values, image: uploadedImageUrls };
 
-      // Send product data to server
-      await axios.post(`http://localhost:3001/api/products/add`, updatedValues);
+      // product size
+      const idSizes = updatedValues.idSize;
+      const quantity = updatedValues.quantity;
 
+      // Send product data to server
+      const dataProduct = await axios.post(`http://localhost:3001/api/products/add`, updatedValues);
+      
+      const productSizes: IProductSize[] = [];
+      idSizes.map(s=>productSizes.push( {_id:null, idProduct: dataProduct.data.data._id, idSize:s, quantity}))
+        
+      await axios.post(`http://localhost:3001/api/products/add/size`, productSizes)
       toast.success("Thêm sản phẩm thành công");
       navigate("/admin/product");
     } catch (err) {
@@ -75,7 +86,7 @@ const ProductAdd = () => {
   };
 
 
-  const onFinishFailed: FormProps<IProduct[]>["onFinishFailed"] = (errorInfo) => {
+  const onFinishFailed: FormProps<IProduct>["onFinishFailed"] = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
   const handleUploadChange = ({ fileList }: { fileList: UploadFile[] }) => {
@@ -121,7 +132,7 @@ const ProductAdd = () => {
 
       <Form.Item<IProduct>
         label="Size"
-        name="sizeId"
+        name="idSize"
         rules={[{ required: true, message: 'Vui lòng chọn size!' }]}
       >
         <Checkbox.Group options={dataSize} />
