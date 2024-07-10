@@ -115,7 +115,7 @@ export default function Cart() {
   //   fakeHotProduct2s.push({
   //     key: i,
   //     image1: `./src/assets/image/product/product-${i + 1}.jpg`,
-  //     image2: `./src/assets/image/product/product-${19 - i - 1}.jpg`,
+  //     image2: `./src/assets/image/product/product-${19 - i - 1`q2  `1}.jpg`,
   //     title: getTitle(i),
   //     price: (i * 10 + 9.99).toFixed(2),
   //     quantity: i,
