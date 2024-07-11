@@ -145,6 +145,12 @@ export default function Cart() {
                         key="price"
                         render={(val) => formatPrice(val)}
                       />
+                        <Table.Column
+                        title="Ảnh"
+                        // dataIndex="ICartItem.image"
+                        key="image"
+                        render={(val) => formatPrice(val)}
+                      />
                       <Table.Column
                         title="Số lượng"
                         dataIndex="quantity"
@@ -152,6 +158,7 @@ export default function Cart() {
                         render={(value, record: any) => (
                           <InputNumber
                             min={1}
+                            max={5}
                             value={value}
                             onStep={(quantity) =>
                               handleUpdateQuantity(record.product._id, quantity)

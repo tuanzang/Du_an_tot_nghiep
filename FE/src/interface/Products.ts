@@ -8,5 +8,6 @@ export interface IProduct {
   quantity: number;
   categoryId: string;
   status: boolean;
+  
 }
  
