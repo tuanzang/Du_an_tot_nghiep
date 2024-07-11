@@ -1,7 +1,13 @@
 import Order from "../models/order.js";
 import Cart from "../models/cart.js";
 import product from "../models/product.js";
+import querystring from "qs";
+import crypto from "crypto";
+import dateFormat from "dayjs";
+import dotenv from "dotenv";
 import dayjs from "dayjs";
+
+dotenv.config();
 
 /**
  * API tạo mới hóa đơn
@@ -10,6 +16,7 @@ import dayjs from "dayjs";
  */
 export const createOrder = async (req, res) => {
   try {
+    const { productSelectedIds, paymentMethod, ...bodyData } = req.body;
     const userId = req.profile._id;
     const cart = await Cart.findOne({ userId })
       .populate({
@@ -17,19 +24,23 @@ export const createOrder = async (req, res) => {
         model: "Product",
       })
       .exec();
-    const products = cart.products.map((item) => ({
+
+    const cartProducts = cart.products?.filter((it) =>
+      productSelectedIds.includes(it.product._id.toString())
+    );
+    const products = cartProducts.map((item) => ({
       name: item.product.name,
       price: item.product.price,
       quantity: item.quantity,
     }));
 
-    const totalPrice = cart.products.reduce((total, curr) => {
+    const totalPrice = cartProducts.reduce((total, curr) => {
       total += curr.product.price * curr.quantity;
 
       return total;
     }, 0);
 
-    for (let item of cart.products) {
+    for (let item of cartProducts) {
       await product.findByIdAndUpdate(
         item.product._id,
         {
@@ -43,15 +54,41 @@ export const createOrder = async (req, res) => {
       ...req.body,
       code: `HD${dayjs().format("YYYYMMDDHHmmss")}`,
       userId,
-      quantity: cart.products.length,
+      quantity: cartProducts.length,
       totalPrice,
+      quantity: cart.products.length,
       products,
-      status: "1",
+      paymentMethod,
+      status: paymentMethod === "COD"?"1":"5"
     }).save();
 
-    await Cart.findOneAndDelete({ userId }).exec();
+    cart.products = cart.products.filter(
+      (it) => !productSelectedIds.includes(it.product._id.toString())
+    );
+    await cart.save();
 
-    res.json(orders);
+    // create vnpay payment url
+    const ipAddr =
+      req.headers["x-forwarded-for"] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      req.connection.socket.remoteAddress;
+
+    let paymentUrl = "";
+
+    if (paymentMethod === "VNPAY") {
+      paymentUrl = createPaymentUrl(
+        ipAddr,
+        `FBEE_${orders._id}`,
+        `Thanh toán đơn hàng ${orders._id}`,
+        totalPrice
+      );
+    }
+
+    res.json({
+      paymentUrl,
+      data: orders,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({
@@ -85,7 +122,7 @@ export const detailOrder = async (req, res) => {
       message: "Internal server error",
     });
   }
-};
+}
 
 /**
  * API danh sách hóa đơn
@@ -146,8 +183,22 @@ export const getAllOrders = async (req, res) => {
       message: "Lỗi máy chủ nội bộ",
     });
   }
-};
+}
 
+export const deleteOrder = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const orders = await Order.findByIdAndDelete(id).exec();
+    return res.status(200).json({
+      message: "Success",
+      data: orders,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  } 
+}
 
 /**
  * API cập nhật trạng thái hóa đơn
@@ -186,4 +237,50 @@ export const updateOrderStatus = async (req, res) => {
       message: "Internal server error",
     });
   }
+};
+const createPaymentUrl = (ipAddr, orderId, orderInfo, amount) => {
+  const tmnCode = process.env.VNPAY_TMN_CODE;
+  const secretKey = process.env.VNPAY_SECRET_KEY;
+  let vnpUrl = process.env.VNPAY_VNP_URL;
+  const returnUrl = process.env.VNPAY_RETURN_URL;
+
+  const date = new Date();
+
+  const createDate = dateFormat(date).format("YYYYMMDDHHmmss");
+  const expiredDate = dateFormat(date).add(10, "m").format("YYYYMMDDHHmmss");
+
+  const currCode = "VND";
+  let vnp_Params = {};
+  vnp_Params["vnp_Version"] = "2.1.0";
+  vnp_Params["vnp_Command"] = "pay";
+  vnp_Params["vnp_TmnCode"] = tmnCode;
+  vnp_Params["vnp_Locale"] = "vn";
+  vnp_Params["vnp_CurrCode"] = currCode;
+  vnp_Params["vnp_TxnRef"] = orderId;
+  vnp_Params["vnp_OrderInfo"] = orderInfo;
+  vnp_Params["vnp_OrderType"] = "other";
+  vnp_Params["vnp_Amount"] = amount * 100;
+  vnp_Params["vnp_ReturnUrl"] = returnUrl;
+  vnp_Params["vnp_IpAddr"] = ipAddr;
+  vnp_Params["vnp_CreateDate"] = createDate;
+  vnp_Params["vnp_ExpireDate"] = expiredDate;
+
+  vnp_Params = Object.entries(vnp_Params)
+    .sort(([key1], [key2]) => key1.toString().localeCompare(key2.toString()))
+    .reduce((result, item) => {
+      result = {
+        ...result,
+        [item[0]]: encodeURIComponent(item[1].toString().replace(/ /g, "+")),
+      };
+
+      return result;
+    }, {});
+
+  const signData = querystring.stringify(vnp_Params, { encode: false });
+  const hmac = crypto.createHmac("sha512", secretKey);
+  const signed = hmac.update(new Buffer(signData, "utf-8")).digest("hex");
+  vnp_Params["vnp_SecureHash"] = signed;
+  vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
+
+  return vnpUrl;
 };
