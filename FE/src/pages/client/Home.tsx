@@ -250,7 +250,8 @@ export default function Home() {
                                         <p className="manufacturer-name">
                                           <Link to={`/product/${p._id}`}>
                                             {p.name}
-                                          </Link>                                        </p>
+                                          </Link>
+                                        </p>
                                       </div>
                                       <ul className="color-categories">
                                         <li>
@@ -287,7 +288,7 @@ export default function Home() {
                                           {p.price + ""} VNĐ
                                         </span>
                                         <span className="price-old">
-                                          <del>{p.priceOld+ " "}VNĐ</del>
+                                          <del>{p.priceOld + " "}VNĐ</del>
                                         </span>
                                       </div>
                                     </div>

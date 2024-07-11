@@ -1,17 +1,37 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ACCESS_TOKEN_STORAGE_KEY,
   USER_INFO_STORAGE_KEY,
 } from "../../services/constants";
 import { useMyCartQuery } from "../../hooks/useCart";
+import useSearchProducts from "../../hooks/searchProducts";
+import { IProduct } from "../../interface/Products";
 
 const Header = () => {
   const [openMenuCart, setOpenMenuCart] = useState(false);
   const { data } = useMyCartQuery();
+  const [searchTerm, setSearchTerm] = useState("");
+  const { searchProducts, searchResults, loading, error } = useSearchProducts();
+  const navigate = useNavigate();
 
   const handleMenuCartClick = () => {
     setOpenMenuCart(!openMenuCart);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (searchTerm.trim() !== "") {
+      searchProducts(searchTerm.trim());
+    }
+  };
+
+  const handleResultClick = (productId: string) => {
+    navigate(`/product/${productId}`);
   };
 
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
@@ -103,21 +123,25 @@ const Header = () => {
                 {/* mini cart area start */}
                 <div className="col-lg-4">
                   <div className="header-right d-flex align-items-center justify-content-xl-between justify-content-lg-end">
+
                     <div className="header-search-container">
                       <button className="search-trigger d-xl-none d-lg-block">
                         <i className="pe-7s-search"></i>
                       </button>
-                      <form className="header-search-box d-lg-none d-xl-block">
+                      <form className="header-search-box d-lg-none d-xl-block" onSubmit={handleSearchSubmit}>
                         <input
                           type="text"
                           placeholder="Tìm kiếm"
                           className="header-search-field bg-white"
+                          value={searchTerm}
+                          onChange={handleSearchChange}
                         />
-                        <button className="header-search-btn">
+                        <button type="submit" className="header-search-btn">
                           <i className="pe-7s-search"></i>
                         </button>
                       </form>
                     </div>
+
                     <div className="header-configure-area">
                       <ul className="nav justify-content-end">
                         <li className="user-hover">
@@ -143,7 +167,7 @@ const Header = () => {
                             )}
                           </ul>
                         </li>
-                        
+
                         <li>
                           <Link
                             to="/cart"
@@ -338,6 +362,27 @@ const Header = () => {
           </div>
         </aside>
         {/* offcanvas mobile menu end */}
+
+        <div className="off-canvas-inner">
+              {/* search box start */}
+              <div className="search-box-offcanvas">
+                {/* Sử dụng searchResults để hiển thị kết quả tìm kiếm */}
+                <ul>
+                  {searchResults.map((product:IProduct) => (
+                    <li
+                      key={product._id}
+                      onClick={() => handleResultClick(product._id.toString())}
+                    >
+                      {product.name}
+                    </li>
+                  ))}
+                </ul>
+                {/* Hiển thị loading hoặc error khi tìm kiếm */}
+                {loading && <p>Đang tải...</p>}
+                {error && <p>{error}</p>}
+              </div>
+              {/* search box end */}
+            </div>
 
         {openMenuCart && <div></div>}
       </header>
