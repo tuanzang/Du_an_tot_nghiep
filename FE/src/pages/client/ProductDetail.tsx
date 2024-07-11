@@ -1,4 +1,4 @@
-import { Carousel, Col, Image, Row, message } from "antd";
+import { Carousel, Col, Image, Row, message, Button } from "antd";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { IProduct } from "../../interface/Products";
@@ -10,6 +10,7 @@ import { IComment } from "../../interface/Comments";
 import { IUser } from "../../interface/Users";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ISize } from "../../interface/Size";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
@@ -17,6 +18,16 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
+  const [sizes, setSizes] = useState<ISize[]>([]);
+  const [selectedSize, setSelectedSize] = useState(null);
+
+  const handleSizeClick = (sizeId:any) => {
+    if (selectedSize === sizeId) {
+      setSelectedSize(null);
+    } else {
+      setSelectedSize(sizeId);
+    }
+  };
 
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const { mutate } = useCartMutation({
@@ -29,6 +40,7 @@ export default function ProductDetail() {
   useEffect(() => {
     fetchProduct(String(id));
     fetchRelatedProducts();
+    fetchSizes();
     findUserById(idUser ? idUser : null);
   }, [id, idUser]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
 
@@ -53,6 +65,16 @@ export default function ProductDetail() {
       setRelatedProducts(response.data.data);
     } catch (error) {
       console.error("Error fetching related products:", error);
+    }
+  };
+
+  const fetchSizes = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/sizes`);
+      console.log("Sizes API response:", response.data);
+      setSizes(response.data.data);
+    } catch (error) {
+      console.error("Error fetching sizes:", error);
     }
   };
 
@@ -268,11 +290,27 @@ export default function ProductDetail() {
                             <del>{product?.priceOld} VNĐ</del>
                           </span>
                         </div>
-                        <div className="availability">
+                        {/* <div className="availability">
                           <i className="fa fa-check-circle"></i>
                           <span>200 in stock</span>
+                        </div> */}
+
+                        <div>
+                          <div className="button-container mt-2">
+                            {sizes.map((size) => (
+                              <Button
+                                key={size._id}
+                                className={`mx-1 ${selectedSize === size._id ? 'selected' : ''}`}
+                                style={{ padding: "10px 20px", fontSize: "16px" }}
+                                onClick={() => handleSizeClick(size._id)}
+                              >
+                                {size.name}
+                              </Button>
+                            ))}
+                          </div>
                         </div>
-                        <p className="pro-desc">Mô tả sản phẩm:</p>
+
+                        <p className="pro-desc mt-3">Mô tả sản phẩm:</p>
                         <p>{product?.description}</p>
                         <div className="quantity-cart-box d-flex align-items-center">
                           <h6 className="option-title">Số lượng:</h6>
@@ -319,9 +357,9 @@ export default function ProductDetail() {
                       <div className="col-lg-12">
                         <div className="product-review-info">
                           <ul className="nav review-tab"
-                          style={{
-                            margin:"30px"
-                          }}>
+                            style={{
+                              margin: "30px"
+                            }}>
                             <li >
                               <a
                                 className="active"

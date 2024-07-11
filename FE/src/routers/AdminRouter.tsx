@@ -10,11 +10,8 @@ import CategoryAdd from "../pages/admin/category/CategoryAdd";
 import CategoryEdit from "../pages/admin/category/CategoryEdit";
 import ProductDetailAndEdit from "../pages/admin/product/ProductDetailAndEdit";
 import BillDetail from "../pages/admin/bill/BillDetail";
-<<<<<<< HEAD
 import Size from "../pages/admin/size/Size";
 import SizeAdd from "../pages/admin/size/SizeAdd";
-=======
->>>>>>> 4a750a9f47f8095b0286710a0234a58ecb7a0e94
 import Users from "../pages/admin/users/Users";
 import ProductAdd from "../pages/admin/product/productAdd";
 import PageComment from "../pages/admin/comment/PageComment";

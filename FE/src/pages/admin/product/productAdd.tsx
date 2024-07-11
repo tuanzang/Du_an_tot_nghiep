@@ -53,7 +53,7 @@ const ProductAdd = () => {
   })
 
         
-  const [quantity, setQuantity] = useState<Number>(0)
+  // const [quantity, setQuantity] = useState<Number>(0)
   const onFinish: FormProps<IProduct>["onFinish"] = async (values) => {
     try {
       // Upload images

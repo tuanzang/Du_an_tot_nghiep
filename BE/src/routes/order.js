@@ -10,7 +10,6 @@ import {
 
 } from "../controller/order.js";
 import { checkAuth } from "../middleware/checkAuth.js";
-s
 const orderRouter = Router();
 
 orderRouter.post("/add-order", checkAuth, createOrder);
