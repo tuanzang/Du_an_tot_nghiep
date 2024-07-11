@@ -318,8 +318,11 @@ export default function ProductDetail() {
                     <div className="row">
                       <div className="col-lg-12">
                         <div className="product-review-info">
-                          <ul className="nav review-tab">
-                            <li>
+                          <ul className="nav review-tab"
+                          style={{
+                            margin:"30px"
+                          }}>
+                            <li >
                               <a
                                 className="active"
                                 data-bs-toggle="tab"

@@ -115,6 +115,12 @@ const ProductAdd = () => {
       >
         <Input />
       </Form.Item>
+      {/* <Form.Item<IProduct>
+        label="Giá cũ"
+        name="priceOld"
+      >
+        <Input />
+      </Form.Item> */}
       <Form.Item<IProduct>
         label="Danh mục"
         name="categoryId"

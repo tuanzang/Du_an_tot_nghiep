@@ -21,7 +21,6 @@ type Inputs = {
   customerName: string;
   address: string;
   phone: string;
-  email: string;
   message: string;
   paymentMethod: string;
 };
@@ -66,7 +65,7 @@ const Checkout = () => {
 
   const [user, setUser] = useState<IUser>({
     _id: "",
-    email: "",
+    email:"",
     password: "",
     name: "",
     role: "",
@@ -76,7 +75,7 @@ const Checkout = () => {
     if (idUser === null) {
       return setUser({
         _id: "",
-        email: "",
+        email:"",
         password: "",
         name: "",
         role: "",
@@ -147,17 +146,7 @@ const Checkout = () => {
                 })}
               />
             </div>
-            <div className="mb-3">
-              <input
-                type="email"
-                className="form-control"
-                id="email"
-                placeholder="name@example.com"
-                {...register("email", {
-                  required: true,
-                })}
-              />
-            </div>
+           
             <div className="mb-3">
               <input
                 type="text"
@@ -236,6 +225,7 @@ const Checkout = () => {
             <thead>
               <tr>
                 <th>Tên sản phẩm</th>
+                <th>ảnh</th>
                 <th>Giá</th>
                 <th>Số lượng</th>
                 <th>Tổng</th>
