@@ -132,14 +132,15 @@ export const detailOrder = async (req, res) => {
  */
 
 export const getAllOrders = async (req, res) => {
-  const { status, code, createdAtFrom, createdAtTo, page = 1 } = req.body;
+  const { code, createdAtFrom, createdAtTo, page = 1 } = req.body; 
+  const statusReq = req.query.status;
   const pageSize = 10;
 
   try {
     let query = {};
 
-    if (status) {
-      query.status = status;
+    if (statusReq) {
+      query = { status : statusReq };
     }
 
     if (code) {
@@ -184,6 +185,7 @@ export const getAllOrders = async (req, res) => {
     });
   }
 }
+
 
 export const deleteOrder = async (req, res) => {
   try {
