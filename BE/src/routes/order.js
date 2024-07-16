@@ -13,8 +13,9 @@ import { checkAuth } from "../middleware/checkAuth.js";
 const orderRouter = Router();
 
 orderRouter.post("/add-order", checkAuth, createOrder);
+
+orderRouter.post("/", getAllOrders);
 orderRouter.get("/", getAllOrders);
-// orderRouter.get("/:id", getMyOrders);
 // orderRouter.put("/:id", updateOrder);
 orderRouter.delete("/:id", deleteOrder);
 orderRouter.get("/:id", detailOrder);

@@ -199,7 +199,7 @@ export default function Dashboard() {
     fetchAllOrders();
   }, []);
 
-  const getOrdersByDayStatus = async (date) => {
+  const getOrdersByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
     try {
       const resAllOrdersByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
@@ -220,6 +220,7 @@ export default function Dashboard() {
         },
       });
 
+      console.log(date);
       return {
         orderByDay: resAllOrdersByDay.data.data.length,
         completed: resCompleted.data.data.length,

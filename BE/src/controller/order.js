@@ -132,23 +132,39 @@ export const detailOrder = async (req, res) => {
  */
 
 export const getAllOrders = async (req, res) => {
-  const { code, createdAtFrom, createdAtTo, page = 1 } = req.body; 
+  const { status, code, createdAtFrom, createdAtTo, page = 1 } = req.body; 
   const statusReq = req.query.status;
+  const dateNowReq = req.query.dateNow;
   const pageSize = 10;
-
+  
   try {
     let query = {};
 
     if (statusReq) {
-      query = { status : statusReq };
+      query.status = statusReq;
     }
 
+    if (status) {
+      query.status = status;
+    }
+    
     if (code) {
       query.code = { $regex: code, $options: "i" }; // Tìm kiếm mã hóa đơn với regex, không phân biệt hoa thường
     }
 
+    if (dateNowReq) {
+      const dateNow = new Date(dateNowReq);
+      const startOfDay = new Date(dateNow.setUTCHours(0, 0, 0, 0));
+      const endOfDay = new Date(dateNow.setUTCHours(23, 59, 59, 999));
+      
+      query.createdAt = {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      };
+    }
+
     if (createdAtFrom || createdAtTo) {
-      query.createdAt = {};
+      query.createdAt = query.createdAt || {};
       if (createdAtFrom) {
         query.createdAt.$gte = new Date(createdAtFrom);
       }
@@ -163,7 +179,7 @@ export const getAllOrders = async (req, res) => {
       .limit(pageSize);
 
     const total = await Order.countDocuments(query);
-    console.log("DON HANG",orders);
+    
     if (!orders || orders?.length === 0) {
       return res.status(200).json({
         message: "Không tìm thấy đơn hàng!",
@@ -184,7 +200,8 @@ export const getAllOrders = async (req, res) => {
       message: "Lỗi máy chủ nội bộ",
     });
   }
-}
+};
+
 
 
 export const deleteOrder = async (req, res) => {
