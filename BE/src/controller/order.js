@@ -163,9 +163,9 @@ export const getAllOrders = async (req, res) => {
       .limit(pageSize);
 
     const total = await Order.countDocuments(query);
-
-    if (!orders || orders.length === 0) {
-      return res.status(404).json({
+    console.log("DON HANG",orders);
+    if (!orders || orders?.length === 0) {
+      return res.status(200).json({
         message: "Không tìm thấy đơn hàng!",
         data: [],
         total: 0,
