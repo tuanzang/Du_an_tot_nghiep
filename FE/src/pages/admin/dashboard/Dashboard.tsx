@@ -154,7 +154,7 @@ export default function Dashboard() {
   const [canceledOrdersMonth, setCanceledOrdersMonth] = useState(0);
   const [completedOrdersYear, setCompletedOrdersYear] = useState(0);
   const [canceledOrdersYear, setCanceledOrdersYear] = useState(0);
-  const [dateRange, setDateRange] = useState(null)
+
   useEffect(() => {
     const fetchAllOrders = async () => {
       try {
@@ -199,20 +199,7 @@ export default function Dashboard() {
     fetchAllOrders();
   }, []);
 
-  const getOrdersByChangeDate = async () => {
-    try {
-      const resAllOrdersByChangeDate= await axios.get(`http://localhost:3001/api/orders`, {
-        params: { 
-          dateStart: dateRange && dateRange[0],
-          dateEnd: dateRange && dateRange[1],
-        }
-      })
-      console.log(resAllOrdersByChangeDate.data.data);
-    }
-    catch (error) {
-      console.log(error);
-    }
-  }
+  
   const getOrdersByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
     try {
       const resAllOrdersByDay = await axios.get(`http://localhost:3001/api/orders`, {
@@ -414,9 +401,7 @@ export default function Dashboard() {
   //   }
   // };
  
-  function onChangeDatePicker (value:any) {
-    setDateRange(value)
-  }
+  
   const handleChangeButton = async (index, period) => {
     setIndexButton(index);
     setNameButton(period);
@@ -449,9 +434,6 @@ export default function Dashboard() {
     handleChangeButton(indexButton, nameButton);
     // fetchBestSellers();
   }, []);
-  useEffect(() => {
-    getOrdersByChangeDate()
-  },[dateRange])
 
   const getDataForButton = () => {
     switch (indexButton) {
@@ -519,7 +501,7 @@ export default function Dashboard() {
           {indexButton === 5 && (
             <RangePicker
               format="DD-MM-YYYY"
-              onChange={(_, value) => onChangeDatePicker(value)}
+              onChange={(_, value) => console.log(value)}
               placeholder={["Từ ngày", "Đến ngày"]}
               style={{ borderColor: "#c29957" }}
             />

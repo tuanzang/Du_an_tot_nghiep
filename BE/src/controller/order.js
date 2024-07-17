@@ -132,7 +132,7 @@ export const detailOrder = async (req, res) => {
  */
 
 export const getAllOrders = async (req, res) => {
-  const { status, code, createdAtFrom, createdAtTo, page = 1 } = req.body; 
+  const { status, code, createAtFrom, createAtTo, page = 1 } = req.body; 
   const statusReq = req.query.status;
   const dateNowReq = req.query.dateNow;
   const pageSize = 10;
@@ -163,13 +163,13 @@ export const getAllOrders = async (req, res) => {
       };
     }
 
-    if (createdAtFrom || createdAtTo) {
-      query.createdAt = query.createdAt || {};
-      if (createdAtFrom) {
-        query.createdAt.$gte = new Date(createdAtFrom);
+    if (createAtFrom || createAtTo) {
+      query.createdAt = {};
+      if (createAtFrom) {
+        query.createdAt.$gte = new Date(createAtFrom);
       }
-      if (createdAtTo) {
-        query.createdAt.$lte = new Date(createdAtTo);
+      if (createAtTo) {
+        query.createdAt.$lte = new Date(createAtTo);
       }
     }
 
