@@ -139,7 +139,7 @@ export default function Dashboard() {
     page: 1,
     size: 5,
   });
-
+  
 
   const [listOrder, setListOrder] = useState([]);
   const [totalOrdersToday, setTotalOrdersToday] = useState(0);
@@ -154,7 +154,7 @@ export default function Dashboard() {
   const [canceledOrdersMonth, setCanceledOrdersMonth] = useState(0);
   const [completedOrdersYear, setCompletedOrdersYear] = useState(0);
   const [canceledOrdersYear, setCanceledOrdersYear] = useState(0);
-
+  const [dateRange, setDateRange] = useState(null)
   useEffect(() => {
     const fetchAllOrders = async () => {
       try {
@@ -199,6 +199,20 @@ export default function Dashboard() {
     fetchAllOrders();
   }, []);
 
+  const getOrdersByChangeDate = async () => {
+    try {
+      const resAllOrdersByChangeDate= await axios.get(`http://localhost:3001/api/orders`, {
+        params: { 
+          dateStart: dateRange && dateRange[0],
+          dateEnd: dateRange && dateRange[1],
+        }
+      })
+      console.log(resAllOrdersByChangeDate.data.data);
+    }
+    catch (error) {
+      console.log(error);
+    }
+  }
   const getOrdersByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
     try {
       const resAllOrdersByDay = await axios.get(`http://localhost:3001/api/orders`, {
@@ -246,7 +260,7 @@ export default function Dashboard() {
         }
 
       })
-      console.log(startDate, endDate);
+      // console.log(startDate, endDate);
 
 
       const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
@@ -399,7 +413,10 @@ export default function Dashboard() {
   //     setListBestSeller([]); // Reset nếu có lỗi
   //   }
   // };
-
+ 
+  function onChangeDatePicker (value:any) {
+    setDateRange(value)
+  }
   const handleChangeButton = async (index, period) => {
     setIndexButton(index);
     setNameButton(period);
@@ -432,137 +449,146 @@ export default function Dashboard() {
     handleChangeButton(indexButton, nameButton);
     // fetchBestSellers();
   }, []);
+  useEffect(() => {
+    getOrdersByChangeDate()
+  },[dateRange])
 
+  const getDataForButton = () => {
+    switch (indexButton) {
+      case 1:
+        return {
+          title: "Hôm nay",
+          total: totalOrdersToday,
+          completed: completedOrdersDay,
+          canceled: canceledOrdersDay,
+          color: "#e3d7c3",
+        };
+      case 2:
+        return {
+          title: "Tuần này",
+          total: totalOrdersThisWeek,
+          completed: completedOrdersWeek,
+          canceled: canceledOrdersWeek,
+          color: "#e0ccab",
+        };
+      case 3:
+        return {
+          title: "Tháng này",
+          total: totalOrdersThisMonth,
+          completed: completedOrdersMonth,
+          canceled: canceledOrdersMonth,
+          color: "#e0ccab",
+        };
+      case 4:
+        return {
+          title: "Năm nay",
+          total: totalOrdersThisYear,
+          completed: completedOrdersYear,
+          canceled: canceledOrdersYear,
+          color: "#e3d7c3",
+        };
+      default:
+        return {};
+    }
+  };
 
+  const dataForButton = getDataForButton();
   return (
     <div>
       {/* tên màn hình */}
       <BreadcrumbsCustom listLink={[]} nameHere={"Thống kê"} />
 
-      {/* thống kê luôn hiển thị theo ngày, tuần, tháng , năm và tùy chỉnh */}
-      <Row gutter={[16, 16]} style={{ marginBottom: "16px" }}>
-        <Col span={12}>
-          <DashboardCard
-            iconCart={ScheduleOutlined}
-            title={"Hôm nay"}
-            total={totalOrdersToday}
-            product={totalOrdersToday}
-            order={completedOrdersDay}
-            orderCancel={canceledOrdersDay}
-            color={"#e3d7c3"}
-          />
-        </Col>
-        <Col span={12}>
-          <DashboardCard
-            iconCart={RiseOutlined}
-            title={"Tuần này"}
-            total={totalOrdersThisWeek}
-            product={totalOrdersThisWeek}
-            order={completedOrdersWeek}
-            orderCancel={canceledOrdersWeek}
-            color={"#e0ccab"}
-          />
-        </Col>
-        <Col span={12}>
-          <DashboardCard
-            iconCart={CalendarOutlined}
-            title={"Tháng này"}
-            total={totalOrdersThisMonth}
-            product={totalOrdersThisMonth}
-            order={completedOrdersMonth}
-            orderCancel={canceledOrdersMonth}
-            color={"#e0ccab"}
-          />
-        </Col>
-        <Col span={12}>
-          <DashboardCard
-            iconCart={BarChartOutlined}
-            title={"Năm nay"}
-            total={totalOrdersThisYear}
-            product={totalOrdersThisYear}
-            order={completedOrdersYear}
-            orderCancel={canceledOrdersYear}
-            color={"#e3d7c3"}
-          />
-        </Col>
-      </Row>
-        {/*  danh sách sản phẩm bán chạy */}
-        <Card bordered={false}>
-          <Title level={4} style={{ fontWeight: "bold", color: "#c29957" }}>Bộ lọc</Title>
-          <div style={{ padding: "0 8px" }}>
-            {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'].map((type, index) => (
-              <Button
-                key={type}
-                style={{
-                  backgroundColor: indexButton === index + 1 ? "#c29957" : "white",
-                  borderColor: "#c29957",
-                  color: indexButton === index + 1 ? "white" : "#c29957",
-                  marginRight: "8px",
-                }}
-                onClick={() => handleChangeButton(index + 1, type)}
-              >
-                {type}
-              </Button>
-            ))}
-            {indexButton === 5 && (
-              <RangePicker
-                format="DD-MM-YYYY"
-                onChange={(_, value) => console.log(value)}
-                placeholder={["Từ ngày", "Đến ngày"]}
-                style={{ borderColor: "#c29957" }}
-              />
-            )}
-          </div>
-          <Row gutter={16} style={{ padding: "0 8px" }}>
-            <Col span={14}>
-              <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-                Danh sách sản phẩm bán chạy theo {nameButton}
-              </Title>
-              <Table
-                dataSource={listBestSeller}
-                pagination={false}
-                columns={[
-                  { title: "Ảnh", dataIndex: "img", key: "img", render: (text) => <img style={{ height: "70px" }} src={text} alt="error" /> },
-                  { title: "Tên sản phẩm", dataIndex: "name", key: "name" },
-                  { title: "Số lượng", dataIndex: "quantity", key: "quantity", align: "center" },
-                  { title: "Giá tiền", dataIndex: "price", key: "price", align: "center", render: (text) => formatCurrency(text) },
-                  { title: "Kích cỡ", dataIndex: "size", key: "size", align: "center" },
-                ]}
-              />
-              {listBestSeller.length > 0 && (
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "-5px", paddingTop: "10px", paddingBottom: "10px" }}>
-                  <div>
-                    <span>Xem </span>
-                    <Select
-                      value={filter.size}
-                      onChange={(value) => setFilter({ ...filter, size: value })}
-                      style={{ width: 60, margin: "0 8px" }}
-                      size="small"
-                    >
-                      {[1, 5, 10, 15, 20].map(size => <Option key={size} value={size}>{size}</Option>)}
-                    </Select>
-                    <span>sản phẩm</span>
-                  </div>
-                  <Pagination
+      {/* bộ lọc */}
+      <Card bordered={false}>
+        <Title level={4} style={{ fontWeight: "bold", color: "#c29957" }}>Bộ lọc</Title>
+        <div style={{ padding: "0 8px" }}>
+          {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'].map((type, index) => (
+            <Button
+              key={type}
+              style={{
+                backgroundColor: indexButton === index + 1 ? "#c29957" : "white",
+                borderColor: "#c29957",
+                color: indexButton === index + 1 ? "white" : "#c29957",
+                marginRight: "8px",
+              }}
+              onClick={() => handleChangeButton(index + 1, type)}
+            >
+              {type}
+            </Button>
+          ))}
+          {indexButton === 5 && (
+            <RangePicker
+              format="DD-MM-YYYY"
+              onChange={(_, value) => onChangeDatePicker(value)}
+              placeholder={["Từ ngày", "Đến ngày"]}
+              style={{ borderColor: "#c29957" }}
+            />
+          )}
+        </div>
+        <Row gutter={16} style={{ padding: "0 8px" }}>
+          <Col span={24}>
+            <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
+              Thống kê theo {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
+            </Title>
+            <Table
+              dataSource={[dataForButton]}
+              columns={[
+                { title: "Thời gian", dataIndex: "title", key: "title" },
+                { title: "Tổng đơn hàng", dataIndex: "total", key: "total" },
+                { title: "Đơn hoàn thành", dataIndex: "completed", key: "completed" },
+                { title: "Đơn hủy", dataIndex: "canceled", key: "canceled" },
+              ]}
+              pagination={false}
+            />
+          </Col>
+          <Col span={24}>
+            <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
+              Danh sách sản phẩm bán chạy theo {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
+            </Title>
+            <Table
+              dataSource={listBestSeller}
+              pagination={false}
+              columns={[
+                { title: "Ảnh", dataIndex: "img", key: "img", render: (text) => <img style={{ height: "70px" }} src={text} alt="error" /> },
+                { title: "Tên sản phẩm", dataIndex: "name", key: "name" },
+                { title: "Số lượng", dataIndex: "quantity", key: "quantity", align: "center" },
+                { title: "Giá tiền", dataIndex: "price", key: "price", align: "center", render: (text) => formatCurrency(text) },
+                { title: "Kích cỡ", dataIndex: "size", key: "size", align: "center" },
+              ]}
+            />
+            {listBestSeller.length > 0 && (
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "-5px", paddingTop: "10px", paddingBottom: "10px" }}>
+                <div>
+                  <span>Xem </span>
+                  <Select
+                    value={filter.size}
+                    onChange={(value) => setFilter({ ...filter, size: value })}
+                    style={{ width: 60, margin: "0 8px" }}
                     size="small"
-                    current={filter.page}
-                    total={50}
-                    onChange={(page) => setFilter({ ...filter, page })}
-                  />
+                  >
+                    {[1, 5, 10, 15, 20].map(size => <Option key={size} value={size}>{size}</Option>)}
+                  </Select>
+                  <span>sản phẩm</span>
                 </div>
-              )}
-            </Col>
-            <Col span={10}>
-              <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-                Biểu đồ trạng thái {nameButton}
-              </Title>
-              <Card style={{ borderColor: "#c29957" }}>
-                <PieChartDashBoard data={dataBieuDo} />
-              </Card>
-            </Col>
-          </Row>
-        </Card>
-      
+                <Pagination
+                  size="small"
+                  current={filter.page}
+                  total={50}
+                  onChange={(page) => setFilter({ ...filter, page })}
+                />
+              </div>
+            )}
+          </Col>
+          <Col span={24}>
+            <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
+              Biểu đồ trạng thái {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
+            </Title>
+            <Card style={{ borderColor: "#c29957" }}>
+              <PieChartDashBoard data={dataBieuDo} />
+            </Card>
+          </Col>
+        </Row>
+      </Card>
     </div>
   );
 }
