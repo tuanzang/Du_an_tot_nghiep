@@ -1,31 +1,56 @@
-import { Col, Row, Slider, message } from "antd";
+import { Col, Row, Slider, message, Button } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { IProduct } from "../../interface/Products";
+import { ICategory } from "../../interface/Categories";
 import { Link } from "react-router-dom";
 import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
 import useCartMutation from "../../hooks/useCart";
+
+
 export default function Product() {
   const [product, setProduct] = useState<IProduct[]>([]);
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [priceRange, setPriceRange] = useState<[number, number]>([200, 500]);
+
   const { mutate } = useCartMutation({
     action: "ADD",
     onSuccess: () => {
       message.success("Đã thêm sản phẩm vào giỏ hàng");
     },
   });
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/categories');
+        setCategories(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/api/products`);
+        let url = `http://localhost:3001/api/products`;
+        if (searchTerm) {
+          url += `?search=${encodeURIComponent(searchTerm)}`;
+        }
+        const response = await axios.get(url);
         setProduct(response.data?.data);
       } catch (error) {
-        console.log("Khong co du lieu");
+        console.log("Không có dữ liệu");
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [searchTerm]);
 
   const onAddCart = (productData: IProduct) => {
     if (!isLogged) {
@@ -37,7 +62,25 @@ export default function Product() {
       quantity: 1,
     });
   };
+
   if (!product) return null;
+
+  const handleSliderChange = (value: [number, number]) => {
+    setPriceRange(value);
+  };
+
+  const handleFilterClick = async () => {
+    const [minPrice, maxPrice] = priceRange;
+    try {
+      const response = await axios.get('http://localhost:3001/api/products/filter/price', {
+        params: { minPrice, maxPrice },
+      });
+      console.log('Filtered Products:', response.data);
+    } catch (error) {
+      console.error('Error fetching filtered products:', error);
+    }
+  };
+
   return (
     <div>
       <main>
@@ -76,6 +119,7 @@ export default function Product() {
               {/* <!-- sidebar area start --> */}
               <div className="col-lg-3 order-2 order-lg-1">
                 <aside className="sidebar-wrapper">
+
                   {/* <!-- single sidebar start --> */}
                   <div className="sidebar-single">
                     <h5 className="sidebar-title">
@@ -89,26 +133,13 @@ export default function Product() {
                             Tất cả <span>(100)</span>
                           </a>
                         </li>
-                        <li>
-                          <a href="#">
-                            Nhẫn <span>(10)</span>
-                          </a>
-                        </li>
-                        <li>
-                          <a href="#">
-                            Dây chuyền <span>(5)</span>
-                          </a>
-                        </li>
-                        <li>
-                          <a href="#">
-                            Lắc tay <span>(8)</span>
-                          </a>
-                        </li>
-                        <li>
-                          <a href="#">
-                            Bông tai <span>(4)</span>
-                          </a>
-                        </li>
+                        {categories?.map(category => (
+                          <li key={category._id}>
+                            <a href="#">
+                              {category.loai} <span></span>
+                            </a>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </div>
@@ -128,8 +159,17 @@ export default function Product() {
 
                     <div className="price-range-wrap">
                       <div className="range-slider">
-                        <Slider range defaultValue={[20, 50]} />
-                        <button className="filter-btn">Tìm kiếm</button>
+                        <Slider
+                          range
+                          defaultValue={priceRange}
+                          onChange={(value) => handleSliderChange(value as [number, number])}
+                          min={1}
+                          max={1000}
+                          step={100}
+                        />
+                        <Button className="filter-btn" onClick={handleFilterClick}>
+                          Tìm kiếm
+                        </Button>
                       </div>
                     </div>
                   </div>

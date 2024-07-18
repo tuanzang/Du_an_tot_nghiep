@@ -6,20 +6,17 @@ import {
   Divider,
   Image,
   Input,
-  Modal,
   Row,
   Space,
   Spin,
   Table,
   Tag,
-  Tooltip,
   Typography,
 } from "antd";
 import { useEffect, useState } from "react";
 import confirmStatus from "./confirmStatus";
 import DialogAddUpdate from "./DialogAddUpdateProps ";
 import axios from "axios";
-import printJS from "print-js";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import TimeLine from "./TimeLine";
 import { IoReturnUpBack } from "react-icons/io5";
@@ -28,7 +25,6 @@ import BillHistoryDialog from "./BillHistoryDialog";
 import statusHoaDon from "../../../services/constants/statusHoaDon";
 import AdBillTransaction from "./AdBillTransaction";
 import formatCurrency from "../../../services/common/formatCurrency";
-import { IOrder } from "../../../interface/Orders";
 import { toast } from "react-toastify";
 import { IUser } from "../../../interface/Users";
 import { IHistoryBill } from "../../../interface/HistoryBill";
@@ -36,21 +32,24 @@ import { ITransaction } from "../../../interface/Transaction";
 import styleHoaDon from "../../../services/constants/styleHoaDon";
 import "./BillStyle.css";
 import { IProduct } from "../../../interface/Products";
-import { DeleteOutlined, MinusOutlined, PlusOutlined } from "@ant-design/icons";
+import { IBill } from "../../../interface/Bill";
+import { USER_INFO_STORAGE_KEY } from "../../../services/constants";
+import dayjs from "dayjs";
 
 const listHis = [{ link: "/admin/bill", name: "Quản lý đơn hàng" }];
 export default function BillDetail() {
-  // fake role admin
-  const userAdmin = { name: "admin", role: 1 };
+  // lấy thông tin user đăng nhập
+  const isLogged = localStorage.getItem(USER_INFO_STORAGE_KEY);
+  const user: IUser | null = isLogged ? JSON.parse(isLogged) : null;
 
   // api
   const { id } = useParams();
-  const [idUser, setIdUser] = useState<string | null>(null);
+  const [idCustomer, setIdCustomer] = useState<string | null>(null);
   const [statusBill, setStatusBill] = useState<string>("");
 
   // lấy ra hóa đơn
   const [loadingBill, setLoadingBill] = useState(true);
-  const [billDetail, setBillDetail] = useState<IOrder>();
+  const [billDetail, setBillDetail] = useState<IBill>();
   const fetchDetailBill = async (id: string | null) => {
     setLoadingBill(true);
     if (id === null) {
@@ -58,10 +57,10 @@ export default function BillDetail() {
     } else {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/orders/${id}`
+          `http://localhost:3001/api/bills/${id}`
         );
         setBillDetail(response.data?.data);
-        setIdUser(response.data?.data.userId);
+        setIdCustomer(response.data?.data.userId);
         setStatusBill(response.data?.data.status);
       } catch (error) {
         toast.error("Không tìm thấy hóa đơn");
@@ -141,7 +140,7 @@ export default function BillDetail() {
 
   // tạo lich sử đơn hàng
   const [loadingHistory, setLoadingHistory] = useState(true);
-  const createNewHistory = async (bill: IOrder, user: IUser, note: string) => {
+  const createNewHistory = async (bill: IBill, user: IUser, note: string) => {
     setLoadingHistory(true);
     if (!bill || !user) {
       toast.warning("Không thể tạo lịch sử đơn hàng!");
@@ -149,7 +148,7 @@ export default function BillDetail() {
     }
     const dataHistoryBill: IHistoryBill = {
       _id: null,
-      idUser: bill.userId,
+      idUser: user._id,
       idBill: bill._id,
       creator: user.name,
       role: user.role,
@@ -194,17 +193,17 @@ export default function BillDetail() {
   };
 
   // lấy thông tin người đặt hàng
-  const [user, setUser] = useState<IUser>();
-  const findUserById = async (idUser: string | null) => {
-    if (idUser === null) {
+  const [customer, setCustomer] = useState<IUser>();
+  const findUserById = async (idCustomer: string | null) => {
+    if (idCustomer === null) {
       toast.error("Không tìm thấy thông tin người đặt hàng");
     } else {
       try {
         const response = await axios.post(
           "http://localhost:3001/api/users/findUserById",
-          { _id: idUser }
+          { _id: idCustomer }
         );
-        setUser(response.data?.data);
+        setCustomer(response.data?.data);
       } catch (error) {
         console.log("Khong co du lieu");
       }
@@ -215,11 +214,11 @@ export default function BillDetail() {
   useEffect(() => {
     fetchDetailBill(id ? id : null);
     getBillHistoryByIdBill(id ? id : null);
-    if (idUser !== null) {
-      findUserById(idUser);
+    if (idCustomer !== null) {
+      findUserById(idCustomer);
     }
     getTransBillByIdBill(id ? id : null);
-  }, [id, idUser]);
+  }, [id, idCustomer]);
 
   // State variables for controlling modal visibility
   const [openModalCancelBill, setOpenModalCancelBill] = useState(false);
@@ -231,7 +230,6 @@ export default function BillDetail() {
   const [openCodalConfirmReceived, setOpenCodalConfirmReceived] =
     useState(false);
   const [openmodalReturnStt, setOpenModalReturnStt] = useState(false);
-  const [openPDFView, setOpenPDFView] = useState(false);
 
   // xác nhận đơn hàng
   function ModalConfirmBill() {
@@ -247,7 +245,7 @@ export default function BillDetail() {
               user ? user : null,
               ghiChu
             );
-            confirmPrintBillGiaoHang(id ? id : null);
+            toast.success("Xác nhận đơn hàng thành công!");
             setOpenModalConfirm(false);
           }
         }
@@ -297,6 +295,7 @@ export default function BillDetail() {
               user ? user : null,
               ghiChu
             );
+            toast.success("Xác nhận giao hàng thành công!");
             setOpenModalConfirmDelive(false);
           }
         }
@@ -339,20 +338,33 @@ export default function BillDetail() {
       confirmStatus({ title: "Xác nhận", text: "Xác nhận đã nhận hàng?" }).then(
         (result) => {
           if (result) {
-            handleUpdateStatusBill(
-              id ? id : null,
-              "4",
-              user ? user : null,
-              ghiChu
-            );
-            handleUpdateStatusBill(
-              id ? id : null,
-              "5",
-              user ? user : null,
-              ghiChu
-            );
-            fetchDetailBill(id ? id : null);
-            setOpenCodalConfirmReceived(false);
+            if (listTransaction.length > 0) {
+              handleUpdateStatusBill(
+                id ? id : null,
+                "4",
+                user ? user : null,
+                ghiChu
+              );
+              toast.success("Xác nhận nhận hàng thành công!");
+              fetchDetailBill(id ? id : null);
+              setOpenCodalConfirmReceived(false);
+            } else {
+              handleUpdateStatusBill(
+                id ? id : null,
+                "4",
+                user ? user : null,
+                ghiChu
+              );
+              handleUpdateStatusBill(
+                id ? id : null,
+                "5",
+                user ? user : null,
+                ghiChu
+              );
+              toast.success("Xác nhận nhận hàng thành công!");
+              fetchDetailBill(id ? id : null);
+              setOpenCodalConfirmReceived(false);
+            }
           }
         }
       );
@@ -538,6 +550,7 @@ export default function BillDetail() {
             user ? user : null,
             ghiChu
           );
+          toast.success("Xác nhận hoàn thành đơn hàng thành công!");
           setOpenModalConfirmComplete(false);
         }
       });
@@ -612,6 +625,7 @@ export default function BillDetail() {
         );
         setOpenModalReturnStt(false);
       }
+      toast.success("Xác nhận quay trở lại trạng thái thành công!");
     };
 
     return (
@@ -705,8 +719,7 @@ export default function BillDetail() {
     if (
       listTransaction.filter((trans) => trans.status === true).length > 0 &&
       Number(statusBill) > 3 &&
-      Number(statusBill) < 7 &&
-      Number(statusBill) !== 0
+      Number(statusBill) < 7
     ) {
       return (
         <Button
@@ -768,7 +781,7 @@ export default function BillDetail() {
                 style={{ marginRight: "5px" }}
                 onClick={() => setOpenCodalConfirmReceived(true)}
               >
-                Xác nhận lấy hàng
+                Xác nhận nhận hàng
               </Button>
               <Button
                 className="them-moi"
@@ -786,105 +799,12 @@ export default function BillDetail() {
     }
   };
 
-  // xác nhận và in bill
-  const [pdfContent, setPdfContent] = useState("");
-  const handleOpenPDF = (pdfContent: string) => {
-    setPdfContent(pdfContent);
-    setOpenPDFView(true);
-  };
-
-  const confirmPrintBill = async (idBill: string) => {
-    const comfirm = await confirmStatus({
-      title: "Xác nhận in hoá đơn",
-      text: "Bạn có chắc chắn muốn in hoá đơn này?",
-    });
-    if (comfirm) {
-      try {
-        const response = await axios.get(
-          "http://localhost:5173" + "/in-hoa-don/" + idBill,
-          {
-            responseType: "blob",
-          }
-        );
-        const pdfContent = await new Response(response.data).blob();
-
-        // Tạo URL từ Blob
-        const pdfUrl = URL.createObjectURL(pdfContent);
-
-        // In PDF khi lấy được nội dung
-        printJS({
-          printable: pdfUrl,
-          type: "pdf",
-          header: "Header for the PDF",
-        });
-
-        // Đảm bảo giải phóng tài nguyên khi không cần thiết
-        URL.revokeObjectURL(pdfUrl);
-        handleOpenPDF(String(pdfContent));
-      } catch (error) {
-        console.error("Error fetching or printing PDF:", error);
-      }
-    }
-  };
-
-  const confirmPrintBillGiaoHang = async (idBill: string | null) => {
-    if (idBill !== null) {
-      try {
-        const response = await axios.get(
-          "http://localhost:5173" + "/in-hoa-don/hd-giao-hang/" + idBill,
-          {
-            responseType: "blob",
-          }
-        );
-        const pdfContent = await new Response(response.data).blob();
-
-        // Tạo URL từ Blob
-        const pdfUrl = URL.createObjectURL(pdfContent);
-
-        // In PDF khi lấy được nội dung
-        printJS({
-          printable: pdfUrl,
-          type: "pdf",
-          header: "Header for the PDF",
-        });
-
-        // Đảm bảo giải phóng tài nguyên khi không cần thiết
-        URL.revokeObjectURL(pdfUrl);
-        handleOpenPDF(String(pdfContent));
-      } catch (error) {
-        console.error("Error fetching or printing PDF:", error);
-      }
-    }
-  };
-
-  const PDFViewerModal = () => {
-    const pdfBlob = new Blob([pdfContent], { type: "application/pdf" });
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-
-    return (
-      <Modal
-        open={openPDFView}
-        onCancel={() => setOpenPDFView(false)}
-        footer={null} // Remove footer if not needed
-        width="80%" // Set the width of the modal
-        style={{ padding: 0 }} // Remove padding from body
-      >
-        <iframe
-          style={{ border: "none", width: "100%", height: "80vh" }}
-          src={pdfUrl}
-          title="PDF Viewer"
-        />
-      </Modal>
-    );
-  };
-
   const handleOpenModalChonNhanVien = () => {
     //TODO: call api danh sách nhân viên và chọn nhân viên => 2 api
   };
 
   return (
     <div>
-      {openPDFView && <PDFViewerModal />}
       {openModalConfirm && <ModalConfirmBill />}
       {openModalConfirmDelive && <ModalConfirmDeliver />}
       {openCodalConfirmReceived && <ModalConfirmReceived />}
@@ -942,8 +862,8 @@ export default function BillDetail() {
           </Col>
 
           <Col>
-            {userAdmin &&
-              userAdmin.role === 1 &&
+            {user &&
+              user.role === "admin" &&
               billDetail &&
               Number(statusBill) < 7 &&
               Number(statusBill) > 1 && (
@@ -978,17 +898,6 @@ export default function BillDetail() {
                 >
                   Chi tiết
                 </Button>
-                {billDetail && Number(statusBill) === 7 && (
-                  <Button
-                    type="default"
-                    style={{ marginRight: 8 }}
-                    onClick={() =>
-                      confirmPrintBill(billDetail._id ? billDetail._id : "")
-                    }
-                  >
-                    In hoá đơn
-                  </Button>
-                )}
               </Col>
             </Row>
           </Col>
@@ -1056,7 +965,7 @@ export default function BillDetail() {
               </Col>
               <Col xs={24} sm={8}>
                 <Typography.Text>
-                  <strong>Tên khách hàng:</strong> {user?.name}
+                  <strong>Tên khách hàng:</strong> {customer?.name}
                 </Typography.Text>
               </Col>
               <Col xs={24} sm={8}>
@@ -1073,11 +982,6 @@ export default function BillDetail() {
               <Col xs={24} sm={8}>
                 <Typography.Text>
                   <strong>Địa chỉ:</strong> {billDetail?.address || ""}
-                </Typography.Text>
-              </Col>
-              <Col xs={24} sm={8}>
-                <Typography.Text>
-                  <strong>Email:</strong> {billDetail?.email || ""}
                 </Typography.Text>
               </Col>
               <Col xs={24} sm={8}>
@@ -1195,35 +1099,13 @@ export default function BillDetail() {
                       alignItems: "center",
                     }}
                   >
-                    <Button
-                      icon={<MinusOutlined />}
-                      disabled={
-                        (billDetail &&
-                          (Number(statusBill) > 1 ||
-                            Number(statusBill) === 0)) ||
-                        value - 1 === 0
-                      }
-                      style={{ marginRight: 8 }}
-                    />
                     <Input
                       value={value}
                       type="number"
                       min={1}
                       size="small"
                       style={{ width: 60, textAlign: "center" }}
-                      // disabled={
-                      //   (billDetail && Number(statusBill) > 1) ||
-                      //   value - 1 === 0
-                      // }
                       readOnly
-                    />
-                    <Button
-                      icon={<PlusOutlined />}
-                      disabled={
-                        billDetail &&
-                        (Number(statusBill) > 1 || Number(statusBill) === 0)
-                      }
-                      style={{ marginLeft: 8 }}
                     />
                   </div>
                 )}
@@ -1251,24 +1133,6 @@ export default function BillDetail() {
                   </span>
                 )}
               />
-              <Table.Column
-                key="actions"
-                width={"5%"}
-                render={() => (
-                  <div>
-                    {billDetail && Number(statusBill) > 1 && (
-                      <Tooltip title="Xoá sản phẩm">
-                        <Button
-                          icon={<DeleteOutlined style={{ color: "red" }} />}
-                          // onClick={() =>
-                          //   handleDeleteSPConfirmation(row)
-                          // }
-                        />
-                      </Tooltip>
-                    )}
-                  </div>
-                )}
-              />
             </Table>
           </div>
         )}
@@ -1282,6 +1146,30 @@ export default function BillDetail() {
         </Row>
         <Divider style={{ margin: "16px 0" }} />
         <Row>
+          <div style={{ marginRight: "auto", width: 300, paddingRight: 16 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 10,
+              }}
+            >
+              <Typography.Title level={5}>Ngày đặt hàng:</Typography.Title>
+              {dayjs(billDetail?.createdAt).format("DD/MM/YYYY HH:mm:ss")}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 10,
+              }}
+            >
+              <Typography.Title level={5}>Ngày giao dự kiến:</Typography.Title>
+              {dayjs(billDetail?.createdAt)
+                .add(7, "day")
+                .format("DD/MM/YYYY HH:mm:ss")}
+            </div>
+          </div>
           <div style={{ marginLeft: "auto", width: 300, paddingRight: 16 }}>
             <div
               style={{
@@ -1304,17 +1192,15 @@ export default function BillDetail() {
                 marginBottom: 10,
               }}
             >
-              Phí vận chuyển:
+              Phí ship:
               {billDetail && billDetail.totalPrice >= 1000000 ? (
                 <span>0 VND</span>
               ) : (
                 <Input
-                  size="small"
+                  size="middle"
+                  style={{ width: "75%" }}
                   value={0}
-                  disabled={
-                    (billDetail && Number(statusBill) > 2) ||
-                    (billDetail && Number(statusBill) <= 0)
-                  }
+                  disabled={billDetail && Number(statusBill) !== 1}
                 />
               )}
             </div>

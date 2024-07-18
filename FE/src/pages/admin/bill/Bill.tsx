@@ -16,11 +16,11 @@ import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import { Link } from "react-router-dom";
 import formatCurrency from "../../../services/common/formatCurrency";
 import statusHoaDon from "../../../services/constants/statusHoaDon";
-import { IOrder } from "../../../interface/Orders";
 import axios from "axios";
 import dayjs from "dayjs";
 import "./BillStyle.css";
 import styleHoaDon from "../../../services/constants/styleHoaDon";
+import { IBill } from "../../../interface/Bill";
 
 interface IFilterBill {
   code: string | null;
@@ -52,11 +52,11 @@ export default function Bill() {
     status: valueTabHD,
     page: 1,
   });
-  const [listBill, setListBill] = useState<IOrder[]>([]);
+  const [listBill, setListBill] = useState<IBill[]>([]);
 
   const fetchOrder = async (filter: IFilterBill, currentPage: number) => {
     try {
-      const response = await axios.post("http://localhost:3001/api/orders", {
+      const response = await axios.post("http://localhost:3001/api/bills", {
         ...filter,
         page: currentPage,
       });
@@ -93,7 +93,7 @@ export default function Bill() {
       key: "stt",
       width: "5%",
       align: "center" as const,
-      render: (_: string, __: IOrder, index: number) =>
+      render: (_: string, __: IBill, index: number) =>
         (currentPage - 1) * pageSize + index + 1,
     },
     {
@@ -142,7 +142,7 @@ export default function Bill() {
       title: "Hành động",
       align: "center" as const,
       width: "10%",
-      render: (bill: IOrder) => (
+      render: (bill: IBill) => (
         <Link to={`/admin/bill/detail/${bill?._id}`}>
           <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
         </Link>

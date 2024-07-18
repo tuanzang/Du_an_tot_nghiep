@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMyCartQuery } from "../../hooks/useCart";
 import { formatPrice } from "../../services/common/formatCurrency";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -6,21 +7,34 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { IHistoryBill } from "../../interface/HistoryBill";
 import axios from "axios";
-import { useEffect, useState } from "react";
 import { IUser } from "../../interface/Users";
+import { useDispatch, useSelector } from "react-redux";
+import { ICartItem } from "./Cart";
+import {
+  resetProductSelected,
+  selectProductSelected,
+  selectTotalPrice,
+} from "../../store/cartSlice";
+import { USER_INFO_STORAGE_KEY } from "../../services/constants";
 
 type Inputs = {
   customerName: string;
   address: string;
   phone: string;
-  email: string;
   message: string;
   paymentMethod: string;
 };
 
 const Checkout = () => {
-  const { data, refetch } = useMyCartQuery();
-  const idUser = "6687fecfed4d73c8f419c10e"; // chưa lấy được từ auth nên đang fix cứng
+  // lấy thông tin user đăng nhập
+  const isLogged = localStorage.getItem(USER_INFO_STORAGE_KEY);
+  const user: IUser | null = isLogged ? JSON.parse(isLogged) : null;
+
+  const dispatch = useDispatch();
+  const productSelected: ICartItem[] = useSelector(selectProductSelected);
+  const totalPrice = useSelector(selectTotalPrice);
+
+  const { refetch } = useMyCartQuery();
   const navigate = useNavigate();
 
   const { register, handleSubmit } = useForm<Inputs>({
@@ -31,64 +45,44 @@ const Checkout = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      const dataBill = await OrderApi.createOrder(data);
-      createNewHistory(dataBill.data._id, dataBill.data.status);
-      toast.success("Đặt hàng thành công!");
-      navigate("/");
-      refetch();
+      const productSelectedIds = productSelected.map((it) => it.product._id);
+      const res = await OrderApi.createOrder({
+        ...data,
+        productSelectedIds,
+      });
+
+      if (data?.paymentMethod === "COD") {
+        createNewHistory(res.data.data._id, "1", user);
+        toast.success("Đặt hàng thành công!");
+        navigate("/");
+        refetch();
+        dispatch(resetProductSelected());
+      } else {
+        window.location.href = res?.data?.paymentUrl;
+      }
     } catch (error) {
       console.log(data);
     }
   };
 
-  const [user, setUser] = useState<IUser>({
-    _id: "",
-    email: "",
-    password: "",
-    name: "",
-    role: "",
-    avatar: "",
-  });
-  const findUserById = async (idUser: string | null) => {
-    if (idUser === null) {
-      return setUser({
-        _id: "",
-        email: "",
-        password: "",
-        name: "",
-        role: "",
-        avatar: "",
-      });
-    } else {
-      try {
-        const response = await axios.post(
-          "http://localhost:3001/api/users/findUserById",
-          { _id: idUser }
-        );
-        setUser(response.data?.data);
-      } catch (error) {
-        toast.error("Không tìm thấy tài khoản người dùng");
-      }
-    }
-  };
-
   const createNewHistory = async (
     idBill: string | null,
-    statusBill: string | null
+    statusBill: string | null,
+    user: IUser | null
   ) => {
-    if (idBill === null || statusBill === null) {
+    if (idBill === null || statusBill === null || user === null) {
       toast.warning("Không thể tạo lịch sử đơn hàng!");
       return;
     }
     const dataHistoryBill: IHistoryBill = {
       _id: null,
-      idUser: idUser,
+      idUser: user._id,
       idBill: idBill,
       creator: user.name,
       role: user.role,
       statusBill: statusBill,
       note: "",
-      createdAt: "",
+      createdAt: null,
     };
 
     try {
@@ -101,10 +95,6 @@ const Checkout = () => {
       toast.error("Tạo lịch sử thất bại");
     }
   };
-
-  useEffect(() => {
-    findUserById(idUser ? idUser : null);
-  }, [idUser]);
 
   return (
     <div className="container mt-5">
@@ -124,17 +114,7 @@ const Checkout = () => {
                 })}
               />
             </div>
-            <div className="mb-3">
-              <input
-                type="email"
-                className="form-control"
-                id="email"
-                placeholder="name@example.com"
-                {...register("email", {
-                  required: true,
-                })}
-              />
-            </div>
+
             <div className="mb-3">
               <input
                 type="text"
@@ -213,13 +193,14 @@ const Checkout = () => {
             <thead>
               <tr>
                 <th>Tên sản phẩm</th>
+                <th>ảnh</th>
                 <th>Giá</th>
                 <th>Số lượng</th>
                 <th>Tổng</th>
               </tr>
             </thead>
             <tbody>
-              {data?.data?.products.map((item) => (
+              {productSelected?.map((item) => (
                 <tr key={item._id}>
                   <td>{item.product.name}</td>
                   <td>{formatPrice(item.product.price)}</td>
@@ -229,7 +210,7 @@ const Checkout = () => {
               ))}
             </tbody>
           </table>
-          <h4>Tổng tiền: {formatPrice(data?.data?.totalPrice)}</h4>
+          <h4>Tổng tiền: {formatPrice(totalPrice)}</h4>
         </div>
       </div>
     </div>

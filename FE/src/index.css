@@ -1,0 +1,5 @@
+.selected {
+    background-color: #1890ff; /* Màu nền khi size được chọn */
+    color: #fff; /* Màu chữ khi size được chọn */
+    border-color: #1890ff; /* Màu viền khi size được chọn */
+  }

@@ -1,22 +1,47 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Button,
-  InputNumber,
-  Popconfirm,
-  Table,
-  Typography,
-  // notification,
-} from "antd";
+import { Button, InputNumber, Popconfirm, Table, Typography } from "antd";
 import { useMemo } from "react";
-// import confirmStatus from "../../components/confirmSatus";
 import { Link } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import useCartMutation, { useMyCartQuery } from "../../hooks/useCart";
 import { formatPrice } from "../../services/common/formatCurrency";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectProductSelected,
+  selectTotalPrice,
+  updateProductSelected,
+} from "../../store/cartSlice";
 
 const { Text } = Typography;
 
+export interface ICartItem {
+  _id: string;
+  name: string;
+  image: string[];
+  price: number;
+  description: string;
+  quantity: number;
+  categoryId: string[];
+  createdAt: string;
+  updatedAt: string;
+  product: {
+    _id: string;
+    name: string;
+    image: string[];
+    price: number;
+    description: string;
+    quantity: number;
+    categoryId: string[];
+    createdAt: string;
+    updatedAt: string;
+  };
+  key: string;
+}
+
 export default function Cart() {
+  const dispatch = useDispatch();
+  const productSelected: ICartItem[] = useSelector(selectProductSelected);
+  const totalPrice = useSelector(selectTotalPrice);
   const { data } = useMyCartQuery();
   const { mutate: onUpdateQuantity } = useCartMutation({
     action: "UPDATE",
@@ -24,105 +49,12 @@ export default function Cart() {
   const { mutate: onDeleteProduct } = useCartMutation({
     action: "DELETE",
   });
-  // const [productSelect, setProductSelect] = useState([]);
-  // const [dataCart, setDataCart] = useState({ label: "Tổng tiền", value: 0 });
 
-  // const onChangeSL = (cart, num) => {
-  //   const soluong = cart.soLuong + num;
-
-  //   const updatedProduct = {
-  //     ...cart,
-  //     soLuong: soluong,
-  //   };
-
-  //   const updatedAmount = productSelect.reduce(
-  //     (total, item) =>
-  //       total +
-  //       (item.id === cart.id ? updatedProduct.soLuong : item.soLuong) *
-  //         item.gia,
-  //     0
-  //   );
-
-  //   if (updatedAmount > 50000000) {
-  //     notification.error({
-  //       message: "Error",
-  //       description: "Tổng số tiền sản phẩm không được vượt quá 50tr VND",
-  //     });
-  //     return;
-  //   }
-
-  //   if (soluong <= 0) {
-  //     const title = "Bạn có muốn xóa sản phẩm ra khỏi giỏ hàng không?";
-  //     const text = "";
-  //     confirmStatus(title, text).then((result) => {
-  //       if (result.isConfirmed) {
-  //         const preProductSelect = [...productSelect];
-  //         const index = preProductSelect.findIndex((e) => e.id === cart.id);
-  //         if (index !== -1) {
-  //           preProductSelect.splice(index, 1);
-  //           setProductSelect(preProductSelect);
-  //         }
-  //       }
-  //     });
-  //   } else {
-  //     const preProductSelect = [...productSelect];
-  //     const index = preProductSelect.findIndex((e) => e.id === cart.id);
-  //     if (index !== -1) {
-  //       preProductSelect[index] = updatedProduct;
-  //       setProductSelect(preProductSelect);
-  //     }
-  //   }
-  //   setDataCart({ ...dataCart, value: updatedAmount });
-  // };
-
-  // const rowSelection = {
-  //   selectedRowKeys: productSelect.map((item) => item.key),
-  //   onChange: (selectedRowKeys, selectedRows) => {
-  //     setProductSelect(selectedRows);
-  //     const updatedAmount = selectedRows.reduce(
-  //       (total, item) => total + item.quantity * item.price,
-  //       0
-  //     );
-  //     setDataCart({ ...dataCart, value: updatedAmount });
-  //   },
-  // };
-
-  // const getTitle = (number) => {
-  //   switch (number) {
-  //     case 1:
-  //       return "GOLD";
-  //     case 2:
-  //       return "SLIVER";
-  //     case 3:
-  //       return "BRONZE";
-  //     case 4:
-  //       return "DIAMOND";
-  //   }
-  // };
-
-  // const fakeHotProduct1s = [];
-  // const fakeHotProduct2s = [];
-  // for (let i = 1; i <= 4; i++) {
-  //   fakeHotProduct1s.push({
-  //     key: i,
-  //     image1: `./src/assets/image/product/product-${i}.jpg`,
-  //     image2: `./src/assets/image/product/product-${19 - i}.jpg`,
-  //     title: getTitle(i),
-  //     price: (i * 10 + 9.99).toFixed(2),
-  //     quantity: i,
-  //     category: `Category ${i}`,
-  //   });
-  //   fakeHotProduct2s.push({
-  //     key: i,
-  //     image1: `./src/assets/image/product/product-${i + 1}.jpg`,
-  //     image2: `./src/assets/image/product/product-${19 - i - 1}.jpg`,
-  //     title: getTitle(i),
-  //     price: (i * 10 + 9.99).toFixed(2),
-  //     quantity: i,
-  //     category: `Category ${i}`,
-  //   });
-  // }
-
+  const rowSelection = {
+    onChange: (_: any, selectedRows: ICartItem[]) => {
+      dispatch(updateProductSelected(selectedRows));
+    },
+  };
   const productsFormatted = useMemo(() => {
     return data?.data?.products?.map((it) => ({
       ...it.product,
@@ -196,11 +128,11 @@ export default function Cart() {
                   </Text>
                   <div className="row">
                     <Table
-                      dataSource={productsFormatted}
+                      dataSource={productsFormatted as any}
                       rowKey="key"
                       pagination={false}
                       className="cart-table"
-                      // rowSelection={rowSelection}
+                      rowSelection={rowSelection}
                     >
                       <Table.Column
                         title="Sản phẩm"
@@ -213,6 +145,12 @@ export default function Cart() {
                         key="price"
                         render={(val) => formatPrice(val)}
                       />
+                        <Table.Column
+                        title="Ảnh"
+                        // dataIndex="ICartItem.image"
+                        key="image"
+                        render={(val) => formatPrice(val)}
+                      />
                       <Table.Column
                         title="Số lượng"
                         dataIndex="quantity"
@@ -220,6 +158,7 @@ export default function Cart() {
                         render={(value, record: any) => (
                           <InputNumber
                             min={1}
+                            max={5}
                             value={value}
                             onStep={(quantity) =>
                               handleUpdateQuantity(record.product._id, quantity)
@@ -277,11 +216,15 @@ export default function Cart() {
                   >
                     <span>Tổng tiền</span>
                     <Text style={{ fontWeight: 800, color: "red" }}>
-                      {formatPrice(data?.data?.totalPrice)}
+                      {formatPrice(totalPrice)}
                     </Text>
                   </div>
                   <Link to="/checkout">
-                    <Button type="primary" style={{ float: "right" }}>
+                    <Button
+                      type="primary"
+                      style={{ float: "right" }}
+                      disabled={!productSelected.length}
+                    >
                       Thanh toán
                     </Button>
                   </Link>
