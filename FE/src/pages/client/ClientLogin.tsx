@@ -18,6 +18,7 @@ import {
   ACCESS_TOKEN_STORAGE_KEY,
   USER_INFO_STORAGE_KEY,
 } from "../../services/constants";
+import { useState } from "react";
 
 interface IFormData {
   name: string;
@@ -45,6 +46,7 @@ const RegisterPanel = () => {
     }
   };
 
+  
   return (
     <Form onFinish={onSubmit} form={form}>
       <Form.Item
@@ -157,22 +159,36 @@ const RegisterPanel = () => {
 };
 
 const LoginPanel = () => {
+  const navigate = useNavigate();
+  const [userBlocked, setUserBlocked] = useState(false); // State to check if user is blocked
+
   const onSubmit = async (formData: ISignInBody) => {
     try {
-      const { data } = await AuthApi.signIn(formData);
-      localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data?.token);
-      localStorage.setItem(USER_INFO_STORAGE_KEY, JSON.stringify(data?.user));
+      const { data } = await AuthApi.signIn(formData); // Call API to sign in
 
-      if (data?.user?.role === "admin") {
-        window.location.href = "/admin";
+      // Check if user is blocked
+      if (data?.user?.blocked) {
+        setUserBlocked(true); // Set state to true if user is blocked
+        message.error(
+          "Tài khoản của bạn đã bị chặn. Vui lòng liên hệ với quản trị viên."
+        ); // Show blocked message
       } else {
-        window.location.href = "/";
+        // Store token and user info in local storage
+        localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data?.token);
+        localStorage.setItem(USER_INFO_STORAGE_KEY, JSON.stringify(data?.user));
+
+        // Redirect user based on role or default path
+        if (data?.user?.role === "admin") {
+          window.location.href = "/admin";
+        } else {
+          window.location.href = "/";
+        }
       }
     } catch (error: any) {
       message.error(
         error?.response?.data?.messages || "Có lỗi xảy ra, vui lòng thử lại"
-      );
-      console.log(error);
+      ); // Error message
+      console.log(error); // Log the error for debugging
     }
   };
 

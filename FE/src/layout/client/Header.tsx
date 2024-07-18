@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ACCESS_TOKEN_STORAGE_KEY,
   USER_INFO_STORAGE_KEY,
@@ -9,9 +9,16 @@ import { useMyCartQuery } from "../../hooks/useCart";
 const Header = () => {
   const [openMenuCart, setOpenMenuCart] = useState(false);
   const { data } = useMyCartQuery();
+  const navigate = useNavigate();
 
   const handleMenuCartClick = () => {
     setOpenMenuCart(!openMenuCart);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+    localStorage.removeItem(USER_INFO_STORAGE_KEY);
+    navigate("/login");
   };
 
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
@@ -128,9 +135,23 @@ const Header = () => {
                           </div>
                           <ul className="dropdown-list">
                             {isLogged ? (
-                              <li>
-                                <a href="my-account.html">Tài khoản của tôi</a>
-                              </li>
+                              <>
+                                <li>
+                                  <a href="my-account.html">
+                                    Tài khoản của tôi
+                                  </a>
+                                </li>
+                                {userInfo?.role === "admin" && (
+                                  <li>
+                                    <Link to="/admin">Truy cập Admin</Link>
+                                  </li>
+                                )}
+                                <li>
+                                  <a href="" onClick={handleLogout}>
+                                    Đăng xuất
+                                  </a>
+                                </li>
+                              </>
                             ) : (
                               <>
                                 <li>
@@ -143,7 +164,7 @@ const Header = () => {
                             )}
                           </ul>
                         </li>
-                        
+
                         <li>
                           <Link
                             to="/cart"
@@ -282,9 +303,17 @@ const Header = () => {
                         aria-labelledby="myaccount"
                       >
                         {isLogged ? (
-                          <a className="dropdown-item" href="my-account.html">
-                            Tài khoản của tôi
-                          </a>
+                          <>
+                            <a className="dropdown-item" href="my-account.html">
+                              Tài khoản của tôi
+                            </a>
+                            <button
+                              onClick={handleLogout}
+                              className="dropdown-item"
+                            >
+                              Đăng xuất
+                            </button>
+                          </>
                         ) : (
                           <>
                             <Link to="/register" className="dropdown-item">

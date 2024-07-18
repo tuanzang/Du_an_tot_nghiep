@@ -28,7 +28,9 @@ export default function ProductDetail() {
   const fetchProduct = async () => {
     try {
       if (id) {
-        const response = await axios.get(`http://localhost:3001/api/products/${id}`);
+        const response = await axios.get(
+          `http://localhost:3001/api/products/${id}`
+        );
         console.log("Product API response:", response.data);
         setProduct(response.data.data);
       }
@@ -91,10 +93,16 @@ export default function ProductDetail() {
                           <i className="fa fa-home"></i>
                         </a>
                       </li>
-                      <li className="breadcrumb-item active" aria-current="page">
+                      <li
+                        className="breadcrumb-item active"
+                        aria-current="page"
+                      >
                         <a href="/product">Sản phẩm</a>
                       </li>
-                      <li className="breadcrumb-item active" aria-current="page">
+                      <li
+                        className="breadcrumb-item active"
+                        aria-current="page"
+                      >
                         Sản phẩm chi tiết
                       </li>
                     </ul>
@@ -116,7 +124,10 @@ export default function ProductDetail() {
                 <div className="product-details-inner">
                   <div className="row">
                     <div className="col-lg-5">
-                      <div className="pro-large-img img-zoom" style={{ marginBottom: "10px" }}>
+                      <div
+                        className="pro-large-img img-zoom"
+                        style={{ marginBottom: "10px" }}
+                      >
                         <Image
                           width={"100%"}
                           src={product?.image?.[0]}
@@ -171,7 +182,9 @@ export default function ProductDetail() {
                           <div className="action_link">
                             <button
                               className="btn btn-cart2"
-                              onClick={product ? () => onAddCart(product) : undefined}
+                              onClick={
+                                product ? () => onAddCart(product) : undefined
+                              }
                             >
                               Thêm vào giỏ hàng
                             </button>
@@ -232,15 +245,22 @@ export default function ProductDetail() {
                           </li>
                         </ul>
                         <div className="tab-content">
-                          <div id="tab_one" className="tab-pane fade show active">
+                          <div
+                            id="tab_one"
+                            className="tab-pane fade show active"
+                          >
                             <div className="product-tab-content">
-                              <h6 className="product-tab-title">Mô tả sản phẩm</h6>
+                              <h6 className="product-tab-title">
+                                Mô tả sản phẩm
+                              </h6>
                               <p>{product?.description}</p>
                             </div>
                           </div>
                           <div id="tab_two" className="tab-pane fade">
                             <div className="product-tab-content">
-                              <h6 className="product-tab-title">Thông tin sản phẩm</h6>
+                              <h6 className="product-tab-title">
+                                Thông tin sản phẩm
+                              </h6>
                               <ul>
                                 <li>
                                   {/* <span>Danh mục:</span> {product?.category} */}
@@ -303,7 +323,10 @@ export default function ProductDetail() {
                                 </div>
                                 <div className="form-group row">
                                   <div className="col">
-                                    <label htmlFor="review" className="col-form-label">
+                                    <label
+                                      htmlFor="review"
+                                      className="col-form-label"
+                                    >
                                       Your Review
                                     </label>
                                     <textarea
@@ -315,7 +338,10 @@ export default function ProductDetail() {
                                 </div>
                                 <div className="form-group row">
                                   <div className="col">
-                                    <label htmlFor="name" className="col-form-label">
+                                    <label
+                                      htmlFor="name"
+                                      className="col-form-label"
+                                    >
                                       Name
                                     </label>
                                     <input
@@ -327,7 +353,10 @@ export default function ProductDetail() {
                                 </div>
                                 <div className="form-group row">
                                   <div className="col">
-                                    <label htmlFor="email" className="col-form-label">
+                                    <label
+                                      htmlFor="email"
+                                      className="col-form-label"
+                                    >
                                       Email
                                     </label>
                                     <input
@@ -375,7 +404,11 @@ export default function ProductDetail() {
                     <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                       <Row gutter={16}>
                         {relatedProducts.map((relatedProduct) => (
-                          <Col key={relatedProduct._id} className="gutter-row" span={6}>
+                          <Col
+                            key={relatedProduct._id}
+                            className="gutter-row"
+                            span={6}
+                          >
                             <div className="product-item">
                               <figure className="product-thumb">
                                 <a href="#">

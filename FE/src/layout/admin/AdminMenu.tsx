@@ -57,7 +57,7 @@ export default function AdminMenu({ small }: Props) {
     {
       key: "users",
       icon: <UserOutlined />,
-      label: <Link to="/admin/users">Tài khoản</Link>,
+      label: <Link to="/admin/users">Quản lý tài khoản</Link>,
     },
   ];
 
