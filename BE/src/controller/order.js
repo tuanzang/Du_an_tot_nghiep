@@ -130,7 +130,6 @@ export const detailOrder = async (req, res) => {
  * @param {*} res
  * @returns
  */
-
 export const getAllOrders = async (req, res) => {
   const { status, code, createdAtFrom, createdAtTo, page = 1 } = req.body;
   const statusReq = req.query.status;

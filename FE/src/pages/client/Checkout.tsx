@@ -114,7 +114,6 @@ const Checkout = () => {
                 })}
               />
             </div>
-
             <div className="mb-3">
               <input
                 type="text"
@@ -171,7 +170,7 @@ const Checkout = () => {
                   {...register("paymentMethod")}
                 />
                 <label className="form-check-label" htmlFor="myCheckbox">
-                  Thanh toán ngay
+                Thanh toán ngay
                 </label>
               </div>
             </div>

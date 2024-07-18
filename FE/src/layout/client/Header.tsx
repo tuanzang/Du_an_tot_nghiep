@@ -123,6 +123,7 @@ const Header = () => {
                 {/* mini cart area start */}
                 <div className="col-lg-4">
                   <div className="header-right d-flex align-items-center justify-content-xl-between justify-content-lg-end">
+
                     <div className="header-search-container">
                       <button className="search-trigger d-xl-none d-lg-block">
                         <i className="pe-7s-search"></i>
@@ -386,7 +387,6 @@ const Header = () => {
           </div>
           {/* search box end */}
         </div>
-
         {openMenuCart && <div></div>}
       </header>
     </div>
