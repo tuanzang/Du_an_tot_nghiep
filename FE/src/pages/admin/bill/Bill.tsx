@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  DatePicker,
   Button,
   Input,
   Card,
@@ -8,212 +7,192 @@ import {
   Row,
   Table,
   Tabs,
-  Modal,
+  DatePicker,
+  Tag,
 } from "antd";
-import {
-  SearchOutlined,
-  PlusSquareOutlined,
-  DownloadOutlined,
-  ScanOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
+import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
 import TabPane from "antd/es/tabs/TabPane";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import Scanner from "./Scanner";
 import { Link } from "react-router-dom";
 import formatCurrency from "../../../services/common/formatCurrency";
 import statusHoaDon from "../../../services/constants/statusHoaDon";
+import { IOrder } from "../../../interface/Orders";
+import axios from "axios";
+import dayjs from "dayjs";
+import "./BillStyle.css";
+import styleHoaDon from "../../../services/constants/styleHoaDon";
 
-const { RangePicker } = DatePicker;
+interface IFilterBill {
+  code: string | null;
+  createAtFrom: string | null;
+  createAtTo: string | null;
+  status: string;
+  page: number;
+}
 
-interface BillItem {
-  key: string;
-  img: string;
-  name: string;
-  quantity: number;
-  price: number;
-  size: number;
+interface IDateSearch {
+  createAtFrom: string;
+  createAtTo: string;
 }
 
 export default function Bill() {
-  const [qrScannerVisible, setQrScannerVisible] = useState(false);
-  const [valueTabHD, setValueTabHD] = useState<string>("all");
+  const [valueTabHD, setValueTabHD] = useState<string>("");
+  const [totalBill, setTotalBill] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [codeSearch, setCodeSearch] = useState<string>("");
+  const [dateSearch, setDateSearch] = useState<IDateSearch>({
+    createAtFrom: "",
+    createAtTo: "",
+  });
+  const [filter, setFilter] = useState<IFilterBill>({
+    code: "",
+    createAtFrom: "",
+    createAtTo: "",
+    status: valueTabHD,
+    page: 1,
+  });
+  const [listBill, setListBill] = useState<IOrder[]>([]);
 
-  const scanQr = () => {};
-  const handleChangeTab = (newValue: string) => {
-    setValueTabHD(newValue);
+  const fetchOrder = async (filter: IFilterBill, currentPage: number) => {
+    try {
+      const response = await axios.post("http://localhost:3001/api/orders", {
+        ...filter,
+        page: currentPage,
+      });
+      setListBill(response.data?.data);
+      setTotalBill(response.data?.total);
+      setPageSize(response.data?.size);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
 
-  const listBestSeller: BillItem[] = [
-    {
-      key: "1",
-      img: "../src/assets/image/product/product-1.jpg",
-      name: "p1",
-      quantity: 1,
-      price: 1,
-      size: 1,
-    },
-    {
-      key: "2",
-      img: "../src/assets/image/product/product-2.jpg",
-      name: "p2",
-      quantity: 2,
-      price: 2,
-      size: 2,
-    },
-    {
-      key: "3",
-      img: "../src/assets/image/product/product-3.jpg",
-      name: "p3",
-      quantity: 3,
-      price: 3,
-      size: 3,
-    },
-    {
-      key: "4",
-      img: "../src/assets/image/product/product-3.jpg",
-      name: "p3",
-      quantity: 3,
-      price: 3,
-      size: 3,
-    },
-  ];
+  useEffect(() => {
+    fetchOrder(filter, currentPage);
+  }, [filter, currentPage]);
+
+  const handleChangeTab = (newValue: string) => {
+    setValueTabHD(newValue);
+    setFilter({ ...filter, status: newValue });
+  };
+
+  const handleFilter = (codeSearch: string, dateSearch: IDateSearch) => {
+    setFilter({
+      ...filter,
+      code: codeSearch,
+      createAtFrom: dateSearch.createAtFrom,
+      createAtTo: dateSearch.createAtTo,
+    });
+  };
 
   const columns = [
     {
-      title: "Ảnh",
-      dataIndex: "img",
-      key: "img",
-      width: "20%",
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      width: "5%",
+      align: "center" as const,
+      render: (_: string, __: IOrder, index: number) =>
+        (currentPage - 1) * pageSize + index + 1,
+    },
+    {
+      title: "Mã hóa đơn",
+      dataIndex: "code",
+      key: "code",
+      align: "center" as const,
+      width: "15%",
+    },
+    {
+      title: "Tên khách hàng",
+      dataIndex: "customerName",
+      key: "customerName",
+      align: "center" as const,
+      width: "15%",
+    },
+    {
+      title: "Tổng tiền",
+      dataIndex: "totalPrice",
+      key: "totalPrice",
+      align: "center" as const,
+      width: "10%",
+      render: (text: number) => formatCurrency({ money: String(text) }),
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      align: "center" as const,
+      width: "10%",
+      render: (text: string) => dayjs(text).format("DD/MM/YYYY"),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      align: "center" as const,
+      width: "10%",
       render: (text: string) => (
-        <img style={{ height: "70px" }} src={text} alt="error" />
+        <Tag className={styleHoaDon({ status: text })}>
+          {statusHoaDon({ status: text })}
+        </Tag>
       ),
-    },
-    {
-      title: "Tên sản phẩm",
-      dataIndex: "name",
-      key: "name",
-      width: "20%",
-    },
-    {
-      title: "Số lượng",
-      dataIndex: "quantity",
-      key: "quantity",
-      align: "center" as const,
-      width: "10%",
-    },
-    {
-      title: "Giá tiền",
-      dataIndex: "price",
-      key: "price",
-      align: "center" as const,
-      width: "30%",
-      render: (text: string) => formatCurrency({ money: text }),
-    },
-    {
-      title: "Kích cỡ",
-      dataIndex: "size",
-      key: "size",
-      align: "center" as const,
-      width: "10%",
     },
     {
       title: "Hành động",
       align: "center" as const,
       width: "10%",
-      render: (bill: BillItem) => (
-        <Link to={`/admin/bill/detail/${bill?.key}`}>
+      render: (bill: IOrder) => (
+        <Link to={`/admin/bill/detail/${bill?._id}`}>
           <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
         </Link>
       ),
     },
   ];
 
-  const listSttHD = [0, 1, 2, 3, 4, 5, 6, 7];
+  const listSttHD = ["1", "2", "3", "4", "5", "6", "7", "0"];
+
   return (
     <div>
       <BreadcrumbsCustom listLink={[]} nameHere={"Đơn hàng"} />
-      <Modal
-        visible={qrScannerVisible}
-        onCancel={() => setQrScannerVisible(false)}
-        footer={null}
-      >
-        <div
-          style={{
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            boxShadow: "0 0 24px rgba(0, 0, 0, 0.2)",
-            padding: 16,
-          }}
-        >
-          <Scanner handleScan={scanQr} setOpen={setQrScannerVisible} />
-        </div>
-      </Modal>
       <Card bordered={false}>
         <Row gutter={16}>
-          <Col span={12}>
+          <Col span={10}>
             <Input
               id="hd-input-search"
               style={{ width: "100%", borderColor: "#c29957" }}
               size="middle"
               placeholder="Tìm kiếm hoá đơn theo mã hóa đơn"
               prefix={<SearchOutlined style={{ color: "#1890ff" }} />}
+              onChange={(e) => setCodeSearch(e.target.value)}
             />
           </Col>
-          <Col span={12}>
-            <Button
-              icon={<DownloadOutlined />}
-              style={{
-                float: "right",
-                marginLeft: "12px",
-                backgroundColor: "white",
-                color: "green",
-                borderColor: "green",
-              }}
-              type="default"
-            >
-              Export Excel
-            </Button>
-            <Button
-              style={{
-                float: "right",
-                marginLeft: "12px",
-                borderColor: "#c29957",
-                color: "#c29957",
-              }}
-              onClick={() => {
-                setQrScannerVisible(true);
-              }}
-              type="default"
-              icon={<ScanOutlined />}
-            >
-              Quét mã
-            </Button>
-            <Button
-              type="default"
-              icon={<PlusSquareOutlined />}
-              style={{
-                float: "right",
-                borderColor: "#c29957",
-                color: "#c29957",
-              }}
-            >
-              Tạo hoá đơn
-            </Button>
-          </Col>
-        </Row>
-        <Row gutter={16} style={{ marginTop: "12px" }}>
-          <Col span={12}>
-            <span>Thời gian: </span>
-            <RangePicker
-              format="DD-MM-YYYY"
-              onChange={(_, dateStrings) => console.log(dateStrings)}
-              placeholder={["Từ ngày", "Đến ngày"]}
-              style={{
-                borderColor: "#c29957",
-              }}
+          <Col span={5}>
+            <span style={{ marginRight: "10px" }}>Từ ngày</span>
+            <DatePicker
+              format={"DD-MM-YYYY"}
+              onChange={(e) =>
+                setDateSearch({
+                  ...dateSearch,
+                  createAtFrom: e ? dayjs(e).format("YYYY-MM-DD") : "",
+                })
+              }
             />
+          </Col>
+          <Col span={5}>
+            <span style={{ marginRight: "10px" }}>Đến ngày</span>
+            <DatePicker
+              format={"DD-MM-YYYY"}
+              onChange={(e) =>
+                setDateSearch({
+                  ...dateSearch,
+                  createAtTo: e ? dayjs(e).format("YYYY-MM-DD") : "",
+                })
+              }
+            />
+          </Col>
+          <Col span={2}></Col>
+          <Col span={2}>
             <Button
               type="default"
               icon={<SearchOutlined />}
@@ -222,6 +201,7 @@ export default function Bill() {
                 borderColor: "#c29957",
                 color: "#c29957",
               }}
+              onClick={() => handleFilter(codeSearch, dateSearch)}
             >
               Tìm kiếm
             </Button>
@@ -230,12 +210,21 @@ export default function Bill() {
       </Card>
       <Card style={{ marginTop: "12px" }}>
         <Tabs activeKey={valueTabHD} onChange={handleChangeTab}>
-          <TabPane tab="Tất cả" key="all"></TabPane>
+          <TabPane tab="Tất cả" key="" />
           {listSttHD.map((row) => (
-            <TabPane tab={statusHoaDon({ status: row })} key={row}></TabPane>
+            <TabPane tab={statusHoaDon({ status: String(row) })} key={row} />
           ))}
         </Tabs>
-        <Table dataSource={listBestSeller} columns={columns} />
+        <Table
+          dataSource={listBill}
+          columns={columns}
+          pagination={{
+            current: currentPage,
+            pageSize: pageSize,
+            total: totalBill,
+            onChange: (page) => setCurrentPage(page),
+          }}
+        />
       </Card>
     </div>
   );

@@ -6,11 +6,16 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",
     },
+    code: {
+      type: String,
+      require: true,
+    },
     products: [
       {
         name: String,
         price: Number,
         quantity: Number,
+        image: String,
       },
     ],
     totalPrice: {
@@ -18,15 +23,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
     status: {
-      enum: [
-        "Đặt hàng thành công",
-        "Đã xác nhận",
-        "Đang giao hàng",
-        "Đã giao hàng",
-        "Đã huỷ",
-      ],
       type: String,
-      default: "Đặt hàng thành công",
     },
     customerName: {
       type: String,
@@ -40,10 +37,10 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    email: {
-      type: String,
-      required: true,
-    },
+    // email: {
+    //   type: String,
+    //   required: true,
+    // },
     message: {
       type: String,
       required: true,

@@ -54,13 +54,14 @@ export default function Users() {
         data?.data?.filter((user) =>
           user.name.toLowerCase().includes(searchTerm.toLowerCase())
         ) || [];
-setUserList(
-  filteredUsers.map((user, index) => ({
-    key: user._id,
-    stt: index + 1,
-    ...user,
-  }))
-);    } catch (error) {
+      setUserList(
+        filteredUsers.map((user, index) => ({
+          key: user._id,
+          stt: index + 1,
+          ...user,
+        }))
+      );
+    } catch (error) {
       console.error("Error fetching users:", error);
     }
   };

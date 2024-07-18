@@ -2,9 +2,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import morgan from "morgan";
-import router from "./routes/index.js";
 // import authRouter from "./routes/authRouter";
 import mongoose from "mongoose";
+import router from "./routes";
 
 const app = express();
 const port = 3001;
@@ -30,3 +30,6 @@ app.listen(port, () => {
 });
 
 export const viteNodeApp = app;
+// em reta
+//kih nao loi e là sao thế a  loi say ra khi naokhi mình k thể lấy dduocj dữ liệu bên mongodb. demo a xem
+// ở bên này e có hết data nhma k thể render ra màn hình tự nhiên bây giờ lại nhận giữ liệu a ạ 

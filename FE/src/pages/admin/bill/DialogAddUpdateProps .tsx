@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 import { Modal, Button, Typography, Space } from "antd";
 
 interface DialogAddUpdateProps {
@@ -39,14 +39,14 @@ const DialogAddUpdate = ({
       footer={null}
       width={
         width === "xs"
-          ? 400
+          ? 100
           : width === "sm"
-          ? 600
+          ? 200
           : width === "md"
-          ? 800
+          ? 400
           : width === "lg"
-          ? 1000
-          : 1200
+          ? 400
+          : 600
       }
     >
       {children}

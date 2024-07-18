@@ -1,21 +1,36 @@
 import type { FormProps } from 'antd';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Button, Form, Input, Select } from 'antd';
+import { Button, Form, Input, Select, Upload, Checkbox } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
 import { IProduct } from '../../../interface/Products';
 import { useEffect, useState } from 'react';
 import { ICategory } from '../../../interface/Categories';
+import { toast } from "react-toastify";
+import { uploadImage } from "../../../services/upload/upload";
+import { UploadFile } from "antd/lib";
+// import { List, Card, notification } from 'antd';
+import { ISize } from '../../../interface/Size';
+import { IProductSize } from '../../../interface/ProductSize';
 import TextArea from 'antd/es/input/TextArea';
 
+
 const ProductAdd = () => {
-  const navigate = useNavigate();
-  const [cates, setCates] = useState<ICategory[]>([]);
+  const navigate = useNavigate()
+
+  const [cates, setCates] = useState([]);
+  const [sizes, setSizes] = useState([]);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get("http://localhost:3001/api/categories");
         setCates(response.data?.data);
+
+        const responseSizes = await axios.get("http://localhost:3001/api/sizes");
+        setSizes(responseSizes.data?.data);
+
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -25,22 +40,57 @@ const ProductAdd = () => {
 
   const dataCates = cates.map((item: ICategory) => {
     return {
-      value: item._id, label: item.loai
+      value: item._id,
+      label: item.loai
     }
   });
 
-  const onFinish: FormProps<IProduct>['onFinish'] = async (values) => {
+  const dataSize = sizes.map((size: ISize) => {
+    return {
+      value: size._id,
+      label: size.name
+    }
+  })
+
+        
+  // const [quantity, setQuantity] = useState<Number>(0)
+  const onFinish: FormProps<IProduct>["onFinish"] = async (values) => {
     try {
-      await axios.post("http://localhost:3001/api/products/add", values);
-      alert('Add product success');
+      // Upload images
+      // Lấy danh sách các file từ fileList
+      const imageFiles: File[] = fileList.map(file => file.originFileObj as File);
+
+      // Upload images
+      const uploadedImageUrls = await uploadImage(imageFiles);
+      //  console.log("Uploaded image URLs:", uploadedImageUrls);
+
+      // Update values with uploaded image URLs
+      const updatedValues = { ...values, image: uploadedImageUrls };
+
+      // product size
+      const idSizes = updatedValues.idSize;
+      const quantity = updatedValues.quantity;
+
+      // Send product data to server
+      const dataProduct = await axios.post(`http://localhost:3001/api/products/add`, updatedValues);
+      
+      const productSizes: IProductSize[] = [];
+      idSizes.map(s=>productSizes.push( {_id:null, idProduct: dataProduct.data.data._id, idSize:s, quantity}))
+        
+      await axios.post(`http://localhost:3001/api/products/add/size`, productSizes)
+      toast.success("Thêm sản phẩm thành công");
       navigate("/admin/product");
     } catch (err) {
       console.log(err);
     }
   };
 
-  const onFinishFailed: FormProps<IProduct>['onFinishFailed'] = (errorInfo) => {
-    console.log('Failed:', errorInfo);
+
+  const onFinishFailed: FormProps<IProduct>["onFinishFailed"] = (errorInfo) => {
+    console.log("Failed:", errorInfo);
+  };
+  const handleUploadChange = ({ fileList }: { fileList: UploadFile[] }) => {
+    setFileList(fileList);
   };
 
   return (
@@ -74,13 +124,36 @@ const ProductAdd = () => {
       >
         <Input type="number" />
       </Form.Item>
+      {/* <Form.Item<IProduct>
+        label="Giá cũ"
+        name="priceOld"
+      >
+        <Input />
+      </Form.Item> */}
       <Form.Item<IProduct>
         label="Danh mục"
         name="categoryId"
         rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
       >
-        <Select style={{ width: 150 }} options={dataCates} />
+        <Select
+
+          defaultValue="Chọn danh mục"
+          style={{
+            width: 150,
+          }}
+
+          options={dataCates}
+        />
       </Form.Item>
+
+      <Form.Item<IProduct>
+        label="Size"
+        name="idSize"
+        rules={[{ required: true, message: 'Vui lòng chọn size!' }]}
+      >
+        <Checkbox.Group options={dataSize} />
+      </Form.Item>
+
       <Form.Item<IProduct>
         label="Số lượng"
         name="quantity"
@@ -88,13 +161,28 @@ const ProductAdd = () => {
       >
         <Input type="number" />
       </Form.Item>
-      <Form.Item<IProduct>
+
+      {/* upload ảnh */}
+      <Form.Item
         label="Ảnh"
         name="image"
-        rules={[{ required: true, message: "Vui lòng nhập URL ảnh!" }]}
+        rules={[
+          { required: true, message: "Vui lòng tải lên ảnh sản phẩm!" },
+        ]}
       >
-        <Input />
+        <Upload
+          name="image"
+          listType="picture"
+          // maxCount={1}
+          beforeUpload={() => false}
+          multiple
+          accept=".jpg,.png,.jpeg"
+          onChange={handleUploadChange}
+        >
+          <Button icon={<UploadOutlined />}>Tải ảnh lên</Button>
+        </Upload>
       </Form.Item>
+
       <Form.Item<IProduct>
         label="Mô tả"
         name="description"

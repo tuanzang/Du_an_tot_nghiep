@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
+import { Button, Card, Col, Input, Radio, Row, Switch, Table, Modal } from "antd";
 import {
   DownloadOutlined,
   PlusSquareOutlined,
   SearchOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -28,6 +29,10 @@ export default function Product() {
   const [value, setValue] = useState(1);
   const [products, setProducts] = useState<IProduct[]>([]);
   const [cates, setCates] = useState<ICategory[]>([]);
+  // const [listSize, setListSize] = useState([]);
+  const [isOpenModalDetailOrder, setIsOpenModalDetailOrder] = useState(false);
+  const [rowDataCurrent, setRowDataCurrent] = useState({});
+  const [sizes, setSizes] = useState<{ size: string, quantity: number }[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,8 +43,8 @@ export default function Product() {
         ]);
         setProducts(productResponse.data?.data);
         setCates(categoryResponse.data?.data); // Ensure categories are correctly set
-        console.log(productResponse.data?.data);
-        console.log(categoryResponse.data?.data);
+        // console.log(productResponse.data?.data);
+        // console.log(categoryResponse.data?.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -89,6 +94,7 @@ export default function Product() {
 
   const columns: (
     | ColumnGroupType<{
+      // _id:number;
         stt: number;
         key: number;
         name: string;
@@ -99,6 +105,7 @@ export default function Product() {
         loai: string;
       }>
     | ColumnType<{
+      // _id:number;
         stt: number;
         key: number;
         name: string;
@@ -168,13 +175,13 @@ export default function Product() {
         </span>
       ),
     },
-    {
-      title: "Số lượng",
-      dataIndex: "quantity",
-      key: "quantity",
-      align: "center",
-      width: "10%",
-    },
+    // {
+    //   title: "Số lượng",
+    //   dataIndex: "quantity",
+    //   key: "quantity",
+    //   align: "center",
+    //   width: "10%",
+    // },
     {
       title: "Trạng thái",
       dataIndex: "status",
@@ -211,12 +218,24 @@ export default function Product() {
         <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
       ),
     },
+    {
+      title: "Chi tiết",
+      align: "center" as const,
+      width: "10%",
+      render: (record) => (
+        <EyeOutlined
+          style={{ fontSize: "20px", color: "#1890ff" }}
+          onClick={() => handleClickDetailOrder(record.id)}
+        />
+      ),
+    },
   ];
 
   const data = products.map((item: IProduct, index: number) => {
     const category = cates.find(
       (cate) => cate._id.toString() === item.categoryId.toString()
     );
+
     return {
       stt: index + 1,
       key: item._id,
@@ -229,6 +248,23 @@ export default function Product() {
       loai: category ? category.loai : "Không có danh mục", // Handle no category case
     };
   });
+
+  const handleClickDetailOrder = async (id: IProduct) => {
+    try {
+      const sizeResponse = await axios.get(`http://localhost:3001/api/products`);
+      const sizes = sizeResponse.data?.data || [];
+      setSizes(sizes);
+      setIsOpenModalDetailOrder(true);
+      
+    } catch (error) {
+      console.error("Error fetching sizes:", error);
+    }
+  };
+
+  // const handleCancel = () => {
+  //   setIsOpenModalDetailOrder(false);
+  //   setRowDataCurrent(null);
+  // };
 
   return (
     <div>
@@ -294,6 +330,38 @@ export default function Product() {
           </Col>
         </Row>
       </Card>
+
+      {rowDataCurrent && (
+         <Modal
+         title="Thông tin kích thước và số lượng"
+         visible={isOpenModalDetailOrder}
+         onCancel={() => setIsOpenModalDetailOrder(false)}
+         footer={[
+           <Button key="back" onClick={() => setIsOpenModalDetailOrder(false)}>
+             Đóng
+           </Button>,
+         ]}
+
+       >
+         <Table
+           dataSource={sizes}
+           columns={[
+             {
+               title: 'Kích thước',
+               dataIndex: 'size',
+               key: 'sizeId',
+             },
+             {
+               title: 'Số lượng',
+               dataIndex: 'quantity',
+               key: 'quantity',
+             },
+           ]}
+           pagination={false}
+         />
+       </Modal>
+      )}
+
       <Card style={{ marginTop: "12px" }}>
         <Table
           components={{

@@ -1,8 +1,8 @@
-import User from "../models/user.js";
+import user from "../models/user.js";
 
 export const getAllUsers = async (req, res) => {
   try {
-    const data = await User.find().sort("-createdAt");
+    const data = await user.find().sort("-createdAt");
 
     res.json({
       message: "Danh sách User",

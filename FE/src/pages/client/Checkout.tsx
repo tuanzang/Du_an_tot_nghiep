@@ -1,21 +1,37 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMyCartQuery } from "../../hooks/useCart";
 import { formatPrice } from "../../services/common/formatCurrency";
 import { SubmitHandler, useForm } from "react-hook-form";
 import OrderApi from "../../config/orderApi";
 import { useNavigate } from "react-router-dom";
-import { message } from "antd";
+import { toast } from "react-toastify";
+import { IHistoryBill } from "../../interface/HistoryBill";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { IUser } from "../../interface/Users";
+import { useDispatch, useSelector } from "react-redux";
+import { ICartItem } from "./Cart";
+import {
+  resetProductSelected,
+  selectProductSelected,
+  selectTotalPrice,
+} from "../../store/cartSlice";
 
 type Inputs = {
   customerName: string;
   address: string;
   phone: string;
-  email: string;
   message: string;
   paymentMethod: string;
 };
 
 const Checkout = () => {
-  const { data, refetch } = useMyCartQuery();
+  const idUser = "6684b89e5934b50d4f1ac280"; // chưa lấy được từ auth nên đang fix cứng
+  const dispatch = useDispatch();
+  const productSelected: ICartItem[] = useSelector(selectProductSelected);
+  const totalPrice = useSelector(selectTotalPrice);
+
+  const { refetch } = useMyCartQuery();
   const navigate = useNavigate();
 
   const { register, handleSubmit } = useForm<Inputs>({
@@ -26,14 +42,91 @@ const Checkout = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      await OrderApi.createOrder(data);
-      message.success("Đặt hàng thành công!");
-      navigate("/");
-      refetch();
+      
+      const productSelectedIds = productSelected.map((it) => it.product._id);
+      const res = await OrderApi.createOrder({
+        ...data,
+        productSelectedIds,
+      });
+      createNewHistory(res.data._id, res.data.status);
+
+      if (data?.paymentMethod === "COD") {
+        toast.success("Đặt hàng thành công!");
+        navigate("/");
+        refetch();
+        dispatch(resetProductSelected());
+      } else {
+        window.location.href = res?.data?.paymentUrl;
+      }
     } catch (error) {
       console.log(data);
     }
   };
+
+  const [user, setUser] = useState<IUser>({
+    _id: "",
+    email:"",
+    password: "",
+    name: "",
+    role: "",
+    avatar: "",
+  });
+  const findUserById = async (idUser: string | null) => {
+    if (idUser === null) {
+      return setUser({
+        _id: "",
+        email:"",
+        password: "",
+        name: "",
+        role: "",
+        avatar: "",
+      });
+    } else {
+      try {
+        const response = await axios.post(
+          "http://localhost:3001/api/users/findUserById",
+          { _id: idUser }
+        );
+        setUser(response.data?.data);
+      } catch (error) {
+        toast.error("Không tìm thấy tài khoản người dùng");
+      }
+    }
+  };
+
+  const createNewHistory = async (
+    idBill: string | null,
+    statusBill: string | null
+  ) => {
+    if (idBill === null || statusBill === null) {
+      toast.warning("Không thể tạo lịch sử đơn hàng!");
+      return;
+    }
+    const dataHistoryBill: IHistoryBill = {
+      _id: null,
+      idUser: idUser,
+      idBill: idBill,
+      creator: user.name,
+      role: user.role,
+      statusBill: statusBill,
+      note: "",
+      createdAt: "",
+    };
+
+    try {
+      // Gửi yêu cầu tạo lịch sử
+      await axios.post(
+        "http://localhost:3001/api//history-bill/add",
+        dataHistoryBill
+      );
+    } catch (error) {
+      toast.error("Tạo lịch sử thất bại");
+    }
+  };
+
+  useEffect(() => {
+    findUserById(idUser ? idUser : null);
+  }, [idUser]);
 
   return (
     <div className="container mt-5">
@@ -53,17 +146,7 @@ const Checkout = () => {
                 })}
               />
             </div>
-            <div className="mb-3">
-              <input
-                type="email"
-                className="form-control"
-                id="email"
-                placeholder="name@example.com"
-                {...register("email", {
-                  required: true,
-                })}
-              />
-            </div>
+           
             <div className="mb-3">
               <input
                 type="text"
@@ -120,8 +203,7 @@ const Checkout = () => {
                   {...register("paymentMethod")}
                 />
                 <label className="form-check-label" htmlFor="myCheckbox">
-                  {" "}
-                  Thanh toán qua tài khoản ngân hàng{" "}
+                Thanh toán ngay
                 </label>
               </div>
             </div>
@@ -143,13 +225,14 @@ const Checkout = () => {
             <thead>
               <tr>
                 <th>Tên sản phẩm</th>
+                <th>ảnh</th>
                 <th>Giá</th>
                 <th>Số lượng</th>
                 <th>Tổng</th>
               </tr>
             </thead>
             <tbody>
-              {data?.data?.products.map((item) => (
+              {productSelected?.map((item) => (
                 <tr key={item._id}>
                   <td>{item.product.name}</td>
                   <td>{formatPrice(item.product.price)}</td>
@@ -159,7 +242,7 @@ const Checkout = () => {
               ))}
             </tbody>
           </table>
-          <h4>Tổng tiền: {formatPrice(data?.data?.totalPrice)}</h4>
+          <h4>Tổng tiền: {formatPrice(totalPrice)}</h4>
         </div>
       </div>
     </div>

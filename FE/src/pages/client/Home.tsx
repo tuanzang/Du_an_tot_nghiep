@@ -178,7 +178,7 @@ export default function Home() {
 
                   {/* <!-- product tab content start --> */}
                   <div className="tab-content">
-                    <Carousel autoplay={true} autoplaySpeed={2000}>
+                    <Carousel autoplay={true} autoplaySpeed={3000}>
                       {/* <!-- product item start --> */}
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
@@ -187,13 +187,13 @@ export default function Home() {
                               <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
-                                    <a href="#">
+                                    <Link to={`/product/${p._id}`}>
                                       <img
                                         className="pri-img"
                                         src={`${p?.image}`}
                                         alt="product"
                                       />
-                                    </a>
+                                    </Link>
                                     <div className="product-badge">
                                       <div className="product-label new">
                                         <span>HOT</span>
