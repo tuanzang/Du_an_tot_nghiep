@@ -1,8 +1,8 @@
-import user from "../models/user.js";
+import User from "../models/user.js";
 
 export const getAllUsers = async (req, res) => {
   try {
-    const data = await user.find().sort("-createdAt");
+    const data = await User.find().sort("-createdAt");
 
     res.json({
       message: "Danh sách User",
@@ -16,8 +16,8 @@ export const getAllUsers = async (req, res) => {
 };
 
 export const updateRoleUser = async (req, res) => {
-  const { userId } = req.params; 
-  const { role } = req.body;     
+  const { userId } = req.params;
+  const { role } = req.body;
 
   if (!userId || !role) {
     return res.status(400).json({
@@ -62,7 +62,7 @@ export const blockUser = async (req, res) => {
   try {
     const blockedUser = await User.findByIdAndUpdate(
       userId,
-      { blocked: true }, 
+      { blocked: true },
       { new: true, runValidators: true }
     );
 
@@ -73,7 +73,7 @@ export const blockUser = async (req, res) => {
     }
 
     res.json({
-      message: "Mở khóa người dùng thành công", 
+      message: "Mở khóa người dùng thành công",
       data: blockedUser,
     });
   } catch (error) {
@@ -89,7 +89,7 @@ export const unlockUser = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { blocked: false, status: "active" },
-      { new: true } 
+      { new: true }
     );
 
     if (!updatedUser) {
