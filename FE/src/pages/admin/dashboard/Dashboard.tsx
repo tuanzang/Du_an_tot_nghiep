@@ -83,7 +83,7 @@ const DashboardCard = function ({
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          fontFamily: "monospace",
+          fontFamily: "Fair-play",
           fontSize: "17px",
         }}
       >
@@ -94,7 +94,7 @@ const DashboardCard = function ({
         style={{
           marginTop: "8px",
           textAlign: "center",
-          fontFamily: "monospace",
+          fontFamily: "Fair-play",
           fontWeight: "600",
         }}
       >
@@ -105,7 +105,7 @@ const DashboardCard = function ({
           marginTop: "8px",
           width: "100%",
           textAlign: "center",
-          fontFamily: "monospace",
+          fontFamily: "Fair-play",
           fontSize: "15px",
           color: "black",
         }}
@@ -490,7 +490,7 @@ export default function Dashboard() {
         <Card bordered={false}>
           <Title level={4} style={{ fontWeight: "bold", color: "#c29957" }}>Bộ lọc</Title>
           <div style={{ padding: "0 8px" }}>
-            {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'].map((type, index) => (
+            {['Ngày', 'Tuần', 'Tháng', 'Năm', 'Tùy chỉnh'].map((type, index) => (
               <Button
                 key={type}
                 style={{

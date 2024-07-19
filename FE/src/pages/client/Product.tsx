@@ -119,7 +119,6 @@ export default function Product() {
               {/* <!-- sidebar area start --> */}
               <div className="col-lg-3 order-2 order-lg-1">
                 <aside className="sidebar-wrapper">
-
                   {/* <!-- single sidebar start --> */}
                   <div className="sidebar-single">
                     <h5 className="sidebar-title">
@@ -133,7 +132,7 @@ export default function Product() {
                             Tất cả <span>(100)</span>
                           </a>
                         </li>
-                        {categories?.map(category => (
+                        {categories?.map((category) => (
                           <li key={category._id}>
                             <a href="#">
                               {category.loai} <span></span>
@@ -162,12 +161,17 @@ export default function Product() {
                         <Slider
                           range
                           defaultValue={priceRange}
-                          onChange={(value) => handleSliderChange(value as [number, number])}
+                          onChange={(value) =>
+                            handleSliderChange(value as [number, number])
+                          }
                           min={1}
                           max={1000}
                           step={100}
                         />
-                        <Button className="filter-btn" onClick={handleFilterClick}>
+                        <Button
+                          className="filter-btn"
+                          onClick={handleFilterClick}
+                        >
                           Tìm kiếm
                         </Button>
                       </div>
@@ -517,11 +521,20 @@ export default function Product() {
                           <div className="product-item">
                             <figure className="product-thumb">
                               <Link to={`/product/${p._id}`}>
-                                <img
-                                  className="pri-img"
-                                  src={p?.image?.[0]}
-                                  alt="product"
-                                />
+                                <div className="image-container">
+                                  <img
+                                    className="pri-img"
+                                    src={p.image[0]}
+                                    alt={p.name}
+                                  />
+                                  {p.image[1] && (
+                                    <img
+                                      className="sec-img"
+                                      src={p.image[1]}
+                                      alt={p.name}
+                                    />
+                                  )}
+                                </div>
                               </Link>
                               <div className="product-badge">
                                 <div className="product-label new">

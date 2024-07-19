@@ -12,6 +12,7 @@ import { UploadFile } from "antd/lib";
 // import { List, Card, notification } from 'antd';
 import { ISize } from '../../../interface/Size';
 import { IProductSize } from '../../../interface/ProductSize';
+import TextArea from 'antd/es/input/TextArea';
 
 
 const ProductAdd = () => {
@@ -34,7 +35,6 @@ const ProductAdd = () => {
         console.error("Error fetching data:", error);
       }
     };
-
     fetchData();
   }, []);
 
@@ -43,7 +43,7 @@ const ProductAdd = () => {
       value: item._id,
       label: item.loai
     }
-  })
+  });
 
   const dataSize = sizes.map((size: ISize) => {
     return {
@@ -106,14 +106,23 @@ const ProductAdd = () => {
       <Form.Item<IProduct>
         label="Tên sản phẩm"
         name="name"
+        rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}
       >
-        <Input type='text' />
+        <Input />
       </Form.Item>
       <Form.Item<IProduct>
         label="Giá"
         name="price"
+        rules={[{ required: true, message: "Vui lòng nhập giá sản phẩm!" }]}
       >
-        <Input />
+        <Input type="number" />
+      </Form.Item>
+      <Form.Item<IProduct>
+        label="Giá cũ"
+        name="priceOld"
+        rules={[{ required: true, message: "Vui lòng nhập giá cũ sản phẩm!" }]}
+      >
+        <Input type="number" />
       </Form.Item>
       {/* <Form.Item<IProduct>
         label="Giá cũ"
@@ -124,6 +133,7 @@ const ProductAdd = () => {
       <Form.Item<IProduct>
         label="Danh mục"
         name="categoryId"
+        rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
       >
         <Select
 
@@ -139,7 +149,7 @@ const ProductAdd = () => {
       <Form.Item<IProduct>
         label="Size"
         name="idSize"
-        rules={[{ required: true, message: 'Vui lòng chọn size!' }]}
+        // rules={[{ required: true, message: 'Vui lòng chọn size!' }]}
       >
         <Checkbox.Group options={dataSize} />
       </Form.Item>
@@ -147,8 +157,9 @@ const ProductAdd = () => {
       <Form.Item<IProduct>
         label="Số lượng"
         name="quantity"
+        rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
       >
-        <Input />
+        <Input type="number" />
       </Form.Item>
 
       {/* upload ảnh */}
@@ -175,8 +186,9 @@ const ProductAdd = () => {
       <Form.Item<IProduct>
         label="Mô tả"
         name="description"
+        rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
       >
-        <Input />
+        <TextArea rows={4} />
       </Form.Item>
       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
         <Button type="primary" htmlType="submit">

@@ -51,19 +51,12 @@ export default function Home() {
 
   if (!product) return null;
 
-  // const queryClient = useQueryClient();
-  // const { mutate } = useMutation({
-  //   mutationFn: async (id) => {
-
-  //   }
-  // })
-
   return (
     <div>
       <main>
         {/* <!-- hero slider area start --> */}
         <section className="slider-area">
-          <Carousel autoplay={true} autoplaySpeed={5000}>
+          <Carousel autoplay={true} autoplaySpeed={2000}>
             <div>
               <h3 style={contentStyle}>
                 <img src="./src/assets/image/slider/home1-slide1.jpg" />
@@ -185,7 +178,7 @@ export default function Home() {
 
                   {/* <!-- product tab content start --> */}
                   <div className="tab-content">
-                    <Carousel autoplay={true} autoplaySpeed={2000}>
+                    <Carousel autoplay={true} autoplaySpeed={3000}>
                       {/* <!-- product item start --> */}
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
@@ -195,11 +188,20 @@ export default function Home() {
                                 <div className="product-item">
                                   <figure className="product-thumb">
                                     <Link to={`/product/${p._id}`}>
-                                      <img
-                                        className="pri-img"
-                                        src={`${p?.image}`}
-                                        alt="product"
-                                      />
+                                      <div className="image-container">
+                                        <img
+                                          className="pri-img"
+                                          src={p.image[0]}
+                                          alt={p.name}
+                                        />
+                                        {p.image[1] && (
+                                          <img
+                                            className="sec-img"
+                                            src={p.image[1]}
+                                            alt={p.name}
+                                          />
+                                        )}
+                                      </div>
                                     </Link>
                                     <div className="product-badge">
                                       <div className="product-label new">
@@ -250,7 +252,7 @@ export default function Home() {
                                         <p className="manufacturer-name">
                                           <Link to={`/product/${p._id}`}>
                                             {p.name}
-                                          </Link>
+                                          </Link>{" "}
                                         </p>
                                       </div>
                                       <ul className="color-categories">
@@ -309,18 +311,22 @@ export default function Home() {
                               <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
-                                    <a href="">
-                                      <img
-                                        className="pri-img"
-                                        src={`${p?.image}`}
-                                        alt="product"
-                                      />
-                                      <img
-                                        className="sec-img"
-                                        src={`${p?.image}`}
-                                        alt="product"
-                                      />
-                                    </a>
+                                    <Link to={`/product/${p._id}`}>
+                                      <div className="image-container">
+                                        <img
+                                          className="pri-img"
+                                          src={p.image[0]}
+                                          alt={p.name}
+                                        />
+                                        {p.image[1] && (
+                                          <img
+                                            className="sec-img"
+                                            src={p.image[1]}
+                                            alt={p.name}
+                                          />
+                                        )}
+                                      </div>
+                                    </Link>
                                     <div className="product-badge">
                                       <div className="product-label new">
                                         <span>HOT</span>
@@ -555,13 +561,22 @@ export default function Home() {
                               <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
-                                    <a href="#">
-                                      <img
-                                        className="pri-img"
-                                        src={`${p?.image}`}
-                                        alt="product"
-                                      />
-                                    </a>
+                                    <Link to={`/product/${p._id}`}>
+                                      <div className="image-container">
+                                        <img
+                                          className="pri-img"
+                                          src={p.image[0]}
+                                          alt={p.name}
+                                        />
+                                        {p.image[1] && (
+                                          <img
+                                            className="sec-img"
+                                            src={p.image[1]}
+                                            alt={p.name}
+                                          />
+                                        )}
+                                      </div>
+                                    </Link>
                                     <div className="product-badge">
                                       <div className="product-label new">
                                         <span>HOT</span>
@@ -639,15 +654,15 @@ export default function Home() {
                                           ></a>
                                         </li>
                                       </ul>
-                                      <h6 className="product-name">
+                                      {/* <h6 className="product-name">
                                         <a href="#">Sản phẩm {index + 1}</a>
-                                      </h6>
+                                      </h6> */}
                                       <div className="price-box">
                                         <span className="price-regular">
                                           {p.price + " "} VNĐ
                                         </span>
                                         <span className="price-old">
-                                          <del>{p.price + " "}VND</del>
+                                          <del>{p.price + " "}VNĐ</del>
                                         </span>
                                       </div>
                                     </div>
@@ -668,18 +683,22 @@ export default function Home() {
                               <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
-                                    <a href="#">
-                                      <img
-                                        className="pri-img"
-                                        src={`${p?.image}`}
-                                        alt="product"
-                                      />
-                                      <img
-                                        className="sec-img"
-                                        src={`${p?.image}`}
-                                        alt="product"
-                                      />
-                                    </a>
+                                    <Link to={`/product/${p._id}`}>
+                                      <div className="image-container">
+                                        <img
+                                          className="pri-img"
+                                          src={p.image[0]}
+                                          alt={p.name}
+                                        />
+                                        {p.image[1] && (
+                                          <img
+                                            className="sec-img"
+                                            src={p.image[1]}
+                                            alt={p.name}
+                                          />
+                                        )}
+                                      </div>
+                                    </Link>
                                     <div className="product-badge">
                                       <div className="product-label new">
                                         <span>HOT</span>
@@ -765,7 +784,7 @@ export default function Home() {
                                           {p.price + " "} VNĐ
                                         </span>
                                         <span className="price-old">
-                                          <del>{p.price + " "}VND</del>
+                                          <del>{p.price + " "}VNĐ</del>
                                         </span>
                                       </div>
                                     </div>
