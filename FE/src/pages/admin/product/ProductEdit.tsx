@@ -50,12 +50,6 @@ const ProductEdit = () => {
       labelCol={{ span: 8 }}
       wrapperCol={{ span: 16 }}
       style={{ maxWidth: 600 }}
-      // initialValues={{
-      //   name: product?.name,
-      //   price: product?.price,
-        // image: product?.image,
-        // description: product?.description
-      // }}
       form={form}
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}

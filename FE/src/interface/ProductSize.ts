@@ -2,5 +2,6 @@ export interface IProductSize {
     _id: string|null;
     idProduct: string;
     idSize: string;
-    quantity: number
+    quantity: number;
+    sizeName:string
   }

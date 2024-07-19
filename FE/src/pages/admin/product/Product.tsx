@@ -1,8 +1,8 @@
 import  { useEffect, useState } from "react";
+// import { useParams } from "react-router-dom";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Button, Card, Col, Input, Radio, Row, Switch, Table, Modal } from "antd";
+import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
 import {
-  DownloadOutlined,
   PlusSquareOutlined,
   SearchOutlined,
   EyeOutlined,
@@ -26,13 +26,10 @@ const customTableHeaderCellStyle = {
 };
 
 export default function Product() {
+  // const { id } = useParams<{ id: string }>(); // Lấy ID sản phẩm từ URL
   const [value, setValue] = useState(1);
   const [products, setProducts] = useState<IProduct[]>([]);
   const [cates, setCates] = useState<ICategory[]>([]);
-  // const [listSize, setListSize] = useState([]);
-  const [isOpenModalDetailOrder, setIsOpenModalDetailOrder] = useState(false);
-  const [rowDataCurrent, setRowDataCurrent] = useState({});
-  const [sizes, setSizes] = useState<{ size: string, quantity: number }[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,7 +39,7 @@ export default function Product() {
           axios.get("http://localhost:3001/api/categories"),
         ]);
         setProducts(productResponse.data?.data);
-        setCates(categoryResponse.data?.data); // Ensure categories are correctly set
+        setCates(categoryResponse.data?.data); 
         // console.log(productResponse.data?.data);
         // console.log(categoryResponse.data?.data);
       } catch (error) {
@@ -145,30 +142,29 @@ const deleteProduct = async (id: number) => {
       width: "20%",
     },
     {
-      title: "Loại sản phẩm",
+      title: "Danh mục",
       dataIndex: "loai",
       key: "loai",
-      width: "20%",
-    },
-    {
-      title: "Mô tả sản phẩm",
-      dataIndex: "description",
-      key: "description",
       width: "20%",
     },
     // {
     //   title: "Số lượng",
     //   dataIndex: "quantity",
     //   key: "quantity",
-    //   align: "center",
-    //   width: "10%",
+    //   width: "20%",
+    // },
+    // {
+    //   title: "Mô tả sản phẩm",
+    //   dataIndex: "description",
+    //   key: "description",
+    //   width: "20%",
     // },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       align: "center",
-      width: "30%",
+      width: "20%",
       render: (key) => (
         <Switch
           style={{ backgroundColor: key ? "green" : "gray" }}
@@ -178,36 +174,25 @@ const deleteProduct = async (id: number) => {
       ),
     },
     {
-      title: "Hành động",
-      dataIndex: "key",
-      key: "key",
-      align: "center",
-      width: "10%",
-      render: (value: any) => (
-        <Button>
-          <Link to={`/admin/product/${value}`}>Sửa</Link>
-        </Button>
-      ),
-    },
-    {
       title: "Xóa",
       dataIndex: "key",
       key: "key",
       align: "center",
-      width: "10%",
+      width: "20%",
       render: (value: any) => (
         <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
       ),
     },
     {
       title: "Chi tiết",
-      align: "center" as const,
-      width: "10%",
-      render: (record) => (
-        <EyeOutlined
-          style={{ fontSize: "20px", color: "#1890ff" }}
-          onClick={() => handleClickDetailOrder(record.id)}
-        />
+      align: "center",
+      dataIndex: "key",
+      key: "key",
+      width: "20%",
+      render: (value:IProduct) => (
+        <Link to={`/admin/product/detail/${value}`}>
+          <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
+        </Link>
       ),
     },
   ];
@@ -225,26 +210,9 @@ const deleteProduct = async (id: number) => {
       price: item.price,
       description: item.description,
       quantity: item.quantity,
-      loai: category ? category.loai : "Không có danh mục", // Handle no category case
+      loai: category ? category.loai : "Không tìm thấy danh mục",
     };
   });
-
-  const handleClickDetailOrder = async (id: IProduct) => {
-    try {
-      const sizeResponse = await axios.get(`http://localhost:3001/api/products`);
-      const sizes = sizeResponse.data?.data || [];
-      setSizes(sizes);
-      setIsOpenModalDetailOrder(true);
-      
-    } catch (error) {
-      console.error("Error fetching sizes:", error);
-    }
-  };
-
-  // const handleCancel = () => {
-  //   setIsOpenModalDetailOrder(false);
-  //   setRowDataCurrent(null);
-  // };
 
   return (
     <div>
@@ -263,19 +231,6 @@ const deleteProduct = async (id: number) => {
           </Col>
           <Col span={12}>
             <Button
-              icon={<DownloadOutlined />}
-              style={{
-                float: "right",
-                marginLeft: "12px",
-                backgroundColor: "white",
-                color: "green",
-                borderColor: "green",
-              }}
-              type="default"
-            >
-              Export Excel
-            </Button>
-            <Button
               type="link"
               icon={<PlusSquareOutlined />}
               style={{
@@ -291,7 +246,7 @@ const deleteProduct = async (id: number) => {
         <Row gutter={16} style={{ marginTop: "12px" }}>
           <Col span={12}>
             <span>Trạng thái: </span>
-            <Radio.Group onChange={onChangeRadio} value={value}>
+            <Radio.Group onChange={onChangeRadio} value={value} style={{ paddingLeft: "12px" }}>
               <Radio value={1}>Tất cả</Radio>
               <Radio value={2}>Hoạt động</Radio>
               <Radio value={3}>Ngưng hoạt động</Radio>
@@ -310,38 +265,7 @@ const deleteProduct = async (id: number) => {
           </Col>
         </Row>
       </Card>
-
-      {rowDataCurrent && (
-         <Modal
-         title="Thông tin kích thước và số lượng"
-         visible={isOpenModalDetailOrder}
-         onCancel={() => setIsOpenModalDetailOrder(false)}
-         footer={[
-           <Button key="back" onClick={() => setIsOpenModalDetailOrder(false)}>
-             Đóng
-           </Button>,
-         ]}
-
-       >
-         <Table
-           dataSource={sizes}
-           columns={[
-             {
-               title: 'Kích thước',
-               dataIndex: 'size',
-               key: 'sizeId',
-             },
-             {
-               title: 'Số lượng',
-               dataIndex: 'quantity',
-               key: 'quantity',
-             },
-           ]}
-           pagination={false}
-         />
-       </Modal>
-      )}
-
+      
       <Card style={{ marginTop: "12px" }}>
         <Table
           components={{
@@ -355,6 +279,7 @@ const deleteProduct = async (id: number) => {
           columns={columns}
         />
       </Card>
+
     </div>
   );
 }

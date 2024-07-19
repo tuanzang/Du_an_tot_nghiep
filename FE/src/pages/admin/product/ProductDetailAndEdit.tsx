@@ -1,167 +1,138 @@
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
+import axios from 'axios';
+import { useEffect } from 'react';
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import {
   Button,
   Card,
-  Col,
-  Empty,
+  Form,
   Image,
-  Input,
-  Modal,
-  Pagination,
-  Row,
-  Select,
-  Slider,
-  Space,
-  Table,
-  Tooltip,
-  Typography,
+  Upload,
 } from "antd";
-import formatCurrency from "../../../services/common/formatCurrency";
+// import formatCurrency from "../../../services/common/formatCurrency";
 import {
-  DeleteOutlined,
   EditOutlined,
-  PictureOutlined,
-  SearchOutlined,
+  UploadOutlined
 } from "@ant-design/icons";
+import { UploadFile } from "antd/lib";
+import { IProduct } from '../../../interface/Products';
+import { IProductSize } from "../../../interface/ProductSize";
 
-interface IProduct {
-  id: number;
-  name: string;
-}
-
-interface ISize {
-  id: number;
-  name: string;
-}
-
-interface ICategory {
-  id: number;
-  name: string;
-}
-
-interface IProductDetail {
-  product: IProduct | null;
-  price: number | null;
-  amount: number | null;
-  weight: number | null;
-  size: ISize | null;
-  image: string[];
-  description: string | null;
-  quantity: number | null;
-  category: ICategory | null;
-}
 
 export default function ProductDetailAndEdit() {
-  const { id } = useParams();
-  const [open, setOpen] = useState(false);
-  const [openUpdate, setOpenUpdate] = useState(false);
-  const [product, setProduct] = useState<IProductDetail>({
-    product: null,
-    price: null,
-    amount: null,
-    weight: null,
-    size: null,
-    image: [],
-    description: null,
-    quantity: null,
-    category: null,
-  });
-  const [priceMax, setPriceMax] = useState(999999999);
-  const listProductDetail = [
-    {
-      id: 1,
-      name: "Product 1",
-      price: 100000,
-      image: "https://via.placeholder.com/100",
-      code: "P001",
-      amount: 10,
-      category: "Category A",
-      size: "L",
-      deleted: 0,
-    },
-    {
-      id: 2,
-      name: "Product 2",
-      price: 200000,
-      image: "https://via.placeholder.com/100",
-      code: "P002",
-      amount: 5,
-      category: "Category B",
-      size: "M",
-      deleted: 0,
-    },
-    {
-      id: 3,
-      name: "Product 3",
-      price: 300000,
-      image: "https://via.placeholder.com/100",
-      code: "P003",
-      amount: 20,
-      category: "Category C",
-      size: "S",
-      deleted: 0,
-    },
-    {
-      id: 4,
-      name: "Product 4",
-      price: 400000,
-      image: "https://via.placeholder.com/100",
-      code: "P004",
-      amount: 15,
-      category: "Category D",
-      size: "XL",
-      deleted: 0,
-    },
-    {
-      id: 5,
-      name: "Product 5",
-      price: 500000,
-      image: "https://via.placeholder.com/100",
-      code: "P005",
-      amount: 8,
-      category: "Category E",
-      size: "XXL",
-      deleted: 0,
-    },
-  ];
+  const { id } = useParams<{ id: string }>(); // Lấy ID sản phẩm từ URL
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [product, setProduct] = useState<IProduct | null>(null);
+  const [name, setName] = useState<string | undefined>(undefined);
+  const [price, setPrice] = useState<number | undefined>(undefined);
+  const [description, setDescription] = useState<string | undefined>(undefined);
+  const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
+  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
 
-  const [filter, setFilter] = useState({
-    product: id,
-    name: null,
-    sizeFilter: null,
-    category: null,
-    status: null,
-    priceMin: 0,
-    size: 5,
-    page: 1,
-  });
+  useEffect(() => {
+    // Gọi API để lấy chi tiết sản phẩm
+    const fetchProductDetails = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:3001/api/products/${id}`);
+        setProduct(data.data);
+        setName(data.data.name);
+        setPrice(data.data.price);
+        setDescription(data.data.description);
+        if (data.data.image) {
+          setFileList(data.data.image.map((url: string) => ({
+            uid: url,
+            name: url.split('/').pop() || '',
+            status: 'done',
+            url,
+          })));
+        }
+      } catch (error) {
+        console.error('Error fetching product details:', error);
+      }
+    };
 
-  const sizes = [
-    { value: null, label: "Tất cả" },
-    { value: 1, label: "X" },
-    { value: 2, label: "M" },
-    { value: 3, label: "L" },
-  ];
-  const categorys = [
-    { value: null, label: "Tất cả" },
-    { value: 1, label: "Nhẫn" },
-    { value: 2, label: "Lắc tay" },
-    { value: 3, label: "Dây chuyền" },
-  ];
+    // Gọi API để lấy số lượng sản phẩm theo kích cỡ
+    const fetchProductSizes = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:3001/api/products/productSize/${id}`);
+        setProductSizes(data.data);
 
-  const statusList = [
-    { value: null, label: "Tất cả" },
-    { value: true, label: "Hoạt động" },
-    { value: false, label: "Ngừng hoạt động" },
-  ];
+        // Cập nhật state quantities
+        const initialQuantities: { [key: string]: number } = {};
+        data.data.forEach((productSize: IProductSize) => {
+          initialQuantities[productSize.sizeName] = productSize.quantity;
+        });
+        setQuantities(initialQuantities);
+      } catch (error) {
+        console.error('Error fetching product sizes:', error);
+      }
+    };
 
-  const calculateTotalPrice = () => {
-    return listProductDetail.reduce(
-      (total, product) => total + product.price,
-      0
-    );
+    fetchProductDetails();
+    fetchProductSizes();
+  }, [id]);
+
+  // Hàm xử lý khi thay đổi số lượng
+  const handleQuantityChange = (sizeName: any, value: any) => {
+    setQuantities({
+      ...quantities,
+      [sizeName]: value
+    });
+  };
+
+  const handleUploadChange = ({ fileList }: { fileList: UploadFile[] }) => {
+    setFileList(fileList);
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+  };
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPrice(Number(e.target.value));
+  };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setDescription(e.target.value);
+  };
+
+  // Tính tổng số lượng tất cả các size
+  const totalQuantity = Object.values(quantities).reduce((acc, qty) => acc + qty, 0);
+
+  const handleUpdateProduct = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('name', name || '');
+      formData.append('price', (price || 0).toString());
+      formData.append('description', description || '');
+
+      // Nối fileList vào formData
+      fileList.forEach(file => {
+        if (file.originFileObj) {
+          formData.append('image', file.originFileObj);
+        }
+      });
+
+      // Cập nhật thông tin sản phẩm
+      await axios.put(`http://localhost:3001/api/products/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      // Cập nhật số lượng sản phẩm theo kích cỡ
+      for (const productSize of productSizes) {
+        const updatedQuantity = quantities[productSize.sizeName];
+        await axios.put(`http://localhost:3001/api/products/productSize/${productSize._id}`, {
+          quantity: updatedQuantity,
+        });
+      }
+      alert('Cập nhật sản phẩm thành công');
+    } catch (error) {
+      console.error('Error updating product:', error);
+      alert('Đã xảy ra lỗi khi cập nhật sản phẩm');
+    }
   };
 
   return (
@@ -170,277 +141,114 @@ export default function ProductDetailAndEdit() {
         listLink={[{ link: "/admin/product", name: "Sản phẩm" }]}
         nameHere={`${id}`}
       />
-      <Card style={{ padding: "16px" }}>
-        <div style={{ padding: 16, backgroundColor: "#fff" }}>
-          <Row justify="space-between" align="middle">
-            <Col span={11}>
-              <Input
-                placeholder="Nhập mã sản phẩm để tìm..."
-                prefix={<SearchOutlined />}
-              />
-            </Col>
-            <Col span={12}>
-              <Typography.Title level={5}>0 VND</Typography.Title>
-              <Typography.Title level={5} style={{ float: "right" }}>
-                {formatCurrency({ money: String(calculateTotalPrice()) })}
-              </Typography.Title>
-              <Slider
-                range
-                min={0}
-                max={calculateTotalPrice()}
-                defaultValue={[filter.priceMin, priceMax]}
-                onChange={(value: number[]) => {
-                  setFilter({ ...filter, priceMin: value[0] });
-                  setPriceMax(value[1]);
-                }}
-              />
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={8}>
-              <div className="filter">
-                <Typography.Title level={5}>Danh mục:</Typography.Title>
-                <Select
-                  value={filter.category}
-                  onChange={(value) =>
-                    setFilter({ ...filter, category: value })
-                  }
-                  options={categorys}
-                  style={{ width: "100%" }}
-                />
-              </div>
-            </Col>
-            <Col span={8}>
-              <div className="filter">
-                <Typography.Title level={5}>Kích cỡ:</Typography.Title>
-                <Select
-                  value={filter.sizeFilter}
-                  onChange={(value) =>
-                    setFilter({ ...filter, sizeFilter: value })
-                  }
-                  options={sizes}
-                  style={{ width: "100%" }}
-                />
-              </div>
-            </Col>
-            <Col span={8}>
-              <div className="filter">
-                <Typography.Title level={5}>Trạng thái:</Typography.Title>
-                <Select
-                  value={filter.status}
-                  onChange={(value) => setFilter({ ...filter, status: value })}
-                  options={statusList}
-                  style={{ width: "100%" }}
-                />
-              </div>
-            </Col>
-          </Row>
-        </div>
-        <div style={{ padding: 16, backgroundColor: "#fff", marginTop: 16 }}>
-          <Typography.Title
-            level={4}
-            style={{
-              textAlign: "center",
-              fontWeight: "bold",
-              marginBottom: 16,
-            }}
-          >
-            Danh sách sản phẩm
-          </Typography.Title>
-          {/* {listUpdate.length > 0 && (
-            <Button type="primary" style={{ float: "right" }}>
-              Lưu thay đổi
-            </Button>
-          )}
-          {listUpdate.length > 0 && (
-            <Button danger style={{ float: "right", marginRight: 16 }}>
-              Hủy bỏ thay đổi
-            </Button>
-          )} */}
-          <Table
-            dataSource={listProductDetail}
-            rowKey="id"
-            pagination={false}
-            bordered
-            columns={[
-              {
-                title: "STT",
-                dataIndex: "id",
-                key: "id",
-                render: (index) => index,
-              },
-              {
-                title: "Ảnh sản phẩm",
-                dataIndex: "image",
-                key: "image",
-                render: (text) => (
-                  <img src={text} alt="" style={{ width: 100, height: 100 }} />
-                ),
-              },
-              {
-                title: "Mã sản phẩm",
-                dataIndex: "code",
-                key: "code",
-              },
-              {
-                title: "Tên sản phẩm",
-                dataIndex: "name",
-                key: "name",
-              },
-              {
-                title: "Số lượng",
-                dataIndex: "amount",
-                key: "amount",
-              },
-              {
-                title: "Giá bán",
-                dataIndex: "price",
-                key: "price",
-                render: (text) => formatCurrency(text),
-              },
-              {
-                title: "Thao tác",
-                key: "action",
-                render: () => (
-                  <Fragment>
-                    <Button
-                      type="link"
-                      onClick={() => setOpenUpdate(true)}
-                      icon={<EditOutlined />}
-                    />
-                    <Button type="link" danger icon={<DeleteOutlined />} />
-                  </Fragment>
-                ),
-              },
-            ]}
-          />
-          {listProductDetail.length === 0 && (
-            <Empty description="Không có dữ liệu" />
-          )}
-        </div>
-        <Pagination
-          style={{ textAlign: "center", marginTop: 16 }}
-          total={10}
-          current={filter.page}
-          onChange={(page) => setFilter({ ...filter, page })}
-          pageSize={filter.size}
-        />
-        <Modal title="Thông báo" open={open} onCancel={() => setOpen(false)}>
-          <Typography.Title>
-            Bạn có muốn lưu các thay đổi không?
-          </Typography.Title>
-        </Modal>
 
-        {/* Modal update */}
-        <Modal
-          title="Cập nhật sản phẩm"
-          open={openUpdate}
-          onCancel={() => setOpenUpdate(false)}
-          onOk={() => console.log("aaaa")}
-        >
-          <div>
-            <Space direction="vertical">
-              <Typography.Text style={{ fontWeight: 600, color: "gray" }}>
-                {`${product.category?.name} ${product.product?.name} ${product.size?.name}`}
-              </Typography.Text>
-              {product ? (
-                <Table
-                  style={{ marginTop: "16px", marginBottom: "16px" }}
-                  pagination={false}
-                  rowKey="key"
-                >
-                  <Table.Column
-                    title="Sản phẩm"
-                    render={() => (
-                      <Typography.Text>{product.product?.name}</Typography.Text>
-                    )}
-                  />
-                  <Table.Column
-                    title="Kích cỡ"
-                    render={(_, record: IProductDetail) => (
-                      <Typography.Text>{record.size?.name}</Typography.Text>
-                    )}
-                  />
-                  <Table.Column
-                    title="Cân nặng"
-                    render={(_, record: IProductDetail) => (
-                      <Input
-                        value={record.weight ? Number(record.weight) : 0}
-                        suffix="g"
-                        style={{ textAlign: "center" }}
-                      />
-                    )}
-                  />
-                  <Table.Column
-                    title="Số lượng"
-                    render={(_, record: IProductDetail) => (
-                      <Input
-                        value={record.amount ? Number(record.amount) : 0}
-                      />
-                    )}
-                  />
-                  <Table.Column
-                    title="Giá"
-                    render={(_, record: IProductDetail) => (
-                      <Input
-                        value={record.price ? Number(record.price) : 0}
-                        style={{ textAlign: "center" }}
-                      />
-                    )}
-                  />
-                  <Table.Column
-                    title="Ảnh"
-                    render={(_, record: IProductDetail) => (
-                      <Space direction="horizontal" align="center">
-                        {record.image.length > 0 ? (
-                          record.image.map((ima: string, index: number) => (
-                            <Image
-                              key={`showImage${index}`}
-                              width={100}
-                              height={100}
-                              src={ima}
-                              alt="anh-san-pham"
-                              style={{ border: "1px dashed #ccc" }}
-                            />
-                          ))
-                        ) : (
-                          <Tooltip title="Chỉnh sửa ảnh">
-                            <div
-                              style={{
-                                cursor: "pointer",
-                                border: "1px dashed #ccc",
-                                width: "100px",
-                                height: "100px",
-                                textAlign: "center",
-                                lineHeight: "100px",
-                              }}
-                            >
-                              <PictureOutlined
-                                style={{
-                                  fontSize: "20px",
-                                  marginRight: "5px",
-                                }}
-                              />
-                              Ảnh
-                            </div>
-                          </Tooltip>
-                        )}
-                      </Space>
-                    )}
-                  />
-                </Table>
-              ) : (
-                <img
-                  height={"200px"}
-                  width={"100%"}
-                  src={"../../src/assets/image/404-page.gif"}
-                  alt="no-data"
+      <Card style={{ padding: "16px" }}>
+
+        <div className="container" >
+          <div className="row" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div className="col-md-6">
+              <p className="pb-3" style={{
+                textDecoration: "none",
+                fontWeight: "600",
+                fontSize: "calc(1.2rem + 0.15vw)",
+                color: "#c29957",
+              }}>Chi tiết sản phẩm</p>
+              <div className="form-group">
+                <label style={{ fontSize: '20px' }}>Tên</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={name}
+                  onChange={handleNameChange}
                 />
-              )}
-            </Space>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="" style={{ fontSize: '20px' }}>Giá</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={price}
+                  onChange={handlePriceChange}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="" style={{ fontSize: '20px' }}>Số lượng</label>
+                <div className="form-group" style={{ display: 'flex', gap: '10px' }}>
+                  {productSizes.map((productSize) => (
+                    <React.Fragment key={productSize._id}>
+                      <p className="mt-2">{productSize.sizeName}</p>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={quantities[productSize.sizeName] || ''}
+                        onChange={(e) => handleQuantityChange(productSize.sizeName, e.target.value)}
+                      />
+                    </React.Fragment>
+                  ))}
+                </div>
+                <div className="form-group mt-2">
+                  <label htmlFor="" style={{ fontSize: '20px' }}>Tổng số lượng</label>
+                  <p className="form-control">{totalQuantity}</p>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="" style={{ fontSize: '20px' }}>Mô tả</label>
+                <textarea
+                  className="form-control"
+                  rows={4}
+                  value={description}
+                  onChange={handleDescriptionChange}
+                />
+              </div>
+
+              {/* upload ảnh */}
+              <Form.Item
+                label="Ảnh"
+                name="image"
+                rules={[
+                  { required: true, message: "Vui lòng tải lên ảnh sản phẩm!" },
+                ]}
+              >
+                <Upload
+                  name="image"
+                  listType="picture"
+                  beforeUpload={() => false}
+                  multiple
+                  accept=".jpg,.png,.jpeg"
+                  onChange={handleUploadChange}
+                >
+                  <Button icon={<UploadOutlined />}>Tải ảnh lên</Button>
+                </Upload>
+              </Form.Item>
+
+              <div className="row mt-4">
+                <div
+                  className=""
+                  style={{ marginBottom: "10px" }}
+                >
+                  <Image
+                    width={"20%"}
+                    src={product?.image?.[0]}
+                    alt="product-details"
+                  />
+                </div>
+              </div>
+
+            </div>
           </div>
-        </Modal>
+
+
+        </div>
+
+        <div className="mt-5" style={{ float: "right" }}>
+          <Button className="btn bg-primary p-2 border text-white" icon={<EditOutlined />} onClick={handleUpdateProduct}>Cập nhật</Button>
+        </div>
+
       </Card>
+
     </div>
   );
 }

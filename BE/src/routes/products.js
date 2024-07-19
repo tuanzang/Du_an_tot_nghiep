@@ -8,6 +8,8 @@ import {
   updateProduct,
   filterProductsByPrice,
   createProductSizes,
+  getProductSizesByProductId,
+  updateProductSizes,
 } from "../controller/products.js";
 
 const productRouter = Router();
@@ -17,7 +19,9 @@ productRouter.get("/search", searchProducts);
 productRouter.get("/:id", getDetailProduct);
 productRouter.post("/add", createProduct);
 productRouter.post("/add/size", createProductSizes);
+productRouter.get("/productSize/:idProduct", getProductSizesByProductId);
 productRouter.put("/:id", updateProduct);
+productRouter.put("/productSize/:id", updateProductSizes);
 productRouter.delete("/:id", deleteProduct);
 productRouter.get('/filter/price', filterProductsByPrice);
 

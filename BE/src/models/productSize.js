@@ -15,6 +15,10 @@ const productSizeSchema = new mongoose.Schema(
         quantity: {
             type: Number,
             required: true
+        },
+        sizeName: {
+            type: String,
+            required: true
         }
     }, {
         timestamps: true,
