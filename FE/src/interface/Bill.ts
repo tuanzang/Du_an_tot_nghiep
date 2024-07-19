@@ -1,4 +1,4 @@
-export interface IOrder {
+export interface IBill {
   _id: string;
   userId: string;
   code: string;

@@ -128,7 +128,10 @@ const Header = () => {
                       <button className="search-trigger d-xl-none d-lg-block">
                         <i className="pe-7s-search"></i>
                       </button>
-                      <form className="header-search-box d-lg-none d-xl-block" onSubmit={handleSearchSubmit}>
+                      <form
+                        className="header-search-box d-lg-none d-xl-block"
+                        onSubmit={handleSearchSubmit}
+                      >
                         <input
                           type="text"
                           placeholder="Tìm kiếm"
@@ -154,6 +157,7 @@ const Header = () => {
                             {isLogged ? (
                               <li>
                                 <a href="my-account.html">Tài khoản của tôi</a>
+                                <a href="">Đăng xuất</a>
                               </li>
                             ) : (
                               <>
@@ -364,26 +368,25 @@ const Header = () => {
         {/* offcanvas mobile menu end */}
 
         <div className="off-canvas-inner">
-              {/* search box start */}
-              <div className="search-box-offcanvas">
-                {/* Sử dụng searchResults để hiển thị kết quả tìm kiếm */}
-                <ul>
-                  {searchResults.map((product:IProduct) => (
-                    <li
-                      key={product._id}
-                      onClick={() => handleResultClick(product._id.toString())}
-                    >
-                      {product.name}
-                    </li>
-                  ))}
-                </ul>
-                {/* Hiển thị loading hoặc error khi tìm kiếm */}
-                {loading && <p>Đang tải...</p>}
-                {error && <p>{error}</p>}
-              </div>
-              {/* search box end */}
-            </div>
-
+          {/* search box start */}
+          <div className="search-box-offcanvas">
+            {/* Sử dụng searchResults để hiển thị kết quả tìm kiếm */}
+            <ul>
+              {searchResults.map((product: IProduct) => (
+                <li
+                  key={product._id}
+                  onClick={() => handleResultClick(product._id.toString())}
+                >
+                  {product.name}
+                </li>
+              ))}
+            </ul>
+            {/* Hiển thị loading hoặc error khi tìm kiếm */}
+            {loading && <p>Đang tải...</p>}
+            {error && <p>{error}</p>}
+          </div>
+          {/* search box end */}
+        </div>
         {openMenuCart && <div></div>}
       </header>
     </div>

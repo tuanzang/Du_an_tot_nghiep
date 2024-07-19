@@ -6,5 +6,5 @@ export interface IHistoryBill {
   role: string;
   statusBill: string;
   note: string;
-  createdAt: string;
+  createdAt: string | null;
 }
