@@ -9,6 +9,7 @@ import sizeRouter from "./size";
 import commentRouter from "./comment.js";
 import historyBillRouter from "./historyBill.js";
 import transBillRouter from "./transaction.js";
+import topOrderRouter from "./topOrder.js";
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use("/orders", orderRouter);
 router.use("/sizes", sizeRouter)
 router.use("/history-bill", historyBillRouter);
 router.use("/trans", transBillRouter);
+router.use("/topOrder", topOrderRouter);
 
 export default router;
