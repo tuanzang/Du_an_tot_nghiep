@@ -23,36 +23,6 @@ const Header = () => {
       <header className="header-area header-wide bg-gray">
         {/* main header start */}
         <div className="main-header d-none d-lg-block">
-          {/* header top start */}
-          <div className="header-top bdr-bottom">
-            <div className="container">
-              <div className="row align-items-center">
-                <div className="col-lg-6">
-                  <div className="welcome-message">
-                    <p>Chào mừng bạn đến với F-Bee</p>
-                  </div>
-                </div>
-                <div className="col-lg-6 text-right">
-                  <div className="header-top-settings">
-                    <ul className="nav align-items-center justify-content-end">
-                      <li className="curreny-wrap">
-                        Cao Đẳng FPT Polytechnic Hà Nội
-                      </li>
-                      <li className="language">
-                        <img
-                          src="../../src/assets/image/icon/vn.gif"
-                          alt="flag"
-                        />
-                        Việt Nam
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* header top end */}
-
           {/* header middle area start */}
           <div className="header-main-area sticky">
             <div className="container">
@@ -87,10 +57,10 @@ const Header = () => {
                             <a href="shop.html">Tin tức</a>
                           </li>
                           <li>
-                            <a href="shop.html">Về chúng tôi</a>
+                            <a href="shop.html">Giới thiệu</a>
                           </li>
                           <li>
-                            <a href="contact-us.html">Tra cứu đơn hàng</a>
+                            <a href="contact-us.html">Chính sách</a>
                           </li>
                         </ul>
                       </nav>
@@ -130,6 +100,7 @@ const Header = () => {
                             {isLogged ? (
                               <li>
                                 <a href="my-account.html">Tài khoản của tôi</a>
+                                <a href="/order_history">Đơn hàng của tôi</a>
                               </li>
                             ) : (
                               <>
@@ -143,7 +114,7 @@ const Header = () => {
                             )}
                           </ul>
                         </li>
-                        
+
                         <li>
                           <Link
                             to="/cart"
