@@ -9,7 +9,6 @@ import {
   Row,
   Switch,
   Table,
-  Modal,
 } from "antd";
 import {
   DownloadOutlined,
@@ -42,9 +41,6 @@ export default function Product() {
   const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
   const [cates, setCates] = useState<ICategory[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [isOpenModalDetailOrder, setIsOpenModalDetailOrder] = useState(false);
-  const [rowDataCurrent, setRowDataCurrent] = useState({});
-  const [sizes, setSizes] = useState<{ size: string; quantity: number }[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,7 +95,7 @@ export default function Product() {
           },
           {
             label: "Không",
-            onClick: () => {},
+            onClick: () => { },
           },
         ],
       });
@@ -151,142 +147,131 @@ export default function Product() {
 
   const columns: (
     | ColumnGroupType<{
-        stt: number;
-        key: number;
-        name: string;
-        image: string[];
-        price: number;
-        description: string;
-        quantity: number;
-        loai: string;
-      }>
+      stt: number;
+      key: number;
+      name: string;
+      image: string[];
+      price: number;
+      description: string;
+      quantity: number;
+      loai: string;
+    }>
     | ColumnType<{
-        stt: number;
-        key: number;
-        name: string;
-        image: string[];
-        price: number;
-        description: string;
-        quantity: number;
-        loai: string;
-      }>
+      stt: number;
+      key: number;
+      name: string;
+      image: string[];
+      price: number;
+      description: string;
+      quantity: number;
+      loai: string;
+    }>
   )[] = [
-    {
-      title: "STT",
-      dataIndex: "stt",
-      key: "stt",
-      align: "center",
-    },
-    {
-      title: "Tên sản phẩm",
-      dataIndex: "name",
-      key: "name",
-      width: "20%",
-    },
-    {
-      title: "Ảnh",
-      dataIndex: "image",
-      key: "image",
-      width: "20%",
-      render: (images: string[]) => (
-        <div style={{ display: "flex", gap: "10px" }}>
-          {images.slice(0, 2).map((image, index) => (
-            <img
-              key={index}
-              style={{ height: "70px", width: "70px", objectFit: "cover" }}
-              src={image}
-              alt={`product-image-${index}`}
-            />
-          ))}
-        </div>
-      ),
-    },
-    {
-      title: "Giá sản phẩm",
-      dataIndex: "price",
-      key: "price",
-      width: "10%",
-    },
-    {
-      title: "Giá cũ sản phẩm",
-      dataIndex: "priceOld",
-      key: "priceOld",
-      width: "10%",
-    },
-    {
-      title: "Loại sản phẩm",
-      dataIndex: "loai",
-      key: "loai",
-      width: "15%",
-    },
-    {
-      title: "Mô tả sản phẩm",
-      dataIndex: "description",
-      key: "description",
-      width: "20%",
-      render: (text) => (
-        <span
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            maxWidth: "150px",
-            display: "inline-block",
-            verticalAlign: "top",
-          }}
-        >
-          {text}
-        </span>
-      ),
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      align: "center",
-      width: "30%",
-      render: (key) => (
-        <Switch
-          style={{ backgroundColor: key ? "green" : "gray" }}
-          checked={key}
-          onChange={() => onChangeSwitch(key)}
-        />
-      ),
-    },
-    {
-      title: "Hành động",
-      dataIndex: "key",
-      key: "key",
-      align: "center",
-      width: "10%",
-      render: (value: any) => (
-        <Button>
-          <Link to={`/admin/product/${value}`}>Sửa</Link>
-        </Button>
-      ),
-    },
-    {
-      title: "Xóa",
-      dataIndex: "key",
-      key: "key",
-      align: "center",
-      width: "10%",
-      render: (value: any) => (
-        <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
-      ),
-    },
-    {
-      title: "Chi tiết",
-      align: "center" as const,
-      width: "10%",
-      render: (record) => (
-        <EyeOutlined
-          style={{ fontSize: "20px", color: "#1890ff" }}
-          onClick={() => handleClickDetailOrder(record.id)}
-        />
-      ),
-    },
-  ];
+      {
+        title: "STT",
+        dataIndex: "stt",
+        key: "stt",
+        align: "center",
+      },
+      {
+        title: "Tên sản phẩm",
+        dataIndex: "name",
+        key: "name",
+        width: "20%",
+      },
+      {
+        title: "Ảnh",
+        dataIndex: "image",
+        key: "image",
+        width: "20%",
+        render: (images: string[]) => (
+          <div style={{ display: "flex", gap: "10px" }}>
+            {images.slice(0, 2).map((image, index) => (
+              <img
+                key={index}
+                style={{ height: "70px", width: "70px", objectFit: "cover" }}
+                src={image}
+                alt={`product-image-${index}`}
+              />
+            ))}
+          </div>
+        ),
+      },
+      {
+        title: "Giá sản phẩm",
+        dataIndex: "price",
+        key: "price",
+        width: "20%",
+      },
+      {
+        title: "Giá cũ sản phẩm",
+        dataIndex: "priceOld",
+        key: "priceOld",
+        width: "10%",
+      },
+      {
+        title: "Danh mục",
+        dataIndex: "loai",
+        key: "loai",
+        width: "15%",
+      },
+      // {
+      //   title: "Mô tả sản phẩm",
+      //   dataIndex: "description",
+      //   key: "description",
+      //   width: "20%",
+      //   render: (text) => (
+      //     <span
+      //       style={{
+      //         whiteSpace: "nowrap",
+      //         overflow: "hidden",
+      //         textOverflow: "ellipsis",
+      //         maxWidth: "150px",
+      //         display: "inline-block",
+      //         verticalAlign: "top",
+      //       }}
+      //     >
+      //       {text}
+      //     </span>
+      //   ),
+      // },
+      {
+        title: "Trạng thái",
+        dataIndex: "status",
+        key: "status",
+        align: "center",
+        width: "30%",
+        render: (key) => (
+          <Switch
+            style={{ backgroundColor: key ? "green" : "gray" }}
+            checked={key}
+            onChange={() => onChangeSwitch(key)}
+          />
+        ),
+      },
+      {
+        title: "Xóa",
+        dataIndex: "key",
+        key: "key",
+        align: "center",
+        width: "10%",
+        render: (value: any) => (
+          <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
+        ),
+      },
+      {
+        title: "Chi tiết",
+        align: "center",
+        dataIndex: "key",
+        key: "key",
+        width: "20%",
+        render: (value: IProduct) => (
+          <Link to={`/admin/product/detail/${value}`}>
+            <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
+          </Link>
+        ),
+      },
+    ];
 
   const data = filteredProducts.map((item: IProduct, index: number) => {
     const category = cates.find(
@@ -305,19 +290,6 @@ export default function Product() {
       loai: category ? category.loai : "Không có danh mục", // Handle no category case
     };
   });
-
-  const handleClickDetailOrder = async (id: IProduct) => {
-    try {
-      const sizeResponse = await axios.get(
-        `http://localhost:3001/api/products`
-      );
-      const sizes = sizeResponse.data?.data || [];
-      setSizes(sizes);
-      setIsOpenModalDetailOrder(true);
-    } catch (error) {
-      console.error("Error fetching sizes:", error);
-    }
-  };
 
   return (
     <div>
@@ -386,36 +358,6 @@ export default function Product() {
           </Col>
         </Row>
       </Card>
-
-      {rowDataCurrent && (
-        <Modal
-          title="Thông tin kích thước và số lượng"
-          visible={isOpenModalDetailOrder}
-          onCancel={() => setIsOpenModalDetailOrder(false)}
-          footer={[
-            <Button key="back" onClick={() => setIsOpenModalDetailOrder(false)}>
-              Đóng
-            </Button>,
-          ]}
-        >
-          <Table
-            dataSource={sizes}
-            columns={[
-              {
-                title: "Kích thước",
-                dataIndex: "size",
-                key: "sizeId",
-              },
-              {
-                title: "Số lượng",
-                dataIndex: "quantity",
-                key: "quantity",
-              },
-            ]}
-            pagination={false}
-          />
-        </Modal>
-      )}
 
       <Card style={{ marginTop: "12px" }}>
         <Table
