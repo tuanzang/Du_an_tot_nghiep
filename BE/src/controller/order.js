@@ -59,7 +59,7 @@ export const createOrder = async (req, res) => {
       quantity: cart.products.length,
       products,
       paymentMethod,
-      status: paymentMethod === "COD"?"1":"5"
+      status: paymentMethod === "COD" ? "1" : "6",
     }).save();
 
     cart.products = cart.products.filter(
@@ -122,7 +122,7 @@ export const detailOrder = async (req, res) => {
       message: "Internal server error",
     });
   }
-}
+};
 
 /**
  * API danh sách hóa đơn
@@ -130,13 +130,12 @@ export const detailOrder = async (req, res) => {
  * @param {*} res
  * @returns
  */
-
 export const getAllOrders = async (req, res) => {
-  const { status, code, createdAtFrom, createdAtTo, page = 1 } = req.body; 
+  const { status, code, createdAtFrom, createdAtTo, page = 1 } = req.body;
   const statusReq = req.query.status;
   const dateNowReq = req.query.dateNow;
   const pageSize = 10;
-  
+
   try {
     let query = {};
 
@@ -147,7 +146,7 @@ export const getAllOrders = async (req, res) => {
     if (status) {
       query.status = status;
     }
-    
+
     if (code) {
       query.code = { $regex: code, $options: "i" }; // Tìm kiếm mã hóa đơn với regex, không phân biệt hoa thường
     }
@@ -156,7 +155,7 @@ export const getAllOrders = async (req, res) => {
       const dateNow = new Date(dateNowReq);
       const startOfDay = new Date(dateNow.setUTCHours(0, 0, 0, 0));
       const endOfDay = new Date(dateNow.setUTCHours(23, 59, 59, 999));
-      
+
       query.createdAt = {
         $gte: startOfDay,
         $lte: endOfDay,
@@ -179,7 +178,7 @@ export const getAllOrders = async (req, res) => {
       .limit(pageSize);
 
     const total = await Order.countDocuments(query);
-    
+
     if (!orders || orders?.length === 0) {
       return res.status(200).json({
         message: "Không tìm thấy đơn hàng!",
@@ -202,8 +201,6 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
-
-
 export const deleteOrder = async (req, res) => {
   try {
     const id = req.params.id;
@@ -216,8 +213,8 @@ export const deleteOrder = async (req, res) => {
     res.status(500).json({
       message: "Internal server error",
     });
-  } 
-}
+  }
+};
 
 /**
  * API cập nhật trạng thái hóa đơn

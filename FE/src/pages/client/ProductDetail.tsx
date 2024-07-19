@@ -3,7 +3,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { IProduct } from "../../interface/Products";
 import axios from "axios";
-import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
+import {
+  ACCESS_TOKEN_STORAGE_KEY,
+  USER_INFO_STORAGE_KEY,
+} from "../../services/constants";
 import useCartMutation from "../../hooks/useCart";
 import dayjs from "dayjs";
 import { IComment } from "../../interface/Comments";
@@ -15,7 +18,6 @@ import { IProductSize } from "../../interface/ProductSize";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
-  const idUser = "6684b89e5934b50d4f1ac280"; // chưa lấy được từ auth nên đang fix cứng
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
@@ -24,7 +26,7 @@ export default function ProductDetail() {
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
 
-  const handleSizeClick = (sizeId:any) => {
+  const handleSizeClick = (sizeId: any) => {
     if (selectedSize === sizeId) {
       setSelectedSize(null);
     } else {
@@ -32,6 +34,11 @@ export default function ProductDetail() {
     }
   };
 
+  // lấy thông tin user đăng nhập
+  const isLoggedUser = localStorage.getItem(USER_INFO_STORAGE_KEY);
+  const user: IUser | null = isLoggedUser ? JSON.parse(isLoggedUser) : null;
+
+  // lấy token đăng nhập
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const { mutate } = useCartMutation({
     action: "ADD",
@@ -44,8 +51,8 @@ export default function ProductDetail() {
     fetchProduct(String(id));
     fetchRelatedProducts();
     fetchSizes();
-    findUserById(idUser ? idUser : null);
-  }, [id, idUser]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
+    // findUserById(idUser ? idUser : null);
+  }, [id]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
 
   const fetchProduct = async (id: string) => {
     try {
@@ -154,37 +161,6 @@ export default function ProductDetail() {
     }
   };
 
-  const [user, setUser] = useState<IUser>({
-    _id: "",
-    email: "",
-    password: "",
-    name: "",
-    role: "",
-    avatar: "",
-  });
-  const findUserById = async (idUser: string | null) => {
-    if (idUser === null) {
-      return setUser({
-        _id: "",
-        email: "",
-        password: "",
-        name: "",
-        role: "",
-        avatar: "",
-      });
-    } else {
-      try {
-        const response = await axios.post(
-          "http://localhost:3001/api/users/findUserById",
-          { _id: idUser }
-        );
-        setUser(response.data?.data);
-      } catch (error) {
-        console.log("Khong co du lieu");
-      }
-    }
-  };
-
   const [textComment, setTextComment] = useState("");
   const [newComment, setNewComment] = useState<IComment | null>({
     _id: "",
@@ -203,8 +179,8 @@ export default function ProductDetail() {
     changeDataComment(comment);
   };
   const changeDataComment = (comment: string) => {
-    if (product === undefined) {
-      toast.warning("Thông tin sản phẩm sai!");
+    if (product === undefined || user === null) {
+      toast.warning("Không thể comment!");
       return;
     }
     setNewComment({
@@ -328,8 +304,13 @@ export default function ProductDetail() {
                             {sizes.map((size) => (
                               <Button
                                 key={size._id}
-                                className={`mx-1 ${selectedSize === size._id ? 'selected' : ''}`}
-                                style={{ padding: "10px 20px", fontSize: "16px" }}
+                                className={`mx-1 ${
+                                  selectedSize === size._id ? "selected" : ""
+                                }`}
+                                style={{
+                                  padding: "10px 20px",
+                                  fontSize: "16px",
+                                }}
                                 onClick={() => handleSizeClick(size._id)}
                               >
                                 {size.name}
@@ -388,11 +369,13 @@ export default function ProductDetail() {
                     <div className="row">
                       <div className="col-lg-12">
                         <div className="product-review-info">
-                          <ul className="nav review-tab"
+                          <ul
+                            className="nav review-tab"
                             style={{
-                              margin: "30px"
-                            }}>
-                            <li >
+                              margin: "30px",
+                            }}
+                          >
+                            <li>
                               <a
                                 className="active"
                                 data-bs-toggle="tab"
@@ -426,15 +409,53 @@ export default function ProductDetail() {
                             </div>
                             <div id="tab_two" className="tab-pane fade">
                               <div className="product-tab-content">
-                                <h6 className="product-tab-title">
-                                  Thông tin sản phẩm
-                                </h6>
+                                <h3 className="product-tab-title">
+                                  Hướng dẫn đo size nhẫn
+                                </h3>
                                 <ul>
                                   <li>
-                                    {/* <span>Danh mục:</span> {product?.category} */}
+                                    {" "}
+                                    <img
+                                      src="https://scontent.fhan17-1.fna.fbcdn.net/v/t39.30808-6/451834400_1143488730215335_8162184727999743406_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=A3J78wJhMkcQ7kNvgHH0Lvb&_nc_ht=scontent.fhan17-1.fna&oh=00_AYD4m8sTtmS14USujkQ3BA48rTU7FtPSsapkyyP3wl1duw&oe=669F95A7"
+                                      alt="" width={"70%"}
+                                    />
+                                  </li>
+                                  <hr />
+                                  <li>
+                                    <h3>
+                                      Những cách đơn giản nhất để đo nhẫn:
+                                    </h3>
+                                    <h5>Đo bằng tờ giấy và thước</h5>
+                                    <span style={{ fontSize: "20px" }}>
+                                      Bước 1: Chuẩn bị một cây thước, 1 cây kéo,
+                                      1 cây bút & một tờ giấy <br /> Bước 2: Cắt
+                                      một mảnh giấy dài khoảng 10 cm và rộng 1
+                                      cm. <br />
+                                      Bước 3: Sử dụng đoạn giấy vừa cắt để quấn
+                                      sát quanh ngón tay muốn đo. <br /> Bước 4:
+                                      Đánh dấu điểm giao nhau. <br /> Bước 5:
+                                      Tháo ra dùng thước đo chiều dài của đoạn
+                                      giấy từ điểm đầu cho đến phần đánh dấu.
+                                      Lấy kết quả đo được chia cho 3,14. Sau đó
+                                      đối chiếu với Bảng size nhẫn.
+                                    </span>
+                                    <img
+                                      src="https://www.pnj.com.vn/blog/wp-content/uploads/2021/11/huong-dan-do-size-nhan-2.jpg"
+                                      alt=""
+                                    />
                                   </li>
                                   <li>
-                                    {/* <span>Thương hiệu:</span> {product?.brand} */}
+                                    <h5>Đo theo một chiếc nhẫn có sẵn</h5>
+                                    <span style={{ fontSize: "20px" }}>
+                                      Bước 1: Chuẩn bị một cây thước cùng chiếc
+                                      nhẫn muốn đo. <br /> Bước 2: Đối chiếu số
+                                      mm của thước với kích thước trên BẢNG SIZE
+                                      NHẪN bên trên.
+                                    </span>
+                                    <img
+                                      src="https://www.pnj.com.vn/blog/wp-content/uploads/2021/11/huong-dan-do-size-nhan-3.jpg"
+                                      alt=""
+                                    />
                                   </li>
                                 </ul>
                               </div>

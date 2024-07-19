@@ -26,6 +26,10 @@ const userSchema = new Schema(
       type: String,
       default: "../upload/default-avatar.jpeg",
     },
+    blocked: {
+      type: Boolean,
+      default: false
+    },
   },
   { timestamps: true, versionKey: false }
 );
