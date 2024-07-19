@@ -3,7 +3,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { IProduct } from "../../interface/Products";
 import axios from "axios";
-import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
+import {
+  ACCESS_TOKEN_STORAGE_KEY,
+  USER_INFO_STORAGE_KEY,
+} from "../../services/constants";
 import useCartMutation from "../../hooks/useCart";
 import dayjs from "dayjs";
 import { IComment } from "../../interface/Comments";
@@ -14,7 +17,6 @@ import { ISize } from "../../interface/Size";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
-  const idUser = "6684b89e5934b50d4f1ac280"; // chưa lấy được từ auth nên đang fix cứng
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
@@ -29,6 +31,11 @@ export default function ProductDetail() {
     }
   };
 
+  // lấy thông tin user đăng nhập
+  const isLoggedUser = localStorage.getItem(USER_INFO_STORAGE_KEY);
+  const user: IUser | null = isLoggedUser ? JSON.parse(isLoggedUser) : null;
+
+  // lấy token đăng nhập
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const { mutate } = useCartMutation({
     action: "ADD",
@@ -41,8 +48,8 @@ export default function ProductDetail() {
     fetchProduct(String(id));
     fetchRelatedProducts();
     fetchSizes();
-    findUserById(idUser ? idUser : null);
-  }, [id, idUser]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
+    // findUserById(idUser ? idUser : null);
+  }, [id]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
 
   const fetchProduct = async (id: string) => {
     try {
@@ -126,37 +133,6 @@ export default function ProductDetail() {
     }
   };
 
-  const [user, setUser] = useState<IUser>({
-    _id: "",
-    email: "",
-    password: "",
-    name: "",
-    role: "",
-    avatar: "",
-  });
-  const findUserById = async (idUser: string | null) => {
-    if (idUser === null) {
-      return setUser({
-        _id: "",
-        email: "",
-        password: "",
-        name: "",
-        role: "",
-        avatar: "",
-      });
-    } else {
-      try {
-        const response = await axios.post(
-          "http://localhost:3001/api/users/findUserById",
-          { _id: idUser }
-        );
-        setUser(response.data?.data);
-      } catch (error) {
-        console.log("Khong co du lieu");
-      }
-    }
-  };
-
   const [textComment, setTextComment] = useState("");
   const [newComment, setNewComment] = useState<IComment | null>({
     _id: "",
@@ -175,8 +151,8 @@ export default function ProductDetail() {
     changeDataComment(comment);
   };
   const changeDataComment = (comment: string) => {
-    if (product === undefined) {
-      toast.warning("Thông tin sản phẩm sai!");
+    if (product === undefined || user === null) {
+      toast.warning("Không thể comment!");
       return;
     }
     setNewComment({
