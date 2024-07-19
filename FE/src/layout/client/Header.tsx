@@ -18,7 +18,7 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
     localStorage.removeItem(USER_INFO_STORAGE_KEY);
-    navigate("/login");
+    // navigate("/login");
   };
 
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);

@@ -149,7 +149,7 @@ const ProductAdd = () => {
       <Form.Item<IProduct>
         label="Size"
         name="idSize"
-        rules={[{ required: true, message: 'Vui lòng chọn size!' }]}
+        // rules={[{ required: true, message: 'Vui lòng chọn size!' }]}
       >
         <Checkbox.Group options={dataSize} />
       </Form.Item>

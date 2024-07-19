@@ -135,6 +135,22 @@ export default function Cart() {
                       rowSelection={rowSelection}
                     >
                       <Table.Column
+                        title="Hình ảnh"
+                        dataIndex="image"
+                        key="image"
+                        render={(images: string[]) => (
+                          <img
+                            src={images[0]}
+                            alt="Product"
+                            style={{
+                              width: "100%", 
+                              height: "100%", 
+                              objectFit: "cover", 
+                            }}
+                          />
+                        )}
+                      />
+                      <Table.Column
                         title="Sản phẩm"
                         dataIndex="name"
                         key="name"
@@ -143,12 +159,6 @@ export default function Cart() {
                         title="Giá"
                         dataIndex="price"
                         key="price"
-                        render={(val) => formatPrice(val)}
-                      />
-                        <Table.Column
-                        title="Ảnh"
-                        // dataIndex="ICartItem.image"
-                        key="image"
                         render={(val) => formatPrice(val)}
                       />
                       <Table.Column
@@ -160,7 +170,7 @@ export default function Cart() {
                             min={1}
                             max={5}
                             value={value}
-                            onStep={(quantity) =>
+                            onChange={(quantity) =>
                               handleUpdateQuantity(record.product._id, quantity)
                             }
                           />
@@ -180,8 +190,8 @@ export default function Cart() {
                         render={(_, record: any) => (
                           <Popconfirm
                             title="Bạn có muốn xóa sản phẩm này khỏi giỏ hàng không?"
-                            okText="Yes"
-                            cancelText="No"
+                            okText="Có"
+                            cancelText="Không"
                             onConfirm={() =>
                               onDeleteProduct(record.product._id)
                             }
@@ -206,12 +216,78 @@ export default function Cart() {
                   <h5 className="sidebar-title">
                     <span>Thông tin đơn hàng</span>
                   </h5>
+                  {productSelected.length > 0 && (
+                    <div style={{ marginTop: "20px" }}>
+                      <h5>Sản phẩm đã chọn:</h5>
+                      <Table
+                        dataSource={productSelected}
+                        rowKey="key"
+                        pagination={false}
+                        className="selected-products-table"
+                        size="small"
+                      >
+                        <Table.Column
+                          title="Hình ảnh"
+                          dataIndex="image"
+                          key="image"
+                          render={(images: string[]) => (
+                            <img
+                              src={images[0]}
+                              alt="Product"
+                              style={{
+                                width: "70%", 
+                                height: "70%", 
+                                objectFit: "cover",
+                              }}
+                            />
+                          )}
+                        />
+                        <Table.Column
+                          title="Tên sản phẩm"
+                          dataIndex="name"
+                          key="name"
+                          render={(name) => (
+                            <span style={{ fontSize: "12px" }}>{name}</span>
+                          )}
+                        />
+                        <Table.Column
+                          title="Giá"
+                          dataIndex="price"
+                          key="price"
+                          render={(val) => (
+                            <span style={{ fontSize: "12px" }}>
+                              {formatPrice(val)}
+                            </span>
+                          )}
+                        />
+                        <Table.Column
+                          title="Số lượng"
+                          dataIndex="quantity"
+                          key="quantity"
+                          render={(quantity) => (
+                            <span style={{ fontSize: "12px" }}>{quantity}</span>
+                          )}
+                        />
+                        <Table.Column
+                          title="Thành tiền"
+                          dataIndex="totalPrice"
+                          key="totalPrice"
+                          render={(_, record: any) => (
+                            <span style={{ fontSize: "12px" }}>
+                              {formatPrice(record.quantity * record.price)}
+                            </span>
+                          )}
+                        />
+                      </Table>
+                    </div>
+                  )}
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
                       padding: "10px 20px",
                       borderTop: "1px solid gray",
+                      marginTop: "20px",
                     }}
                   >
                     <span>Tổng tiền</span>

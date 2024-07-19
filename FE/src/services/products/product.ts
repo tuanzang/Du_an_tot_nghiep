@@ -1,6 +1,7 @@
 import axiosInstance from "../../config/axios";
 import { IProduct } from "../../interface/Products";
 
+// Lấy tất cả sản phẩm
 export const getAllProducts = async () => {
   try {
     const { data } = await axiosInstance.get(`/products`);
@@ -11,6 +12,7 @@ export const getAllProducts = async () => {
   }
 };
 
+// Lấy một sản phẩm theo ID
 export const getOneProduct = async (id: string) => {
   try {
     const { data } = await axiosInstance.get(`/products/${id}`);
@@ -20,6 +22,7 @@ export const getOneProduct = async (id: string) => {
   }
 };
 
+// Thêm sản phẩm mới
 export const addProduct = async (product: IProduct) => {
   try {
     const { data } = await axiosInstance.post("/products/add", product);
@@ -29,6 +32,7 @@ export const addProduct = async (product: IProduct) => {
   }
 };
 
+// Xóa sản phẩm
 export const deleteProduct = async (product: IProduct) => {
   try {
     const { data } = await axiosInstance.delete(`/products/${product._id}`);
@@ -38,6 +42,7 @@ export const deleteProduct = async (product: IProduct) => {
   }
 };
 
+// Cập nhật sản phẩm
 export const updateProduct = async (product: IProduct) => {
   try {
     const { data } = await axiosInstance.put(

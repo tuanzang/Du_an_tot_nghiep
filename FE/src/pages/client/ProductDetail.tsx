@@ -1,16 +1,33 @@
-import { Carousel, Col, Image, Row, message } from "antd";
+import { Carousel, Col, Image, Row, message, Button } from "antd";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { IProduct } from "../../interface/Products";
 import axios from "axios";
 import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
 import useCartMutation from "../../hooks/useCart";
+import dayjs from "dayjs";
+import { IComment } from "../../interface/Comments";
+import { IUser } from "../../interface/Users";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { ISize } from "../../interface/Size";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
+  const idUser = "6684b89e5934b50d4f1ac280"; // chưa lấy được từ auth nên đang fix cứng
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
+  const [sizes, setSizes] = useState<ISize[]>([]);
+  const [selectedSize, setSelectedSize] = useState(null);
+
+  const handleSizeClick = (sizeId: any) => {
+    if (selectedSize === sizeId) {
+      setSelectedSize(null);
+    } else {
+      setSelectedSize(sizeId);
+    }
+  };
 
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const { mutate } = useCartMutation({
@@ -21,11 +38,13 @@ export default function ProductDetail() {
   });
 
   useEffect(() => {
-    fetchProduct();
+    fetchProduct(String(id));
     fetchRelatedProducts();
-  }, [id]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
+    fetchSizes();
+    findUserById(idUser ? idUser : null);
+  }, [id, idUser]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
 
-  const fetchProduct = async () => {
+  const fetchProduct = async (id: string) => {
     try {
       if (id) {
         const response = await axios.get(
@@ -46,6 +65,16 @@ export default function ProductDetail() {
       setRelatedProducts(response.data.data);
     } catch (error) {
       console.error("Error fetching related products:", error);
+    }
+  };
+
+  const fetchSizes = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/sizes`);
+      console.log("Sizes API response:", response.data);
+      setSizes(response.data.data);
+    } catch (error) {
+      console.error("Error fetching sizes:", error);
     }
   };
 
@@ -74,6 +103,117 @@ export default function ProductDetail() {
         productId: productData._id,
         quantity: quantity, // Use the state quantity here
       });
+    }
+  };
+
+  /** API bình luận sản phẩm */
+  const [listComment, setListComment] = useState<IComment[]>([]);
+  const fetchComment = async (idProduct: string | null) => {
+    if (idProduct === null) {
+      return setListComment([]);
+    } else {
+      try {
+        const response = await axios.post(
+          "http://localhost:3001/api/comments/findByIdProduct",
+          {
+            idProduct: idProduct,
+          }
+        );
+        setListComment(response.data?.data);
+      } catch (error) {
+        console.log("Khong co du lieu");
+      }
+    }
+  };
+
+  const [user, setUser] = useState<IUser>({
+    _id: "",
+    email: "",
+    password: "",
+    name: "",
+    role: "",
+    avatar: "",
+  });
+  const findUserById = async (idUser: string | null) => {
+    if (idUser === null) {
+      return setUser({
+        _id: "",
+        email: "",
+        password: "",
+        name: "",
+        role: "",
+        avatar: "",
+      });
+    } else {
+      try {
+        const response = await axios.post(
+          "http://localhost:3001/api/users/findUserById",
+          { _id: idUser }
+        );
+        setUser(response.data?.data);
+      } catch (error) {
+        console.log("Khong co du lieu");
+      }
+    }
+  };
+
+  const [textComment, setTextComment] = useState("");
+  const [newComment, setNewComment] = useState<IComment | null>({
+    _id: "",
+    idUser: "",
+    idProduct: "",
+    fullName: "",
+    productName: "",
+    avatar: "",
+    comment: "",
+    createdAt: "",
+  });
+  const handleChangeTextComment = (comment: string) => {
+    setTextComment(comment);
+
+    // Giả sử rằng `product` và `user` đã được xác định trước đó
+    changeDataComment(comment);
+  };
+  const changeDataComment = (comment: string) => {
+    if (product === undefined) {
+      toast.warning("Thông tin sản phẩm sai!");
+      return;
+    }
+    setNewComment({
+      _id: null,
+      idUser: user._id,
+      idProduct: String(product._id),
+      fullName: user.name,
+      productName: product.name,
+      avatar: user.avatar,
+      comment: comment,
+      createdAt: "",
+    });
+  };
+  const createComment = async (newComment: IComment | null) => {
+    if (
+      newComment?.comment === "" ||
+      newComment?.comment === undefined ||
+      newComment?.comment === null
+    ) {
+      toast.warning("Bạn chưa nhập bình luận!");
+      return;
+    }
+    if (newComment === null) {
+      toast.error("Không thể bình luận");
+      return;
+    }
+
+    try {
+      // Gửi yêu cầu tạo bình luận
+      await axios.post("http://localhost:3001/api/comments/add", newComment);
+      fetchComment(newComment.idProduct);
+      setTextComment("");
+      setNewComment(null);
+      toast.success("Bình luận thành công");
+    } catch (error) {
+      console.error("Error creating comment:", error); // In lỗi ra console để kiểm tra
+      toast.error("Bình luận thất bại");
     }
   };
 
@@ -150,11 +290,32 @@ export default function ProductDetail() {
                             <del>{product?.priceOld} VNĐ</del>
                           </span>
                         </div>
-                        <div className="availability">
+                        {/* <div className="availability">
                           <i className="fa fa-check-circle"></i>
                           <span>200 in stock</span>
+                        </div> */}
+
+                        <div>
+                          <div className="button-container mt-2">
+                            {sizes.map((size) => (
+                              <Button
+                                key={size._id}
+                                className={`mx-1 ${
+                                  selectedSize === size._id ? "selected" : ""
+                                }`}
+                                style={{
+                                  padding: "10px 20px",
+                                  fontSize: "16px",
+                                }}
+                                onClick={() => handleSizeClick(size._id)}
+                              >
+                                {size.name}
+                              </Button>
+                            ))}
+                          </div>
                         </div>
-                        <p className="pro-desc">Mô tả sản phẩm:</p>
+
+                        <p className="pro-desc mt-3">Mô tả sản phẩm:</p>
                         <p>{product?.description}</p>
                         <div className="quantity-cart-box d-flex align-items-center">
                           <h6 className="option-title">Số lượng:</h6>
@@ -178,199 +339,206 @@ export default function ProductDetail() {
                             >
                               +
                             </button>
+                            <div className="action_link">
+                              <button
+                                className="btn btn-cart2"
+                                onClick={
+                                  product ? () => onAddCart(product) : undefined
+                                }
+                              >
+                                Thêm vào giỏ hàng
+                              </button>
+                            </div>
                           </div>
-                          <div className="action_link">
-                            <button
-                              className="btn btn-cart2"
-                              onClick={
-                                product ? () => onAddCart(product) : undefined
-                              }
-                            >
-                              Thêm vào giỏ hàng
-                            </button>
-                          </div>
-                        </div>
-                        <div className="useful-links">
-                          <a href="#" data-bs-toggle="tooltip" title="Compare">
-                            <i className="pe-7s-refresh-2"></i>compare
-                          </a>
-                          <a href="#" data-bs-toggle="tooltip" title="Wishlist">
-                            <i className="pe-7s-like"></i>wishlist
-                          </a>
-                        </div>
-                        <div className="like-icon">
-                          <a className="facebook" href="#">
-                            <i className="fa fa-facebook"></i>like
-                          </a>
-                          <a className="twitter" href="#">
-                            <i className="fa fa-twitter"></i>tweet
-                          </a>
-                          <a className="pinterest" href="#">
-                            <i className="fa fa-pinterest"></i>save
-                          </a>
-                          <a className="google" href="#">
-                            <i className="fa fa-google-plus"></i>share
-                          </a>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                {/* product details inner end */}
+                  {/* product details inner end */}
 
-                {/* product details reviews start */}
-                <div className="product-details-reviews section-padding pb-0">
-                  <div className="row">
-                    <div className="col-lg-12">
-                      <div className="product-review-info">
-                        <ul className="nav review-tab">
-                          <li>
-                            <a
-                              className="active"
-                              data-bs-toggle="tab"
-                              href="#tab_one"
-                            >
-                              Mô tả
-                            </a>
-                          </li>
-                          <li>
-                            <a data-bs-toggle="tab" href="#tab_two">
-                              Thông tin
-                            </a>
-                          </li>
-                          <li>
-                            <a data-bs-toggle="tab" href="#tab_three">
-                              Bình luận và đánh giá
-                            </a>
-                          </li>
-                        </ul>
-                        <div className="tab-content">
-                          <div
-                            id="tab_one"
-                            className="tab-pane fade show active"
+                  {/* product details reviews start */}
+                  <div className="product-details-reviews section-padding pb-0">
+                    <div className="row">
+                      <div className="col-lg-12">
+                        <div className="product-review-info">
+                          <ul
+                            className="nav review-tab"
+                            style={{
+                              margin: "30px",
+                            }}
                           >
-                            <div className="product-tab-content">
-                              <h6 className="product-tab-title">
-                                Mô tả sản phẩm
-                              </h6>
-                              <p>{product?.description}</p>
+                            <li>
+                              <a
+                                className="active"
+                                data-bs-toggle="tab"
+                                href="#tab_one"
+                              >
+                                Mô tả
+                              </a>
+                            </li>
+                            <li>
+                              <a data-bs-toggle="tab" href="#tab_two">
+                                Thông tin
+                              </a>
+                            </li>
+                            <li onClick={() => fetchComment(id ? id : null)}>
+                              <a data-bs-toggle="tab" href="#tab_three">
+                                Bình luận
+                              </a>
+                            </li>
+                          </ul>
+                          <div className="tab-content">
+                            <div
+                              id="tab_one"
+                              className="tab-pane fade show active"
+                            >
+                              <div className="product-tab-content">
+                                <h6 className="product-tab-title">
+                                  Mô tả sản phẩm
+                                </h6>
+                                <p>{product?.description}</p>
+                              </div>
                             </div>
-                          </div>
-                          <div id="tab_two" className="tab-pane fade">
-                            <div className="product-tab-content">
-                              <h6 className="product-tab-title">
-                                Thông tin sản phẩm
-                              </h6>
-                              <ul>
-                                <li>
-                                  {/* <span>Danh mục:</span> {product?.category} */}
-                                </li>
-                                <li>
-                                  {/* <span>Thương hiệu:</span> {product?.brand} */}
-                                </li>
-                              </ul>
-                            </div>
-                          </div>
-                          <div id="tab_three" className="tab-pane fade">
-                            <div className="product-tab-content">
-                              <div className="reviews">
-                                <div className="review-content">
-                                  <div className="rev-author">
+                            <div id="tab_two" className="tab-pane fade">
+                              <div className="product-tab-content">
+                                <h3 className="product-tab-title">
+                                  Hướng dẫn đo size nhẫn
+                                </h3>
+                                <ul>
+                                  <li>
+                                    {" "}
                                     <img
-                                      src="https://via.placeholder.com/100"
-                                      alt="avatar"
+                                      src="https://scontent.fhan17-1.fna.fbcdn.net/v/t39.30808-6/451834400_1143488730215335_8162184727999743406_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=A3J78wJhMkcQ7kNvgHH0Lvb&_nc_ht=scontent.fhan17-1.fna&oh=00_AYD4m8sTtmS14USujkQ3BA48rTU7FtPSsapkyyP3wl1duw&oe=669F95A7"
+                                      alt=""
                                     />
+                                  </li>
+                                  <hr />
+                                  <li>
+                                    <h3>
+                                      Những cách đơn giản nhất để đo nhẫn:
+                                    </h3>
+                                    <h5>Đo bằng tờ giấy và thước</h5>
+                                    <span style={{ fontSize: "20px" }}>
+                                      Bước 1: Chuẩn bị một cây thước, 1 cây kéo,
+                                      1 cây bút & một tờ giấy <br /> Bước 2: Cắt
+                                      một mảnh giấy dài khoảng 10 cm và rộng 1
+                                      cm. <br />
+                                      Bước 3: Sử dụng đoạn giấy vừa cắt để quấn
+                                      sát quanh ngón tay muốn đo. <br /> Bước 4:
+                                      Đánh dấu điểm giao nhau. <br /> Bước 5:
+                                      Tháo ra dùng thước đo chiều dài của đoạn
+                                      giấy từ điểm đầu cho đến phần đánh dấu.
+                                      Lấy kết quả đo được chia cho 3,14. Sau đó
+                                      đối chiếu với Bảng size nhẫn.
+                                    </span>
+                                    <img
+                                      src="https://www.pnj.com.vn/blog/wp-content/uploads/2021/11/huong-dan-do-size-nhan-2.jpg"
+                                      alt=""
+                                    />
+                                  </li>
+                                  <li>
+                                    <h5>Đo theo một chiếc nhẫn có sẵn</h5>
+                                    <span style={{ fontSize: "20px" }}>
+                                      Bước 1: Chuẩn bị một cây thước cùng chiếc
+                                      nhẫn muốn đo. <br /> Bước 2: Đối chiếu số
+                                      mm của thước với kích thước trên BẢNG SIZE
+                                      NHẪN bên trên.
+                                    </span>
+                                    <img
+                                      src="https://www.pnj.com.vn/blog/wp-content/uploads/2021/11/huong-dan-do-size-nhan-3.jpg"
+                                      alt=""
+                                    />
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                            <div id="tab_three" className="tab-pane fade">
+                              <div className="product-tab-content">
+                                <div className="reviews">
+                                  <div
+                                    className="reviews"
+                                    style={{
+                                      maxHeight: "310px",
+                                      overflowY: "scroll", // Cho phép cuộn nội dung theo chiều dọc
+                                      scrollbarWidth: "none", // Ẩn thanh cuộn trên Firefox
+                                      msOverflowStyle: "none", // Ẩn thanh cuộn trên IE và Edge
+                                    }}
+                                  >
+                                    {listComment.length > 0 ? (
+                                      listComment.map((comment) => (
+                                        <div
+                                          className="review-content"
+                                          key={comment._id}
+                                        >
+                                          <div className="rev-author">
+                                            <img
+                                              src={comment.avatar}
+                                              alt="avatar"
+                                              style={{ marginRight: "10px" }}
+                                            />
+                                            <span>{comment.fullName}</span>
+                                            <span style={{ float: "right" }}>
+                                              {dayjs(comment.createdAt).format(
+                                                "DD/MM/YYYY HH:mm:ss"
+                                              )}
+                                            </span>
+                                          </div>
+                                          <div className="rev-content">
+                                            <p style={{ paddingLeft: "20px" }}>
+                                              {comment.comment}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <div className="form-group row">
+                                        <div className="col">
+                                          <label
+                                            htmlFor="review"
+                                            className="col-form-label"
+                                          >
+                                            Sản phẩm chưa có bình luận
+                                          </label>
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
-                                  <div className="rev-content">
-                                    <div className="post-author">
-                                      <p>
-                                        <span>Admin -</span> 30 Jan, 2019
-                                      </p>
+                                  <div
+                                    className="form-group row"
+                                    style={{ marginTop: "20px" }}
+                                  >
+                                    <div className="col">
+                                      <textarea
+                                        className="form-control"
+                                        id="review"
+                                        placeholder="Bình luận của bạn"
+                                        value={textComment}
+                                        onChange={(e) =>
+                                          handleChangeTextComment(
+                                            e.target.value
+                                          )
+                                        }
+                                        rows={3}
+                                      />
                                     </div>
-                                    <p>
-                                      Aliquam dignissim nonummy ultricies. Nulla
-                                      quis nibh. Proin ac neque. Nunc tincidunt
-                                      ante vitae massa. Donec viverra, pede ac
-                                      diam. Cras interdum. Nunc tincidunt ante
-                                      vitae massa. Donec viverra, pede ac diam.
-                                      Cras interdum.
-                                    </p>
                                   </div>
-                                </div>
-                                <div className="form-group row">
-                                  <div className="col">
-                                    <label className="col-form-label">
-                                      Your Rating
-                                    </label>
-                                    <div className="ratings">
-                                      <span className="good">
-                                        <i className="fa fa-star"></i>
-                                      </span>
-                                      <span className="good">
-                                        <i className="fa fa-star"></i>
-                                      </span>
-                                      <span className="good">
-                                        <i className="fa fa-star"></i>
-                                      </span>
-                                      <span className="good">
-                                        <i className="fa fa-star"></i>
-                                      </span>
-                                      <span>
-                                        <i className="fa fa-star"></i>
-                                      </span>
+
+                                  <div className="form-group row">
+                                    <div className="col">
+                                      <button
+                                        className="btn btn-secondary"
+                                        style={{
+                                          backgroundColor: "#c29957",
+                                          width: "100px",
+                                          height: "30px",
+                                        }}
+                                        onClick={() =>
+                                          createComment(newComment)
+                                        }
+                                      >
+                                        Submit
+                                      </button>
                                     </div>
-                                  </div>
-                                </div>
-                                <div className="form-group row">
-                                  <div className="col">
-                                    <label
-                                      htmlFor="review"
-                                      className="col-form-label"
-                                    >
-                                      Your Review
-                                    </label>
-                                    <textarea
-                                      className="form-control"
-                                      id="review"
-                                      rows={3}
-                                    ></textarea>
-                                  </div>
-                                </div>
-                                <div className="form-group row">
-                                  <div className="col">
-                                    <label
-                                      htmlFor="name"
-                                      className="col-form-label"
-                                    >
-                                      Name
-                                    </label>
-                                    <input
-                                      type="text"
-                                      className="form-control"
-                                      id="name"
-                                    />
-                                  </div>
-                                </div>
-                                <div className="form-group row">
-                                  <div className="col">
-                                    <label
-                                      htmlFor="email"
-                                      className="col-form-label"
-                                    >
-                                      Email
-                                    </label>
-                                    <input
-                                      type="text"
-                                      className="form-control"
-                                      id="email"
-                                    />
-                                  </div>
-                                </div>
-                                <div className="form-group row">
-                                  <div className="col">
-                                    <button className="btn btn-secondary">
-                                      Submit
-                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -392,7 +560,7 @@ export default function ProductDetail() {
                   {/* <!-- section title start --> */}
                   <div className="section-title text-center">
                     <h2 className="title">Sản phẩm liên quan</h2>
-                    <p className="sub-title">Sản phẩm mới nhất</p>
+                    <p className="sub-title">Sản phẩm liên quan</p>
                   </div>
                   {/* <!-- section title start --> */}
                 </div>
@@ -411,53 +579,17 @@ export default function ProductDetail() {
                           >
                             <div className="product-item">
                               <figure className="product-thumb">
-                                <Link to={`/product/${relatedProduct._id}`}>
+                                <a href="#">
                                   <img
                                     className="pri-img"
                                     src={relatedProduct?.image?.[0]}
                                     alt="product"
                                   />
-                                  <img
-                                    className="sec-img"
-                                    src={relatedProduct?.image?.[0]}
-                                    alt="product"
-                                  />
-                                </Link>
+                                </a>
                                 <div className="product-badge">
                                   <div className="product-label new">
                                     <span>HOT</span>
                                   </div>
-                                </div>
-                                <div className="button-group">
-                                  <a
-                                    href="#"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="left"
-                                    title="Yêu thích"
-                                  >
-                                    <i className="pe-7s-like"></i>
-                                  </a>
-                                  <a
-                                    href="#"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="left"
-                                    title="So sánh"
-                                  >
-                                    <i className="pe-7s-refresh-2"></i>
-                                  </a>
-                                  <a
-                                    href="#"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#quick_view"
-                                  >
-                                    <span
-                                      data-bs-toggle="tooltip"
-                                      data-bs-placement="left"
-                                      title="Xem chi tiết"
-                                    >
-                                      <i className="pe-7s-search"></i>
-                                    </span>
-                                  </a>
                                 </div>
                                 <div className="cart-hover">
                                   <button className="btn btn-cart">
@@ -470,36 +602,6 @@ export default function ProductDetail() {
                                       <a href="#">{relatedProduct.name}</a>
                                     </p>
                                   </div>
-                                  <ul className="color-categories">
-                                    <li>
-                                      <a
-                                        href="#"
-                                        className="c-lightblue"
-                                        title="LightSteelblue"
-                                      ></a>
-                                    </li>
-                                    <li>
-                                      <a
-                                        href="#"
-                                        className="c-darktan"
-                                        title="Darktan"
-                                      ></a>
-                                    </li>
-                                    <li>
-                                      <a
-                                        href="#"
-                                        className="c-grey"
-                                        title="Grey"
-                                      ></a>
-                                    </li>
-                                    <li>
-                                      <a
-                                        href="#"
-                                        className="c-brown"
-                                        title="Brown"
-                                      ></a>
-                                    </li>
-                                  </ul>
                                   <div className="price-box">
                                     <span className="price-regular">
                                       {relatedProduct.price} VNĐ

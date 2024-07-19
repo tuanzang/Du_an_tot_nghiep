@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Button, Card, Col, Input, Radio, Row, Switch, Table, Modal } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  Input,
+  Radio,
+  Row,
+  Switch,
+  Table,
+  Modal,
+} from "antd";
 import {
   DownloadOutlined,
   PlusSquareOutlined,
@@ -16,6 +26,7 @@ import { RadioChangeEvent } from "antd/lib";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import { toast } from "react-toastify";
+import * as XLSX from "xlsx";
 
 const customTableHeaderCellStyle = {
   backgroundColor: "#c29957",
@@ -28,11 +39,12 @@ const customTableHeaderCellStyle = {
 export default function Product() {
   const [value, setValue] = useState(1);
   const [products, setProducts] = useState<IProduct[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
   const [cates, setCates] = useState<ICategory[]>([]);
-  // const [listSize, setListSize] = useState([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [isOpenModalDetailOrder, setIsOpenModalDetailOrder] = useState(false);
   const [rowDataCurrent, setRowDataCurrent] = useState({});
-  const [sizes, setSizes] = useState<{ size: string, quantity: number }[]>([]);
+  const [sizes, setSizes] = useState<{ size: string; quantity: number }[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,10 +53,15 @@ export default function Product() {
           axios.get("http://localhost:3001/api/products"),
           axios.get("http://localhost:3001/api/categories"),
         ]);
-        setProducts(productResponse.data?.data);
+
+        const sortedProducts = productResponse.data?.data.sort(
+          (a: IProduct, b: IProduct) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
+        setProducts(sortedProducts);
         setCates(categoryResponse.data?.data); // Ensure categories are correctly set
-        // console.log(productResponse.data?.data);
-        // console.log(categoryResponse.data?.data);
+        setFilteredProducts(sortedProducts); // Set initial filtered products
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -52,6 +69,13 @@ export default function Product() {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const results = products.filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredProducts(results);
+  }, [searchTerm, products]);
 
   const deleteProduct = async (id: number) => {
     try {
@@ -68,6 +92,7 @@ export default function Product() {
               if (response.status === 200) {
                 const newArr = products.filter((item) => item["_id"] !== id);
                 setProducts(newArr);
+                setFilteredProducts(newArr); // Update filtered products as well
                 toast.success("Xoá sản phẩm thành công!");
               }
             },
@@ -92,9 +117,40 @@ export default function Product() {
     console.log(`switch to ${checked}`);
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleExportExcel = () => {
+    // Create a new workbook
+    const wb = XLSX.utils.book_new();
+
+    // Convert filteredProducts to worksheet
+    const ws = XLSX.utils.json_to_sheet(
+      filteredProducts.map((product) => ({
+        STT: product._id, // or any other field
+        "Tên sản phẩm": product.name,
+        "Giá sản phẩm": product.price,
+        "Giá cũ sản phẩm": product.priceOld,
+        "Loại sản phẩm":
+          cates.find(
+            (cate) => cate._id.toString() === product.categoryId.toString()
+          )?.loai || "Không có danh mục",
+        "Mô tả sản phẩm": product.description,
+        "Số lượng": product.quantity,
+        // Add more fields as needed
+      }))
+    );
+
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, "Sản phẩm");
+
+    // Export workbook to file
+    XLSX.writeFile(wb, "products.xlsx");
+  };
+
   const columns: (
     | ColumnGroupType<{
-      // _id:number;
         stt: number;
         key: number;
         name: string;
@@ -105,7 +161,6 @@ export default function Product() {
         loai: string;
       }>
     | ColumnType<{
-      // _id:number;
         stt: number;
         key: number;
         name: string;
@@ -133,27 +188,36 @@ export default function Product() {
       dataIndex: "image",
       key: "image",
       width: "20%",
-      render: (text) => (
-        <img style={{ height: "70px" }} src={text} alt="error" />
+      render: (images: string[]) => (
+        <div style={{ display: "flex", gap: "10px" }}>
+          {images.slice(0, 2).map((image, index) => (
+            <img
+              key={index}
+              style={{ height: "70px", width: "70px", objectFit: "cover" }}
+              src={image}
+              alt={`product-image-${index}`}
+            />
+          ))}
+        </div>
       ),
     },
     {
       title: "Giá sản phẩm",
       dataIndex: "price",
       key: "price",
-      width: "20%",
+      width: "10%",
     },
     {
       title: "Giá cũ sản phẩm",
       dataIndex: "priceOld",
       key: "priceOld",
-      width: "20%",
+      width: "10%",
     },
     {
       title: "Loại sản phẩm",
       dataIndex: "loai",
       key: "loai",
-      width: "20%",
+      width: "15%",
     },
     {
       title: "Mô tả sản phẩm",
@@ -175,13 +239,6 @@ export default function Product() {
         </span>
       ),
     },
-    // {
-    //   title: "Số lượng",
-    //   dataIndex: "quantity",
-    //   key: "quantity",
-    //   align: "center",
-    //   width: "10%",
-    // },
     {
       title: "Trạng thái",
       dataIndex: "status",
@@ -231,7 +288,7 @@ export default function Product() {
     },
   ];
 
-  const data = products.map((item: IProduct, index: number) => {
+  const data = filteredProducts.map((item: IProduct, index: number) => {
     const category = cates.find(
       (cate) => cate._id.toString() === item.categoryId.toString()
     );
@@ -251,20 +308,16 @@ export default function Product() {
 
   const handleClickDetailOrder = async (id: IProduct) => {
     try {
-      const sizeResponse = await axios.get(`http://localhost:3001/api/products`);
+      const sizeResponse = await axios.get(
+        `http://localhost:3001/api/products`
+      );
       const sizes = sizeResponse.data?.data || [];
       setSizes(sizes);
       setIsOpenModalDetailOrder(true);
-      
     } catch (error) {
       console.error("Error fetching sizes:", error);
     }
   };
-
-  // const handleCancel = () => {
-  //   setIsOpenModalDetailOrder(false);
-  //   setRowDataCurrent(null);
-  // };
 
   return (
     <div>
@@ -279,6 +332,8 @@ export default function Product() {
               size="middle"
               placeholder="Tìm kiếm sản phẩm"
               prefix={<SearchOutlined style={{ color: "#1890ff" }} />}
+              value={searchTerm}
+              onChange={handleSearchChange}
             />
           </Col>
           <Col span={12}>
@@ -292,6 +347,7 @@ export default function Product() {
                 borderColor: "green",
               }}
               type="default"
+              onClick={handleExportExcel}
             >
               Export Excel
             </Button>
@@ -332,34 +388,33 @@ export default function Product() {
       </Card>
 
       {rowDataCurrent && (
-         <Modal
-         title="Thông tin kích thước và số lượng"
-         visible={isOpenModalDetailOrder}
-         onCancel={() => setIsOpenModalDetailOrder(false)}
-         footer={[
-           <Button key="back" onClick={() => setIsOpenModalDetailOrder(false)}>
-             Đóng
-           </Button>,
-         ]}
-
-       >
-         <Table
-           dataSource={sizes}
-           columns={[
-             {
-               title: 'Kích thước',
-               dataIndex: 'size',
-               key: 'sizeId',
-             },
-             {
-               title: 'Số lượng',
-               dataIndex: 'quantity',
-               key: 'quantity',
-             },
-           ]}
-           pagination={false}
-         />
-       </Modal>
+        <Modal
+          title="Thông tin kích thước và số lượng"
+          visible={isOpenModalDetailOrder}
+          onCancel={() => setIsOpenModalDetailOrder(false)}
+          footer={[
+            <Button key="back" onClick={() => setIsOpenModalDetailOrder(false)}>
+              Đóng
+            </Button>,
+          ]}
+        >
+          <Table
+            dataSource={sizes}
+            columns={[
+              {
+                title: "Kích thước",
+                dataIndex: "size",
+                key: "sizeId",
+              },
+              {
+                title: "Số lượng",
+                dataIndex: "quantity",
+                key: "quantity",
+              },
+            ]}
+            pagination={false}
+          />
+        </Modal>
       )}
 
       <Card style={{ marginTop: "12px" }}>

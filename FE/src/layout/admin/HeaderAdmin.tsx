@@ -28,6 +28,7 @@ import {
 import AdminMenu from "./AdminMenu";
 import "./HeaderAdmin.css";
 import { BsHouse } from "react-icons/bs";
+import { ACCESS_TOKEN_STORAGE_KEY, USER_INFO_STORAGE_KEY } from '../../services/constants'
 
 dayjs.extend(relativeTime);
 
@@ -51,9 +52,9 @@ export default function HeaderAdmin({ children }: HeaderAdminProps) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("ACCESS_TOKEN_STORAGE_KEY");
-    localStorage.removeItem("USER_INFO_STORAGE_KEY");
-    navigate("/login");
+    localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+    localStorage.removeItem(USER_INFO_STORAGE_KEY);
+    navigate("/home");
   };
 
   const menu = (
@@ -68,7 +69,7 @@ export default function HeaderAdmin({ children }: HeaderAdminProps) {
           <AiOutlineKey style={{ marginRight: "8px" }} /> Đổi mật khẩu
         </Link>
       </Menu.Item>
-      <Menu.Item key="3" onClick={handleLogout}>
+      <Menu.Item key="3" onClick={() => handleLogout()}>
         <AiOutlineLogout style={{ marginRight: "8px" }} /> Đăng xuất
       </Menu.Item>
       <Menu.Item key="4">

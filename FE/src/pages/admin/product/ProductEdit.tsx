@@ -1,47 +1,73 @@
-import type { FormProps } from 'antd';
-import axios from 'axios';
-import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Button, Form, Input } from 'antd';
-import { IProduct } from '../../../interface/Products';
-
+import type { FormProps } from "antd";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Button, Form, Input, Upload } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import { IProduct } from "../../../interface/Products";
+import { UploadFile } from "antd/es/upload/interface";
 
 const ProductEdit = () => {
   const { id } = useParams();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [form] = Form.useForm();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+
   useEffect(() => {
     (async () => {
-      const { data } = await axios.get(`http://localhost:3001/api/products/${id}`);
-      // setProduct(data.data)
-      // const product = data.data
-      form.setFieldsValue(data.data);
-      return data
-    })();
-  }, [id]);
-
-  // const onSubmit: SubmitHandler<IProduct> = async (data) => {
-  //   try {
-  //     await axios.put(`http://localhost:3001/api/products/${id}`, data);
-  //     alert('Success')
-  //     navigate("/admin/product")
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // }
-  const onFinish: FormProps<IProduct>['onFinish'] = async  (values) => {
-    console.log('Success:', values);
       try {
-      await axios.put(`http://localhost:3001/api/products/${id}`, values);
-      alert( 'Edit product success')
-      navigate("/admin/product")
+        const { data } = await axios.get(
+          `http://localhost:3001/api/products/${id}`
+        );
+        console.log("Fetched data:", data.data); // Debugging line
+
+        form.setFieldsValue(data.data);
+
+        // Ensure `data.data.image` is an array of image URLs
+        const imageUrls: string[] = Array.isArray(data.data.image)
+          ? data.data.image
+          : [];
+        console.log("Image URLs:", imageUrls); // Debugging line
+
+        setFileList(
+          imageUrls.map((url: string) => ({
+            uid: url,
+            name: url.split("/").pop() || "image",
+            status: "done",
+            url,
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching product data:", error);
+      }
+    })();
+  }, [id, form]);
+
+  const onFinish: FormProps<IProduct>["onFinish"] = async (values) => {
+    try {
+      // Prepare file URLs from fileList
+      const images = fileList.map((file) => file.url).filter((url) => url); // Ensure non-null URLs
+      const updatedValues = { ...values, image: images };
+
+      console.log("Updating product with values:", updatedValues); // Debugging line
+
+      await axios.put(
+        `http://localhost:3001/api/products/${id}`,
+        updatedValues
+      );
+      alert("Edit product success");
+      navigate("/admin/product");
     } catch (err) {
-      console.log(err);
+      console.error("Error updating product:", err);
     }
   };
 
-  const onFinishFailed: FormProps<IProduct>['onFinishFailed'] = (errorInfo) => {
-    console.log('Failed:', errorInfo);
+  const onFinishFailed: FormProps<IProduct>["onFinishFailed"] = (errorInfo) => {
+    console.log("Failed:", errorInfo);
+  };
+
+  const handleUploadChange = ({ fileList }: { fileList: UploadFile[] }) => {
+    setFileList(fileList);
   };
 
   return (
@@ -50,51 +76,36 @@ const ProductEdit = () => {
       labelCol={{ span: 8 }}
       wrapperCol={{ span: 16 }}
       style={{ maxWidth: 600 }}
-      // initialValues={{
-      //   name: product?.name,
-      //   price: product?.price,
-        // image: product?.image,
-        // description: product?.description
-      // }}
       form={form}
       onFinish={onFinish}
       onFinishFailed={onFinishFailed}
       autoComplete="off"
     >
-      <Form.Item<IProduct>
-        label="Tên sản phẩm"
-        name="name"
-      >
-        <Input type='text'/>
+      <Form.Item<IProduct> label="Tên sản phẩm" name="name">
+        <Input type="text" />
       </Form.Item>
-      <Form.Item<IProduct>
-        label="Giá"
-        name="price"
-      >
+      <Form.Item<IProduct> label="Giá" name="price">
         <Input />
       </Form.Item>
-      <Form.Item<IProduct>
-        label="Giá cũ"
-        name="priceOld"
-      >
+      <Form.Item<IProduct> label="Giá cũ" name="priceOld">
         <Input />
       </Form.Item>
-      <Form.Item<IProduct>
-        label="Số lượng"
-        name="quantity"
-      >
+      <Form.Item<IProduct> label="Số lượng" name="quantity">
         <Input />
       </Form.Item>
-      <Form.Item<IProduct>
-        label="Ảnh"
-        name="image"
-      >
-        <Input />
+      <Form.Item<IProduct> label="Ảnh" name="image">
+        <Upload
+          listType="picture"
+          fileList={fileList}
+          onChange={handleUploadChange}
+          beforeUpload={() => false} // Prevent automatic upload
+          multiple
+          accept=".jpg,.png,.jpeg"
+        >
+          <Button icon={<UploadOutlined />}>Tải ảnh lên</Button>
+        </Upload>
       </Form.Item>
-      <Form.Item<IProduct>
-        label="Mô tả"
-        name="description"
-      >
+      <Form.Item<IProduct> label="Mô tả" name="description">
         <Input />
       </Form.Item>
       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>

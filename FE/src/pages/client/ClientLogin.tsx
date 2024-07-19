@@ -160,20 +160,18 @@ const RegisterPanel = () => {
 
 const LoginPanel = () => {
   const navigate = useNavigate();
-  const [userBlocked, setUserBlocked] = useState(false); // State to check if user is blocked
+  const [userBlocked, setUserBlocked] = useState(false); 
 
   const onSubmit = async (formData: ISignInBody) => {
     try {
-      const { data } = await AuthApi.signIn(formData); // Call API to sign in
+      const { data } = await AuthApi.signIn(formData); 
 
-      // Check if user is blocked
       if (data?.user?.blocked) {
-        setUserBlocked(true); // Set state to true if user is blocked
+        setUserBlocked(true); 
         message.error(
           "Tài khoản của bạn đã bị chặn. Vui lòng liên hệ với quản trị viên."
-        ); // Show blocked message
+        ); 
       } else {
-        // Store token and user info in local storage
         localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data?.token);
         localStorage.setItem(USER_INFO_STORAGE_KEY, JSON.stringify(data?.user));
 
