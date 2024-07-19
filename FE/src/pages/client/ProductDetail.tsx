@@ -409,7 +409,7 @@ export default function ProductDetail() {
                                     {" "}
                                     <img
                                       src="https://scontent.fhan17-1.fna.fbcdn.net/v/t39.30808-6/451834400_1143488730215335_8162184727999743406_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=A3J78wJhMkcQ7kNvgHH0Lvb&_nc_ht=scontent.fhan17-1.fna&oh=00_AYD4m8sTtmS14USujkQ3BA48rTU7FtPSsapkyyP3wl1duw&oe=669F95A7"
-                                      alt=""
+                                      alt="" width={"70%"}
                                     />
                                   </li>
                                   <hr />
