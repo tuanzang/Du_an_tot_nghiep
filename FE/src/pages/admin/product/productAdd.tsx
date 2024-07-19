@@ -67,12 +67,12 @@ const ProductAdd = () => {
       // Update values with uploaded image URLs
       const updatedValues = { ...values, image: uploadedImageUrls };
 
+      // Send product data to server
+      const dataProduct = await axios.post(`http://localhost:3001/api/products/add`, updatedValues);
+      
       // product size
       const idSizes = updatedValues.idSize;
       const quantity = updatedValues.quantity;
-
-      // Send product data to server
-      const dataProduct = await axios.post(`http://localhost:3001/api/products/add`, updatedValues);
       
       const productSizes: IProductSize[] = [];
       idSizes.map(s=>productSizes.push( {_id:null, idProduct: dataProduct.data.data._id, idSize:s, quantity}))

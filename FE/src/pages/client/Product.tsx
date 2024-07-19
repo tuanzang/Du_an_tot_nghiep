@@ -6,6 +6,7 @@ import { ICategory } from "../../interface/Categories";
 import { Link } from "react-router-dom";
 import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
 import useCartMutation from "../../hooks/useCart";
+import { ISize } from "../../interface/Size";
 
 
 export default function Product() {
@@ -14,6 +15,7 @@ export default function Product() {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [priceRange, setPriceRange] = useState<[number, number]>([200, 500]);
+  const [sizes, setSizes] = useState<ISize[]>([]);
 
   const { mutate } = useCartMutation({
     action: "ADD",
@@ -32,7 +34,18 @@ export default function Product() {
       }
     };
 
+    const fetchSizes = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/api/sizes`);
+        console.log("Sizes API response:", response.data);
+        setSizes(response.data.data);
+      } catch (error) {
+        console.error("Error fetching sizes:", error);
+      }
+    };
+
     fetchCategories();
+    fetchSizes()
   }, []);
 
   useEffect(() => {
@@ -129,13 +142,13 @@ export default function Product() {
                       <ul className="shop-categories">
                         <li>
                           <a href="#">
-                            Tất cả <span>(100)</span>
+                            Tất cả
                           </a>
                         </li>
                         {categories?.map((category) => (
                           <li key={category._id}>
                             <a href="#">
-                              {category.loai} <span></span>
+                              {category.loai}
                             </a>
                           </li>
                         ))}
@@ -188,259 +201,28 @@ export default function Product() {
                         justifyContent: "space-between",
                       }}
                     >
-                      <span>Thương hiệu</span>
-                    </h5>
-
-                    <div className="sidebar-body">
-                      <ul className="checkbox-container categories-list">
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck2"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck2"
-                            >
-                              Studio (3)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck3"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck3"
-                            >
-                              Hastech (4)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck4"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck4"
-                            >
-                              Quickiin (15)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck1"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck1"
-                            >
-                              Graphic corner (10)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck5"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck5"
-                            >
-                              devItems (12)
-                            </label>
-                          </div>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  {/* <!-- single sidebar end --> */}
-
-                  {/* <!-- single sidebar start --> */}
-                  <div className="sidebar-single">
-                    <h5
-                      className="sidebar-title"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span>Màu sắc</span>
-                    </h5>
-
-                    <div className="sidebar-body">
-                      <ul className="checkbox-container categories-list">
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck12"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck12"
-                            >
-                              black (20)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck13"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck13"
-                            >
-                              red (6)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck14"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck14"
-                            >
-                              blue (8)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck11"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck11"
-                            >
-                              green (5)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck15"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck15"
-                            >
-                              pink (4)
-                            </label>
-                          </div>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  {/* <!-- single sidebar end --> */}
-
-                  {/* <!-- single sidebar start --> */}
-                  <div className="sidebar-single">
-                    <h5
-                      className="sidebar-title"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
                       <span>Kích cỡ</span>
                     </h5>
-
+                    
                     <div className="sidebar-body">
                       <ul className="checkbox-container categories-list">
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck111"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck111"
-                            >
-                              S (4)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck222"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck222"
-                            >
-                              M (5)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck333"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck333"
-                            >
-                              L (7)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck444"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck444"
-                            >
-                              XL (3)
-                            </label>
-                          </div>
-                        </li>
+                        {sizes.map((size, index) => (
+                          <li key={size._id}>
+                            <div className="custom-control custom-checkbox">
+                              <input
+                                type="checkbox"
+                                className="custom-control-input"
+                                id={`customCheck${index}`}
+                              />
+                              <label
+                                className="custom-control-label"
+                                htmlFor={`customCheck${index}`}
+                              >
+                                {size.name}
+                              </label>
+                            </div>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </div>
@@ -554,7 +336,7 @@ export default function Product() {
                                   href="#"
                                   data-bs-toggle="tooltip"
                                   data-bs-placement="left"
-                                  title="So sánhpare"
+                                  title="So sánh"
                                 >
                                   <i className="pe-7s-refresh-2"></i>
                                 </a>
@@ -576,6 +358,7 @@ export default function Product() {
                                 <button
                                   className="btn btn-cart"
                                   onClick={() => onAddCart(p)}
+
                                 >
                                   Thêm vào giỏ hàng
                                 </button>
@@ -588,46 +371,14 @@ export default function Product() {
                                     </Link>
                                   </p>
                                 </div>
-                                <ul className="color-categories">
-                                  <li>
-                                    <a
-                                      href="#"
-                                      className="c-lightblue"
-                                      title="LightSteelblue"
-                                    ></a>
-                                  </li>
-                                  <li>
-                                    <a
-                                      href="#"
-                                      className="c-darktan"
-                                      title="Darktan"
-                                    ></a>
-                                  </li>
-                                  <li>
-                                    <a
-                                      href="#"
-                                      className="c-grey"
-                                      title="Grey"
-                                    ></a>
-                                  </li>
-                                  <li>
-                                    <a
-                                      href="#"
-                                      className="c-brown"
-                                      title="Brown"
-                                    ></a>
-                                  </li>
-                                </ul>
-                                {/* <h6 className="product-name">
-                                  <a href="#">Sản phẩm {index + 1}</a>
-                                </h6> */}
+
                                 <div className="price-box">
                                   <span className="price-regular">
                                     {p.price + " "} VNĐ
                                   </span>
-                                  <span className="price-old">
+                                  {/* <span className="price-old">
                                     <del>{p.priceOld + " "}VND</del>
-                                  </span>
+                                  </span> */}
                                 </div>
                               </div>
                             </figure>

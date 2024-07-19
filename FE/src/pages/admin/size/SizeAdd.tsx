@@ -17,7 +17,7 @@ const SizeAdd = () => {
 
     try {
       const response = await axios.post('http://localhost:3001/api/sizes/add', data);
-      console.log('Response:', response.data); // Thêm console log để kiểm tra phản hồi từ server
+      console.log('Response:', response.data); 
       alert('Add size success');
       navigate('/admin/size');
     } catch (err) {

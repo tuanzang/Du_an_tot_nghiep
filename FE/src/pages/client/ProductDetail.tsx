@@ -14,6 +14,7 @@ import { IUser } from "../../interface/Users";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ISize } from "../../interface/Size";
+import { IProductSize } from "../../interface/ProductSize";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
@@ -22,6 +23,8 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1); // State for quantity
   const [sizes, setSizes] = useState<ISize[]>([]);
   const [selectedSize, setSelectedSize] = useState(null);
+  const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
+  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
 
   const handleSizeClick = (sizeId: any) => {
     if (selectedSize === sizeId) {
@@ -84,6 +87,31 @@ export default function ProductDetail() {
       console.error("Error fetching sizes:", error);
     }
   };
+
+  useEffect(() => {
+    // Gọi API để lấy số lượng sản phẩm theo kích cỡ
+    const fetchProductSizes = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:3001/api/products/productSize/${id}`);
+        setProductSizes(data.data);
+
+        // Cập nhật state quantities
+        const initialQuantities: { [key: string]: number } = {};
+        data.data.forEach((productSize: IProductSize) => {
+          initialQuantities[productSize.sizeName] = productSize.quantity;
+        });
+        setQuantities(initialQuantities);
+      } catch (error) {
+        console.error('Error fetching product sizes:', error);
+      }
+    };
+
+    fetchProductSizes();
+  }, [id]);
+
+  
+  // Tính tổng số lượng tất cả các size
+  const totalQuantity = Object.values(quantities).reduce((acc, qty) => acc + qty, 0);
 
   const handleQuantityIncrease = () => {
     setQuantity(quantity + 1);
@@ -289,6 +317,10 @@ export default function ProductDetail() {
                               </Button>
                             ))}
                           </div>
+                        </div>
+
+                        <div className="mt-2">
+                          <p>Còn {totalQuantity} sản phẩm</p>
                         </div>
 
                         <p className="pro-desc mt-3">Mô tả sản phẩm:</p>

@@ -1,3 +1,8 @@
+import  { useEffect, useState } from "react";
+// import { useParams } from "react-router-dom";
+import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
+import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
+=======
 import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import {
@@ -11,7 +16,6 @@ import {
   Table,
 } from "antd";
 import {
-  DownloadOutlined,
   PlusSquareOutlined,
   SearchOutlined,
   EyeOutlined,
@@ -36,6 +40,7 @@ const customTableHeaderCellStyle = {
 };
 
 export default function Product() {
+  // const { id } = useParams<{ id: string }>(); // Lấy ID sản phẩm từ URL
   const [value, setValue] = useState(1);
   const [products, setProducts] = useState<IProduct[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
@@ -49,6 +54,10 @@ export default function Product() {
           axios.get("http://localhost:3001/api/products"),
           axios.get("http://localhost:3001/api/categories"),
         ]);
+        setProducts(productResponse.data?.data);
+        setCates(categoryResponse.data?.data); 
+        // console.log(productResponse.data?.data);
+        // console.log(categoryResponse.data?.data);
 
         const sortedProducts = productResponse.data?.data.sort(
           (a: IProduct, b: IProduct) =>
@@ -167,6 +176,88 @@ export default function Product() {
       loai: string;
     }>
   )[] = [
+    {
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      align: "center",
+    },
+    {
+      title: "Tên sản phẩm",
+      dataIndex: "name",
+      key: "name",
+      width: "20%",
+    },
+    {
+      title: "Ảnh",
+      dataIndex: "image",
+      key: "image",
+      width: "20%",
+      render: (text) => (
+        <img style={{ height: "70px" }} src={text} alt="error" />
+      ),
+    },
+    {
+      title: "Giá sản phẩm",
+      dataIndex: "price",
+      key: "price",
+      width: "20%",
+    },
+    {
+      title: "Danh mục",
+      dataIndex: "loai",
+      key: "loai",
+      width: "20%",
+    },
+    // {
+    //   title: "Số lượng",
+    //   dataIndex: "quantity",
+    //   key: "quantity",
+    //   width: "20%",
+    // },
+    // {
+    //   title: "Mô tả sản phẩm",
+    //   dataIndex: "description",
+    //   key: "description",
+    //   width: "20%",
+    // },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      align: "center",
+      width: "20%",
+      render: (key) => (
+        <Switch
+          style={{ backgroundColor: key ? "green" : "gray" }}
+          checked={key}
+          onChange={() => onChangeSwitch(key)}
+        />
+      ),
+    },
+    {
+      title: "Xóa",
+      dataIndex: "key",
+      key: "key",
+      align: "center",
+      width: "20%",
+      render: (value: any) => (
+        <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
+      ),
+    },
+    {
+      title: "Chi tiết",
+      align: "center",
+      dataIndex: "key",
+      key: "key",
+      width: "20%",
+      render: (value:IProduct) => (
+        <Link to={`/admin/product/detail/${value}`}>
+          <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
+        </Link>
+      ),
+    },
+  ];
       {
         title: "STT",
         dataIndex: "stt",
@@ -287,7 +378,7 @@ export default function Product() {
       priceOld: item.priceOld,
       description: item.description,
       quantity: item.quantity,
-      loai: category ? category.loai : "Không có danh mục", // Handle no category case
+      loai: category ? category.loai : "Không tìm thấy danh mục",
     };
   });
 
@@ -339,7 +430,7 @@ export default function Product() {
         <Row gutter={16} style={{ marginTop: "12px" }}>
           <Col span={12}>
             <span>Trạng thái: </span>
-            <Radio.Group onChange={onChangeRadio} value={value}>
+            <Radio.Group onChange={onChangeRadio} value={value} style={{ paddingLeft: "12px" }}>
               <Radio value={1}>Tất cả</Radio>
               <Radio value={2}>Hoạt động</Radio>
               <Radio value={3}>Ngưng hoạt động</Radio>
@@ -358,7 +449,7 @@ export default function Product() {
           </Col>
         </Row>
       </Card>
-
+      
       <Card style={{ marginTop: "12px" }}>
         <Table
           components={{
@@ -372,6 +463,7 @@ export default function Product() {
           columns={columns}
         />
       </Card>
+
     </div>
   );
 }
