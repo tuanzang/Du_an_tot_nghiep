@@ -13,124 +13,17 @@ import {
   // Pagination,
 } from "antd";
 
-import {
-  ScheduleOutlined,
-  RiseOutlined,
-  CalendarOutlined,
-  BarChartOutlined,
-  SettingOutlined,
-  DownloadOutlined,
-} from "@ant-design/icons";
 
-import formatCurrency from "../../../services/common/formatCurrency";
 import axios from "axios";
-import PieChartDashBoard from "./PieChartDashBoard";
-import dayjs from "dayjs";
+import formatCurrency from "../../../services/common/formatCurrency";
+import { ColumnGroupType, ColumnType } from "antd/es/table";
+import { IProduct } from "../../../interface/Products";
+import { log } from "console";
+import { GiLogicGateAnd } from "react-icons/gi";
 // import { LineChart } from "./LineChartDashBoard"; // Assuming you have a LineChartDashBoard component
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
-const { Option } = Select;
-
-const customTableHeaderCellStyle = {
-  backgroundColor: "#c29957",
-  color: "white",
-  fontWeight: "bold",
-  textAlign: "center",
-  height: "10px",
-};
-
-const DashboardCard = function ({
-  iconCart,
-  title,
-  total,
-  product,
-  order,
-  orderCancel,
-  color,
-}: {
-  iconCart:
-  | typeof ScheduleOutlined
-  | typeof RiseOutlined
-  | typeof CalendarOutlined
-  | typeof BarChartOutlined
-  | typeof SettingOutlined
-  | typeof DownloadOutlined;
-  title: string;
-  total: number;
-  product: number;
-  order: number;
-  orderCancel: number;
-  color: string;
-}) {
-  const IconComponent = iconCart;
-  return (
-    <Card style={{ padding: "16px", backgroundColor: color, color: "white" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: "30px",
-          color: "black",
-        }}
-      >
-        <IconComponent />
-      </div>
-      <Typography.Text
-        style={{
-          marginTop: "8px",
-          textAlign: "center",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontFamily: "monospace",
-          fontSize: "17px",
-        }}
-      >
-        {title}
-      </Typography.Text>
-      <Typography.Title
-        level={4}
-        style={{
-          marginTop: "8px",
-          textAlign: "center",
-          fontFamily: "monospace",
-          fontWeight: "600",
-        }}
-      >
-        {formatCurrency(total)}
-      </Typography.Title>
-      <table
-        style={{
-          marginTop: "8px",
-          width: "100%",
-          textAlign: "center",
-          fontFamily: "monospace",
-          fontSize: "15px",
-          color: "black",
-        }}
-      >
-        <thead>
-          <tr>
-            <th>Sản phẩm</th>
-            <th>Đơn thành công</th>
-            <th>Đơn hủy</th>
-            <th>Đơn trả</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style={{ fontWeight: "bold" }}>{product}</td>
-            <td style={{ fontWeight: "bold" }}>{order}</td>
-            <td style={{ fontWeight: "bold" }}>{orderCancel}</td>
-          </tr>
-        </tbody>
-      </table>
-    </Card>
-  );
-};
-
 interface Filter {
   page: number;
   size: number;
@@ -138,23 +31,35 @@ interface Filter {
   createAtTo?: string | null;   // Thêm thuộc tính này
 }
 
+interface ProductDetails {
+  price: number;
+  image: string;
+  description?: string;
+}
+
+interface BestSellerItem {
+  stt: number;
+  name: string;
+  productDetails: ProductDetails;
+  categoryName: string;
+  totalQuantity: number;
+}
+
 export default function Dashboard() {
   const [indexButton, setIndexButton] = useState(1);
   const [nameButton, setNameButton] = useState("ngày");
-  const [dataBieuDo, setDataBieuDo] = useState([]);
+  const [totalPriceByDay, setTotalPriceByDay] = useState(0);
+  const [totalPriceByWeek, setTotalPriceByWeek] = useState(0);
+  const [totalPriceByMonth, setTotalPriceByMonth] = useState(0);
+  const [totalPriceByYear, setTotalPriceByYear] = useState(0);
+  const [totalPriceByCustomDay, setTotalPriceByCustomDay] = useState(0);
   const [listBestSellerByDay, setListBestSellerByDay] = useState([]);
   const [listBestSellerByWeek, setListBestSellerByWeek] = useState([]);
   const [listBestSellerByMonth, setListBestSellerByMonth] = useState([]);
   const [listBestSellerByYear, setListBestSellerByYear] = useState([]);
+  const [listBestSellerByCustomDay, setListBestSellerByCustomDay] = useState([]);
   const [filter, setFilter] = useState<Filter>({ page: 1, size: 5, createAtFrom: null, createAtTo: null });
   const [customDateRange, setCustomDateRange] = useState([null, null]);
-  // const [statistics, setStatistics] = useState({
-  //   totalOrdersByCustomDay: 0,
-  //   completedOrdersByCustomDay: 0,
-  //   canceledOrdersByCustomDay: 0,
-  // });
-
-  const [listOrder, setListOrder] = useState([]);
   const [totalOrdersToday, setTotalOrdersToday] = useState(0);
   const [totalOrdersThisWeek, setTotalOrdersThisWeek] = useState(0);
   const [totalOrdersThisMonth, setTotalOrdersThisMonth] = useState(0);
@@ -171,117 +76,85 @@ export default function Dashboard() {
   const [completedOrdersYear, setCompletedOrdersYear] = useState(0);
   const [canceledOrdersYear, setCanceledOrdersYear] = useState(0);
 
-  useEffect(() => {
-    const fetchAllOrders = async () => {
-      try {
-        const today = new Date().toISOString().split('T')[0];
-        // Lấy tổng số đơn hàng
-        const resAllOrders = await axios.get(`http://localhost:3001/api/orders`);
-        const allOrders = resAllOrders.data.data;
-        console.log(allOrders);
-
-        setListOrder(allOrders);
-        // Tính tổng số đơn hàng thành công và bị hủy theo CustomDay
-        const resOrdersByCustomDay = await getOrdersByCustomStatus(customDateRange[0] ?? "", customDateRange[1] ?? "");
-        setTotalOrdersByCustomDay(resOrdersByCustomDay.totalOrdersByCustomDay);
-        setCompletedOrdersByCustomDay(resOrdersByCustomDay.completedOrdersByCustomDay);
-        setCanceledOrdersByCustomDay(resOrdersByCustomDay.canceledOrdersByCustomDay);
-        // Tính tổng số đơn hàng thành công và bị hủy theo ngày
-        const resOrdersByDay = await getOrdersByDayStatus(today);
-        setTotalOrdersToday(resOrdersByDay.orderByDay);
-        setCompletedOrdersDay(resOrdersByDay.completed);
-        setCanceledOrdersDay(resOrdersByDay.canceled);
-
-        // Tính tổng số đơn hàng thành công và bị hủy theo tuần
-        const resOrdersByWeek = await getOrdersByWeekStatus();
-        setTotalOrdersThisWeek(resOrdersByWeek.orderByWeek);
-        setCompletedOrdersWeek(resOrdersByWeek.completed);
-        setCanceledOrdersWeek(resOrdersByWeek.canceled);
-
-        // Tính tổng số đơn hàng thành công và bị hủy theo tháng
-        const resOrdersByMonth = await getOrdersByMonthStatus();
-        setTotalOrdersThisMonth(resOrdersByMonth.orderByMonth);
-        setCompletedOrdersMonth(resOrdersByMonth.completed);
-        setCanceledOrdersMonth(resOrdersByMonth.canceled);
-
-        // Tính tổng số đơn hàng thành công và bị hủy theo năm
-        const resOrdersByYear = await getOrdersByYearStatus();
-        setTotalOrdersThisYear(resOrdersByYear.orderByYear);
-        setCompletedOrdersYear(resOrdersByYear.completed);
-        setCanceledOrdersYear(resOrdersByYear.canceled);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchAllOrders();
-  }, []);
-
-  // Lấy đơn hàng bán chạy theo ngày
-  const getTopOrderByDay = async (date = new Date().toISOString().split('T')[0]) => {
+  //tính tổng tiền 
+  const getOrdersPriceByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
     try {
-      const resAllTopOrdersByDay = await axios.get(`http://localhost:3001/api/topOrder/top-ordered-products`,{
-        params: {
-          dataNow : date
-        }
-      })
-      setListBestSellerByDay(resAllTopOrdersByDay.data.data)
+      const resTotalPriceByDay = await axios.get(`http://localhost:3001/api/orders/total-price/day`, {
+        params: { dateNow: date }
+      });
+  
+      setTotalPriceByDay(resTotalPriceByDay.data.totalPrice);
     } catch (error) {
       console.log(error);
-      
     }
-  }
-  const getTopOrdersByWeek = async () => {
+  };
+  
+  const getOrdersPriceByWeekStatus = async () => {
     try {
       const { startDate, endDate } = getWeekRange();
-      const resAllTopOrdersByWeek = await axios.get(`http://localhost:3001/api/topOrder/top-ordered-products`, {
+      const resTotalPriceByWeek = await axios.get(`http://localhost:3001/api/orders/total-price/week`, {
         params: {
           dateStart: startDate,
-          dateEnd: endDate,
-
+          dateEnd: endDate
         }
-      })
-
-      setListBestSellerByWeek(resAllTopOrdersByWeek.data.data)
+      });
+      console.log(resTotalPriceByWeek.data.totalPrice);
+      setTotalPriceByWeek(resTotalPriceByWeek.data.totalPrice);
     } catch (error) {
       console.log(error);
-      
     }
   };
-  const getTopOrdersByMonth = async () => {
+  
+  const getOrdersPriceByMonthStatus = async () => {
     try {
       const { startDate, endDate } = getMonthRange();
-      const resAllTopOrdersBymonth = await axios.get(`http://localhost:3001/api/topOrder/top-ordered-products`, {
+      const resTotalPriceByMonth = await axios.get(`http://localhost:3001/api/orders/total-price/month`, {
         params: {
           dateStart: startDate,
-          dateEnd: endDate,
-
+          dateEnd: endDate
         }
-      })
-
-      setListBestSellerByMonth(resAllTopOrdersBymonth.data.data)
+      });
+  
+      setTotalPriceByMonth(resTotalPriceByMonth.data.totalPrice);
     } catch (error) {
       console.log(error);
-      
     }
   };
-  const getTopOrdersByYear = async () => {
+  
+  const getOrdersPriceByYearStatus = async () => {
     try {
       const { startDate, endDate } = getYearRange();
-      const resAllTopOrdersByear = await axios.get(`http://localhost:3001/api/topOrder/top-ordered-products`, {
+      const resTotalPriceByYear = await axios.get(`http://localhost:3001/api/orders/total-price/year`, {
         params: {
           dateStart: startDate,
-          dateEnd: endDate,
-
+          dateEnd: endDate
         }
-      })
-
-      setListBestSellerByYear(resAllTopOrdersByear.data.data)
+      });
+  
+      setTotalPriceByYear(resTotalPriceByYear.data.totalPrice);
     } catch (error) {
       console.log(error);
-      
     }
   };
+
+  const getOrdersByCustomDayStatus = async () => {
+    try{
+    const [startDate, endDate] = customDateRange;
+      const resTotalPriceByCustomDay = await axios.get(`http://localhost:3001/api/orders/total-price/custom-day`, {
+        params: {
+          dateStart: startDate.format('YYYY-MM-DD'),
+          dateEnd: endDate.format('YYYY-MM-DD')
+        }
+      });
+      console.log(resTotalPriceByCustomDay.data.totalPrice);
+      setTotalPriceByCustomDay(resTotalPriceByCustomDay.data.totalPrice);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+
+  // tính số đơn hàng
   const getOrdersByCustomStatus = async (createAtFrom: string, createAtTo: string) => {
     try {
       // Chuyển đổi ngày về định dạng YYYY-MM-DD
@@ -308,13 +181,10 @@ export default function Dashboard() {
         ...customDateRange,
       });
   
-      console.log(resAllOrdersByCustomDay.data.data.length);
   
-      return {
-        totalOrdersByCustomDay: resAllOrdersByCustomDay.data.data.length,
-        completedOrdersByCustomDay: resCompleted.data.data.length,
-        canceledOrdersByCustomDay: resCanceled.data.data.length,
-      };
+      setTotalOrdersByCustomDay(resAllOrdersByCustomDay.data.data.length);
+      setCompletedOrdersByCustomDay(resCompleted.data.data.length);
+      setCanceledOrdersByCustomDay(resCanceled.data.data.length);
     } catch (error) {
       console.error("Error fetching statistics:", error);
       return {
@@ -324,10 +194,6 @@ export default function Dashboard() {
       };
     }
   };
-  
-
-  
-  
   const getOrdersByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
     try {
       const resAllOrdersByDay = await axios.get(`http://localhost:3001/api/orders`, {
@@ -348,13 +214,9 @@ export default function Dashboard() {
           dateNow: date,
         },
       });
-
-      console.log(date);
-      return {
-        orderByDay: resAllOrdersByDay.data.data.length,
-        completed: resCompleted.data.data.length,
-        canceled: resCanceled.data.data.length,
-      };
+      setTotalOrdersToday(resAllOrdersByDay.data.data.length);
+      setCompletedOrdersDay(resCompleted.data.data.length);
+      setCanceledOrdersDay(resCanceled.data.data.length);
     } catch (error) {
       console.log(error);
       return {
@@ -375,9 +237,6 @@ export default function Dashboard() {
         }
 
       })
-      // console.log(startDate, endDate);
-
-
       const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "7",
@@ -385,7 +244,6 @@ export default function Dashboard() {
           dateEnd: endDate,
         },
       });
-
       const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "0",
@@ -394,11 +252,9 @@ export default function Dashboard() {
         },
       });
 
-      return {
-        orderByWeek: resAllOrdersByWeek.data.data.length,
-        completed: resCompleted.data.data.length,
-        canceled: resCanceled.data.data.length,
-      };
+      setTotalOrdersThisWeek(resAllOrdersByWeek.data.data.length);
+      setCompletedOrdersWeek(resCompleted.data.data.length);
+      setCanceledOrdersWeek(resCanceled.data.data.length);
     } catch (error) {
       console.log(error);
       return {
@@ -444,11 +300,9 @@ export default function Dashboard() {
         },
       });
 
-      return {
-        orderByMonth: resAllOrdersByMonth.data.data.length,
-        completed: resCompleted.data.data.length,
-        canceled: resCanceled.data.data.length,
-      };
+      setTotalOrdersThisMonth(resAllOrdersByMonth.data.data.length);
+      setCompletedOrdersMonth(resCompleted.data.data.length);
+      setCanceledOrdersMonth(resCanceled.data.data.length);
     } catch (error) {
       console.log(error);
       return {
@@ -494,11 +348,9 @@ export default function Dashboard() {
         },
       });
 
-      return {
-        orderByYear: resAllOrdersByYear.data.data.length,
-        completed: resCompleted.data.data.length,
-        canceled: resCanceled.data.data.length,
-      };
+      setTotalOrdersThisYear(resAllOrdersByYear.data.data.length);
+      setCompletedOrdersYear(resCompleted.data.data.length);
+      setCanceledOrdersYear(resCanceled.data.data.length);
     } catch (error) {
       console.log(error);
       return {
@@ -518,35 +370,203 @@ export default function Dashboard() {
       endDate: endOfYear.toISOString().split('T')[0],
     };
   };
+  const handleCustomDateRangeChange = (dates) => {
+    setCustomDateRange(dates);
+    if (dates[0] && dates[1]) {
+      const startDate = dates[0].toISOString();
+      const endDate = dates[1].toISOString();
+      getOrdersByCustomStatus(startDate, endDate);
+    }
+    if (dates && dates.length === 2) {
+      setCustomDateRange(dates);
+    }
+  };
 
-  // const fetchBestSellers = async () => {
-  //   try {
-  //     const response = await axios.get("http://localhost:3001/api/best-sellers");
-  //     setListBestSeller(response.data.data); // Giả sử API trả về dữ liệu ở data.data
-  //   } catch (error) {
-  //     console.error("Error fetching best sellers:", error);
-  //     setListBestSeller([]); // Reset nếu có lỗi
-  //   }
-  // };
- 
+  useEffect(() => {
+    const today = new Date().toISOString();
+    getOrdersByCustomStatus(today, today);
+    handleChangeButton(indexButton, nameButton);
+  }, []);
+
+  const getDataForButton = () => {
+    switch (indexButton) {
+      case 1:
+        return {
+          
+          total: totalOrdersToday,
+          completed: completedOrdersDay,
+          canceled: canceledOrdersDay,
+          totalPrice : totalPriceByDay,
+          color: "#e3d7c3",
+        };
+      case 2:
+        return {
+          total: totalOrdersThisWeek,
+          completed: completedOrdersWeek,
+          canceled: canceledOrdersWeek,
+          totalPrice : totalPriceByWeek,
+          color: "#e0ccab",
+        };
+      case 3:
+        return {
+          total: totalOrdersThisMonth,
+          completed: completedOrdersMonth,
+          canceled: canceledOrdersMonth,
+          totalPrice : totalPriceByMonth,
+          color: "#e0ccab",
+        };
+      case 4:
+        return {
+          total: totalOrdersThisYear,
+          completed: completedOrdersYear,
+          canceled: canceledOrdersYear,
+          totalPrice : totalPriceByYear,
+          color: "#e3d7c3",
+        };
+      case 5: 
+        return {
+          total: totalOrdersByCustomDay,
+          completed: completedOrdersByCustomDay,
+          canceled: canceledOrdersByCustomDay,
+          totalPrice : totalPriceByCustomDay,
+          color: "#e0ccab",
+        }
+      default:
+        return {};
+    }
+  };
+
+  const dataForButton = getDataForButton();
+
+  // Sản phẩm được bán chạy nhất 
+  const getListBestSeller = async (startDate, endDate, setter) => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/topOrder/top-ordered-products`, {
+        params: { startDate, endDate }
+      });
+      setter(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getListBestSellerByDay = async (date = new Date().toISOString().split('T')[0]) => {
+    await getListBestSeller(date, date, setListBestSellerByDay);
+  };
+
+  const getListBestSellerByWeek = async () => {
+    const { startDate, endDate } = getWeekRange();
+    await getListBestSeller(startDate, endDate, setListBestSellerByWeek);
+  };
+
+  const getListBestSellerByMonth = async () => {
+    const { startDate, endDate } = getMonthRange();
+    await getListBestSeller(startDate, endDate, setListBestSellerByMonth);
+  };
+
+  const getListBestSellerByYear = async () => {
+    const { startDate, endDate } = getYearRange();
+    await getListBestSeller(startDate, endDate, setListBestSellerByYear);
+  };
+
+  const getListBestSellerCustom = async ( ) => {
+
+    const [startDate, endDate] = customDateRange;
+    if (startDate && endDate) {
+      await getListBestSeller(startDate.format('YYYY-MM-DD'), endDate.format('YYYY-MM-DD'), setListBestSellerByCustomDay);
+    }
+    
+  };
+
   
-  const handleChangeButton = async (index, period) => {
+  useEffect(() => {
+    if (customDateRange[0] && customDateRange[1]) {
+      getListBestSellerCustom();
+      getOrdersByCustomDayStatus();
+    }
+  }, [customDateRange]);
+
+  const dataListBestSeller = {
+    1: listBestSellerByDay.map((item : BestSellerItem, index) => ({
+      stt: index + 1,
+      name: item.name,
+      price: item.productDetails.price,
+      image: item.productDetails.image,
+      description: item.productDetails.description,
+      totalQuantity: item.totalQuantity,
+    })),
+    2: listBestSellerByWeek.map((item : BestSellerItem, index) => ({
+      stt: index + 1,
+      name: item.name,
+      price: item.productDetails.price,
+      image: item.productDetails.image,
+      description: item.productDetails.description,
+      totalQuantity: item.totalQuantity,
+    })),
+    3: listBestSellerByMonth.map((item : BestSellerItem, index) => ({
+      stt: index + 1,
+      name: item.name,
+      price: item.productDetails.price,
+      image: item.productDetails.image,
+      description: item.productDetails.description,
+      totalQuantity: item.totalQuantity,
+    })),
+    4: listBestSellerByYear.map((item: BestSellerItem, index) => ({
+      stt: index + 1,
+      name: item.name,
+      price: item.productDetails.price,
+      image: item.productDetails.image,
+      description: item.productDetails.description,
+      totalQuantity: item.totalQuantity,
+    })),
+    5: listBestSellerByCustomDay.map((item: BestSellerItem, index) => ({
+      stt: index + 1,
+      name: item.name,
+      price: item.productDetails.price,
+      image: item.productDetails.image,
+      description: item.productDetails.description,
+      totalQuantity: item.totalQuantity,
+    }))
+  };
+  
+  const columns = [
+    { title: "STT", dataIndex: "stt", key: "stt" },
+    { title: "Tên sản phẩm", dataIndex: "name", key: "name" },
+    { title: "Giá", dataIndex: "price", key: "price" },
+    { title: "Ảnh", dataIndex: "image", key: "image" },
+    { title: "Mô tả", dataIndex: "description", key: "description" },
+    { title: "Số lượng bán ra", dataIndex: "totalQuantity", key: "totalQuantity" },
+  ];
+  
+  
+
+  
+
+  const handleChangeButton =  async (index: number, type: string) => {
     setIndexButton(index);
-    setNameButton(period);
+    setNameButton(type);
     let data;
 
     switch (index) {
       case 1:
         data = await getOrdersByDayStatus(new Date().toISOString().split('T')[0]);
+        await getOrdersPriceByDayStatus(new Date().toISOString().split('T')[0]);
+        await getListBestSellerByDay();
         break;
       case 2:
         data = await getOrdersByWeekStatus();
+        await getOrdersPriceByWeekStatus();
+        await getListBestSellerByWeek();
         break;
       case 3:
         data = await getOrdersByMonthStatus();
+        await getOrdersPriceByMonthStatus();
+        await getListBestSellerByMonth();
         break;
       case 4:
         data = await getOrdersByYearStatus();
+        await getOrdersPriceByYearStatus();
+        await getListBestSellerByYear();
         break;
       case 5: // Trường hợp chọn khoảng thời gian tùy chỉnh
       if (filter.createAtFrom && filter.createAtTo) {
@@ -560,82 +580,9 @@ export default function Dashboard() {
       default:
         return;
     }
-    setDataBieuDo([
-      { label: "Đã hoàn thành", value: data.completed },
-      { label: "Đã hủy", value: data.canceled },
-    ]);
+    
   }
-  const handleCustomDateRangeChange = (dates) => {
-    setCustomDateRange(dates);
-    if (dates[0] && dates[1]) {
-      const startDate = dates[0].toISOString();
-      const endDate = dates[1].toISOString();
-      getOrdersByCustomStatus(startDate, endDate);
-    }
-  };
 
-  useEffect(() => {
-    // Default statistics for the current day
-    const today = new Date().toISOString();
-    getOrdersByCustomStatus(today, today);
-    getTopOrderByDay();
-    getTopOrdersByWeek();
-    getTopOrdersByMonth();
-    getTopOrdersByYear();
-  }, []);
-  useEffect(() => {
-    handleChangeButton(indexButton, nameButton);
-    // fetchBestSellers();
-  }, []);
-
-  const getDataForButton = () => {
-    switch (indexButton) {
-      case 1:
-        return {
-          title: "Hôm nay",
-          total: totalOrdersToday,
-          completed: completedOrdersDay,
-          canceled: canceledOrdersDay,
-          color: "#e3d7c3",
-        };
-      case 2:
-        return {
-          title: "Tuần này",
-          total: totalOrdersThisWeek,
-          completed: completedOrdersWeek,
-          canceled: canceledOrdersWeek,
-          color: "#e0ccab",
-        };
-      case 3:
-        return {
-          title: "Tháng này",
-          total: totalOrdersThisMonth,
-          completed: completedOrdersMonth,
-          canceled: canceledOrdersMonth,
-          color: "#e0ccab",
-        };
-      case 4:
-        return {
-          title: "Năm nay",
-          total: totalOrdersThisYear,
-          completed: completedOrdersYear,
-          canceled: canceledOrdersYear,
-          color: "#e3d7c3",
-        };
-      case 5: 
-        return {
-          title: "Tùy chỉnh",
-          total: totalOrdersByCustomDay,
-          completed: completedOrdersByCustomDay,
-          canceled: canceledOrdersByCustomDay,
-          color: "#e0ccab",
-        }
-      default:
-        return {};
-    }
-  };
-
-  const dataForButton = getDataForButton();
   return (
     <div>
       {/* tên màn hình */}
@@ -663,9 +610,6 @@ export default function Dashboard() {
             <RangePicker
               format="YYYY-MM-DD"
               onChange={handleCustomDateRangeChange}
-              // onChange={(_, value) => {
-              //   setFilter({ ...filter, createAtFrom: value[0], createAtTo: value[1] });
-              // }}
               placeholder={["Từ ngày", "Đến ngày"]}
               style={{ borderColor: "#c29957" }}
             />
@@ -679,61 +623,29 @@ export default function Dashboard() {
             <Table
               dataSource={[dataForButton]}
               columns={[
-                { title: "Thời gian", dataIndex: "title", key: "title" },
+                
                 { title: "Tổng đơn hàng", dataIndex: "total", key: "total" },
                 { title: "Đơn hoàn thành", dataIndex: "completed", key: "completed" },
                 { title: "Đơn hủy", dataIndex: "canceled", key: "canceled" },
+                { title: "Tổng thu nhập", dataIndex: "totalPrice", key: "totalPrice" },
               ]}
               pagination={false}
             />
           </Col>
           <Col span={24}>
-            <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-              Danh sách sản phẩm bán chạy theo {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
-            </Title>
-            <Table
-              dataSource={listBestSellerByWeek}
-              pagination={false}
-              columns={[
-                { title: "Ảnh", dataIndex: "img", key: "img", render: (text) => <img style={{ height: "70px" }} src={text} alt="error" /> },
-                { title: "Tên sản phẩm", dataIndex: "name", key: "name" },
-                { title: "Số lượng", dataIndex: "quantity", key: "quantity", align: "center" },
-                { title: "Giá tiền", dataIndex: "price", key: "price", align: "center", render: (text) => formatCurrency(text) },
-                { title: "Kích cỡ", dataIndex: "size", key: "size", align: "center" },
-              ]}
-            />
-            {listBestSellerByWeek.length > 0 && (
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: "-5px", paddingTop: "10px", paddingBottom: "10px" }}>
-                <div>
-                  <span>Xem </span>
-                  <Select
-                    value={filter.size}
-                    onChange={(value) => setFilter({ ...filter, size: value })}
-                    style={{ width: 60, margin: "0 8px" }}
-                    size="small"
-                  >
-                    {[1, 5, 10, 15, 20].map(size => <Option key={size} value={size}>{size}</Option>)}
-                  </Select>
-                  <span>sản phẩm</span>
-                </div>
-                <Pagination
-                  size="small"
-                  current={filter.page}
-                  total={50}
-                  onChange={(page) => setFilter({ ...filter, page })}
-                />
-              </div>
-            )}
-          </Col>
-          <Col span={24}>
-            <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-              Biểu đồ trạng thái {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
-            </Title>
-            <Card style={{ borderColor: "#c29957" }}>
-              <PieChartDashBoard data={dataBieuDo} />
-            </Card>
-          </Col>
+              <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
+                Danh sách sản phẩm bán chạy theo {nameButton}
+              </Title>
+              <Table
+                dataSource={dataListBestSeller[indexButton]}
+                columns={columns}
+                pagination={false}
+                
+              />
+            
+            </Col>
         </Row>
+
       </Card>
     </div>
   );
