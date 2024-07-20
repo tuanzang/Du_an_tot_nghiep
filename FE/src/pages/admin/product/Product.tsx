@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import {
   Button,
@@ -51,7 +51,7 @@ export default function Product() {
           axios.get("http://localhost:3001/api/categories"),
         ]);
         setProducts(productResponse.data?.data);
-        setCates(categoryResponse.data?.data); 
+        setCates(categoryResponse.data?.data);
         // console.log(productResponse.data?.data);
         // console.log(categoryResponse.data?.data);
 
@@ -171,90 +171,8 @@ export default function Product() {
       quantity: number;
       loai: string;
     }>
-  )[] = [
-    {
-      title: "STT",
-      dataIndex: "stt",
-      key: "stt",
-      align: "center",
-    },
-    {
-      title: "Tên sản phẩm",
-      dataIndex: "name",
-      key: "name",
-      width: "20%",
-    },
-    {
-      title: "Ảnh",
-      dataIndex: "image",
-      key: "image",
-      width: "20%",
-      render: (text) => (
-        <img style={{ height: "70px" }} src={text} alt="error" />
-      ),
-    },
-    {
-      title: "Giá sản phẩm",
-      dataIndex: "price",
-      key: "price",
-      width: "20%",
-    },
-    {
-      title: "Danh mục",
-      dataIndex: "loai",
-      key: "loai",
-      width: "20%",
-    },
-    // {
-    //   title: "Số lượng",
-    //   dataIndex: "quantity",
-    //   key: "quantity",
-    //   width: "20%",
-    // },
-    // {
-    //   title: "Mô tả sản phẩm",
-    //   dataIndex: "description",
-    //   key: "description",
-    //   width: "20%",
-    // },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      align: "center",
-      width: "20%",
-      render: (key) => (
-        <Switch
-          style={{ backgroundColor: key ? "green" : "gray" }}
-          checked={key}
-          onChange={() => onChangeSwitch(key)}
-        />
-      ),
-    },
-    {
-      title: "Xóa",
-      dataIndex: "key",
-      key: "key",
-      align: "center",
-      width: "20%",
-      render: (value: any) => (
-        <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
-      ),
-    },
-    {
-      title: "Chi tiết",
-      align: "center",
-      dataIndex: "key",
-      key: "key",
-      width: "20%",
-      render: (value:IProduct) => (
-        <Link to={`/admin/product/detail/${value}`}>
-          <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
-        </Link>
-      ),
-    },
-  ];
-  [
+  )[] =
+    [
       {
         title: "STT",
         dataIndex: "stt",
@@ -329,7 +247,7 @@ export default function Product() {
         key: "status",
         align: "center",
         width: "30%",
-        render: (key:any) => (
+        render: (key: any) => (
           <Switch
             style={{ backgroundColor: key ? "green" : "gray" }}
             checked={key}
@@ -446,7 +364,7 @@ export default function Product() {
           </Col>
         </Row>
       </Card>
-      
+
       <Card style={{ marginTop: "12px" }}>
         <Table
           components={{
