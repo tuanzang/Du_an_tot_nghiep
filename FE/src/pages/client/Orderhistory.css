@@ -1,0 +1,70 @@
+body {
+ background-color: #f0f2f5;
+}
+.Title{
+ color: red;
+}
+.ant-tabs-nav {
+ display: flex;
+ justify-content: center;
+}
+
+.ant-tabs-tab {
+ font-size: 18px;
+ /* Tăng kích thước chữ */
+}
+
+.ant-table-wrapper {
+ background: white;
+ padding: 24px;
+ border-radius: 8px;
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+ width: 90%;
+ /* Tăng kích thước chiều dài */
+ margin: 0 auto;
+ /* Căn giữa */
+}
+
+.ant-table th,
+.ant-table td {
+ font-size: 16px;
+ /* Tăng kích thước chữ trong bảng */
+ padding: 12px;
+ /* Tăng khoảng cách giữa các ô */
+}
+
+.ant-typography {
+ margin-bottom: 24px;
+ /* Tăng khoảng cách dưới dòng chữ */
+}
+.hoan-thanh {
+ color: red;
+}
+
+.cho-xac-nhan {
+ color: orange;
+}
+
+.cho-giao-hang {
+ color: blue;
+}
+
+.dang-van-chuyen {
+ color: rgb(217, 52, 217);
+}
+
+.da-giao-hang {
+ color: green;
+}
+
+.cho-thanh-toan {
+ color: red;
+}
+
+.da-thanh-toan {
+ color: green;
+}
+
+.da-huy {
+ color: grey;
+}

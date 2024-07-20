@@ -99,8 +99,10 @@ const Header = () => {
                           <ul className="dropdown-list">
                             {isLogged ? (
                               <li>
-                                <a href="my-account.html">Tài khoản của tôi</a>
-                                <a href="/order_history">Đơn hàng của tôi</a>
+                                <Link to="/introduce">Tài khoản của tôi</Link>
+                                <Link to="/order_history">
+                                  Đơn hàng của tôi
+                                </Link>
                               </li>
                             ) : (
                               <>

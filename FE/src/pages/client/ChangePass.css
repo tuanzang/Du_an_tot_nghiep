@@ -1,0 +1,58 @@
+.container {
+ max-width: 900px;
+}
+
+.nav-link {
+ color: black !important;
+ font-weight: bold;
+ margin-bottom: 10px;
+ padding: 5px 0;
+ transition: color 0.3s, transform 0.3s;
+}
+
+.nav-link:hover {
+ color: red !important;
+ text-decoration: none;
+ transform: translateX(5px);
+}
+
+.nav-link.active {
+ color: red !important;
+}
+
+h3.account-header {
+ color: red;
+ text-align: center;
+}
+
+.change-password {
+ padding: 20px;
+ background-color: #f8f9fa;
+ border-radius: 5px;
+}
+
+.form-group {
+ margin-bottom: 15px;
+}
+
+.input-container {
+ position: relative;
+}
+
+.input-container .form-control {
+ padding-right: 40px;
+ /* Cung cấp không gian cho biểu tượng mắt */
+}
+
+.toggle-password {
+ position: absolute;
+ top: 50%;
+ right: 10px;
+ transform: translateY(-50%);
+ cursor: pointer;
+ color: #007bff;
+}
+
+button {
+ width: 100%;
+}

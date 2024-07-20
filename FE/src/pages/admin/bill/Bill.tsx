@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Button,
   Input,
@@ -53,24 +53,6 @@ export default function Bill() {
     page: 1,
   });
   const [listBill, setListBill] = useState<IOrder[]>([]);
-
-  const fetchOrder = async (filter: IFilterBill, currentPage: number) => {
-    try {
-      const response = await axios.get("http://localhost:3001/api/orders", {
-        ...filter,
-        page: currentPage,
-      });
-      setListBill(response.data?.data);
-      setTotalBill(response.data?.total);
-      setPageSize(response.data?.size);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchOrder(filter, currentPage);
-  }, [filter, currentPage]);
 
   const handleChangeTab = (newValue: string) => {
     setValueTabHD(newValue);

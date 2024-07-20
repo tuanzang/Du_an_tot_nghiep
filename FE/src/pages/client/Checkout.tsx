@@ -42,7 +42,6 @@ const Checkout = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      
       const productSelectedIds = productSelected.map((it) => it.product._id);
       const res = await OrderApi.createOrder({
         ...data,
@@ -65,7 +64,7 @@ const Checkout = () => {
 
   const [user, setUser] = useState<IUser>({
     _id: "",
-    email:"",
+    email: "",
     password: "",
     name: "",
     role: "",
@@ -75,7 +74,7 @@ const Checkout = () => {
     if (idUser === null) {
       return setUser({
         _id: "",
-        email:"",
+        email: "",
         password: "",
         name: "",
         role: "",
@@ -146,7 +145,7 @@ const Checkout = () => {
                 })}
               />
             </div>
-           
+
             <div className="mb-3">
               <input
                 type="text"
@@ -203,7 +202,7 @@ const Checkout = () => {
                   {...register("paymentMethod")}
                 />
                 <label className="form-check-label" htmlFor="myCheckbox">
-                Thanh toán ngay
+                  Thanh toán ngay
                 </label>
               </div>
             </div>

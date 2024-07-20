@@ -145,7 +145,7 @@ export default function Cart() {
                         key="price"
                         render={(val) => formatPrice(val)}
                       />
-                        <Table.Column
+                      <Table.Column
                         title="Ảnh"
                         // dataIndex="ICartItem.image"
                         key="image"
