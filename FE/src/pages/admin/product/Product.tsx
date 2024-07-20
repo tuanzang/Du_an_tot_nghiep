@@ -11,6 +11,7 @@ import {
   Table,
 } from "antd";
 import {
+  DownloadOutlined,
   PlusSquareOutlined,
   SearchOutlined,
   EyeOutlined,
@@ -328,7 +329,7 @@ export default function Product() {
         key: "status",
         align: "center",
         width: "30%",
-        render: (key) => (
+        render: (key:any) => (
           <Switch
             style={{ backgroundColor: key ? "green" : "gray" }}
             checked={key}
