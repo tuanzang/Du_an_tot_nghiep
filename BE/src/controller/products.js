@@ -2,6 +2,7 @@ import { sanitizeFilter } from "mongoose";
 import product from "../models/product.js";
 import productSize from "../models/productSize.js";
 import size from "../models/size.js";
+import category from "../models/category.js";
 
 export const getAllProduct = async (req, res) => {
   try {
@@ -255,8 +256,8 @@ export const filterProductsByPrice = async (req, res) => {
     const data = await product.find({ price: priceFilter });
 
     if (!data || data.length === 0) {
-      return res.status(404).json({
-        message: `Không tìm thấy sản phẩm nào trong khoảng giá từ ${minPrice} đến ${maxPrice}!`,
+      return res.status(200).json({
+        message: `Không có sản phẩm nào trong khoảng giá từ ${minPrice} đến ${maxPrice}!`,
         data: [],
       });
     }
@@ -328,4 +329,30 @@ export const updateProductSizes = async (req, res) => {
     });
   }
 };
+
+export const filterProductByCategory = async (req, res) => {
+  try {
+      const { categoryId } = req.params;
+
+      // Tìm danh mục bằng categoryId
+      const categorys = await category.findById(categoryId);
+      
+      if (!categorys) {
+          return res.status(404).json({ message: 'Category not found' });
+      }
+
+      // Tìm tất cả sản phẩm thuộc danh mục đó
+      const products = await product.find({ categoryId });
+
+      return res.status(200).json({
+        message: "Danh sách sản phẩm thuộc danh mục",
+        data: products,
+      });
+
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Server error' });
+  }
+};
+
 

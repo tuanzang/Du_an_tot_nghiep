@@ -10,6 +10,7 @@ const Header = () => {
   const [openMenuCart, setOpenMenuCart] = useState(false);
   const { data } = useMyCartQuery();
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleMenuCartClick = () => {
     setOpenMenuCart(!openMenuCart);
@@ -18,12 +19,16 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
     localStorage.removeItem(USER_INFO_STORAGE_KEY);
-    // navigate("/login");
   };
 
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const userInfo =
     JSON.parse(localStorage.getItem(USER_INFO_STORAGE_KEY) as string) || "";
+
+  const handleSearchSubmit = (event:React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    navigate(`/product?search=${encodeURIComponent(searchTerm)}`);
+  };
 
   return (
     <div>
@@ -114,13 +119,15 @@ const Header = () => {
                       <button className="search-trigger d-xl-none d-lg-block">
                         <i className="pe-7s-search"></i>
                       </button>
-                      <form className="header-search-box d-lg-none d-xl-block">
+                      <form className="header-search-box d-lg-none d-xl-block" onSubmit={handleSearchSubmit}>
                         <input
                           type="text"
                           placeholder="Tìm kiếm"
                           className="header-search-field bg-white"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                        <button className="header-search-btn">
+                        <button className="header-search-btn" type="submit">
                           <i className="pe-7s-search"></i>
                         </button>
                       </form>
