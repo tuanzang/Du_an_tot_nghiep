@@ -1,0 +1,43 @@
+.text-hover-red {
+ font-size: 16px;
+ /* Kích thước chữ 16px */
+ transition: color 0.3s ease;
+}
+
+.text-hover-red:hover {
+ color: #ff0000;
+ /* Màu chữ đỏ khi hover */
+}
+
+.text-hover-blue {
+ font-size: 16px;
+ /* Kích thước chữ 16px */
+ transition: color 0.3s ease;
+}
+
+.text-hover-blue:hover {
+ color: #0000ff;
+ /* Màu chữ xanh khi hover */
+}
+
+.text-hover-green {
+ font-size: 16px;
+ /* Kích thước chữ 16px */
+ transition: color 0.3s ease;
+}
+
+.text-hover-green:hover {
+ color: #00ff00;
+ /* Màu chữ xanh lá khi hover */
+}
+
+.text-hover-yellow {
+ font-size: 16px;
+ /* Kích thước chữ 16px */
+ transition: color 0.3s ease;
+}
+
+.text-hover-yellow:hover {
+ color: #ffff00;
+ /* Màu chữ vàng khi hover */
+}

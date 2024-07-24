@@ -30,7 +30,7 @@ const ChangePassword = () => {
             <Link to="/order_history" className="nav-link">
               Đơn Hàng Của Tôi
             </Link>
-            <Link to="#change-password" className="nav-link active">
+            <Link to="#change-password" className="nav-link active text-dr">
               Đổi Mật Khẩu
             </Link>
             <a href="#logout" className="nav-link">
@@ -95,7 +95,7 @@ const ChangePassword = () => {
                 </span>
               </div>
             </div>
-            <button className="btn btn-primary" onClick={handleChangePassword}>
+            <button className="btn btn-primary " onClick={handleChangePassword}>
               Lưu Thay Đổi
             </button>
           </div>

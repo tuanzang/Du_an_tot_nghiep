@@ -1,42 +1,48 @@
-body {
- background-color: #f0f2f5;
+.text-center {
+ text-align: center;
 }
-.Title{
- color: red;
-}
-.ant-tabs-nav {
+
+.center-container {
  display: flex;
  justify-content: center;
+ align-items: center;
+ padding: 20px;
+ /* Thêm padding nếu cần */
 }
 
-.ant-tabs-tab {
- font-size: 18px;
- /* Tăng kích thước chữ */
+.ant-table-wrapperr {
+ width: 100%;
+ max-width: 1200px;
+ /* Hoặc một giá trị phù hợp */
+ margin-left: 200px;
+ /* Căn giữa theo chiều ngang */
 }
 
-.ant-table-wrapper {
- background: white;
- padding: 24px;
- border-radius: 8px;
- box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
- width: 90%;
- /* Tăng kích thước chiều dài */
- margin: 0 auto;
- /* Căn giữa */
+.discount-code-container {
+  display: flex; /* Sắp xếp các phần tử theo hàng */
+  align-items: center; /* Căn chỉnh dọc */
+  justify-content: space-between; /* Căn chỉnh ngang */
+  padding: 10px; /* Thêm khoảng đệm */
+  border: 1px solid red; /* Đường viền màu đỏ */
+  border-radius: 5px; /* Bo góc nhẹ */
+  background-color: #f9f9f9; /* Màu nền nhẹ */
 }
 
-.ant-table th,
-.ant-table td {
- font-size: 16px;
- /* Tăng kích thước chữ trong bảng */
- padding: 12px;
- /* Tăng khoảng cách giữa các ô */
+.discount-code {
+  font-size: 14px; /* Kích thước chữ nhỏ hơn */
+  color: red; /* Màu chữ đỏ */
 }
 
-.ant-typography {
- margin-bottom: 24px;
- /* Tăng khoảng cách dưới dòng chữ */
+.apply-button {
+  padding: 5px 10px; /* Khoảng đệm cho nút */
+  font-size: 14px; /* Kích thước chữ nút */
+  color: #fff; /* Màu chữ nút */
+  background-color: red; /* Màu nền nút */
+  border: none; /* Bỏ viền nút */
+  border-radius: 3px; /* Bo góc nút */
+  cursor: pointer; /* Con trỏ chuột khi hover */
 }
+
 .hoan-thanh {
  color: red;
 }

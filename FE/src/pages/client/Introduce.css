@@ -1,57 +1,68 @@
-/* Thiết kế thông báo thành công */
-.toast-container {
- position: fixed;
- bottom: 20px;
- right: 20px;
+/* Căn giữa tiêu đề và thay đổi màu sắc */
+.account-header {
+ text-align: center;
+ /* Căn giữa tiêu đề */
+ color: red;
+ /* Đổi màu tiêu đề thành đỏ */
+}
+
+/* Căn chỉnh các trường thông tin */
+.account-info .form-group {
+ margin-bottom: 15px;
+}
+
+.form-group label {
+ display: block;
+ margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+ width: 100%;
+}
+
+.row-info {
  display: flex;
- flex-direction: column;
- align-items: flex-end;
- z-index: 1050;
+ flex-wrap: wrap;
+ gap: 10px;
+ /* Khoảng cách giữa các trường */
 }
 
-.toast {
- background: linear-gradient(135deg, #4caf50 0%, #81c784 100%);
- color: #fff;
- padding: 20px;
- border-radius: 10px;
- box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
- margin-top: 10px;
- opacity: 0;
- transform: translateY(50%);
- transition: opacity 0.5s ease, transform 0.5s ease;
- font-size: 1rem;
- display: flex;
- align-items: center;
- justify-content: center;
- width: 300px;
+.col-info {
+ flex: 1;
+ /* Các trường chiếm đều không gian có sẵn */
+ min-width: 0;
+ /* Đảm bảo các trường không bị co nhỏ quá mức */
 }
 
-.toast.show {
- opacity: 1;
- transform: translateY(0);
+.form-control.input-sm {
+ padding: 0.5rem;
+ font-size: 0.875rem;
+ /* Kích thước font nhỏ hơn */
 }
 
-.toast-icon {
- margin-right: 15px;
- font-size: 1.5rem;
-}
-
-.toast-message {
- font-weight: 500;
-}
-
-/* Thay đổi màu sắc nút lưu thay đổi */
-.btn-primary {
- background-color: #007bff;
+/* Cập nhật kiểu dáng của nút */
+.btn-update {
+ background-color: red;
+ /* Màu nền đỏ */
+ color: white;
+ /* Chữ màu trắng */
  border: none;
- border-radius: 5px;
- color: #fff;
- padding: 10px 20px;
- font-size: 1rem;
- font-weight: bold;
- transition: background-color 0.3s ease;
+ /* Xóa viền */
+ padding: 0.5rem 1rem;
+ /* Padding cho nút */
+ font-size: 0.875rem;
+ /* Kích thước font nhỏ hơn */
+ border-radius: 4px;
+ /* Bo góc nút */
+ cursor: pointer;
+ /* Con trỏ chuột khi hover */
+ transition: box-shadow 0.3s;
+ /* Hiệu ứng chuyển đổi cho box-shadow */
 }
 
-.btn-primary:hover {
- background-color: #0056b3;
-}
+/* Hiệu ứng phát sáng khi nhấn */
+.btn-update:active {
+ box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+ /* Phát sáng với màu đỏ */
+} 
