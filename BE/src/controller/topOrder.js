@@ -1,7 +1,6 @@
 import { query } from "express";
 import Order from "../models/order.js";
 import Product from "../models/product.js";
-import Category from "../models/category.js";
 
 /**
  * API lấy danh sách sản phẩm được order nhiều nhất trong một khoảng thời gian
@@ -10,30 +9,27 @@ import Category from "../models/category.js";
  */
 export const getTopOrderedProducts = async (req, res) => {
   try {
-    let { startDate, endDate, limit = 10 } = req.query; // Thêm startDate và endDate vào query
+    const { startDate, endDate, nowDate, limit = 10 } = req.query; // Thêm nowDate vào query
 
-    // Nếu không truyền endDate, sử dụng ngày hiện tại
-    if (!endDate) {
-      const today = new Date();
-      endDate = today.toISOString().split('T')[0];
-    }
-
-    // Nếu không truyền startDate, sử dụng ngày của endDate
-    if (!startDate) {
-      startDate = endDate;
+    // Kiểm tra nếu thiếu tham số thời gian
+    if (!startDate && !nowDate) {
+      return res.status(400).json({
+        message: "Vui lòng cung cấp startDate và (endDate hoặc nowDate)",
+      });
     }
 
     // Chuyển đổi startDate và endDate sang đối tượng Date
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const dateStart = startDate ? new Date(startDate) : null;
+    const currentDate = nowDate ? new Date(nowDate) : new Date(); // Thiết lập nowDate là ngày hiện tại nếu không được cung cấp
+    const dateEnd = endDate ? new Date(endDate) : currentDate;
 
     // Aggregation pipeline để tính tổng số lượng của mỗi sản phẩm đã được order trong khoảng thời gian
     const topProducts = await Order.aggregate([
       {
         $match: {
           createdAt: {
-            $gte: start,
-            $lte: end,
+            ...(dateStart && { $gte: dateStart }),
+            $lte: dateEnd,
           },
         },
       },
@@ -53,15 +49,6 @@ export const getTopOrderedProducts = async (req, res) => {
         },
       },
       { $unwind: "$productDetails" },
-      {
-        $lookup: {
-          from: "categories",
-          localField: "productDetails.categoryId",
-          foreignField: "_id",
-          as: "categoryDetails",
-        },
-      },
-      { $unwind: "$categoryDetails" },
       { $sort: { totalQuantity: -1 } }, // Sắp xếp theo tổng số lượng từ cao đến thấp
       { $limit: parseInt(limit, 10) }, // Giới hạn số lượng sản phẩm trả về
       {
@@ -73,8 +60,8 @@ export const getTopOrderedProducts = async (req, res) => {
             price: 1,
             description: 1,
             image: 1,
+            categoryId: 1,
           },
-          categoryName: "$categoryDetails.name"
         },
       },
     ]);

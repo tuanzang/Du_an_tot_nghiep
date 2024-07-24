@@ -439,7 +439,22 @@ export default function Dashboard() {
   const dataForButton = getDataForButton();
 
   // Sản phẩm được bán chạy nhất 
-  const getListBestSeller = async (startDate, endDate, setter) => {
+  const getListBestSellerByDay = async (date = new Date().toISOString().split('T')[0]) => {
+    try {
+      const allListBestSellerByDay = await axios.get(`http://localhost:3001/api/topOrder/top-ordered-products`, {
+        params: {
+          nowDate: date
+        }
+      }
+      );
+      setListBestSellerByDay(allListBestSellerByDay.data.data);
+      console.log(date);
+      
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  const getListBestSeller = async (startDate : string, endDate :  string, setter) => {
     try {
       const response = await axios.get(`http://localhost:3001/api/topOrder/top-ordered-products`, {
         params: { startDate, endDate }
@@ -450,9 +465,7 @@ export default function Dashboard() {
     }
   };
 
-  const getListBestSellerByDay = async (date = new Date().toISOString().split('T')[0]) => {
-    await getListBestSeller(date, date, setListBestSellerByDay);
-  };
+  
 
   const getListBestSellerByWeek = async () => {
     const { startDate, endDate } = getWeekRange();
