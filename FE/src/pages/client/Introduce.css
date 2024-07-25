@@ -1,0 +1,68 @@
+/* Căn giữa tiêu đề và thay đổi màu sắc */
+.account-header {
+ text-align: center;
+ /* Căn giữa tiêu đề */
+ color: red;
+ /* Đổi màu tiêu đề thành đỏ */
+}
+
+/* Căn chỉnh các trường thông tin */
+.account-info .form-group {
+ margin-bottom: 15px;
+}
+
+.form-group label {
+ display: block;
+ margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+ width: 100%;
+}
+
+.row-info {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 10px;
+ /* Khoảng cách giữa các trường */
+}
+
+.col-info {
+ flex: 1;
+ /* Các trường chiếm đều không gian có sẵn */
+ min-width: 0;
+ /* Đảm bảo các trường không bị co nhỏ quá mức */
+}
+
+.form-control.input-sm {
+ padding: 0.5rem;
+ font-size: 0.875rem;
+ /* Kích thước font nhỏ hơn */
+}
+
+/* Cập nhật kiểu dáng của nút */
+.btn-update {
+ background-color: red;
+ /* Màu nền đỏ */
+ color: white;
+ /* Chữ màu trắng */
+ border: none;
+ /* Xóa viền */
+ padding: 0.5rem 1rem;
+ /* Padding cho nút */
+ font-size: 0.875rem;
+ /* Kích thước font nhỏ hơn */
+ border-radius: 4px;
+ /* Bo góc nút */
+ cursor: pointer;
+ /* Con trỏ chuột khi hover */
+ transition: box-shadow 0.3s;
+ /* Hiệu ứng chuyển đổi cho box-shadow */
+}
+
+/* Hiệu ứng phát sáng khi nhấn */
+.btn-update:active {
+ box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+ /* Phát sáng với màu đỏ */
+} 
