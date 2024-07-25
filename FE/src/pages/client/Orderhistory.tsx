@@ -58,7 +58,7 @@ const data: OrderData[] = [
     soLuong: "2",
     tongTien: "200,000 VND",
     ngayDatHang: "2023-07-01",
-    trangThai: "Hoàn thành",
+    trangThai: "7",
     trangThaiClass: "hoan-thanh",
   },
   {
