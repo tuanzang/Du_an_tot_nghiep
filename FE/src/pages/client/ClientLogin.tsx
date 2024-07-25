@@ -46,7 +46,6 @@ const RegisterPanel = () => {
     }
   };
 
-  
   return (
     <Form onFinish={onSubmit} form={form}>
       <Form.Item
@@ -160,17 +159,17 @@ const RegisterPanel = () => {
 
 const LoginPanel = () => {
   const navigate = useNavigate();
-  const [userBlocked, setUserBlocked] = useState(false); 
+  const [userBlocked, setUserBlocked] = useState(false);
 
   const onSubmit = async (formData: ISignInBody) => {
     try {
-      const { data } = await AuthApi.signIn(formData); 
+      const { data } = await AuthApi.signIn(formData);
 
       if (data?.user?.blocked) {
-        setUserBlocked(true); 
+        setUserBlocked(true);
         message.error(
           "Tài khoản của bạn đã bị chặn. Vui lòng liên hệ với quản trị viên."
-        ); 
+        );
       } else {
         localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data?.token);
         localStorage.setItem(USER_INFO_STORAGE_KEY, JSON.stringify(data?.user));
@@ -230,7 +229,7 @@ const LoginPanel = () => {
         </Space>
       </Form.Item>
       <Typography>
-        <Link to="/forgot-password">Quên mật khẩu?</Link>
+        <Link to="/forgotPass">Quên mật khẩu?</Link>
       </Typography>
     </Form>
   );

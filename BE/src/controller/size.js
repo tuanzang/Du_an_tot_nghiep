@@ -26,7 +26,7 @@ export const getAllSize = async (req, res) => {
     try {
         const data  = await Size.find()
         if(!data || data.length === 0){
-            res.status(404).json({
+         return   res.status(404).json({
                 message: "Không tìm thấy danh sách size !",
                 data: []
             })
