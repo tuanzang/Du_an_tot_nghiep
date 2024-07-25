@@ -139,7 +139,7 @@ export default function ProductDetailAndEdit() {
     <div>
       <BreadcrumbsCustom
         listLink={[{ link: "/admin/product", name: "Sản phẩm" }]}
-        nameHere={`${id}`}
+        nameHere={`${name}`}
       />
 
       <Card style={{ padding: "16px" }}>
