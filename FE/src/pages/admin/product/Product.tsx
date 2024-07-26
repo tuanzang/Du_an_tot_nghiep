@@ -221,26 +221,6 @@ export default function Product() {
         key: "loai",
         width: "15%",
       },
-      // {
-      //   title: "Mô tả sản phẩm",
-      //   dataIndex: "description",
-      //   key: "description",
-      //   width: "20%",
-      //   render: (text) => (
-      //     <span
-      //       style={{
-      //         whiteSpace: "nowrap",
-      //         overflow: "hidden",
-      //         textOverflow: "ellipsis",
-      //         maxWidth: "150px",
-      //         display: "inline-block",
-      //         verticalAlign: "top",
-      //       }}
-      //     >
-      //       {text}
-      //     </span>
-      //   ),
-      // },
       {
         title: "Trạng thái",
         dataIndex: "status",

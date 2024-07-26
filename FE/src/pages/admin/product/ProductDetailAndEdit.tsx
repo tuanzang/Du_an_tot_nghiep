@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from 'axios';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import {
   Button,
   Card,
   Form,
-  Image,
   Upload,
 } from "antd";
 // import formatCurrency from "../../../services/common/formatCurrency";
@@ -18,7 +17,14 @@ import {
 import { UploadFile } from "antd/lib";
 import { IProduct } from '../../../interface/Products';
 import { IProductSize } from "../../../interface/ProductSize";
-
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import {
+  ClassicEditor, AccessibilityHelp, Alignment, Autosave, Bold, Essentials, GeneralHtmlSupport, Highlight, Italic,
+  Link, Paragraph, SelectAll, SpecialCharacters, Table, TableCaption, TableCellProperties, TableColumnResize,
+  TableProperties, TableToolbar, TextPartLanguage, Title, Underline, Undo
+} from 'ckeditor5';
+import 'ckeditor5/ckeditor5.css';
+import { toast } from "react-toastify";
 
 export default function ProductDetailAndEdit() {
   const { id } = useParams<{ id: string }>(); // Lấy ID sản phẩm từ URL
@@ -26,9 +32,17 @@ export default function ProductDetailAndEdit() {
   const [product, setProduct] = useState<IProduct | null>(null);
   const [name, setName] = useState<string | undefined>(undefined);
   const [price, setPrice] = useState<number | undefined>(undefined);
+  const [priceOld, setPriceOld] = useState<number | undefined>(undefined);
+  // const [category, setCategory] = useState<string | undefined>(undefined);
   const [description, setDescription] = useState<string | undefined>(undefined);
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+  const editorContainerRef = useRef(null);
+  const editorRef = useRef(null);
+  const [isLayoutReady, setIsLayoutReady] = useState(false);
+  const [isChanged, setIsChanged] = useState(false);
+  const [isChanged1, setIsChanged1] = useState(false);
+  const [isChanged2, setIsChanged2] = useState(false);
 
   useEffect(() => {
     // Gọi API để lấy chi tiết sản phẩm
@@ -38,6 +52,7 @@ export default function ProductDetailAndEdit() {
         setProduct(data.data);
         setName(data.data.name);
         setPrice(data.data.price);
+        setPriceOld(data.data.priceOld);
         setDescription(data.data.description);
         if (data.data.image) {
           setFileList(data.data.image.map((url: string) => ({
@@ -79,32 +94,41 @@ export default function ProductDetailAndEdit() {
       ...quantities,
       [sizeName]: value
     });
+    setIsChanged1(true);
   };
 
   const handleUploadChange = ({ fileList }: { fileList: UploadFile[] }) => {
     setFileList(fileList);
+    setIsChanged(true);
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
+    setIsChanged(true);
   };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPrice(Number(e.target.value));
+    setIsChanged(true);
   };
 
-  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setDescription(e.target.value);
+  const handleOldPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPriceOld(Number(e.target.value));
+    setIsChanged(true);
   };
 
-  // Tính tổng số lượng tất cả các size
-  const totalQuantity = Object.values(quantities).reduce((acc, qty) => acc + qty, 0);
+  const handleDescriptionChange = (_event: any, editor: any) => {
+    const data = editor.getData();
+    setDescription(data);
+    setIsChanged2(true);
+  };
 
   const handleUpdateProduct = async () => {
     try {
       const formData = new FormData();
       formData.append('name', name || '');
       formData.append('price', (price || 0).toString());
+      formData.append('priceOld', (priceOld || 0).toString());
       formData.append('description', description || '');
 
       // Nối fileList vào formData
@@ -120,18 +144,77 @@ export default function ProductDetailAndEdit() {
           'Content-Type': 'multipart/form-data'
         }
       });
+      toast.success("Cập nhật sản phẩm thành công");
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast.error("Cập nhật sản phẩm thất bại");
+    }
+  };
 
-      // Cập nhật số lượng sản phẩm theo kích cỡ
+  const handleUpdateProductSize = async () => {
+    try {
       for (const productSize of productSizes) {
         const updatedQuantity = quantities[productSize.sizeName];
         await axios.put(`http://localhost:3001/api/products/productSize/${productSize._id}`, {
           quantity: updatedQuantity,
         });
       }
-      alert('Cập nhật sản phẩm thành công');
+      toast.success("Cập nhật sản phẩm thành công");
     } catch (error) {
-      console.error('Error updating product:', error);
-      alert('Đã xảy ra lỗi khi cập nhật sản phẩm');
+      console.error('Error updating product sizes:', error);
+      toast.error("Cập nhật sản phẩm thất bại");
+    }
+  };
+
+  useEffect(() => {
+    setIsLayoutReady(true);
+    return () => setIsLayoutReady(false);
+  }, []);
+
+  const editorConfig = {
+    toolbar: {
+      items: [
+        'undo', 'redo', '|',
+        'selectAll', 'textPartLanguage', '|',
+        'bold', 'italic', 'underline', '|',
+        'specialCharacters', 'link', 'insertTable', 'highlight', '|',
+        'alignment', '|', 'accessibilityHelp'
+      ],
+      shouldNotGroupWhenFull: false
+    },
+    plugins: [
+      AccessibilityHelp, Alignment, Autosave, Bold, Essentials, GeneralHtmlSupport,
+      Highlight, Italic, Link, Paragraph, SelectAll, SpecialCharacters, Table,
+      TableCaption, TableCellProperties, TableColumnResize, TableProperties, TableToolbar,
+      TextPartLanguage, Title, Underline, Undo
+    ],
+    htmlSupport: {
+      allow: [
+        {
+          name: /^.*$/,
+          styles: true,
+          attributes: true,
+          classes: true
+        }
+      ]
+    },
+    initialData: description || 'Mô tả sản phẩm',
+    link: {
+      addTargetToExternalLinks: true,
+      defaultProtocol: 'https://',
+      decorators: {
+        toggleDownloadable: {
+          mode: 'manual',
+          label: 'Downloadable',
+          attributes: {
+            download: 'file'
+          }
+        }
+      }
+    },
+    placeholder: 'Type or paste your content here!',
+    table: {
+      contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
     }
   };
 
@@ -141,70 +224,49 @@ export default function ProductDetailAndEdit() {
         listLink={[{ link: "/admin/product", name: "Sản phẩm" }]}
         nameHere={`${name}`}
       />
+      <div className="w-50 mx-auto">
+        <Card style={{ padding: "10px", marginBottom: "10px" }}>
+          <form>
+            <div className="form-group">
+              <label htmlFor="">Tên sản phẩm</label>
+              <input
+                type="text"
+                className="form-control"
+                name="name"
+                value={name}
+                onChange={handleNameChange}
+                placeholder="Tên sản phẩm"
+              />
+            </div>
 
-      <Card style={{ padding: "16px" }}>
-
-        <div className="container" >
-          <div className="row" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div className="col-md-6">
-              <p className="pb-3" style={{
-                textDecoration: "none",
-                fontWeight: "600",
-                fontSize: "calc(1.2rem + 0.15vw)",
-                color: "#c29957",
-              }}>Chi tiết sản phẩm</p>
-              <div className="form-group">
-                <label style={{ fontSize: '20px' }}>Tên</label>
+            <div className="row">
+              <div className="form-group col">
+                <label htmlFor="">Giá</label>
                 <input
-                  type="text"
+                  type="number"
                   className="form-control"
-                  value={name}
-                  onChange={handleNameChange}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="" style={{ fontSize: '20px' }}>Giá</label>
-                <input
-                  type="text"
-                  className="form-control"
+                  name="price"
                   value={price}
                   onChange={handlePriceChange}
+                  placeholder="Giá sản phẩm"
                 />
               </div>
 
-              <div>
-                <label htmlFor="" style={{ fontSize: '20px' }}>Số lượng</label>
-                <div className="form-group" style={{ display: 'flex', gap: '10px' }}>
-                  {productSizes.map((productSize) => (
-                    <React.Fragment key={productSize._id}>
-                      <p className="mt-2">{productSize.sizeName}</p>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={quantities[productSize.sizeName] || ''}
-                        onChange={(e) => handleQuantityChange(productSize.sizeName, e.target.value)}
-                      />
-                    </React.Fragment>
-                  ))}
-                </div>
-                <div className="form-group mt-2">
-                  <label htmlFor="" style={{ fontSize: '20px' }}>Tổng số lượng</label>
-                  <p className="form-control">{totalQuantity}</p>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="" style={{ fontSize: '20px' }}>Mô tả</label>
-                <textarea
+              <div className="form-group col">
+                <label htmlFor="">Giá cũ</label>
+                <input
+                  type="number"
                   className="form-control"
-                  rows={4}
-                  value={description}
-                  onChange={handleDescriptionChange}
+                  name="priceOld"
+                  value={priceOld}
+                  onChange={handleOldPriceChange}
+                  placeholder="Giá cũ"
                 />
               </div>
+            </div>
 
-              {/* upload ảnh */}
+
+            <div className="mt-3">
               <Form.Item
                 label="Ảnh"
                 name="image"
@@ -218,37 +280,90 @@ export default function ProductDetailAndEdit() {
                   beforeUpload={() => false}
                   multiple
                   accept=".jpg,.png,.jpeg"
+                  fileList={fileList}
                   onChange={handleUploadChange}
                 >
                   <Button icon={<UploadOutlined />}>Tải ảnh lên</Button>
                 </Upload>
               </Form.Item>
+            </div>
 
-              <div className="row mt-4">
-                <div
-                  className=""
-                  style={{ marginBottom: "10px" }}
-                >
-                  <Image
-                    width={"20%"}
-                    src={product?.image?.[0]}
-                    alt="product-details"
-                  />
-                </div>
+            {isChanged && (
+              <Button type="primary" onClick={handleUpdateProduct} className="mt-2">
+                <EditOutlined />
+                Cập nhật
+              </Button>
+            )}
+          </form>
+        </Card>
+
+        <Card style={{ padding: "10px", marginBottom: "10px" }}>
+          <table className="table">
+            <thead>
+              <tr>
+                <th scope="col">Tên</th>
+                <th scope="col">Số lượng</th>
+                <th scope="col">Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              {productSizes.map((size) => (
+                <tr key={size._id}>
+                  <td>{size.sizeName}</td>
+                  <td>
+                    <input
+                      type="number"
+                      value={quantities[size.sizeName]}
+                      onChange={(e) => handleQuantityChange(size.sizeName, Number(e.target.value))}
+                    />
+                  </td>
+                  <td>
+                    {/* {size.status} */}
+                    <div className="form-check form-switch">
+                      <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {isChanged1 && (
+            <Button
+              type="primary"
+              onClick={handleUpdateProductSize}
+            >
+              <EditOutlined />
+              Cập nhật
+            </Button>
+          )}
+        </Card>
+
+        <Card style={{ padding: "10px", marginBottom: "10px" }}>
+          <label style={{ fontSize: "20px" }} className="mb-2">Mô tả sản phẩm</label>
+          <div className="editor-container editor-container_classic-editor" ref={editorContainerRef}>
+            <div className="editor-container__editor">
+              <div ref={editorRef}>
+                {isLayoutReady &&
+                  <CKEditor
+                    editor={ClassicEditor}
+                    config={editorConfig}
+                    data={description || ''}
+                    onChange={handleDescriptionChange}
+                    name="description"
+                  />}
               </div>
-
             </div>
           </div>
-
-
-        </div>
-
-        <div className="mt-5" style={{ float: "right" }}>
-          <Button className="btn bg-primary p-2 border text-white" icon={<EditOutlined />} onClick={handleUpdateProduct}>Cập nhật</Button>
-        </div>
-
-      </Card>
-
+          {isChanged2 && (
+            <Button type="primary" onClick={handleUpdateProduct} className="mt-4">
+              <EditOutlined />
+              Cập nhật
+            </Button>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
+
+

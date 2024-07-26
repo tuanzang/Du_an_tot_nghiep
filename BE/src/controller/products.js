@@ -149,31 +149,6 @@ export const createProductSizes = async (req, res) => {
   }
 };
 
-// export const getDetailProductSize = async (req, res) => {
-//   try {
-//     // Tìm sản phẩm kích cỡ trong CSDL dựa trên ID
-//     const data = await productSize.findById(req.params.id);
-
-//     // Kiểm tra nếu không tìm thấy sản phẩm kích cỡ
-//     if (!data || data.length === 0) {
-//       return res.status(404).json({
-//         message: "Không tìm thấy kích cỡ sản phẩm.",
-//         data: [],
-//       });
-//     }
-
-//     // Trả về chi tiết sản phẩm kích cỡ
-//     return res.status(200).json({
-//       message: "Lấy chi tiết kích cỡ sản phẩm thành công",
-//       data: data,
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       message: error.message,
-//     });
-//   }
-// };
-
 export const getProductSizesByProductId = async (req, res) => {
   try {
      // Tìm tất cả kích cỡ sản phẩm trong CSDL dựa trên idProduct
@@ -203,6 +178,7 @@ export const updateProduct = async (req, res) => {
   try {
     const data = await product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
+      runValidators: true,
     });
     if (!data || data.length === 0) {
       res.status(404).json({
@@ -213,7 +189,7 @@ export const updateProduct = async (req, res) => {
 
     return res.status(200).json({
       message: "Update thành công",
-      data,
+      data: data,
     });
   } catch (error) {
     return res.status(500).json({
@@ -301,7 +277,7 @@ export const updateProductSizes = async (req, res) => {
         id,
         {
           quantity,
-          sizeName: Size.name // Cập nhật tên kích cỡ
+          // sizeName: Size.name // Cập nhật tên kích cỡ
         },
         { new: true, runValidators: true }
       );
