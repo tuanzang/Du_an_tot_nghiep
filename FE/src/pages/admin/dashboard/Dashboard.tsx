@@ -20,6 +20,8 @@ import { ColumnGroupType, ColumnType } from "antd/es/table";
 import { IProduct } from "../../../interface/Products";
 import { log } from "console";
 import { GiLogicGateAnd } from "react-icons/gi";
+import { start } from "repl";
+import PieChartDashBoard from "./PieChartDashBoard";
 // import { LineChart } from "./LineChartDashBoard"; // Assuming you have a LineChartDashBoard component
 
 const { Title } = Typography;
@@ -46,6 +48,7 @@ interface BestSellerItem {
 }
 
 export default function Dashboard() {
+  const [dataBieuDo, setDataBieuDo] = useState([]);
   const [indexButton, setIndexButton] = useState(1);
   const [nameButton, setNameButton] = useState("ngày");
   const [totalPriceByDay, setTotalPriceByDay] = useState(0);
@@ -392,7 +395,6 @@ export default function Dashboard() {
     switch (indexButton) {
       case 1:
         return {
-          
           total: totalOrdersToday,
           completed: completedOrdersDay,
           canceled: canceledOrdersDay,
@@ -443,12 +445,12 @@ export default function Dashboard() {
     try {
       const allListBestSellerByDay = await axios.get(`http://localhost:3001/api/topOrder/top-ordered-products`, {
         params: {
-          nowDate: date
+          startDate : date
         }
       }
       );
       setListBestSellerByDay(allListBestSellerByDay.data.data);
-      console.log(date);
+      console.log(allListBestSellerByDay.data.data);
       
     } catch (error) {
       console.log(error);
@@ -550,9 +552,8 @@ export default function Dashboard() {
     { title: "Mô tả", dataIndex: "description", key: "description" },
     { title: "Số lượng bán ra", dataIndex: "totalQuantity", key: "totalQuantity" },
   ];
-  
-  
 
+  
   
 
   const handleChangeButton =  async (index: number, type: string) => {
@@ -565,37 +566,60 @@ export default function Dashboard() {
         data = await getOrdersByDayStatus(new Date().toISOString().split('T')[0]);
         await getOrdersPriceByDayStatus(new Date().toISOString().split('T')[0]);
         await getListBestSellerByDay();
+        setDataBieuDo([
+          { label: "Đã hoàn thành", value : completedOrdersDay}, 
+          { label: "Đã hủy", value: canceledOrdersDay},
+        ]);
         break;
       case 2:
         data = await getOrdersByWeekStatus();
         await getOrdersPriceByWeekStatus();
         await getListBestSellerByWeek();
+        setDataBieuDo([
+          { label: "Đã hoàn thành", value : completedOrdersWeek}, 
+          { label: "Đã hủy", value: canceledOrdersWeek},
+        ]);
         break;
       case 3:
         data = await getOrdersByMonthStatus();
         await getOrdersPriceByMonthStatus();
         await getListBestSellerByMonth();
+        setDataBieuDo([
+          { label: "Đã hoàn thành", value : completedOrdersMonth},
+          { label: "Đã hủy", value: canceledOrdersMonth},
+        ])
         break;
       case 4:
         data = await getOrdersByYearStatus();
         await getOrdersPriceByYearStatus();
         await getListBestSellerByYear();
+        setDataBieuDo([
+          { label: "Đã hoàn thành", value : completedOrdersYear},
+          { label: "Đã hủy", value: canceledOrdersYear},
+        ])
         break;
       case 5: // Trường hợp chọn khoảng thời gian tùy chỉnh
       if (filter.createAtFrom && filter.createAtTo) {
         data = await getOrdersByCustomStatus(filter.createAtFrom, filter.createAtTo);
+        // setDataBieuDo([
+        //   { label: "Đã hoàn thành", value : completedOrdersByCustomDay},
+        //   { label: "Đã hủy", value: canceledOrdersByCustomDay},
+        // ])
       } else {
         // Có thể thông báo cho người dùng rằng cần chọn ngày
         console.warn("Vui lòng chọn khoảng thời gian.");
         return;
       }
+      
         break;
       default:
         return;
     }
     
+    
   }
 
+ 
   return (
     <div>
       {/* tên màn hình */}
@@ -629,7 +653,7 @@ export default function Dashboard() {
           )}
         </div>
         <Row gutter={16} style={{ padding: "0 8px" }}>
-          <Col span={24}>
+          <Col span={12}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
               Thống kê theo {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
             </Title>
@@ -644,6 +668,14 @@ export default function Dashboard() {
               ]}
               pagination={false}
             />
+          </Col>
+          <Col span={10}>
+              <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
+                Biểu đồ trạng thái {nameButton}
+              </Title>
+              <Card style={{ borderColor: "#c29957" }}>
+                <PieChartDashBoard data={dataBieuDo} />
+              </Card>
           </Col>
           <Col span={24}>
               <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
