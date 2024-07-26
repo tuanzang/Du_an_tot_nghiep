@@ -19,6 +19,11 @@ const productSizeSchema = new mongoose.Schema(
         sizeName: {
             type: String,
             required: true
+        },
+        status:{
+            type: Boolean,
+            required: true,
+            default: true
         }
     }, {
         timestamps: true,

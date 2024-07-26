@@ -41,8 +41,6 @@ import {
 } from 'ckeditor5';
 import 'ckeditor5/ckeditor5.css';
 
-
-
 const ProductAdd = () => {
   const navigate = useNavigate()
   const [cates, setCates] = useState([]);
@@ -106,7 +104,7 @@ const ProductAdd = () => {
       const quantity = updatedValues.quantity;
 
       const productSizes: IProductSize[] = [];
-      idSizes.map(s => productSizes.push({ _id: null, idProduct: dataProduct.data.data._id, idSize: s, quantity }))
+      idSizes.map(s => productSizes.push({ _id: null, idProduct: dataProduct.data.data._id, idSize: s, quantity}))
 
       await axios.post(`http://localhost:3001/api/products/add/size`, productSizes)
       toast.success("Thêm sản phẩm thành công");
@@ -208,7 +206,7 @@ const ProductAdd = () => {
     }
   };
 
-  const onDescriptionChange = (_event: Event, editor: ClassicEditor) => {
+  const onDescriptionChange = (_event: any, editor: any) => {
     const data = editor.getData();
     setDescription(data);
   };
@@ -336,108 +334,6 @@ const ProductAdd = () => {
       </Form>
     </div>
 
-    //<Form
-    //   name="basic"
-    //   labelCol={{ span: 8 }}
-    //   wrapperCol={{ span: 16 }}
-    //   style={{ maxWidth: 600 }}
-    //   onFinish={onFinish}
-    //   onFinishFailed={onFinishFailed}
-    //   autoComplete="off"
-    // >
-    //   <Form.Item<IProduct>
-    //     label="Tên sản phẩm"
-    //     name="name"
-    //     rules={[{ required: true, message: "Vui lòng nhập tên sản phẩm!" }]}
-    //   >
-    //     <Input />
-    //   </Form.Item>
-    //   <Form.Item<IProduct>
-    //     label="Giá"
-    //     name="price"
-    //     rules={[{ required: true, message: "Vui lòng nhập giá sản phẩm!" }]}
-    //   >
-    //     <Input type="number" />
-    //   </Form.Item>
-    //   <Form.Item<IProduct>
-    //     label="Giá cũ"
-    //     name="priceOld"
-    //     rules={[{ required: true, message: "Vui lòng nhập giá cũ sản phẩm!" }]}
-    //   >
-    //     <Input type="number" />
-    //   </Form.Item>
-    //   {/* <Form.Item<IProduct>
-    //     label="Giá cũ"
-    //     name="priceOld"
-    //   >
-    //     <Input />
-    //   </Form.Item> */}
-    //   <Form.Item<IProduct>
-    //     label="Danh mục"
-    //     name="categoryId"
-    //     rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
-    //   >
-    //     <Select
-
-    //       defaultValue="Chọn danh mục"
-    //       style={{
-    //         width: 150,
-    //       }}
-
-    //       options={dataCates}
-    //     />
-    //   </Form.Item>
-
-    //   <Form.Item<IProduct>
-    //     label="Size"
-    //     name="idSize"
-    //     // rules={[{ required: true, message: 'Vui lòng chọn size!' }]}
-    //   >
-    //     <Checkbox.Group options={dataSize} />
-    //   </Form.Item>
-
-    //   <Form.Item<IProduct>
-    //     label="Số lượng"
-    //     name="quantity"
-    //     rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
-    //   >
-    //     <Input type="number" />
-    //   </Form.Item>
-
-    //   {/* upload ảnh */}
-    //   <Form.Item
-    //     label="Ảnh"
-    //     name="image"
-    //     rules={[
-    //       { required: true, message: "Vui lòng tải lên ảnh sản phẩm!" },
-    //     ]}
-    //   >
-    //     <Upload
-    //       name="image"
-    //       listType="picture"
-    //       // maxCount={1}
-    //       beforeUpload={() => false}
-    //       multiple
-    //       accept=".jpg,.png,.jpeg"
-    //       onChange={handleUploadChange}
-    //     >
-    //       <Button icon={<UploadOutlined />}>Tải ảnh lên</Button>
-    //     </Upload>
-    //   </Form.Item>
-
-    //   <Form.Item<IProduct>
-    //     label="Mô tả"
-    //     name="description"
-    //     rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
-    //   >
-    //     <TextArea rows={4} />
-    //   </Form.Item>
-    //   <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-    //     <Button type="primary" htmlType="submit">
-    //       Submit
-    //     </Button>
-    //   </Form.Item>
-    // </Form>
   );
 };
 
