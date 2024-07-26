@@ -85,13 +85,13 @@ export default function Dashboard() {
       const resTotalPriceByDay = await axios.get(`http://localhost:3001/api/orders/total-price/day`, {
         params: { dateNow: date }
       });
-  
+
       setTotalPriceByDay(resTotalPriceByDay.data.totalPrice);
     } catch (error) {
       console.log(error);
     }
   };
-  
+
   const getOrdersPriceByWeekStatus = async () => {
     try {
       const { startDate, endDate } = getWeekRange();
@@ -107,7 +107,7 @@ export default function Dashboard() {
       console.log(error);
     }
   };
-  
+
   const getOrdersPriceByMonthStatus = async () => {
     try {
       const { startDate, endDate } = getMonthRange();
@@ -117,13 +117,13 @@ export default function Dashboard() {
           dateEnd: endDate
         }
       });
-  
+
       setTotalPriceByMonth(resTotalPriceByMonth.data.totalPrice);
     } catch (error) {
       console.log(error);
     }
   };
-  
+
   const getOrdersPriceByYearStatus = async () => {
     try {
       const { startDate, endDate } = getYearRange();
@@ -133,7 +133,7 @@ export default function Dashboard() {
           dateEnd: endDate
         }
       });
-  
+
       setTotalPriceByYear(resTotalPriceByYear.data.totalPrice);
     } catch (error) {
       console.log(error);
@@ -141,8 +141,8 @@ export default function Dashboard() {
   };
 
   const getOrdersByCustomDayStatus = async () => {
-    try{
-    const [startDate, endDate] = customDateRange;
+    try {
+      const [startDate, endDate] = customDateRange;
       const resTotalPriceByCustomDay = await axios.get(`http://localhost:3001/api/orders/total-price/custom-day`, {
         params: {
           dateStart: startDate.format('YYYY-MM-DD'),
@@ -155,7 +155,7 @@ export default function Dashboard() {
       console.log(error);
     }
   };
-  
+
 
   // tính số đơn hàng
   const getOrdersByCustomStatus = async (createAtFrom: string, createAtTo: string) => {
@@ -163,28 +163,28 @@ export default function Dashboard() {
       // Chuyển đổi ngày về định dạng YYYY-MM-DD
       const formattedCreateAtFrom = new Date(createAtFrom).toISOString().split('T')[0];
       const formattedCreateAtTo = new Date(createAtTo).toISOString().split('T')[0];
-  
+
       const resAllOrdersByCustomDay = await axios.post("http://localhost:3001/api/orders", {
         createAtFrom: formattedCreateAtFrom,
         createAtTo: formattedCreateAtTo,
         ...customDateRange,
       });
-  
+
       const resCompleted = await axios.post("http://localhost:3001/api/orders", {
         createAtFrom: formattedCreateAtFrom,
         createAtTo: formattedCreateAtTo,
         status: "7",
         ...customDateRange,
       });
-  
+
       const resCanceled = await axios.post("http://localhost:3001/api/orders", {
         createAtFrom: formattedCreateAtFrom,
         createAtTo: formattedCreateAtTo,
         status: "0",
         ...customDateRange,
       });
-  
-  
+
+
       setTotalOrdersByCustomDay(resAllOrdersByCustomDay.data.data.length);
       setCompletedOrdersByCustomDay(resCompleted.data.data.length);
       setCanceledOrdersByCustomDay(resCanceled.data.data.length);
@@ -398,7 +398,7 @@ export default function Dashboard() {
           total: totalOrdersToday,
           completed: completedOrdersDay,
           canceled: canceledOrdersDay,
-          totalPrice : totalPriceByDay,
+          totalPrice: totalPriceByDay,
           color: "#e3d7c3",
         };
       case 2:
@@ -406,7 +406,7 @@ export default function Dashboard() {
           total: totalOrdersThisWeek,
           completed: completedOrdersWeek,
           canceled: canceledOrdersWeek,
-          totalPrice : totalPriceByWeek,
+          totalPrice: totalPriceByWeek,
           color: "#e0ccab",
         };
       case 3:
@@ -414,7 +414,7 @@ export default function Dashboard() {
           total: totalOrdersThisMonth,
           completed: completedOrdersMonth,
           canceled: canceledOrdersMonth,
-          totalPrice : totalPriceByMonth,
+          totalPrice: totalPriceByMonth,
           color: "#e0ccab",
         };
       case 4:
@@ -422,15 +422,15 @@ export default function Dashboard() {
           total: totalOrdersThisYear,
           completed: completedOrdersYear,
           canceled: canceledOrdersYear,
-          totalPrice : totalPriceByYear,
+          totalPrice: totalPriceByYear,
           color: "#e3d7c3",
         };
-      case 5: 
+      case 5:
         return {
           total: totalOrdersByCustomDay,
           completed: completedOrdersByCustomDay,
           canceled: canceledOrdersByCustomDay,
-          totalPrice : totalPriceByCustomDay,
+          totalPrice: totalPriceByCustomDay,
           color: "#e0ccab",
         }
       default:
@@ -445,18 +445,18 @@ export default function Dashboard() {
     try {
       const allListBestSellerByDay = await axios.get(`http://localhost:3001/api/topOrder/top-ordered-products`, {
         params: {
-          startDate : date
+          startDate: date
         }
       }
       );
       setListBestSellerByDay(allListBestSellerByDay.data.data);
       console.log(allListBestSellerByDay.data.data);
-      
+
     } catch (error) {
       console.log(error);
     }
   }
-  const getListBestSeller = async (startDate : string, endDate :  string, setter) => {
+  const getListBestSeller = async (startDate: string, endDate: string, setter) => {
     try {
       const response = await axios.get(`http://localhost:3001/api/topOrder/top-ordered-products`, {
         params: { startDate, endDate }
@@ -467,7 +467,7 @@ export default function Dashboard() {
     }
   };
 
-  
+
 
   const getListBestSellerByWeek = async () => {
     const { startDate, endDate } = getWeekRange();
@@ -484,16 +484,16 @@ export default function Dashboard() {
     await getListBestSeller(startDate, endDate, setListBestSellerByYear);
   };
 
-  const getListBestSellerCustom = async ( ) => {
+  const getListBestSellerCustom = async () => {
 
     const [startDate, endDate] = customDateRange;
     if (startDate && endDate) {
       await getListBestSeller(startDate.format('YYYY-MM-DD'), endDate.format('YYYY-MM-DD'), setListBestSellerByCustomDay);
     }
-    
+
   };
 
-  
+
   useEffect(() => {
     if (customDateRange[0] && customDateRange[1]) {
       getListBestSellerCustom();
@@ -502,7 +502,7 @@ export default function Dashboard() {
   }, [customDateRange]);
 
   const dataListBestSeller = {
-    1: listBestSellerByDay.map((item : BestSellerItem, index) => ({
+    1: listBestSellerByDay.map((item: BestSellerItem, index) => ({
       stt: index + 1,
       name: item.name,
       price: item.productDetails.price,
@@ -510,7 +510,7 @@ export default function Dashboard() {
       description: item.productDetails.description,
       totalQuantity: item.totalQuantity,
     })),
-    2: listBestSellerByWeek.map((item : BestSellerItem, index) => ({
+    2: listBestSellerByWeek.map((item: BestSellerItem, index) => ({
       stt: index + 1,
       name: item.name,
       price: item.productDetails.price,
@@ -518,7 +518,7 @@ export default function Dashboard() {
       description: item.productDetails.description,
       totalQuantity: item.totalQuantity,
     })),
-    3: listBestSellerByMonth.map((item : BestSellerItem, index) => ({
+    3: listBestSellerByMonth.map((item: BestSellerItem, index) => ({
       stt: index + 1,
       name: item.name,
       price: item.productDetails.price,
@@ -543,20 +543,34 @@ export default function Dashboard() {
       totalQuantity: item.totalQuantity,
     }))
   };
-  
+
   const columns = [
     { title: "STT", dataIndex: "stt", key: "stt" },
     { title: "Tên sản phẩm", dataIndex: "name", key: "name" },
     { title: "Giá", dataIndex: "price", key: "price" },
-    { title: "Ảnh", dataIndex: "image", key: "image" },
-    { title: "Mô tả", dataIndex: "description", key: "description" },
+    {
+      title: "Ảnh",
+      dataIndex: "image",
+      key: "image",
+      render: (text) => <img src={text} alt="product" style={{ height: "70px", width: "70px", objectFit: 'cover' }} />
+    },
+    {
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      render: (text) => (
+        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
+          {text.length > 0 ? text.substring(0, 20) + '...' : text}
+        </div>
+      )
+    },
     { title: "Số lượng bán ra", dataIndex: "totalQuantity", key: "totalQuantity" },
   ];
 
-  
-  
 
-  const handleChangeButton =  async (index: number, type: string) => {
+
+
+  const handleChangeButton = async (index: number, type: string) => {
     setIndexButton(index);
     setNameButton(type);
     let data;
@@ -567,8 +581,8 @@ export default function Dashboard() {
         await getOrdersPriceByDayStatus(new Date().toISOString().split('T')[0]);
         await getListBestSellerByDay();
         setDataBieuDo([
-          { label: "Đã hoàn thành", value : completedOrdersDay}, 
-          { label: "Đã hủy", value: canceledOrdersDay},
+          { label: "Đã hoàn thành", value: completedOrdersDay },
+          { label: "Đã hủy", value: canceledOrdersDay },
         ]);
         break;
       case 2:
@@ -576,8 +590,8 @@ export default function Dashboard() {
         await getOrdersPriceByWeekStatus();
         await getListBestSellerByWeek();
         setDataBieuDo([
-          { label: "Đã hoàn thành", value : completedOrdersWeek}, 
-          { label: "Đã hủy", value: canceledOrdersWeek},
+          { label: "Đã hoàn thành", value: completedOrdersWeek },
+          { label: "Đã hủy", value: canceledOrdersWeek },
         ]);
         break;
       case 3:
@@ -585,8 +599,8 @@ export default function Dashboard() {
         await getOrdersPriceByMonthStatus();
         await getListBestSellerByMonth();
         setDataBieuDo([
-          { label: "Đã hoàn thành", value : completedOrdersMonth},
-          { label: "Đã hủy", value: canceledOrdersMonth},
+          { label: "Đã hoàn thành", value: completedOrdersMonth },
+          { label: "Đã hủy", value: canceledOrdersMonth },
         ])
         break;
       case 4:
@@ -594,32 +608,32 @@ export default function Dashboard() {
         await getOrdersPriceByYearStatus();
         await getListBestSellerByYear();
         setDataBieuDo([
-          { label: "Đã hoàn thành", value : completedOrdersYear},
-          { label: "Đã hủy", value: canceledOrdersYear},
+          { label: "Đã hoàn thành", value: completedOrdersYear },
+          { label: "Đã hủy", value: canceledOrdersYear },
         ])
         break;
       case 5: // Trường hợp chọn khoảng thời gian tùy chỉnh
-      if (filter.createAtFrom && filter.createAtTo) {
-        data = await getOrdersByCustomStatus(filter.createAtFrom, filter.createAtTo);
-        // setDataBieuDo([
-        //   { label: "Đã hoàn thành", value : completedOrdersByCustomDay},
-        //   { label: "Đã hủy", value: canceledOrdersByCustomDay},
-        // ])
-      } else {
-        // Có thể thông báo cho người dùng rằng cần chọn ngày
-        console.warn("Vui lòng chọn khoảng thời gian.");
-        return;
-      }
-      
+        if (filter.createAtFrom && filter.createAtTo) {
+          data = await getOrdersByCustomStatus(filter.createAtFrom, filter.createAtTo);
+          // setDataBieuDo([
+          //   { label: "Đã hoàn thành", value : completedOrdersByCustomDay},
+          //   { label: "Đã hủy", value: canceledOrdersByCustomDay},
+          // ])
+        } else {
+          // Có thể thông báo cho người dùng rằng cần chọn ngày
+          console.warn("Vui lòng chọn khoảng thời gian.");
+          return;
+        }
+
         break;
       default:
         return;
     }
-    
-    
+
+
   }
 
- 
+
   return (
     <div>
       {/* tên màn hình */}
@@ -653,42 +667,95 @@ export default function Dashboard() {
           )}
         </div>
         <Row gutter={16} style={{ padding: "0 8px" }}>
-          <Col span={12}>
+
+          <Col span={14}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-              Thống kê theo {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
+              Danh sách sản phẩm bán chạy theo {nameButton}
+            </Title>
+            <Table
+              dataSource={dataListBestSeller[indexButton]}
+              columns={columns}
+              pagination={false}
+
+            />
+
+          </Col>
+          <Col span={10}>
+            <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
+              Biểu đồ trạng thái {nameButton}
+            </Title>
+            <Card style={{ borderColor: "#c29957" }}>
+              <PieChartDashBoard data={dataBieuDo} />
+            </Card>
+          </Col>
+          <Col span={24}>
+            <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
+              Thống kê số đơn theo {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
             </Title>
             <Table
               dataSource={[dataForButton]}
               columns={[
-                
-                { title: "Tổng đơn hàng", dataIndex: "total", key: "total" },
-                { title: "Đơn hoàn thành", dataIndex: "completed", key: "completed" },
-                { title: "Đơn hủy", dataIndex: "canceled", key: "canceled" },
-                { title: "Tổng thu nhập", dataIndex: "totalPrice", key: "totalPrice" },
+                {
+                  title: (
+                    <div style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                      Tổng đơn hàng
+                    </div>
+                  ),
+                  dataIndex: "total",
+                  key: "total",
+                  render: text => (
+                    <div style={{ textAlign: 'center' }}>
+                      {text}
+                    </div>
+                  )
+                },
+                {
+                  title: (
+                    <div style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                      Đơn hoàn thành
+                    </div>
+                  ),
+                  dataIndex: "completed",
+                  key: "completed",
+                  render: text => (
+                    <div style={{ textAlign: 'center' }}>
+                      {text}
+                    </div>
+                  )
+                },
+                {
+                  title: (
+                    <div style={{ textAlign: 'center', fontWeight: 'bold'}}>
+                      Đơn hủy
+                    </div>
+                  ),
+                  dataIndex: "canceled",
+                  key: "canceled",
+                  render: text => (
+                    <div style={{  textAlign: 'center' }}>
+                      {text }
+                    </div>
+                  )
+                },
+                {
+                  title: (
+                    <div style={{ textAlign: 'center', fontWeight: 'bold'}}>
+                      Tổng thu nhập
+                    </div>
+                  ),
+                  dataIndex: "totalPrice",
+                  key: "totalPrice",
+                  render: text => (
+                    <div style={{ textAlign: 'center' }}>
+                     {parseFloat(text).toLocaleString()} VND
+                    </div>
+                  )
+                },
               ]}
               pagination={false}
             />
+
           </Col>
-          <Col span={10}>
-              <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-                Biểu đồ trạng thái {nameButton}
-              </Title>
-              <Card style={{ borderColor: "#c29957" }}>
-                <PieChartDashBoard data={dataBieuDo} />
-              </Card>
-          </Col>
-          <Col span={24}>
-              <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-                Danh sách sản phẩm bán chạy theo {nameButton}
-              </Title>
-              <Table
-                dataSource={dataListBestSeller[indexButton]}
-                columns={columns}
-                pagination={false}
-                
-              />
-            
-            </Col>
         </Row>
 
       </Card>
