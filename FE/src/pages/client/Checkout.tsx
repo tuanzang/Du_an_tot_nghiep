@@ -45,7 +45,7 @@ const Checkout = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      const productSelectedIds = productSelected.map((it) => it.product._id);
+      const productSelectedIds = productSelected.map((it) => it.variant._id);
       const res = await OrderApi.createOrder({
         ...data,
         productSelectedIds,
@@ -192,7 +192,7 @@ const Checkout = () => {
             <thead>
               <tr>
                 <th>Tên sản phẩm</th>
-                <th>ảnh</th>
+                {/* <th>ảnh</th> */}
                 <th>Giá</th>
                 <th>Số lượng</th>
                 <th>Tổng</th>
@@ -201,10 +201,12 @@ const Checkout = () => {
             <tbody>
               {productSelected?.map((item) => (
                 <tr key={item._id}>
-                  <td>{item.product.name}</td>
-                  <td>{formatPrice(item.product.price)}</td>
+                  <td>
+                    {item.product.name} (Size: {item.variant?.sizeName})
+                  </td>
+                  <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
-                  <td>{formatPrice(item.product.price * item.quantity)}</td>
+                  <td>{formatPrice(item.variant.price * item.quantity)}</td>
                 </tr>
               ))}
             </tbody>

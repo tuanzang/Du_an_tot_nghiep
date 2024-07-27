@@ -12,7 +12,7 @@ export const cartSlice = createSlice({
     updateProductSelected: (state, { payload }) => {
       state.productSelected = payload;
       state.totalPrice = (payload as ICartItem[]).reduce((res, curr) => {
-        return (res += curr.product.price * curr.quantity);
+        return (res += curr.variant.price * curr.quantity);
       }, 0);
     },
 
