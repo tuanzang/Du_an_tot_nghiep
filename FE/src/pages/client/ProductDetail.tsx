@@ -13,7 +13,6 @@ import { IComment } from "../../interface/Comments";
 import { IUser } from "../../interface/Users";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { ISize } from "../../interface/Size";
 import { IProductSize } from "../../interface/ProductSize";
 
 export default function ProductDetail() {
@@ -21,18 +20,12 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
-  const [sizes, setSizes] = useState<ISize[]>([]);
   const [selectedSize, setSelectedSize] = useState(null);
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+  const [price, setPrice] = useState<string | undefined>('')
 
-  const handleSizeClick = (sizeId: any) => {
-    if (selectedSize === sizeId) {
-      setSelectedSize(null);
-    } else {
-      setSelectedSize(sizeId);
-    }
-  };
+ 
 
   // lấy thông tin user đăng nhập
   const isLoggedUser = localStorage.getItem(USER_INFO_STORAGE_KEY);
@@ -50,7 +43,6 @@ export default function ProductDetail() {
   useEffect(() => {
     fetchProduct(String(id));
     fetchRelatedProducts();
-    fetchSizes();
     // findUserById(idUser ? idUser : null);
   }, [id]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
 
@@ -60,7 +52,11 @@ export default function ProductDetail() {
         const response = await axios.get(
           `http://localhost:3001/api/products/${id}`
         );
-        console.log("Product API response:", response.data);
+        const productData = response.data.data;
+        setProduct(productData);
+
+        const productSize = response?.data?.data?.productSizedata?.map(it => +it.price);
+        setPrice(Math.min(...productSize) + ' - ' + Math.max(...productSize) + ' VNĐ')
         setProduct(response.data.data);
       }
     } catch (error) {
@@ -75,16 +71,6 @@ export default function ProductDetail() {
       setRelatedProducts(response.data.data);
     } catch (error) {
       console.error("Error fetching related products:", error);
-    }
-  };
-
-  const fetchSizes = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3001/api/sizes`);
-      console.log("Sizes API response:", response.data);
-      setSizes(response.data.data);
-    } catch (error) {
-      console.error("Error fetching sizes:", error);
     }
   };
 
@@ -221,6 +207,23 @@ export default function ProductDetail() {
     }
   };
 
+  const handleSizeClick = (sizeId: string) => {
+    const findSize = productSizes.find(it => it._id === sizeId);
+    setPrice(findSize?.price?.toString());
+  };
+
+  useEffect(() => {
+    if (selectedSize) {
+      const selectedProductSize = productSizes.find(
+        (productSize) => productSize.sizeId === selectedSize
+      );
+      if (selectedProductSize) {
+        setPrice(selectedProductSize.price + ' VNĐ');
+      }
+    }
+  }, [selectedSize, productSizes]);
+  
+ 
   return (
     <div>
       <main>
@@ -288,20 +291,13 @@ export default function ProductDetail() {
                         <h3 className="product-name">{product?.name}</h3>
                         <div className="price-box">
                           <span className="price-regular">
-                            {product?.price} VNĐ
+                            {price} VNĐ
                           </span>
-                          {/* <span className="price-old">
-                            <del>{product?.priceOld} VNĐ</del>
-                          </span> */}
                         </div>
-                        {/* <div className="availability">
-                          <i className="fa fa-check-circle"></i>
-                          <span>200 in stock</span>
-                        </div> */}
-
                         <div>
                           <div className="button-container mt-2">
-                            {sizes.map((size) => (
+                            {productSizes.map((size) => (
+                              
                               <Button
                                 key={size._id}
                                 className={`mx-1 ${
@@ -313,8 +309,8 @@ export default function ProductDetail() {
                                 }}
                                 onClick={() => handleSizeClick(size._id)}
                               >
-                                {size.name}
-                              </Button>
+                                {size.sizeName}
+                              </Button>                             
                             ))}
                           </div>
                         </div>
@@ -612,11 +608,8 @@ export default function ProductDetail() {
                                   </div>
                                   <div className="price-box">
                                     <span className="price-regular">
-                                      {relatedProduct.price} VNĐ
+                                      {price} VNĐ
                                     </span>
-                                    {/* <span className="price-old">
-                                      <del>{relatedProduct.priceOld} VNĐ</del>
-                                    </span> */}
                                   </div>
                                 </div>
                               </figure>

@@ -3,7 +3,7 @@ export interface IProduct {
   name: string;
   // price: number;
   // priceOld: number;
-  size: string[];
+  // size: string[];
   image: string[];
   idSize: string[];
   // quantity: number;

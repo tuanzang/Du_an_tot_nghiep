@@ -239,33 +239,6 @@ export default function ProductDetailAndEdit() {
               />
             </div>
 
-            <div className="row">
-              <div className="form-group col">
-                <label htmlFor="">Giá</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  name="price"
-                  value={price}
-                  onChange={handlePriceChange}
-                  placeholder="Giá sản phẩm"
-                />
-              </div>
-
-              {/* <div className="form-group col">
-                <label htmlFor="">Giá cũ</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  name="priceOld"
-                  value={priceOld}
-                  onChange={handleOldPriceChange}
-                  placeholder="Giá cũ"
-                />
-              </div> */}
-            </div>
-
-
             <div className="mt-3">
               <Form.Item
                 label="Ảnh"
@@ -303,6 +276,7 @@ export default function ProductDetailAndEdit() {
               <tr>
                 <th scope="col">Tên</th>
                 <th scope="col">Số lượng</th>
+                <th scope="col">Giá</th>
                 <th scope="col">Trạng thái</th>
               </tr>
             </thead>
@@ -315,6 +289,14 @@ export default function ProductDetailAndEdit() {
                       type="number"
                       value={quantities[size.sizeName]}
                       onChange={(e) => handleQuantityChange(size.sizeName, Number(e.target.value))}
+                    />
+                  </td>
+                  
+                  <td>
+                  <input
+                      type="number"
+                      value={size.price}
+                      onChange={(e) => handlePriceChange()}
                     />
                   </td>
                   <td>

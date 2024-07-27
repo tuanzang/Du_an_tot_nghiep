@@ -55,6 +55,8 @@ export const searchProducts = async (req, res) => {
 export const getDetailProduct = async (req, res) => {
   try {
     const data = await product.findById(req.params.id);
+    const productSizedata=  await productSize.find({ idProduct: req.params.id });
+   
 
     if (!data || data.length === 0) {
       return res.status(404).json({
@@ -63,9 +65,15 @@ export const getDetailProduct = async (req, res) => {
       });
     }
 
+    data.productSize= productSizedata
+    console.log(data);
+
     return res.status(200).json({
       message: "Đã tìm thấy sản phẩm",
-      data,
+      data: {
+        ...data.toJSON(),
+        productSizedata
+      },
     });
   } catch (error) {
     return res.status(500).json({
