@@ -10,6 +10,7 @@ import commentRouter from "./comment.js";
 import historyBillRouter from "./historyBill.js";
 import transBillRouter from "./transaction.js";
 import topOrderRouter from "./topOrder.js";
+import stockOrderRouter from "./stockProduct.js";
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use("/sizes", sizeRouter)
 router.use("/history-bill", historyBillRouter);
 router.use("/trans", transBillRouter);
 router.use("/topOrder", topOrderRouter);
+router.use("/stockOrder",stockOrderRouter)
 
 export default router;
