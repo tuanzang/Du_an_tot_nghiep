@@ -37,13 +37,6 @@ export default function Product() {
         console.error('Failed to fetch categories:', error);
       }
     };
-    // bình luận 
-    // mã giảm giá 
-    // thống kê(theo tháng ,tuần ,ngày ) ( đơn bom  -chi phí phải chịu,doanh thu tổng ,doanh thu của sản phẩm bán chạy nhất ,sản phẩm không bán được,doanh thu tổng  )
-    //===> những gì liên quan đến tiền là phải  có thống kê  
-    //lịch sử mua hàng ở client
-    // đổi trả 
-    // 
 
     const fetchSizes = async () => {
       try {
@@ -75,6 +68,8 @@ export default function Product() {
         const response = await axios.get(url,{
           params: { search: searchTerm },
         });
+        console.log(response);
+        
         setProduct(response.data?.data);
         
       } catch (error) {
@@ -421,9 +416,6 @@ export default function Product() {
                                   <span className="price-regular">
                                     {p.price + " "} VNĐ
                                   </span>
-                                  {/* <span className="price-old">
-                                    <del>{p.priceOld + " "}VND</del>
-                                  </span> */}
                                 </div>
                               </div>
                             </figure>

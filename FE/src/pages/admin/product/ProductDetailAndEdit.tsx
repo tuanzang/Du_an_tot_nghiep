@@ -32,7 +32,7 @@ export default function ProductDetailAndEdit() {
   const [product, setProduct] = useState<IProduct | null>(null);
   const [name, setName] = useState<string | undefined>(undefined);
   const [price, setPrice] = useState<number | undefined>(undefined);
-  const [priceOld, setPriceOld] = useState<number | undefined>(undefined);
+  // const [priceOld, setPriceOld] = useState<number | undefined>(undefined);
   // const [category, setCategory] = useState<string | undefined>(undefined);
   const [description, setDescription] = useState<string | undefined>(undefined);
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
@@ -52,7 +52,7 @@ export default function ProductDetailAndEdit() {
         setProduct(data.data);
         setName(data.data.name);
         setPrice(data.data.price);
-        setPriceOld(data.data.priceOld);
+        // setPriceOld(data.data.priceOld);
         setDescription(data.data.description);
         if (data.data.image) {
           setFileList(data.data.image.map((url: string) => ({
@@ -112,10 +112,10 @@ export default function ProductDetailAndEdit() {
     setIsChanged(true);
   };
 
-  const handleOldPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPriceOld(Number(e.target.value));
-    setIsChanged(true);
-  };
+  // const handleOldPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setPriceOld(Number(e.target.value));
+  //   setIsChanged(true);
+  // };
 
   const handleDescriptionChange = (_event: any, editor: any) => {
     const data = editor.getData();
@@ -128,7 +128,7 @@ export default function ProductDetailAndEdit() {
       const formData = new FormData();
       formData.append('name', name || '');
       formData.append('price', (price || 0).toString());
-      formData.append('priceOld', (priceOld || 0).toString());
+      // formData.append('priceOld', (priceOld || 0).toString());
       formData.append('description', description || '');
 
       // Nối fileList vào formData
@@ -239,33 +239,6 @@ export default function ProductDetailAndEdit() {
               />
             </div>
 
-            <div className="row">
-              <div className="form-group col">
-                <label htmlFor="">Giá</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  name="price"
-                  value={price}
-                  onChange={handlePriceChange}
-                  placeholder="Giá sản phẩm"
-                />
-              </div>
-
-              <div className="form-group col">
-                <label htmlFor="">Giá cũ</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  name="priceOld"
-                  value={priceOld}
-                  onChange={handleOldPriceChange}
-                  placeholder="Giá cũ"
-                />
-              </div>
-            </div>
-
-
             <div className="mt-3">
               <Form.Item
                 label="Ảnh"
@@ -303,6 +276,7 @@ export default function ProductDetailAndEdit() {
               <tr>
                 <th scope="col">Tên</th>
                 <th scope="col">Số lượng</th>
+                <th scope="col">Giá</th>
                 <th scope="col">Trạng thái</th>
               </tr>
             </thead>
@@ -315,6 +289,14 @@ export default function ProductDetailAndEdit() {
                       type="number"
                       value={quantities[size.sizeName]}
                       onChange={(e) => handleQuantityChange(size.sizeName, Number(e.target.value))}
+                    />
+                  </td>
+                  
+                  <td>
+                  <input
+                      type="number"
+                      value={size.price}
+                      onChange={(e) => handlePriceChange()}
                     />
                   </td>
                   <td>

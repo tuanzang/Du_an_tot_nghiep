@@ -12,14 +12,14 @@ const productSchema = new mongoose.Schema(
                 required: true
             }
         ],
-        price: {
-            type: Number,
-            required: true
-        },
-        priceOld: {
-            type: Number,
-            required: true
-        },
+        // price: {
+        //     type: Number,
+        //     required: true
+        // },
+        // priceOld: {
+        //     type: Number,
+        //     required: true
+        // },
         description: {
             type: String,
             required: true

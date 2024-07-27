@@ -83,9 +83,6 @@ export default function Home() {
               <div className="row mtn-30">
                 <div className="col-sm-6 col-lg-3">
                   <div className="policy-item">
-                    <div className="policy-icon">
-                      <i className="pe-7s-plane"></i>
-                    </div>
                     <div className="policy-content">
                       <h6>Miễn phí ship</h6>
                       <p>Miễn phí ship toàn quốc</p>
@@ -94,9 +91,6 @@ export default function Home() {
                 </div>
                 <div className="col-sm-6 col-lg-3">
                   <div className="policy-item">
-                    <div className="policy-icon">
-                      <i className="pe-7s-help2"></i>
-                    </div>
                     <div className="policy-content">
                       <h6>Hỗ trợ</h6>
                       <p>Hỗ trợ 24h trên ngày</p>
@@ -105,9 +99,6 @@ export default function Home() {
                 </div>
                 <div className="col-sm-6 col-lg-3">
                   <div className="policy-item">
-                    <div className="policy-icon">
-                      <i className="pe-7s-back"></i>
-                    </div>
                     <div className="policy-content">
                       <h6>Bảo hành</h6>
                       <p>Bảo hành làm mới trong 1 năm</p>
@@ -116,9 +107,6 @@ export default function Home() {
                 </div>
                 <div className="col-sm-6 col-lg-3">
                   <div className="policy-item">
-                    <div className="policy-icon">
-                      <i className="pe-7s-credit"></i>
-                    </div>
                     <div className="policy-content">
                       <h6>Tra cứu đơn hàng</h6>
                       <p>Có thể tra cứu mọi lúc</p>
@@ -183,7 +171,7 @@ export default function Home() {
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
-                            {product.map((p: IProduct, index) => (
+                            {product.map((p: IProduct) => (
                               <Col key={p._id} className="gutter-row" span={6}>
                                 <div className="product-item">
                                   <figure className="product-thumb">
@@ -255,7 +243,7 @@ export default function Home() {
                                           </Link>{" "}
                                         </p>
                                       </div>
-                                      <ul className="color-categories">
+                                      {/* <ul className="color-categories">
                                         <li>
                                           <a
                                             href="#"
@@ -284,14 +272,14 @@ export default function Home() {
                                             title="Brown"
                                           ></a>
                                         </li>
-                                      </ul>
+                                      </ul> */}
                                       <div className="price-box">
                                         <span className="price-regular">
                                           {p.price + ""} VNĐ
                                         </span>
-                                        <span className="price-old">
+                                        {/* <span className="price-old">
                                           <del>{p.priceOld + " "}VNĐ</del>
-                                        </span>
+                                        </span> */}
                                       </div>
                                     </div>
                                   </figure>
@@ -374,7 +362,7 @@ export default function Home() {
                                           <a href="#">{p.name}</a>
                                         </p>
                                       </div>
-                                      <ul className="color-categories">
+                                      {/* <ul className="color-categories">
                                         <li>
                                           <a
                                             href="#"
@@ -403,7 +391,7 @@ export default function Home() {
                                             title="Brown"
                                           ></a>
                                         </li>
-                                      </ul>
+                                      </ul> */}
                                       {/* <h6 className="product-name">
                                         <a href="#">Sản phẩm {index + 1}</a>
                                       </h6> */}
@@ -411,9 +399,9 @@ export default function Home() {
                                         <span className="price-regular">
                                           {p.price + " "} VNĐ
                                         </span>
-                                        <span className="price-old">
+                                        {/* <span className="price-old">
                                           <del>{p.priceOld + " "}VNĐ</del>
-                                        </span>
+                                        </span> */}
                                       </div>
                                     </div>
                                   </figure>
@@ -506,305 +494,6 @@ export default function Home() {
           </div>
         </div>
         {/* <!-- banner statistics area end --> */}
-
-        {/* <!-- featured product area start --> */}
-        <section className="product-area section-padding">
-          <div className="container">
-            <div className="row">
-              <div className="col-12">
-                {/* <!-- section title start --> */}
-                <div className="section-title text-center">
-                  <h2 className="title">Sản phẩm mới</h2>
-                  <p className="sub-title">Sản phẩm mới nhất</p>
-                </div>
-                {/* <!-- section title start --> */}
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-12">
-                <div className="product-container">
-                  {/* <!-- product tab menu start --> */}
-                  <div className="product-tab-menu">
-                    <ul className="nav justify-content-center">
-                      <li>
-                        <a href="#" className="active" data-bs-toggle="tab">
-                          Nhẫn
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" data-bs-toggle="tab">
-                          Dây chuyền
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" data-bs-toggle="tab">
-                          Lắc tay
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" data-bs-toggle="tab">
-                          Bông tai
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                  {/* <!-- product tab menu end --> */}
-
-                  {/* <!-- product tab content start --> */}
-                  <div className="tab-content">
-                    <Carousel autoplay={true} autoplaySpeed={5000}>
-                      {/* <!-- product item start --> */}
-                      <div className="tab-pane fade show active">
-                        <div className="product-carousel-4 slick-row-10 slick-arrow-style">
-                          <Row gutter={16}>
-                            {product.map((p, index) => (
-                              <Col key={p._id} className="gutter-row" span={6}>
-                                <div className="product-item">
-                                  <figure className="product-thumb">
-                                    <Link to={`/product/${p._id}`}>
-                                      <div className="image-container">
-                                        <img
-                                          className="pri-img"
-                                          src={p.image[0]}
-                                          alt={p.name}
-                                        />
-                                        {p.image[1] && (
-                                          <img
-                                            className="sec-img"
-                                            src={p.image[1]}
-                                            alt={p.name}
-                                          />
-                                        )}
-                                      </div>
-                                    </Link>
-                                    <div className="product-badge">
-                                      <div className="product-label new">
-                                        <span>HOT</span>
-                                      </div>
-                                    </div>
-                                    <div className="button-group">
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="left"
-                                        title="Yêu thích"
-                                      >
-                                        <i className="pe-7s-like"></i>
-                                      </a>
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="left"
-                                        title="So sánhpare"
-                                      >
-                                        <i className="pe-7s-refresh-2"></i>
-                                      </a>
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#quick_view"
-                                      >
-                                        <span
-                                          data-bs-toggle="tooltip"
-                                          data-bs-placement="left"
-                                          title="Xem chi tiết"
-                                        >
-                                          <i className="pe-7s-search"></i>
-                                        </span>
-                                      </a>
-                                    </div>
-                                    <div className="cart-hover">
-                                      <button className="btn btn-cart">
-                                        Thêm vào giỏ hàng
-                                      </button>
-                                    </div>
-                                    <div className="product-caption text-center">
-                                      <div className="product-identity">
-                                        <p className="manufacturer-name">
-                                          <a href="#">{p.name}</a>
-                                        </p>
-                                      </div>
-                                      <ul className="color-categories">
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-lightblue"
-                                            title="LightSteelblue"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-darktan"
-                                            title="Darktan"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-grey"
-                                            title="Grey"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-brown"
-                                            title="Brown"
-                                          ></a>
-                                        </li>
-                                      </ul>
-                                      {/* <h6 className="product-name">
-                                        <a href="#">Sản phẩm {index + 1}</a>
-                                      </h6> */}
-                                      <div className="price-box">
-                                        <span className="price-regular">
-                                          {p.price + " "} VNĐ
-                                        </span>
-                                        <span className="price-old">
-                                          <del>{p.price + " "}VNĐ</del>
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </figure>
-                                </div>
-                              </Col>
-                            ))}
-                          </Row>
-                        </div>
-                      </div>
-                      {/* <!-- product item end --> */}
-
-                      {/* <!-- product item start --> */}
-                      <div className="tab-pane fade show active">
-                        <div className="product-carousel-4 slick-row-10 slick-arrow-style">
-                          <Row gutter={16}>
-                            {product.map((p, index) => (
-                              <Col key={p._id} className="gutter-row" span={6}>
-                                <div className="product-item">
-                                  <figure className="product-thumb">
-                                    <Link to={`/product/${p._id}`}>
-                                      <div className="image-container">
-                                        <img
-                                          className="pri-img"
-                                          src={p.image[0]}
-                                          alt={p.name}
-                                        />
-                                        {p.image[1] && (
-                                          <img
-                                            className="sec-img"
-                                            src={p.image[1]}
-                                            alt={p.name}
-                                          />
-                                        )}
-                                      </div>
-                                    </Link>
-                                    <div className="product-badge">
-                                      <div className="product-label new">
-                                        <span>HOT</span>
-                                      </div>
-                                    </div>
-                                    <div className="button-group">
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="left"
-                                        title="Yêu thích"
-                                      >
-                                        <i className="pe-7s-like"></i>
-                                      </a>
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="left"
-                                        title="So sánhpare"
-                                      >
-                                        <i className="pe-7s-refresh-2"></i>
-                                      </a>
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#quick_view"
-                                      >
-                                        <span
-                                          data-bs-toggle="tooltip"
-                                          data-bs-placement="left"
-                                          title="Xem chi tiết"
-                                        >
-                                          <i className="pe-7s-search"></i>
-                                        </span>
-                                      </a>
-                                    </div>
-                                    <div className="cart-hover">
-                                      <button className="btn btn-cart">
-                                        Thêm vào giỏ hàng
-                                      </button>
-                                    </div>
-                                    <div className="product-caption text-center">
-                                      <div className="product-identity">
-                                        <p className="manufacturer-name">
-                                          <a href="#">{p.name}</a>
-                                        </p>
-                                      </div>
-                                      <ul className="color-categories">
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-lightblue"
-                                            title="LightSteelblue"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-darktan"
-                                            title="Darktan"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-grey"
-                                            title="Grey"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-brown"
-                                            title="Brown"
-                                          ></a>
-                                        </li>
-                                      </ul>
-                                      <h6 className="product-name">
-                                        <a href="#">Sản phẩm {index + 1}</a>
-                                      </h6>
-                                      <div className="price-box">
-                                        <span className="price-regular">
-                                          {p.price + " "} VNĐ
-                                        </span>
-                                        <span className="price-old">
-                                          <del>{p.price + " "}VNĐ</del>
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </figure>
-                                </div>
-                              </Col>
-                            ))}
-                          </Row>
-                        </div>
-                      </div>
-                      {/* <!-- product item end --> */}
-                    </Carousel>
-                  </div>
-                  {/* <!-- product tab content end --> */}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        {/* <!-- featured product area end --> */}
 
         {/* <!-- latest blog area start --> */}
         <section className="latest-blog-area section-padding pt-0">
