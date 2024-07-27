@@ -1,24 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import axios from 'axios';
-import { useEffect } from 'react';
+import axios from "axios";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import {
-  Button,
-  Card,
-  Form,
-  Image,
-  Upload,
-} from "antd";
-// import formatCurrency from "../../../services/common/formatCurrency";
-import {
-  EditOutlined,
-  UploadOutlined
-} from "@ant-design/icons";
+import { Button, Card, Form, Image, Upload, Input, InputNumber } from "antd";
+import { EditOutlined, UploadOutlined } from "@ant-design/icons";
 import { UploadFile } from "antd/lib";
-import { IProduct } from '../../../interface/Products';
+import { IProduct } from "../../../interface/Products";
 import { IProductSize } from "../../../interface/ProductSize";
 
+const { TextArea } = Input;
 
 export default function ProductDetailAndEdit() {
   const { id } = useParams<{ id: string }>(); // Lấy ID sản phẩm từ URL
@@ -34,28 +24,34 @@ export default function ProductDetailAndEdit() {
     // Gọi API để lấy chi tiết sản phẩm
     const fetchProductDetails = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:3001/api/products/${id}`);
+        const { data } = await axios.get(
+          `http://localhost:3001/api/products/${id}`
+        );
         setProduct(data.data);
         setName(data.data.name);
         setPrice(data.data.price);
         setDescription(data.data.description);
         if (data.data.image) {
-          setFileList(data.data.image.map((url: string) => ({
-            uid: url,
-            name: url.split('/').pop() || '',
-            status: 'done',
-            url,
-          })));
+          setFileList(
+            data.data.image.map((url: string) => ({
+              uid: url,
+              name: url.split("/").pop() || "",
+              status: "done",
+              url,
+            }))
+          );
         }
       } catch (error) {
-        console.error('Error fetching product details:', error);
+        console.error("Error fetching product details:", error);
       }
     };
 
     // Gọi API để lấy số lượng sản phẩm theo kích cỡ
     const fetchProductSizes = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:3001/api/products/productSize/${id}`);
+        const { data } = await axios.get(
+          `http://localhost:3001/api/products/productSize/${id}`
+        );
         setProductSizes(data.data);
 
         // Cập nhật state quantities
@@ -65,11 +61,11 @@ export default function ProductDetailAndEdit() {
         });
         setQuantities(initialQuantities);
       } catch (error) {
-        console.error('Error fetching product sizes:', error);
+        console.error("Error fetching product sizes:", error);
       }
     };
 
-    fetchProductDetails();
+    fetchProductDetails(); 
     fetchProductSizes();
   }, [id]);
 
@@ -77,7 +73,7 @@ export default function ProductDetailAndEdit() {
   const handleQuantityChange = (sizeName: any, value: any) => {
     setQuantities({
       ...quantities,
-      [sizeName]: value
+      [sizeName]: value,
     });
   };
 
@@ -89,49 +85,57 @@ export default function ProductDetailAndEdit() {
     setName(e.target.value);
   };
 
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPrice(Number(e.target.value));
+  const handlePriceChange = (value: number|any) => {
+    setPrice(value);
   };
 
-  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleDescriptionChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setDescription(e.target.value);
   };
 
   // Tính tổng số lượng tất cả các size
-  const totalQuantity = Object.values(quantities).reduce((acc, qty) => acc + qty, 0);
+  const totalQuantity = Object.values(quantities).reduce(
+    (acc, qty) => acc + qty,
+    0
+  );
 
   const handleUpdateProduct = async () => {
     try {
       const formData = new FormData();
-      formData.append('name', name || '');
-      formData.append('price', (price || 0).toString());
-      formData.append('description', description || '');
+      formData.append("name", name || "");
+      formData.append("price", (price || 0).toString());
+      formData.append("description", description || "");
 
       // Nối fileList vào formData
-      fileList.forEach(file => {
+      fileList.forEach((file) => {
         if (file.originFileObj) {
-          formData.append('image', file.originFileObj);
+          formData.append("image", file.originFileObj);
         }
       });
 
       // Cập nhật thông tin sản phẩm
       await axios.put(`http://localhost:3001/api/products/${id}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       // Cập nhật số lượng sản phẩm theo kích cỡ
       for (const productSize of productSizes) {
         const updatedQuantity = quantities[productSize.sizeName];
-        await axios.put(`http://localhost:3001/api/products/productSize/${productSize._id}`, {
-          quantity: updatedQuantity,
-        });
+        await axios.put(
+          `http://localhost:3001/api/products/productSize/${productSize._id}`,
+          {
+            quantity: updatedQuantity,
+          }
+        );
       }
-      alert('Cập nhật sản phẩm thành công');
+      alert("Cập nhật sản phẩm thành công");
     } catch (error) {
-      console.error('Error updating product:', error);
-      alert('Đã xảy ra lỗi khi cập nhật sản phẩm');
+      console.error("Error updating product:", error);
+      alert("Đã xảy ra lỗi khi cập nhật sản phẩm");
     }
   };
 
@@ -139,116 +143,194 @@ export default function ProductDetailAndEdit() {
     <div>
       <BreadcrumbsCustom
         listLink={[{ link: "/admin/product", name: "Sản phẩm" }]}
-        nameHere={`${id}`}
+        nameHere={`Chi tiết sản phẩm ${name}`}
       />
 
-      <Card style={{ padding: "16px" }}>
-
-        <div className="container" >
-          <div className="row" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <div className="col-md-6">
-              <p className="pb-3" style={{
-                textDecoration: "none",
-                fontWeight: "600",
-                fontSize: "calc(1.2rem + 0.15vw)",
-                color: "#c29957",
-              }}>Chi tiết sản phẩm</p>
-              <div className="form-group">
-                <label style={{ fontSize: '20px' }}>Tên</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={name}
-                  onChange={handleNameChange}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="" style={{ fontSize: '20px' }}>Giá</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={price}
-                  onChange={handlePriceChange}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="" style={{ fontSize: '20px' }}>Số lượng</label>
-                <div className="form-group" style={{ display: 'flex', gap: '10px' }}>
-                  {productSizes.map((productSize) => (
-                    <React.Fragment key={productSize._id}>
-                      <p className="mt-2">{productSize.sizeName}</p>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={quantities[productSize.sizeName] || ''}
-                        onChange={(e) => handleQuantityChange(productSize.sizeName, e.target.value)}
-                      />
-                    </React.Fragment>
-                  ))}
-                </div>
-                <div className="form-group mt-2">
-                  <label htmlFor="" style={{ fontSize: '20px' }}>Tổng số lượng</label>
-                  <p className="form-control">{totalQuantity}</p>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="" style={{ fontSize: '20px' }}>Mô tả</label>
-                <textarea
-                  className="form-control"
-                  rows={4}
-                  value={description}
-                  onChange={handleDescriptionChange}
-                />
-              </div>
-
-              {/* upload ảnh */}
-              <Form.Item
-                label="Ảnh"
-                name="image"
-                rules={[
-                  { required: true, message: "Vui lòng tải lên ảnh sản phẩm!" },
-                ]}
+      <Card style={{ padding: "16px", backgroundColor: "#f9f9f9" }}>
+        <div className="container">
+          <div
+            className="row"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <div className="col-md-8">
+              <p
+                className="pb-3"
+                style={{
+                  textDecoration: "none",
+                  fontWeight: "600",
+                  fontSize: "calc(1.2rem + 0.15vw)",
+                  color: "#c29957",
+                  textAlign: "center",
+                }}
               >
-                <Upload
-                  name="image"
-                  listType="picture"
-                  beforeUpload={() => false}
-                  multiple
-                  accept=".jpg,.png,.jpeg"
-                  onChange={handleUploadChange}
+                Chi tiết sản phẩm
+              </p>
+              <Form layout="vertical">
+                <Form.Item
+                  label="Tên"
+                  style={{ fontSize: "20px", color: "#333" }}
                 >
-                  <Button icon={<UploadOutlined />}>Tải ảnh lên</Button>
-                </Upload>
-              </Form.Item>
-
-              <div className="row mt-4">
-                <div
-                  className=""
-                  style={{ marginBottom: "10px" }}
-                >
-                  <Image
-                    width={"20%"}
-                    src={product?.image?.[0]}
-                    alt="product-details"
+                  <Input
+                    value={name}
+                    onChange={handleNameChange}
+                    style={{ borderColor: "#c29957" }}
                   />
-                </div>
-              </div>
+                </Form.Item>
 
+                <Form.Item
+                  label="Giá"
+                  style={{ fontSize: "20px", color: "#333" }}
+                >
+                  <InputNumber
+                    value={price}
+                    onChange={handlePriceChange}
+                    style={{ width: "100%", borderColor: "#c29957" }}
+                    min={0}
+                    formatter={(value) =>
+                      `₫ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="Số lượng"
+                  style={{ fontSize: "20px", color: "#333" }}
+                >
+                  <div
+                    style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}
+                  >
+                    {productSizes.map((productSize) => (
+                      <div
+                        key={productSize._id}
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <p
+                          className="mt-2"
+                          style={{ marginRight: "10px", color: "#555" }}
+                        >
+                          Size {productSize.sizeName}
+                        </p>
+                        <InputNumber
+                          value={quantities[productSize.sizeName] || 0}
+                          onChange={(value) =>
+                            handleQuantityChange(productSize.sizeName, value)
+                          }
+                          min={0}
+                          style={{ flex: "1", borderColor: "#c29957" }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="form-group mt-2">
+                    <label style={{ fontSize: "20px", color: "#333" }}>
+                      Tổng số lượng
+                    </label>
+                    <p
+                      className="form-control"
+                      style={{
+                        width: "100%",
+                        textAlign: "center",
+                        borderColor: "#c29957",
+                      }}
+                    >
+                      {totalQuantity} chiếc
+                    </p>
+                  </div>
+                </Form.Item>
+
+                <Form.Item
+                  label="Mô tả"
+                  style={{ fontSize: "20px", color: "#333" }}
+                >
+                  <TextArea
+                    rows={4}
+                    value={description}
+                    onChange={handleDescriptionChange}
+                    style={{ borderColor: "#c29957" }}
+                  />
+                </Form.Item>
+
+                {/* upload ảnh */}
+                <Form.Item
+                  label="Ảnh"
+                  name="image"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Vui lòng tải lên ảnh sản phẩm!",
+                    },
+                  ]}
+                  style={{ fontSize: "20px", color: "#333" }}
+                >
+                  <Upload
+                    name="image"
+                    listType="picture"
+                    beforeUpload={() => false}
+                    multiple
+                    accept=".jpg,.png,.jpeg"
+                    onChange={handleUploadChange}
+                  >
+                    <Button
+                      icon={<UploadOutlined />}
+                      style={{
+                        backgroundColor: "#c29957",
+                        borderColor: "#c29957",
+                        color: "#fff",
+                      }}
+                    >
+                      Tải ảnh lên
+                    </Button>
+                  </Upload>
+                </Form.Item>
+
+                <div className="row mt-4">
+                  <div
+                    className=""
+                    style={{
+                      marginBottom: "10px",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {fileList.map((file) => (
+                      <Image
+                        key={file.uid}
+                        width={"20%"}
+                        src={file.url}
+                        alt="product-details"
+                        style={{ marginRight: "10px", borderColor: "#c29957" }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-5" style={{ textAlign: "center" }}>
+                  <Button
+                    className="btn bg-primary p-2 border text-white"
+                    icon={<EditOutlined />}
+                    onClick={handleUpdateProduct}
+                    style={{
+                      backgroundColor: "#c29957",
+                      borderColor: "#c29957",
+                      color: "#fff",
+                    }}
+                  >
+                    Cập nhật
+                  </Button>
+                </div>
+              </Form>
             </div>
           </div>
-
-
         </div>
-
-        <div className="mt-5" style={{ float: "right" }}>
-          <Button className="btn bg-primary p-2 border text-white" icon={<EditOutlined />} onClick={handleUpdateProduct}>Cập nhật</Button>
-        </div>
-
       </Card>
-
     </div>
   );
 }
