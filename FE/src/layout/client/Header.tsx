@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   ACCESS_TOKEN_STORAGE_KEY,
   USER_INFO_STORAGE_KEY,
@@ -9,7 +9,6 @@ import { useMyCartQuery } from "../../hooks/useCart";
 const Header = () => {
   const [openMenuCart, setOpenMenuCart] = useState(false);
   const { data } = useMyCartQuery();
-  const navigate = useNavigate();
 
   const handleMenuCartClick = () => {
     setOpenMenuCart(!openMenuCart);
@@ -18,9 +17,7 @@ const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
     localStorage.removeItem(USER_INFO_STORAGE_KEY);
-    // navigate("/login");
   };
-
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const userInfo =
     JSON.parse(localStorage.getItem(USER_INFO_STORAGE_KEY) as string) || "";
@@ -30,36 +27,6 @@ const Header = () => {
       <header className="header-area header-wide bg-gray">
         {/* main header start */}
         <div className="main-header d-none d-lg-block">
-          {/* header top start */}
-          <div className="header-top bdr-bottom">
-            <div className="container">
-              <div className="row align-items-center">
-                <div className="col-lg-6">
-                  <div className="welcome-message">
-                    <p>Chào mừng bạn đến với F-Bee</p>
-                  </div>
-                </div>
-                <div className="col-lg-6 text-right">
-                  <div className="header-top-settings">
-                    <ul className="nav align-items-center justify-content-end">
-                      <li className="curreny-wrap">
-                        Cao Đẳng FPT Polytechnic Hà Nội
-                      </li>
-                      <li className="language">
-                        <img
-                          src="../../src/assets/image/icon/vn.gif"
-                          alt="flag"
-                        />
-                        Việt Nam
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* header top end */}
-
           {/* header middle area start */}
           <div className="header-main-area sticky">
             <div className="container">
@@ -94,10 +61,10 @@ const Header = () => {
                             <a href="shop.html">Tin tức</a>
                           </li>
                           <li>
-                            <a href="shop.html">Về chúng tôi</a>
+                            <a href="shop.html">Giới thiệu</a>
                           </li>
                           <li>
-                            <a href="contact-us.html">Tra cứu đơn hàng</a>
+                            <a href="contact-us.html">Chính sách</a>
                           </li>
                         </ul>
                       </nav>
@@ -137,9 +104,7 @@ const Header = () => {
                             {isLogged ? (
                               <>
                                 <li>
-                                  <a href="my-account.html">
-                                    Tài khoản của tôi
-                                  </a>
+                                  <a href="/profile">Tài khoản của tôi</a>
                                 </li>
                                 {userInfo?.role === "admin" && (
                                   <li>
@@ -303,17 +268,9 @@ const Header = () => {
                         aria-labelledby="myaccount"
                       >
                         {isLogged ? (
-                          <>
-                            <a className="dropdown-item" href="my-account.html">
-                              Tài khoản của tôi
-                            </a>
-                            <button
-                              onClick={handleLogout}
-                              className="dropdown-item"
-                            >
-                              Đăng xuất
-                            </button>
-                          </>
+                          <a className="dropdown-item" href="my-account.html">
+                            Tài khoản của tôi
+                          </a>
                         ) : (
                           <>
                             <Link to="/register" className="dropdown-item">

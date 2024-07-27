@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams } from "react-router-dom";
 import {
   Button,
@@ -1086,6 +1087,12 @@ export default function BillDetail() {
                 dataIndex="name"
                 key="name"
                 width={"25%"}
+                render={(name, record: any) => {
+                  return <>
+                  <p>{name}</p>
+                  <p>Size: {record?.size}</p>
+                  </>
+                }}
               />
               <Table.Column
                 title="Số lượng"

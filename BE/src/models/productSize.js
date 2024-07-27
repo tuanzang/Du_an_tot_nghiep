@@ -7,7 +7,7 @@ const productSizeSchema = new mongoose.Schema(
             ref: "Product",
             required: true
         },
-        idSize  : {
+        idSize: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Size",
             required: true
@@ -16,14 +16,23 @@ const productSizeSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
+        price: {
+            type: Number,
+            required: true
+        },
         sizeName: {
             type: String,
             required: true
+        },
+        status: {
+            type: Boolean,
+            required: true,
+            default: true
         }
     }, {
-        timestamps: true,
-        versionKey: false
-    }
+    timestamps: true,
+    versionKey: false
+}
 );
 
 

@@ -26,6 +26,12 @@ const signupSchema = Joi.object({
     "any.required": " Confirm Password là bắt buộc",
     "any.only": "Mật khẩu không trùng khớp",
   }),
+  phoneNumber: Joi.string().min(10).max(20).required().messages({
+    "any.required": " Password là bắt buộc",
+    "string.empty": " Password không được để trống",
+    "string.min": " Password phải có ít nhất {#limit} ký tự",
+    "string.max": " Password không được vượt quá {#limit} ký tự",
+  }),
   avatar: Joi.string().uri().messages({
     "string.uri": " Avatar phải là đường dẫn hợp lệ",
   }),
@@ -33,7 +39,7 @@ const signupSchema = Joi.object({
 
 // test đẩy code
 export const signup = async (req, res) => {
-  const { email, password, name, avatar } = req.body;
+  const { email, password, phoneNumber, name, avatar } = req.body;
   const { error } = signupSchema.validate(req.body, { abortEarly: false });
   console.log(error);
   if (error) {

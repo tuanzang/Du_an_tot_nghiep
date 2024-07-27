@@ -11,11 +11,14 @@ import { IUser } from "../../interface/Users";
 import { useDispatch, useSelector } from "react-redux";
 import { ICartItem } from "./Cart";
 import {
+  removeProduct,
   resetProductSelected,
   selectProductSelected,
   selectTotalPrice,
 } from "../../store/cartSlice";
 import { USER_INFO_STORAGE_KEY } from "../../services/constants";
+import { useEffect } from "react";
+import { socket } from "../../socket";
 
 type Inputs = {
   customerName: string;
@@ -37,6 +40,25 @@ const Checkout = () => {
   const { refetch } = useMyCartQuery();
   const navigate = useNavigate();
 
+  // initial socket
+  useEffect(() => {
+    const onHiddenProduct = (productId: string) => {
+      dispatch(removeProduct(productId));
+    };
+
+    socket.on("hidden product", onHiddenProduct);
+
+    return () => {
+      socket.off("hidden product", onHiddenProduct);
+    };
+  }, [dispatch, navigate, productSelected.length]);
+
+  useEffect(() => {
+    if (!productSelected.length) {
+      navigate(-1);
+    }
+  }, [navigate, productSelected.length]);
+
   const { register, handleSubmit } = useForm<Inputs>({
     defaultValues: {
       paymentMethod: "COD",
@@ -45,7 +67,7 @@ const Checkout = () => {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      const productSelectedIds = productSelected.map((it) => it.product._id);
+      const productSelectedIds = productSelected.map((it) => it.variant._id);
       const res = await OrderApi.createOrder({
         ...data,
         productSelectedIds,
@@ -170,7 +192,7 @@ const Checkout = () => {
                   {...register("paymentMethod")}
                 />
                 <label className="form-check-label" htmlFor="myCheckbox">
-                Thanh toán ngay
+                  Thanh toán ngay
                 </label>
               </div>
             </div>
@@ -192,7 +214,7 @@ const Checkout = () => {
             <thead>
               <tr>
                 <th>Tên sản phẩm</th>
-                <th>ảnh</th>
+                {/* <th>ảnh</th> */}
                 <th>Giá</th>
                 <th>Số lượng</th>
                 <th>Tổng</th>
@@ -201,10 +223,12 @@ const Checkout = () => {
             <tbody>
               {productSelected?.map((item) => (
                 <tr key={item._id}>
-                  <td>{item.product.name}</td>
-                  <td>{formatPrice(item.product.price)}</td>
+                  <td>
+                    {item.product.name} (Size: {item.variant?.sizeName})
+                  </td>
+                  <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
-                  <td>{formatPrice(item.product.price * item.quantity)}</td>
+                  <td>{formatPrice(item.variant.price * item.quantity)}</td>
                 </tr>
               ))}
             </tbody>

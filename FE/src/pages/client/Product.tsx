@@ -3,7 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { IProduct } from "../../interface/Products";
 import { ICategory } from "../../interface/Categories";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
 import useCartMutation from "../../hooks/useCart";
 import { ISize } from "../../interface/Size";
@@ -14,8 +14,12 @@ export default function Product() {
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([200, 500]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([200000, 500000]);
   const [sizes, setSizes] = useState<ISize[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
+
+  const location = useLocation();
 
   const { mutate } = useCartMutation({
     action: "ADD",
@@ -37,7 +41,7 @@ export default function Product() {
     const fetchSizes = async () => {
       try {
         const response = await axios.get(`http://localhost:3001/api/sizes`);
-        console.log("Sizes API response:", response.data);
+        // console.log("Sizes API response:", response.data);
         setSizes(response.data.data);
       } catch (error) {
         console.error("Error fetching sizes:", error);
@@ -48,22 +52,59 @@ export default function Product() {
     fetchSizes()
   }, []);
 
+
   useEffect(() => {
+     // Get search term from URL
+     const queryParams = new URLSearchParams(location.search);
+     const searchQuery = queryParams.get('search');
+     if (searchQuery) {
+       setSearchTerm(searchQuery);
+     }
+     console.log(searchQuery);
+     
     const fetchProducts = async () => {
       try {
         let url = `http://localhost:3001/api/products`;
-        if (searchTerm) {
-          url += `?search=${encodeURIComponent(searchTerm)}`;
-        }
-        const response = await axios.get(url);
+        const response = await axios.get(url,{
+          params: { search: searchTerm },
+        });
+        console.log(response);
+        
         setProduct(response.data?.data);
+        
       } catch (error) {
         console.log("Không có dữ liệu");
       }
     };
 
     fetchProducts();
-  }, [searchTerm]);
+  }, [location.search]);
+
+  useEffect(() => {
+    const results = product.filter((products) =>
+      products.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredProducts(results);
+    console.log(results);
+  }, [searchTerm, product]);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      const fetchProductsByCategory = async () => {
+        try {
+           let url = selectedCategory 
+          ? `http://localhost:3001/api/products/filter/category/${selectedCategory}`
+          : `http://localhost:3001/api/products`;
+        const response = await axios.get(url);
+        setProduct(response.data?.data);
+        } catch (error) {
+          console.error('Error fetching products by category:', error);
+        }
+      };
+
+      fetchProductsByCategory();
+    }
+  }, [selectedCategory]);
 
   const onAddCart = (productData: IProduct) => {
     if (!isLogged) {
@@ -88,10 +129,19 @@ export default function Product() {
       const response = await axios.get('http://localhost:3001/api/products/filter/price', {
         params: { minPrice, maxPrice },
       });
+      if (response.data?.data.length === 0) {
+        message.info('Không có sản phẩm nào trong khoảng giá này');
+      }
       console.log('Filtered Products:', response.data);
+      setProduct(response.data?.data || []);
     } catch (error) {
       console.error('Error fetching filtered products:', error);
+      message.error('Lỗi khi lọc sản phẩm');
     }
+  };
+
+  const handleCategoryClick = (categoryId: string) => {
+    setSelectedCategory(categoryId);
   };
 
   return (
@@ -132,6 +182,7 @@ export default function Product() {
               {/* <!-- sidebar area start --> */}
               <div className="col-lg-3 order-2 order-lg-1">
                 <aside className="sidebar-wrapper">
+
                   {/* <!-- single sidebar start --> */}
                   <div className="sidebar-single">
                     <h5 className="sidebar-title">
@@ -139,15 +190,15 @@ export default function Product() {
                     </h5>
 
                     <div className="sidebar-body">
-                      <ul className="shop-categories">
-                        <li>
-                          <a href="#">
+                    <ul className="shop-categories">
+                        {/* <li>
+                          <a href="#" onClick={() => handleCategoryClick('')}>
                             Tất cả
                           </a>
-                        </li>
+                        </li> */}
                         {categories?.map((category) => (
                           <li key={category._id}>
-                            <a href="#">
+                            <a href="#" onClick={() => handleCategoryClick(category._id)}>
                               {category.loai}
                             </a>
                           </li>
@@ -177,9 +228,9 @@ export default function Product() {
                           onChange={(value) =>
                             handleSliderChange(value as [number, number])
                           }
-                          min={1}
-                          max={1000}
-                          step={100}
+                          min={100000}
+                          max={1000000}
+                          step={50000}
                         />
                         <Button
                           className="filter-btn"
@@ -203,7 +254,7 @@ export default function Product() {
                     >
                       <span>Kích cỡ</span>
                     </h5>
-                    
+
                     <div className="sidebar-body">
                       <ul className="checkbox-container categories-list">
                         {sizes.map((size, index) => (
@@ -276,18 +327,7 @@ export default function Product() {
                           </div>
                         </div>
                       </div>
-                      <div className="col-lg-5 col-md-6 order-1 order-md-2">
-                        <div className="top-bar-right">
-                          <div className="product-short">
-                            <p>Tìm kiếm theo :</p>
-                            <select className="nice-select" name="sortby">
-                              <option value="trending">Tìm kiếm theo</option>
-                              <option value="sales">Tên (A - Z)</option>
-                              <option value="sales">Tên (Z - A)</option>
-                            </select>
-                          </div>
-                        </div>
-                      </div>
+
                     </div>
                   </div>
                   {/* <!-- shop product top wrap start --> */}
@@ -299,7 +339,7 @@ export default function Product() {
                       style={{ marginLeft: "6px", padding: "0px" }}
                     >
                       {product.map((p: IProduct) => (
-                        <Col className="gutter-row" span={8}>
+                        <Col className="gutter-row" span={8} key={p._id}>
                           <div className="product-item">
                             <figure className="product-thumb">
                               <Link to={`/product/${p._id}`}>
@@ -376,9 +416,6 @@ export default function Product() {
                                   <span className="price-regular">
                                     {p.price + " "} VNĐ
                                   </span>
-                                  {/* <span className="price-old">
-                                    <del>{p.priceOld + " "}VND</del>
-                                  </span> */}
                                 </div>
                               </div>
                             </figure>

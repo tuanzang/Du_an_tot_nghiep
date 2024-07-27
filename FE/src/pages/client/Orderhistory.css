@@ -1,0 +1,76 @@
+.text-center {
+ text-align: center;
+}
+
+.center-container {
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ padding: 20px;
+ /* Thêm padding nếu cần */
+}
+
+.ant-table-wrapperr {
+ width: 100%;
+ max-width: 1200px;
+ /* Hoặc một giá trị phù hợp */
+ margin-left: 200px;
+ /* Căn giữa theo chiều ngang */
+}
+
+.discount-code-container {
+  display: flex; /* Sắp xếp các phần tử theo hàng */
+  align-items: center; /* Căn chỉnh dọc */
+  justify-content: space-between; /* Căn chỉnh ngang */
+  padding: 10px; /* Thêm khoảng đệm */
+  border: 1px solid red; /* Đường viền màu đỏ */
+  border-radius: 5px; /* Bo góc nhẹ */
+  background-color: #f9f9f9; /* Màu nền nhẹ */
+}
+
+.discount-code {
+  font-size: 14px; /* Kích thước chữ nhỏ hơn */
+  color: red; /* Màu chữ đỏ */
+}
+
+.apply-button {
+  padding: 5px 10px; /* Khoảng đệm cho nút */
+  font-size: 14px; /* Kích thước chữ nút */
+  color: #fff; /* Màu chữ nút */
+  background-color: red; /* Màu nền nút */
+  border: none; /* Bỏ viền nút */
+  border-radius: 3px; /* Bo góc nút */
+  cursor: pointer; /* Con trỏ chuột khi hover */
+}
+
+.hoan-thanh {
+ color: red;
+}
+
+.cho-xac-nhan {
+ color: orange;
+}
+
+.cho-giao-hang {
+ color: blue;
+}
+
+.dang-van-chuyen {
+ color: rgb(217, 52, 217);
+}
+
+.da-giao-hang {
+ color: green;
+}
+
+.cho-thanh-toan {
+ color: red;
+}
+
+.da-thanh-toan {
+ color: green;
+}
+
+.da-huy {
+ color: grey;
+}

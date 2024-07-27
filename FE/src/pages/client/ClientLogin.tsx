@@ -10,7 +10,12 @@ import {
   Card,
   message,
 } from "antd";
-import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  LockOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import AuthApi, { ISignInBody } from "../../config/authApi";
@@ -46,7 +51,6 @@ const RegisterPanel = () => {
     }
   };
 
-  
   return (
     <Form onFinish={onSubmit} form={form}>
       <Form.Item
@@ -97,6 +101,29 @@ const RegisterPanel = () => {
         <Input
           prefix={<MailOutlined color="black" />}
           placeholder="Nhập email"
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="PhoneNumber"
+        style={{ width: "100%", marginBottom: "20px" }}
+        labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }}
+        name="phoneNumber"
+        rules={[
+          {
+            required: true,
+            message: "Vui lòng nhập số điện thoại",
+          },
+          {
+            pattern: /^(?:\+84|0)[0-9]{9}$/,
+            message: "số điện thoại không đúng định dạng",
+          },
+        ]}
+      >
+        <Input
+          prefix={<PhoneOutlined color="black" />}
+          placeholder="Nhập số điện thoại"
         />
       </Form.Item>
 
@@ -160,17 +187,17 @@ const RegisterPanel = () => {
 
 const LoginPanel = () => {
   const navigate = useNavigate();
-  const [userBlocked, setUserBlocked] = useState(false); 
+  const [userBlocked, setUserBlocked] = useState(false);
 
   const onSubmit = async (formData: ISignInBody) => {
     try {
-      const { data } = await AuthApi.signIn(formData); 
+      const { data } = await AuthApi.signIn(formData);
 
       if (data?.user?.blocked) {
-        setUserBlocked(true); 
+        setUserBlocked(true);
         message.error(
           "Tài khoản của bạn đã bị chặn. Vui lòng liên hệ với quản trị viên."
-        ); 
+        );
       } else {
         localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data?.token);
         localStorage.setItem(USER_INFO_STORAGE_KEY, JSON.stringify(data?.user));
@@ -230,7 +257,7 @@ const LoginPanel = () => {
         </Space>
       </Form.Item>
       <Typography>
-        <Link to="/forgot-password">Quên mật khẩu?</Link>
+        <Link to="/forgotPass">Quên mật khẩu?</Link>
       </Typography>
     </Form>
   );

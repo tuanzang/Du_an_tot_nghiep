@@ -16,9 +16,17 @@ export default function ProductDetailAndEdit() {
   const [product, setProduct] = useState<IProduct | null>(null);
   const [name, setName] = useState<string | undefined>(undefined);
   const [price, setPrice] = useState<number | undefined>(undefined);
+  // const [priceOld, setPriceOld] = useState<number | undefined>(undefined);
+  // const [category, setCategory] = useState<string | undefined>(undefined);
   const [description, setDescription] = useState<string | undefined>(undefined);
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+  const editorContainerRef = useRef(null);
+  const editorRef = useRef(null);
+  const [isLayoutReady, setIsLayoutReady] = useState(false);
+  const [isChanged, setIsChanged] = useState(false);
+  const [isChanged1, setIsChanged1] = useState(false);
+  const [isChanged2, setIsChanged2] = useState(false);
 
   useEffect(() => {
     // Gọi API để lấy chi tiết sản phẩm
@@ -30,6 +38,7 @@ export default function ProductDetailAndEdit() {
         setProduct(data.data);
         setName(data.data.name);
         setPrice(data.data.price);
+        // setPriceOld(data.data.priceOld);
         setDescription(data.data.description);
         if (data.data.image) {
           setFileList(
@@ -75,14 +84,17 @@ export default function ProductDetailAndEdit() {
       ...quantities,
       [sizeName]: value,
     });
+    setIsChanged1(true);
   };
 
   const handleUploadChange = ({ fileList }: { fileList: UploadFile[] }) => {
     setFileList(fileList);
+    setIsChanged(true);
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
+    setIsChanged(true);
   };
 
   const handlePriceChange = (value: number|any) => {
@@ -121,8 +133,15 @@ export default function ProductDetailAndEdit() {
           "Content-Type": "multipart/form-data",
         },
       });
+      toast.success("Cập nhật sản phẩm thành công");
+    } catch (error) {
+      console.error('Error updating product:', error);
+      toast.error("Cập nhật sản phẩm thất bại");
+    }
+  };
 
-      // Cập nhật số lượng sản phẩm theo kích cỡ
+  const handleUpdateProductSize = async () => {
+    try {
       for (const productSize of productSizes) {
         const updatedQuantity = quantities[productSize.sizeName];
         await axios.put(
@@ -145,6 +164,20 @@ export default function ProductDetailAndEdit() {
         listLink={[{ link: "/admin/product", name: "Sản phẩm" }]}
         nameHere={`Chi tiết sản phẩm ${name}`}
       />
+      <div className="w-50 mx-auto">
+        <Card style={{ padding: "10px", marginBottom: "10px" }}>
+          <form>
+            <div className="form-group">
+              <label htmlFor="">Tên sản phẩm</label>
+              <input
+                type="text"
+                className="form-control"
+                name="name"
+                value={name}
+                onChange={handleNameChange}
+                placeholder="Tên sản phẩm"
+              />
+            </div>
 
       <Card style={{ padding: "16px", backgroundColor: "#f9f9f9" }}>
         <div className="container">
@@ -334,3 +367,5 @@ export default function ProductDetailAndEdit() {
     </div>
   );
 }
+
+
