@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, InputNumber, Popconfirm, Table, Typography } from "antd";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import useCartMutation, { useMyCartQuery } from "../../hooks/useCart";
@@ -11,6 +11,7 @@ import {
   selectTotalPrice,
   updateProductSelected,
 } from "../../store/cartSlice";
+import { socket } from "../../socket";
 
 const { Text } = Typography;
 
@@ -47,13 +48,32 @@ export default function Cart() {
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
   const totalPrice = useSelector(selectTotalPrice);
-  const { data } = useMyCartQuery();
+  const { data, refetch } = useMyCartQuery();
   const { mutate: onUpdateQuantity } = useCartMutation({
     action: "UPDATE",
   });
   const { mutate: onDeleteProduct } = useCartMutation({
     action: "DELETE",
   });
+
+  // initial socket
+  useEffect(() => {
+    const onConnect = () => {
+      console.log("Socket client connect");
+    };
+
+    const onHiddenProduct = () => {
+      refetch();
+    };
+
+    socket.on("connect", onConnect);
+    socket.on("hidden product", onHiddenProduct);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("hidden product", onHiddenProduct);
+    };
+  }, [refetch]);
 
   const rowSelection = {
     onChange: (_: any, selectedRows: ICartItem[]) => {
