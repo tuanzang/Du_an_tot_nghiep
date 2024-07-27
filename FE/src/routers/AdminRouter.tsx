@@ -15,7 +15,7 @@ import SizeAdd from "../pages/admin/size/SizeAdd";
 import Users from "../pages/admin/users/Users";
 import ProductAdd from "../pages/admin/product/productAdd";
 import PageComment from "../pages/admin/comment/PageComment";
-
+import ChangePassword from "../pages/admin/changepassword/ChangePassword";
 
 export default function AdminRouter() {
   return (
@@ -37,6 +37,7 @@ export default function AdminRouter() {
         <Route path="/staff" element={<Staff />} />
         <Route path="/users" element={<Users />} />
         <Route path="/comments" element={<PageComment />} />
+        <Route path="/change-password" element={<ChangePassword />} />
       </Routes>
     </HeaderAdmin>
   );

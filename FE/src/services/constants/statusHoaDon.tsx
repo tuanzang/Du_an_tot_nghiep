@@ -9,7 +9,7 @@ export default function statusHoaDon({ status }: Props) {
     case "1":
       return "Chờ xác nhận";
     case "2":
-      return "Chờ giao hàng";
+      return "Đang chuẩn bị hàng";
     case "3":
       return "Đang vận chuyển";
     case "4":

@@ -1,6 +1,4 @@
 import {
-    DownloadOutlined,
-    // EyeOutlined,
     PlusSquareOutlined,
     SearchOutlined,
   } from "@ant-design/icons";
@@ -58,7 +56,7 @@ import { ISize } from "../../../interface/Size";
       setValue(e.target.value);
     };
   
-    const onChangeSwith = (checked) => {
+    const onChangeSwith = (checked: any) => {
       console.log(`switch to ${checked}`);
     };
   
@@ -100,7 +98,7 @@ import { ISize } from "../../../interface/Size";
     })
     return (
       <div>
-        <BreadcrumbsCustom nameHere={"Size"} />
+        <BreadcrumbsCustom nameHere={"Size"} listLink={[]} />
         {/* filter */}
         <Card bordered={false}>
           <Row gutter={16}>
@@ -114,20 +112,6 @@ import { ISize } from "../../../interface/Size";
               />
             </Col>
             <Col span={12}>
-            
-              <Button
-                icon={<DownloadOutlined />}
-                style={{
-                  float: "right",
-                  marginLeft: "12px",
-                  backgroundColor: "white",
-                  color: "green",
-                  borderColor: "green",
-                }}
-                type="default"
-              >
-                Export Excel
-              </Button>
               <Button
                 type="link"
                 icon={<PlusSquareOutlined />}
@@ -149,17 +133,6 @@ import { ISize } from "../../../interface/Size";
                 <Radio value={2}>Hoạt động</Radio>
                 <Radio value={3}>Ngưng hoạt động</Radio>
               </Radio.Group>
-              {/* <Button
-                type="default"
-                icon={<SearchOutlined />}
-                style={{
-                  float: "right",
-                  borderColor: "#c29957",
-                  color: "#c29957",
-                }}
-              >
-                Tìm kiếm
-              </Button> */}
             </Col>
           </Row>
         </Card>
@@ -167,7 +140,7 @@ import { ISize } from "../../../interface/Size";
           <Table
             components={{
               header: {
-                cell: (props) => (
+                cell: (props:any) => (
                   <th {...props} style={customTableHeaderCellStyle} />
                 ),
               },

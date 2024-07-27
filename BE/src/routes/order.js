@@ -7,6 +7,11 @@ import {
   // updateOrder,
   detailOrder,
   updateOrderStatus,
+  getTotalPriceByDay,
+  getTotalPriceByWeek,
+  getTotalPriceByMonth,
+  getTotalPriceByYear,
+  getTotalPriceByCustomDay,
 
 } from "../controller/order.js";
 import { checkAuth } from "../middleware/checkAuth.js";
@@ -20,6 +25,10 @@ orderRouter.get("/", getAllOrders);
 orderRouter.delete("/:id", deleteOrder);
 orderRouter.get("/:id", detailOrder);
 orderRouter.post("/update-status", updateOrderStatus);
-
+orderRouter.get("/total-price/day", getTotalPriceByDay);
+orderRouter.get("/total-price/week", getTotalPriceByWeek);
+orderRouter.get("/total-price/month", getTotalPriceByMonth);
+orderRouter.get("/total-price/year", getTotalPriceByYear);
+orderRouter.get("/total-price/custom-day", getTotalPriceByCustomDay);
 
 export default orderRouter;

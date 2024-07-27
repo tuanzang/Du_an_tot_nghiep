@@ -13,23 +13,19 @@ import { IComment } from "../../interface/Comments";
 import { IUser } from "../../interface/Users";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { ISize } from "../../interface/Size";
+import { IProductSize } from "../../interface/ProductSize";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
-  const [sizes, setSizes] = useState<ISize[]>([]);
   const [selectedSize, setSelectedSize] = useState(null);
+  const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
+  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+  const [price, setPrice] = useState<string | undefined>('')
 
-  const handleSizeClick = (sizeId: any) => {
-    if (selectedSize === sizeId) {
-      setSelectedSize(null);
-    } else {
-      setSelectedSize(sizeId);
-    }
-  };
+ 
 
   // lấy thông tin user đăng nhập
   const isLoggedUser = localStorage.getItem(USER_INFO_STORAGE_KEY);
@@ -47,7 +43,6 @@ export default function ProductDetail() {
   useEffect(() => {
     fetchProduct(String(id));
     fetchRelatedProducts();
-    fetchSizes();
     // findUserById(idUser ? idUser : null);
   }, [id]); // Thêm id vào dependency array để gọi lại API khi id thay đổi
 
@@ -57,7 +52,11 @@ export default function ProductDetail() {
         const response = await axios.get(
           `http://localhost:3001/api/products/${id}`
         );
-        console.log("Product API response:", response.data);
+        const productData = response.data.data;
+        setProduct(productData);
+
+        const productSize = response?.data?.data?.productSizedata?.map(it => +it.price);
+        setPrice(Math.min(...productSize) + ' - ' + Math.max(...productSize) + ' VNĐ')
         setProduct(response.data.data);
       }
     } catch (error) {
@@ -75,15 +74,30 @@ export default function ProductDetail() {
     }
   };
 
-  const fetchSizes = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3001/api/sizes`);
-      console.log("Sizes API response:", response.data);
-      setSizes(response.data.data);
-    } catch (error) {
-      console.error("Error fetching sizes:", error);
-    }
-  };
+  useEffect(() => {
+    // Gọi API để lấy số lượng sản phẩm theo kích cỡ
+    const fetchProductSizes = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:3001/api/products/productSize/${id}`);
+        setProductSizes(data.data);
+
+        // Cập nhật state quantities
+        const initialQuantities: { [key: string]: number } = {};
+        data.data.forEach((productSize: IProductSize) => {
+          initialQuantities[productSize.sizeName] = productSize.quantity;
+        });
+        setQuantities(initialQuantities);
+      } catch (error) {
+        console.error('Error fetching product sizes:', error);
+      }
+    };
+
+    fetchProductSizes();
+  }, [id]);
+
+  
+  // Tính tổng số lượng tất cả các size
+  const totalQuantity = Object.values(quantities).reduce((acc, qty) => acc + qty, 0);
 
   const handleQuantityIncrease = () => {
     setQuantity(quantity + 1);
@@ -193,6 +207,23 @@ export default function ProductDetail() {
     }
   };
 
+  const handleSizeClick = (sizeId: string) => {
+    const findSize = productSizes.find(it => it._id === sizeId);
+    setPrice(findSize?.price?.toString());
+  };
+
+  useEffect(() => {
+    if (selectedSize) {
+      const selectedProductSize = productSizes.find(
+        (productSize) => productSize.sizeId === selectedSize
+      );
+      if (selectedProductSize) {
+        setPrice(selectedProductSize.price + ' VNĐ');
+      }
+    }
+  }, [selectedSize, productSizes]);
+  
+ 
   return (
     <div>
       <main>
@@ -260,20 +291,13 @@ export default function ProductDetail() {
                         <h3 className="product-name">{product?.name}</h3>
                         <div className="price-box">
                           <span className="price-regular">
-                            {product?.price} VNĐ
-                          </span>
-                          <span className="price-old">
-                            <del>{product?.priceOld} VNĐ</del>
+                            {price} VNĐ
                           </span>
                         </div>
-                        {/* <div className="availability">
-                          <i className="fa fa-check-circle"></i>
-                          <span>200 in stock</span>
-                        </div> */}
-
                         <div>
                           <div className="button-container mt-2">
-                            {sizes.map((size) => (
+                            {productSizes.map((size) => (
+                              
                               <Button
                                 key={size._id}
                                 className={`mx-1 ${
@@ -285,10 +309,14 @@ export default function ProductDetail() {
                                 }}
                                 onClick={() => handleSizeClick(size._id)}
                               >
-                                {size.name}
-                              </Button>
+                                {size.sizeName}
+                              </Button>                             
                             ))}
                           </div>
+                        </div>
+
+                        <div className="mt-2">
+                          <p>Còn {totalQuantity} sản phẩm</p>
                         </div>
 
                         <p className="pro-desc mt-3">Mô tả sản phẩm:</p>
@@ -377,15 +405,53 @@ export default function ProductDetail() {
                             </div>
                             <div id="tab_two" className="tab-pane fade">
                               <div className="product-tab-content">
-                                <h6 className="product-tab-title">
-                                  Thông tin sản phẩm
-                                </h6>
+                                <h3 className="product-tab-title">
+                                  Hướng dẫn đo size nhẫn
+                                </h3>
                                 <ul>
                                   <li>
-                                    {/* <span>Danh mục:</span> {product?.category} */}
+                                    {" "}
+                                    <img
+                                      src="https://scontent.fhan17-1.fna.fbcdn.net/v/t39.30808-6/451834400_1143488730215335_8162184727999743406_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=A3J78wJhMkcQ7kNvgHH0Lvb&_nc_ht=scontent.fhan17-1.fna&oh=00_AYD4m8sTtmS14USujkQ3BA48rTU7FtPSsapkyyP3wl1duw&oe=669F95A7"
+                                      alt="" width={"70%"}
+                                    />
+                                  </li>
+                                  <hr />
+                                  <li>
+                                    <h3>
+                                      Những cách đơn giản nhất để đo nhẫn:
+                                    </h3>
+                                    <h5>Đo bằng tờ giấy và thước</h5>
+                                    <span style={{ fontSize: "20px" }}>
+                                      Bước 1: Chuẩn bị một cây thước, 1 cây kéo,
+                                      1 cây bút & một tờ giấy <br /> Bước 2: Cắt
+                                      một mảnh giấy dài khoảng 10 cm và rộng 1
+                                      cm. <br />
+                                      Bước 3: Sử dụng đoạn giấy vừa cắt để quấn
+                                      sát quanh ngón tay muốn đo. <br /> Bước 4:
+                                      Đánh dấu điểm giao nhau. <br /> Bước 5:
+                                      Tháo ra dùng thước đo chiều dài của đoạn
+                                      giấy từ điểm đầu cho đến phần đánh dấu.
+                                      Lấy kết quả đo được chia cho 3,14. Sau đó
+                                      đối chiếu với Bảng size nhẫn.
+                                    </span>
+                                    <img
+                                      src="https://www.pnj.com.vn/blog/wp-content/uploads/2021/11/huong-dan-do-size-nhan-2.jpg"
+                                      alt=""
+                                    />
                                   </li>
                                   <li>
-                                    {/* <span>Thương hiệu:</span> {product?.brand} */}
+                                    <h5>Đo theo một chiếc nhẫn có sẵn</h5>
+                                    <span style={{ fontSize: "20px" }}>
+                                      Bước 1: Chuẩn bị một cây thước cùng chiếc
+                                      nhẫn muốn đo. <br /> Bước 2: Đối chiếu số
+                                      mm của thước với kích thước trên BẢNG SIZE
+                                      NHẪN bên trên.
+                                    </span>
+                                    <img
+                                      src="https://www.pnj.com.vn/blog/wp-content/uploads/2021/11/huong-dan-do-size-nhan-3.jpg"
+                                      alt=""
+                                    />
                                   </li>
                                 </ul>
                               </div>
@@ -542,10 +608,7 @@ export default function ProductDetail() {
                                   </div>
                                   <div className="price-box">
                                     <span className="price-regular">
-                                      {relatedProduct.price} VNĐ
-                                    </span>
-                                    <span className="price-old">
-                                      <del>{relatedProduct.priceOld} VNĐ</del>
+                                      {price} VNĐ
                                     </span>
                                   </div>
                                 </div>

@@ -1,10 +1,19 @@
 import { Router } from "express";
-import { findUserById, getAllUsers } from "../controller/users.js";
+import {
+  blockUser,
+  getAllUsers,
+  unlockUser,
+  updatePassword,
+  updateRoleUser,
+} from "../controller/users.js";
 import { checkAuth } from "../middleware/checkAuth.js";
 
-const productRouter = Router();
+const userRouter = Router();
 
-productRouter.get("/", checkAuth, getAllUsers);
-productRouter.post("/findUserById", findUserById);
+userRouter.get("/", checkAuth, getAllUsers);
+userRouter.patch("/:userId", updateRoleUser);
+userRouter.post("/updatePassword", updatePassword);
+userRouter.patch("/block/:userId", blockUser);
+userRouter.patch("/unlock/:userId", unlockUser);
 
-export default productRouter;
+export default userRouter;

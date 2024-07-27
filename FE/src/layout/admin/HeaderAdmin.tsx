@@ -17,12 +17,20 @@ import {
   AiOutlineKey,
   AiOutlineBell,
 } from "react-icons/ai";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { ClockCircleOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  ClockCircleOutlined,
+  HomeOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import AdminMenu from "./AdminMenu";
 import "./HeaderAdmin.css";
+import {
+  ACCESS_TOKEN_STORAGE_KEY,
+  USER_INFO_STORAGE_KEY,
+} from "../../services/constants";
 
 dayjs.extend(relativeTime);
 
@@ -43,32 +51,32 @@ type HeaderAdminProps = {
 export default function HeaderAdmin({ children }: HeaderAdminProps) {
   const notification: Notification[] = [];
   const [collapsed, setCollapsed] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+    localStorage.removeItem(USER_INFO_STORAGE_KEY);
+    navigate("/home");
+  };
 
   const menu = (
     <Menu>
-      <>
-        <Menu.Item key="1">
-          <Link to={`/admin/infomation/`}>
-            <Avatar /> Tài khoản của tôi
-          </Link>
-        </Menu.Item>
-        <Menu.Item key="2">
-          <Link to={`/admin/change-password`}>
-            <AiOutlineKey style={{ marginRight: "8px" }} /> Đổi mật khẩu
-          </Link>
-        </Menu.Item>
-        <Menu.Item
-          key="3"
-          onClick={() => {
-            console.log("Đăng xuất");
-          }}
-        >
-          <AiOutlineLogout style={{ marginRight: "8px" }} /> Đăng xuất
-        </Menu.Item>
-      </>
+      <Menu.Item key="1">
+        <Link to={`/admin/infomation/`}>
+          <Avatar /> Tài khoản của tôi
+        </Link>
+      </Menu.Item>
+      <Menu.Item key="2">
+        <Link to={`/admin/change-password`}>
+          <AiOutlineKey style={{ marginRight: "8px" }} /> Đổi mật khẩu
+        </Link>
+      </Menu.Item>
+      <Menu.Item key="3" onClick={() => handleLogout()}>
+        <AiOutlineLogout style={{ marginRight: "8px" }} /> Đăng xuất
+      </Menu.Item>
       <Menu.Item key="4">
-        <Link to={`/login`}>
-          <Avatar /> Đăng nhập
+        <Link to={`/home`}>
+          <HomeOutlined /> Trang chủ
         </Link>
       </Menu.Item>
     </Menu>

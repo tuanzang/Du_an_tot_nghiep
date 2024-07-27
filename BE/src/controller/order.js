@@ -59,7 +59,7 @@ export const createOrder = async (req, res) => {
       quantity: cart.products.length,
       products,
       paymentMethod,
-      status: paymentMethod === "COD" ? "1" : "6",
+      status: paymentMethod === "COD"?"1":"5"
     }).save();
 
     cart.products = cart.products.filter(
@@ -122,7 +122,7 @@ export const detailOrder = async (req, res) => {
       message: "Internal server error",
     });
   }
-};
+}
 
 /**
  * API danh sách hóa đơn
@@ -130,12 +130,13 @@ export const detailOrder = async (req, res) => {
  * @param {*} res
  * @returns
  */
+
 export const getAllOrders = async (req, res) => {
-  const { status, code, createdAtFrom, createdAtTo, page = 1 } = req.body;
+  const { status, code, createAtFrom, createAtTo, page = 1 } = req.body; 
   const statusReq = req.query.status;
   const dateNowReq = req.query.dateNow;
   const pageSize = 10;
-
+  
   try {
     let query = {};
 
@@ -146,7 +147,7 @@ export const getAllOrders = async (req, res) => {
     if (status) {
       query.status = status;
     }
-
+    
     if (code) {
       query.code = { $regex: code, $options: "i" }; // Tìm kiếm mã hóa đơn với regex, không phân biệt hoa thường
     }
@@ -155,20 +156,20 @@ export const getAllOrders = async (req, res) => {
       const dateNow = new Date(dateNowReq);
       const startOfDay = new Date(dateNow.setUTCHours(0, 0, 0, 0));
       const endOfDay = new Date(dateNow.setUTCHours(23, 59, 59, 999));
-
+      
       query.createdAt = {
         $gte: startOfDay,
         $lte: endOfDay,
       };
     }
 
-    if (createdAtFrom || createdAtTo) {
-      query.createdAt = query.createdAt || {};
-      if (createdAtFrom) {
-        query.createdAt.$gte = new Date(createdAtFrom);
+    if (createAtFrom || createAtTo) {
+      query.createdAt = {};
+      if (createAtFrom) {
+        query.createdAt.$gte = new Date(createAtFrom);
       }
-      if (createdAtTo) {
-        query.createdAt.$lte = new Date(createdAtTo);
+      if (createAtTo) {
+        query.createdAt.$lte = new Date(createAtTo);
       }
     }
 
@@ -178,7 +179,7 @@ export const getAllOrders = async (req, res) => {
       .limit(pageSize);
 
     const total = await Order.countDocuments(query);
-
+    
     if (!orders || orders?.length === 0) {
       return res.status(200).json({
         message: "Không tìm thấy đơn hàng!",
@@ -201,6 +202,8 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
+
+
 export const deleteOrder = async (req, res) => {
   try {
     const id = req.params.id;
@@ -213,8 +216,8 @@ export const deleteOrder = async (req, res) => {
     res.status(500).json({
       message: "Internal server error",
     });
-  }
-};
+  } 
+}
 
 /**
  * API cập nhật trạng thái hóa đơn
@@ -299,4 +302,151 @@ const createPaymentUrl = (ipAddr, orderId, orderInfo, amount) => {
   vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
 
   return vnpUrl;
+};
+
+export const getTotalPriceByDay = async (req, res) => {
+  const { dateNow } = req.query;
+
+  try {
+    const date = new Date(dateNow);
+    const startOfDay = new Date(date.setUTCHours(0, 0, 0, 0));
+    const endOfDay = new Date(date.setUTCHours(23, 59, 59, 999));
+
+    const orders = await Order.find({
+      createdAt: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
+    });
+
+    const totalPrice = orders.reduce((total, order) => total + order.totalPrice, 0);
+
+    return res.status(200).json({
+      message: "Success",
+      totalPrice,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getTotalPriceByWeek = async (req, res) => {
+  const { dateStart, dateEnd } = req.query;
+
+  try {
+    const orders = await Order.find({
+      createdAt: {
+        $gte: new Date(dateStart),
+        $lte: new Date(dateEnd),
+      },
+    });
+
+    const totalPrice = orders.reduce((total, order) => total + order.totalPrice, 0);
+
+    return res.status(200).json({
+      message: "Success",
+      totalPrice,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getTotalPriceByMonth = async (req, res) => {
+  const { dateStart, dateEnd } = req.query;
+
+  try {
+    const orders = await Order.find({
+      createdAt: {
+        $gte: new Date(dateStart),
+        $lte: new Date(dateEnd),
+      },
+    });
+
+    const totalPrice = orders.reduce((total, order) => total + order.totalPrice, 0);
+
+    return res.status(200).json({
+      message: "Success",
+      totalPrice,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getTotalPriceByYear = async (req, res) => {
+  const { dateStart, dateEnd } = req.query;
+
+  try {
+    const orders = await Order.find({
+      createdAt: {
+        $gte: new Date(dateStart),
+        $lte: new Date(dateEnd),
+      },
+    });
+
+    const totalPrice = orders.reduce((total, order) => total + order.totalPrice, 0);
+
+    return res.status(200).json({
+      message: "Success",
+      totalPrice,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+
+export const getTotalPriceByCustomDay = async (req, res) => {
+  const { dateStart, dateEnd } = req.query;
+
+  // Kiểm tra xem có các tham số ngày hợp lệ không
+  if (!dateStart || !dateEnd) {
+    return res.status(400).json({
+      message: "Thiếu tham số ngày bắt đầu hoặc ngày kết thúc",
+      providedParams: { dateStart, dateEnd } // Thêm thông tin tham số đã gửi để debug
+    });
+  }
+
+  // Kiểm tra định dạng của ngày có hợp lệ không
+  const startDate = new Date(dateStart);
+  const endDate = new Date(dateEnd);
+
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    return res.status(400).json({
+      message: "Ngày không hợp lệ",
+      providedParams: { dateStart, dateEnd } // Thêm thông tin tham số đã gửi để debug
+    });
+  }
+
+  try {
+    // Tìm các đơn hàng trong khoảng thời gian
+    const orders = await Order.find({
+      createdAt: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    });
+
+    // Tính tổng giá trị của các đơn hàng
+    const totalPrice = orders.reduce((total, order) => total + order.totalPrice, 0);
+
+    return res.status(200).json({
+      message: "Success",
+      totalPrice,
+    });
+  } catch (error) {
+    console.error(error); // In lỗi ra console để dễ dàng kiểm tra
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
 };

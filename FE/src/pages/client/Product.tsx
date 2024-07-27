@@ -3,9 +3,10 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { IProduct } from "../../interface/Products";
 import { ICategory } from "../../interface/Categories";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
 import useCartMutation from "../../hooks/useCart";
+import { ISize } from "../../interface/Size";
 
 
 export default function Product() {
@@ -13,7 +14,12 @@ export default function Product() {
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([200, 500]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([200000, 500000]);
+  const [sizes, setSizes] = useState<ISize[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
+
+  const location = useLocation();
 
   const { mutate } = useCartMutation({
     action: "ADD",
@@ -32,25 +38,73 @@ export default function Product() {
       }
     };
 
+    const fetchSizes = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/api/sizes`);
+        // console.log("Sizes API response:", response.data);
+        setSizes(response.data.data);
+      } catch (error) {
+        console.error("Error fetching sizes:", error);
+      }
+    };
+
     fetchCategories();
+    fetchSizes()
   }, []);
 
+
   useEffect(() => {
+     // Get search term from URL
+     const queryParams = new URLSearchParams(location.search);
+     const searchQuery = queryParams.get('search');
+     if (searchQuery) {
+       setSearchTerm(searchQuery);
+     }
+     console.log(searchQuery);
+     
     const fetchProducts = async () => {
       try {
         let url = `http://localhost:3001/api/products`;
-        if (searchTerm) {
-          url += `?search=${encodeURIComponent(searchTerm)}`;
-        }
-        const response = await axios.get(url);
+        const response = await axios.get(url,{
+          params: { search: searchTerm },
+        });
+        console.log(response);
+        
         setProduct(response.data?.data);
+        
       } catch (error) {
         console.log("Không có dữ liệu");
       }
     };
 
     fetchProducts();
-  }, [searchTerm]);
+  }, [location.search]);
+
+  useEffect(() => {
+    const results = product.filter((products) =>
+      products.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredProducts(results);
+    console.log(results);
+  }, [searchTerm, product]);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      const fetchProductsByCategory = async () => {
+        try {
+           let url = selectedCategory 
+          ? `http://localhost:3001/api/products/filter/category/${selectedCategory}`
+          : `http://localhost:3001/api/products`;
+        const response = await axios.get(url);
+        setProduct(response.data?.data);
+        } catch (error) {
+          console.error('Error fetching products by category:', error);
+        }
+      };
+
+      fetchProductsByCategory();
+    }
+  }, [selectedCategory]);
 
   const onAddCart = (productData: IProduct) => {
     if (!isLogged) {
@@ -75,10 +129,19 @@ export default function Product() {
       const response = await axios.get('http://localhost:3001/api/products/filter/price', {
         params: { minPrice, maxPrice },
       });
+      if (response.data?.data.length === 0) {
+        message.info('Không có sản phẩm nào trong khoảng giá này');
+      }
       console.log('Filtered Products:', response.data);
+      setProduct(response.data?.data || []);
     } catch (error) {
       console.error('Error fetching filtered products:', error);
+      message.error('Lỗi khi lọc sản phẩm');
     }
+  };
+
+  const handleCategoryClick = (categoryId: string) => {
+    setSelectedCategory(categoryId);
   };
 
   return (
@@ -127,16 +190,16 @@ export default function Product() {
                     </h5>
 
                     <div className="sidebar-body">
-                      <ul className="shop-categories">
-                        <li>
-                          <a href="#">
-                            Tất cả <span>(100)</span>
+                    <ul className="shop-categories">
+                        {/* <li>
+                          <a href="#" onClick={() => handleCategoryClick('')}>
+                            Tất cả
                           </a>
-                        </li>
-                        {categories?.map(category => (
+                        </li> */}
+                        {categories?.map((category) => (
                           <li key={category._id}>
-                            <a href="#">
-                              {category.loai} <span></span>
+                            <a href="#" onClick={() => handleCategoryClick(category._id)}>
+                              {category.loai}
                             </a>
                           </li>
                         ))}
@@ -162,203 +225,20 @@ export default function Product() {
                         <Slider
                           range
                           defaultValue={priceRange}
-                          onChange={(value) => handleSliderChange(value as [number, number])}
-                          min={1}
-                          max={1000}
-                          step={100}
+                          onChange={(value) =>
+                            handleSliderChange(value as [number, number])
+                          }
+                          min={100000}
+                          max={1000000}
+                          step={50000}
                         />
-                        <Button className="filter-btn" onClick={handleFilterClick}>
+                        <Button
+                          className="filter-btn"
+                          onClick={handleFilterClick}
+                        >
                           Tìm kiếm
                         </Button>
                       </div>
-                    </div>
-                  </div>
-                  {/* <!-- single sidebar end --> */}
-
-                  {/* <!-- single sidebar start --> */}
-                  <div className="sidebar-single">
-                    <h5
-                      className="sidebar-title"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span>Thương hiệu</span>
-                    </h5>
-
-                    <div className="sidebar-body">
-                      <ul className="checkbox-container categories-list">
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck2"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck2"
-                            >
-                              Studio (3)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck3"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck3"
-                            >
-                              Hastech (4)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck4"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck4"
-                            >
-                              Quickiin (15)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck1"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck1"
-                            >
-                              Graphic corner (10)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck5"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck5"
-                            >
-                              devItems (12)
-                            </label>
-                          </div>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  {/* <!-- single sidebar end --> */}
-
-                  {/* <!-- single sidebar start --> */}
-                  <div className="sidebar-single">
-                    <h5
-                      className="sidebar-title"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span>Màu sắc</span>
-                    </h5>
-
-                    <div className="sidebar-body">
-                      <ul className="checkbox-container categories-list">
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck12"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck12"
-                            >
-                              black (20)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck13"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck13"
-                            >
-                              red (6)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck14"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck14"
-                            >
-                              blue (8)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck11"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck11"
-                            >
-                              green (5)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck15"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck15"
-                            >
-                              pink (4)
-                            </label>
-                          </div>
-                        </li>
-                      </ul>
                     </div>
                   </div>
                   {/* <!-- single sidebar end --> */}
@@ -377,66 +257,23 @@ export default function Product() {
 
                     <div className="sidebar-body">
                       <ul className="checkbox-container categories-list">
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck111"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck111"
-                            >
-                              S (4)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck222"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck222"
-                            >
-                              M (5)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck333"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck333"
-                            >
-                              L (7)
-                            </label>
-                          </div>
-                        </li>
-                        <li>
-                          <div className="custom-control custom-checkbox">
-                            <input
-                              type="checkbox"
-                              className="custom-control-input"
-                              id="customCheck444"
-                            />
-                            <label
-                              className="custom-control-label"
-                              htmlFor="customCheck444"
-                            >
-                              XL (3)
-                            </label>
-                          </div>
-                        </li>
+                        {sizes.map((size, index) => (
+                          <li key={size._id}>
+                            <div className="custom-control custom-checkbox">
+                              <input
+                                type="checkbox"
+                                className="custom-control-input"
+                                id={`customCheck${index}`}
+                              />
+                              <label
+                                className="custom-control-label"
+                                htmlFor={`customCheck${index}`}
+                              >
+                                {size.name}
+                              </label>
+                            </div>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </div>
@@ -490,18 +327,7 @@ export default function Product() {
                           </div>
                         </div>
                       </div>
-                      <div className="col-lg-5 col-md-6 order-1 order-md-2">
-                        <div className="top-bar-right">
-                          <div className="product-short">
-                            <p>Tìm kiếm theo :</p>
-                            <select className="nice-select" name="sortby">
-                              <option value="trending">Tìm kiếm theo</option>
-                              <option value="sales">Tên (A - Z)</option>
-                              <option value="sales">Tên (Z - A)</option>
-                            </select>
-                          </div>
-                        </div>
-                      </div>
+
                     </div>
                   </div>
                   {/* <!-- shop product top wrap start --> */}
@@ -513,15 +339,24 @@ export default function Product() {
                       style={{ marginLeft: "6px", padding: "0px" }}
                     >
                       {product.map((p: IProduct) => (
-                        <Col className="gutter-row" span={8}>
+                        <Col className="gutter-row" span={8} key={p._id}>
                           <div className="product-item">
                             <figure className="product-thumb">
                               <Link to={`/product/${p._id}`}>
-                                <img
-                                  className="pri-img"
-                                  src={p?.image?.[0]}
-                                  alt="product"
-                                />
+                                <div className="image-container">
+                                  <img
+                                    className="pri-img"
+                                    src={p.image[0]}
+                                    alt={p.name}
+                                  />
+                                  {p.image[1] && (
+                                    <img
+                                      className="sec-img"
+                                      src={p.image[1]}
+                                      alt={p.name}
+                                    />
+                                  )}
+                                </div>
                               </Link>
                               <div className="product-badge">
                                 <div className="product-label new">
@@ -541,7 +376,7 @@ export default function Product() {
                                   href="#"
                                   data-bs-toggle="tooltip"
                                   data-bs-placement="left"
-                                  title="So sánhpare"
+                                  title="So sánh"
                                 >
                                   <i className="pe-7s-refresh-2"></i>
                                 </a>
@@ -563,6 +398,7 @@ export default function Product() {
                                 <button
                                   className="btn btn-cart"
                                   onClick={() => onAddCart(p)}
+
                                 >
                                   Thêm vào giỏ hàng
                                 </button>
@@ -575,45 +411,10 @@ export default function Product() {
                                     </Link>
                                   </p>
                                 </div>
-                                <ul className="color-categories">
-                                  <li>
-                                    <a
-                                      href="#"
-                                      className="c-lightblue"
-                                      title="LightSteelblue"
-                                    ></a>
-                                  </li>
-                                  <li>
-                                    <a
-                                      href="#"
-                                      className="c-darktan"
-                                      title="Darktan"
-                                    ></a>
-                                  </li>
-                                  <li>
-                                    <a
-                                      href="#"
-                                      className="c-grey"
-                                      title="Grey"
-                                    ></a>
-                                  </li>
-                                  <li>
-                                    <a
-                                      href="#"
-                                      className="c-brown"
-                                      title="Brown"
-                                    ></a>
-                                  </li>
-                                </ul>
-                                {/* <h6 className="product-name">
-                                  <a href="#">Sản phẩm {index + 1}</a>
-                                </h6> */}
+
                                 <div className="price-box">
                                   <span className="price-regular">
                                     {p.price + " "} VNĐ
-                                  </span>
-                                  <span className="price-old">
-                                    <del>{p.priceOld + " "}VND</del>
                                   </span>
                                 </div>
                               </div>

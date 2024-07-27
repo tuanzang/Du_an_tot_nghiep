@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema(
-
     {
         name: {
             type: String,
@@ -13,10 +12,14 @@ const productSchema = new mongoose.Schema(
                 required: true
             }
         ],
-        price: {
-            type: Number,
-            required: true
-        },
+        // price: {
+        //     type: Number,
+        //     required: true
+        // },
+        // priceOld: {
+        //     type: Number,
+        //     required: true
+        // },
         description: {
             type: String,
             required: true
@@ -28,9 +31,9 @@ const productSchema = new mongoose.Schema(
             }
         ]
     }, {
-        timestamps: true,
-        versionKey: false
-    }
+    timestamps: true,
+    versionKey: false
+}
 );
 
 
