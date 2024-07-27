@@ -15,7 +15,7 @@ export const getMyCarts = async (req, res) => {
 
       return res;
     }, 0);
-
+return
     res.json({
       ...data?._doc,
       totalPrice,

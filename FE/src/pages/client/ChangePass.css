@@ -1,0 +1,184 @@
+/* Container for the whole page */
+.containerr {
+ margin-top: 30px;
+ display: flex;
+ justify-content: center;
+ width: 100%;
+}
+
+/* Header styling */
+.account-headerr {
+ color: red;
+ font-size: 32px;
+ /* Increase header font size */
+ text-align: center;
+ margin-bottom: 30px;
+}
+
+/* Styling for the navigation links */
+.nav-link {
+ color: #007bff;
+ /* Blue color for links */
+ font-size: 18px;
+ /* Increase link font size */
+}
+
+.nav-link.active {
+ font-weight: bold;
+}
+
+/* Column styling for the layout */
+.row {
+ display: flex;
+ justify-content: space-between;
+}
+
+.col-md-4 {
+ flex: 0 0 25%;
+ /* Set column width */
+}
+
+.col-md-8 {
+ flex: 0 0 75%;
+ /* Set column width */
+}
+
+.ml-5 {
+ margin-left: 3rem;
+}
+
+/* Styling for form inputs */
+.form-group {
+ margin-bottom: 20px;
+}
+
+.input-container {
+ position: relative;
+}
+
+.form-control {
+ padding-right: 2.5rem;
+ /* Space for the eye icon */
+ font-size: 18px;
+ /* Increase input font size */
+ height: 50px;
+ /* Increase input height */
+}
+
+/* Styling for password toggle icon */
+.toggle-password {
+ position: absolute;
+ top: 50%;
+ right: 10px;
+ transform: translateY(-50%);
+ cursor: pointer;
+ font-size: 20px;
+ /* Increase icon size */
+}
+.bg-primary {
+ background-color: red;
+}
+
+.text-white {
+ color: #fff;
+}
+
+/* Align columns */
+.input-label {
+ font-size: 18px;
+ /* Increase label font size */
+ color: black;
+ /* Change label color to black */
+}
+
+.form-group {
+ display: flex;
+ flex-direction: column;
+}
+
+.input-container {
+ display: flex;
+ align-items: center;
+ width: 100%;
+}
+
+/* Ensure form content is not too narrow */
+.change-password {
+ width: 100%;
+ max-width: 600px;
+ /* Set max width to ensure the form doesn't stretch too wide */
+}
+/* Cài đặt màu chữ cho cột bên trái */
+.nav-link {
+ color: black;
+ /* Màu chữ bình thường */
+ transition: color 0.3s, transform 0.3s;
+ /* Hiệu ứng chuyển màu và hiệu ứng phóng to */
+}
+
+/* Cài đặt màu chữ khi hover */
+.nav-link:hover {
+ color: red;
+ /* Màu chữ khi hover */
+ transform: scale(1.05);
+ /* Tăng kích thước một chút khi hover */
+}
+
+/* Các hiệu ứng cho cột bên trái */
+.nav-link.active {
+ font-weight: bold;
+ /* Đặt chữ đang hoạt động thành đậm */
+}
+
+/* Cài đặt màu chữ cho cột bên trái */
+.nav-link {
+ color: black;
+ /* Màu chữ bình thường */
+ font-weight: bold;
+ /* Chữ in đậm */
+ transition: color 0.3s, transform 0.3s;
+ /* Hiệu ứng chuyển màu và hiệu ứng phóng to */
+}
+
+/* Cài đặt màu chữ khi hover */
+.nav-link:hover {
+ color: red;
+ /* Màu chữ khi hover */
+ transform: scale(1.05);
+ /* Tăng kích thước một chút khi hover */
+}
+
+/* Các hiệu ứng cho cột bên trái */
+.nav-link.active {
+ font-weight: bold;
+ /* Đặt chữ đang hoạt động thành đậm */
+}
+/* Cập nhật kiểu dáng của nút */
+.btn-primary {
+ background-color: #007bff;
+ /* Màu nền chính */
+ color: white;
+ /* Màu chữ trắng */
+ border: none;
+ /* Xóa viền */
+ padding: 0.5rem 1.5rem;
+ /* Padding cho nút */
+ font-size: 1rem;
+ /* Kích thước font */
+ border-radius: 4px;
+ /* Bo góc nút */
+ cursor: pointer;
+ /* Con trỏ chuột khi hover */
+ transition: background-color 0.3s, box-shadow 0.3s;
+ /* Hiệu ứng chuyển đổi */
+}
+
+.btn-primary:hover {
+ background-color: #0056b3;
+ /* Màu nền khi hover */
+}
+
+.btn-primary:active {
+ box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
+ /* Phát sáng với màu xanh khi nhấn */
+}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   ACCESS_TOKEN_STORAGE_KEY,
   USER_INFO_STORAGE_KEY,
@@ -9,8 +9,6 @@ import { useMyCartQuery } from "../../hooks/useCart";
 const Header = () => {
   const [openMenuCart, setOpenMenuCart] = useState(false);
   const { data } = useMyCartQuery();
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
 
   const handleMenuCartClick = () => {
     setOpenMenuCart(!openMenuCart);
@@ -20,51 +18,15 @@ const Header = () => {
     localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
     localStorage.removeItem(USER_INFO_STORAGE_KEY);
   };
-
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const userInfo =
     JSON.parse(localStorage.getItem(USER_INFO_STORAGE_KEY) as string) || "";
-
-  const handleSearchSubmit = (event:React.ChangeEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    navigate(`/product?search=${encodeURIComponent(searchTerm)}`);
-  };
 
   return (
     <div>
       <header className="header-area header-wide bg-gray">
         {/* main header start */}
         <div className="main-header d-none d-lg-block">
-          {/* header top start */}
-          <div className="header-top bdr-bottom">
-            <div className="container">
-              <div className="row align-items-center">
-                <div className="col-lg-6">
-                  <div className="welcome-message">
-                    <p>Chào mừng bạn đến với F-Bee</p>
-                  </div>
-                </div>
-                <div className="col-lg-6 text-right">
-                  <div className="header-top-settings">
-                    <ul className="nav align-items-center justify-content-end">
-                      <li className="curreny-wrap">
-                        Cao Đẳng FPT Polytechnic Hà Nội
-                      </li>
-                      <li className="language">
-                        <img
-                          src="../../src/assets/image/icon/vn.gif"
-                          alt="flag"
-                        />
-                        Việt Nam
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* header top end */}
-
           {/* header middle area start */}
           <div className="header-main-area sticky">
             <div className="container">
@@ -99,10 +61,10 @@ const Header = () => {
                             <a href="shop.html">Tin tức</a>
                           </li>
                           <li>
-                            <a href="shop.html">Về chúng tôi</a>
+                            <a href="shop.html">Giới thiệu</a>
                           </li>
                           <li>
-                            <a href="contact-us.html">Tra cứu đơn hàng</a>
+                            <a href="contact-us.html">Chính sách</a>
                           </li>
                         </ul>
                       </nav>
@@ -119,15 +81,13 @@ const Header = () => {
                       <button className="search-trigger d-xl-none d-lg-block">
                         <i className="pe-7s-search"></i>
                       </button>
-                      <form className="header-search-box d-lg-none d-xl-block" onSubmit={handleSearchSubmit}>
+                      <form className="header-search-box d-lg-none d-xl-block">
                         <input
                           type="text"
                           placeholder="Tìm kiếm"
                           className="header-search-field bg-white"
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                        <button className="header-search-btn" type="submit">
+                        <button className="header-search-btn">
                           <i className="pe-7s-search"></i>
                         </button>
                       </form>
@@ -144,9 +104,10 @@ const Header = () => {
                             {isLogged ? (
                               <>
                                 <li>
-                                  <a href="my-account.html">
-                                    Tài khoản của tôi
-                                  </a>
+                                  <a href="/introduce">Tài khoản của tôi</a>
+                                </li>
+                                <li>
+                                  <a href="/order_history">Đơn hàng của tôi</a>
                                 </li>
                                 {userInfo?.role === "admin" && (
                                   <li>
@@ -310,17 +271,9 @@ const Header = () => {
                         aria-labelledby="myaccount"
                       >
                         {isLogged ? (
-                          <>
-                            <a className="dropdown-item" href="my-account.html">
-                              Tài khoản của tôi
-                            </a>
-                            <button
-                              onClick={handleLogout}
-                              className="dropdown-item"
-                            >
-                              Đăng xuất
-                            </button>
-                          </>
+                          <a className="dropdown-item" href="my-account.html">
+                            Tài khoản của tôi
+                          </a>
                         ) : (
                           <>
                             <Link to="/register" className="dropdown-item">

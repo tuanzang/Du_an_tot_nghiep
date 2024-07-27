@@ -143,9 +143,9 @@ export default function Cart() {
                             src={images[0]}
                             alt="Product"
                             style={{
-                              width: "100%", 
-                              height: "100%", 
-                              objectFit: "cover", 
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
                             }}
                           />
                         )}
@@ -235,8 +235,8 @@ export default function Cart() {
                               src={images[0]}
                               alt="Product"
                               style={{
-                                width: "70%", 
-                                height: "70%", 
+                                width: "70%",
+                                height: "70%",
                                 objectFit: "cover",
                               }}
                             />

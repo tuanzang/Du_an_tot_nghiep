@@ -27,9 +27,10 @@ export default function Category() {
   useEffect(() => {
     const fetchCate = async () => {
       try {
-        const  response  = await axios.get("http://localhost:3001/api/categories");
+        const response = await axios.get(
+          "http://localhost:3001/api/categories"
+        );
         setCates(response.data?.data);
-        
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -38,21 +39,22 @@ export default function Category() {
     fetchCate();
   }, []);
   const deleteCategory = async (id: number) => {
-   
     try {
       //dùng confirm để xóa
-       const confirm = window.confirm("Bạn muốn xóa danh mục này ?");
-       if (confirm) {
-        const response = await axios.delete(`http://localhost:3001/api/categories/${id}`);
+      const confirm = window.confirm("Bạn muốn xóa danh mục này ?");
+      if (confirm) {
+        const response = await axios.delete(
+          `http://localhost:3001/api/categories/${id}`
+        );
         if (response.status === 200) {
-        const newArr = cates.filter((item) => item["_id"] !== id);
-        setCates(newArr);
+          const newArr = cates.filter((item) => item["_id"] !== id);
+          setCates(newArr);
+        }
       }
-       }
     } catch (error) {
       console.log(error);
     }
-  }
+  };
   const onChangeRadio = (e) => {
     console.log("radio checked", e.target.value);
     setValue(e.target.value);
@@ -61,8 +63,6 @@ export default function Category() {
   const onChangeSwith = (checked) => {
     console.log(`switch to ${checked}`);
   };
-
-  
 
   const columns = [
     {
@@ -85,9 +85,11 @@ export default function Category() {
       key: "key",
       align: "center",
       width: "2%",
-      render : (value: any) => (
-        <Button><Link to={`/admin/category/${value}`}>Sửa</Link></Button>
-      )
+      render: (value: any) => (
+        <Button>
+          <Link to={`/admin/category/${value}`}>Sửa</Link>
+        </Button>
+      ),
     },
     {
       title: "Xóa",
@@ -96,7 +98,7 @@ export default function Category() {
       align: "center",
       width: "2%",
       render: (value: any) => (
-        <Button onClick={() => deleteCategory(value!)} >Xóa</Button> 
+        <Button onClick={() => deleteCategory(value!)}>Xóa</Button>
       ),
     },
   ];
@@ -105,9 +107,9 @@ export default function Category() {
     return {
       stt: index + 1,
       key: item._id,
-      loai : item.loai,
+      loai: item.loai,
     };
-  })
+  });
   return (
     <div>
       <BreadcrumbsCustom nameHere={"Danh mục"} />
@@ -124,7 +126,6 @@ export default function Category() {
             />
           </Col>
           <Col span={12}>
-          
             <Button
               icon={<DownloadOutlined />}
               style={{
