@@ -1,5 +1,5 @@
 import { Carousel, Col, Image, Row, message, Button } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { IProduct } from "../../interface/Products";
 import axios from "axios";
@@ -14,18 +14,29 @@ import { IUser } from "../../interface/Users";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IProductSize } from "../../interface/ProductSize";
+import { formatPrice } from "../../services/common/formatCurrency";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
-  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedSize, setSelectedSize] = useState<IProductSize | undefined>();
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
-  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
-  const [price, setPrice] = useState<string | undefined>('')
 
- 
+  // product price
+  const productPrice = useMemo(() => {
+    if (selectedSize) {
+      return formatPrice(selectedSize?.price);
+    }
+
+    const productSizePrice =
+      product?.productSizedata?.map((it) => it.price) || [];
+    const minPrice = Math.min(...productSizePrice);
+    const maxPrice = Math.max(...productSizePrice);
+
+    return `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+  }, [selectedSize, product]);
 
   // lấy thông tin user đăng nhập
   const isLoggedUser = localStorage.getItem(USER_INFO_STORAGE_KEY);
@@ -37,6 +48,8 @@ export default function ProductDetail() {
     action: "ADD",
     onSuccess: () => {
       message.success("Đã thêm sản phẩm vào giỏ hàng");
+      setQuantity(1);
+      setSelectedSize(undefined);
     },
   });
 
@@ -54,10 +67,6 @@ export default function ProductDetail() {
         );
         const productData = response.data.data;
         setProduct(productData);
-
-        const productSize = response?.data?.data?.productSizedata?.map(it => +it.price);
-        setPrice(Math.min(...productSize) + ' - ' + Math.max(...productSize) + ' VNĐ')
-        setProduct(response.data.data);
       }
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -78,26 +87,17 @@ export default function ProductDetail() {
     // Gọi API để lấy số lượng sản phẩm theo kích cỡ
     const fetchProductSizes = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:3001/api/products/productSize/${id}`);
+        const { data } = await axios.get(
+          `http://localhost:3001/api/products/productSize/${id}`
+        );
         setProductSizes(data.data);
-
-        // Cập nhật state quantities
-        const initialQuantities: { [key: string]: number } = {};
-        data.data.forEach((productSize: IProductSize) => {
-          initialQuantities[productSize.sizeName] = productSize.quantity;
-        });
-        setQuantities(initialQuantities);
       } catch (error) {
-        console.error('Error fetching product sizes:', error);
+        console.error("Error fetching product sizes:", error);
       }
     };
 
     fetchProductSizes();
   }, [id]);
-
-  
-  // Tính tổng số lượng tất cả các size
-  const totalQuantity = Object.values(quantities).reduce((acc, qty) => acc + qty, 0);
 
   const handleQuantityIncrease = () => {
     setQuantity(quantity + 1);
@@ -114,17 +114,22 @@ export default function ProductDetail() {
     }
   };
 
-  const onAddCart = (productData: IProduct) => {
+  const onAddCart = () => {
     if (!isLogged) {
       return message.info("Vui lòng đăng nhập tài khoản!");
     }
 
-    if (productData) {
-      mutate({
-        productId: productData._id,
-        quantity: quantity, // Use the state quantity here
-      });
+    if (!selectedSize) {
+      return message.info("Vui lòng chọn size!");
     }
+
+    const body = {
+      productId: product?._id,
+      quantity,
+      variantId: selectedSize._id,
+    };
+
+    mutate(body);
   };
 
   /** API bình luận sản phẩm */
@@ -208,22 +213,10 @@ export default function ProductDetail() {
   };
 
   const handleSizeClick = (sizeId: string) => {
-    const findSize = productSizes.find(it => it._id === sizeId);
-    setPrice(findSize?.price?.toString());
+    const findSize = productSizes.find((it) => it._id === sizeId);
+    setSelectedSize(findSize);
   };
 
-  useEffect(() => {
-    if (selectedSize) {
-      const selectedProductSize = productSizes.find(
-        (productSize) => productSize.sizeId === selectedSize
-      );
-      if (selectedProductSize) {
-        setPrice(selectedProductSize.price + ' VNĐ');
-      }
-    }
-  }, [selectedSize, productSizes]);
-  
- 
   return (
     <div>
       <main>
@@ -290,18 +283,17 @@ export default function ProductDetail() {
                         </div>
                         <h3 className="product-name">{product?.name}</h3>
                         <div className="price-box">
-                          <span className="price-regular">
-                            {price} VNĐ
-                          </span>
+                          <span className="price-regular">{productPrice}</span>
                         </div>
                         <div>
                           <div className="button-container mt-2">
                             {productSizes.map((size) => (
-                              
                               <Button
                                 key={size._id}
                                 className={`mx-1 ${
-                                  selectedSize === size._id ? "selected" : ""
+                                  selectedSize?._id === size._id
+                                    ? "selected"
+                                    : ""
                                 }`}
                                 style={{
                                   padding: "10px 20px",
@@ -310,17 +302,23 @@ export default function ProductDetail() {
                                 onClick={() => handleSizeClick(size._id)}
                               >
                                 {size.sizeName}
-                              </Button>                             
+                              </Button>
                             ))}
                           </div>
                         </div>
 
-                        <div className="mt-2">
-                          <p>Còn {totalQuantity} sản phẩm</p>
-                        </div>
+                        {selectedSize && (
+                          <div className="mt-2">
+                            <p>Còn {selectedSize?.quantity} sản phẩm</p>
+                          </div>
+                        )}
 
                         <p className="pro-desc mt-3">Mô tả sản phẩm:</p>
-                        <p>{product?.description}</p>
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: product?.description || "",
+                          }}
+                        />
                         <div className="quantity-cart-box d-flex align-items-center">
                           <h6 className="option-title">Số lượng:</h6>
                           <div className="quantity-controls">
@@ -346,9 +344,7 @@ export default function ProductDetail() {
                             <div className="action_link">
                               <button
                                 className="btn btn-cart2"
-                                onClick={
-                                  product ? () => onAddCart(product) : undefined
-                                }
+                                onClick={onAddCart}
                               >
                                 Thêm vào giỏ hàng
                               </button>
@@ -413,7 +409,8 @@ export default function ProductDetail() {
                                     {" "}
                                     <img
                                       src="https://scontent.fhan17-1.fna.fbcdn.net/v/t39.30808-6/451834400_1143488730215335_8162184727999743406_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=A3J78wJhMkcQ7kNvgHH0Lvb&_nc_ht=scontent.fhan17-1.fna&oh=00_AYD4m8sTtmS14USujkQ3BA48rTU7FtPSsapkyyP3wl1duw&oe=669F95A7"
-                                      alt="" width={"70%"}
+                                      alt=""
+                                      width={"70%"}
                                     />
                                   </li>
                                   <hr />
@@ -608,7 +605,7 @@ export default function ProductDetail() {
                                   </div>
                                   <div className="price-box">
                                     <span className="price-regular">
-                                      {price} VNĐ
+                                      {/* {price} VNĐ */}
                                     </span>
                                   </div>
                                 </div>

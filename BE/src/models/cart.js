@@ -10,6 +10,10 @@ const cartSchema = new mongoose.Schema(
       {
         product: String,
         quantity: Number,
+        variant: {
+          type: mongoose.Types.ObjectId,
+          ref: "ProductSize",
+        },
       },
     ],
   },

@@ -320,7 +320,7 @@ const ProductAdd = () => {
                 >
                   <p>{it.name}</p>
                   <Form.Item
-                    name={"price" + "-" + it._id}
+                    name={"quantity" + "-" + it._id}
                     rules={[
                       { required: true, message: "Vui lòng nhập số lượng" },
                     ]}
@@ -328,7 +328,7 @@ const ProductAdd = () => {
                     <Input placeholder="Số lượng" type="number" />
                   </Form.Item>
                   <Form.Item
-                    name={"quantity" + "-" + it._id}
+                    name={"price" + "-" + it._id}
                     rules={[{ required: true, message: "Vui lòng nhập giá" }]}
                   >
                     <Input placeholder="Giá" type="number" />

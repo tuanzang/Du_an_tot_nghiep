@@ -36,6 +36,11 @@ export interface ICartItem {
     updatedAt: string;
   };
   key: string;
+  variant: {
+    _id: string;
+    price: number;
+    sizeName: string;
+  };
 }
 
 export default function Cart() {
@@ -63,9 +68,9 @@ export default function Cart() {
     }));
   }, [data?.data]);
 
-  const handleUpdateQuantity = (productId: string, quantity: number) => {
+  const handleUpdateQuantity = (variantId: string, quantity: number) => {
     onUpdateQuantity({
-      productId: productId,
+      variantId,
       quantity: quantity,
     });
   };
@@ -154,12 +159,22 @@ export default function Cart() {
                         title="Sản phẩm"
                         dataIndex="name"
                         key="name"
+                        render={(_, record: any) => {
+                          return (
+                            <div>
+                              <p>{record.name}</p>
+                              <p>Size: {record.variant.sizeName}</p>
+                            </div>
+                          );
+                        }}
+                        width={100}
                       />
                       <Table.Column
                         title="Giá"
-                        dataIndex="price"
                         key="price"
-                        render={(val) => formatPrice(val)}
+                        render={(_, record: any) =>
+                          formatPrice(record.variant.price)
+                        }
                       />
                       <Table.Column
                         title="Số lượng"
@@ -168,10 +183,9 @@ export default function Cart() {
                         render={(value, record: any) => (
                           <InputNumber
                             min={1}
-                            max={5}
                             value={value}
                             onChange={(quantity) =>
-                              handleUpdateQuantity(record.product._id, quantity)
+                              handleUpdateQuantity(record.variant._id, quantity)
                             }
                           />
                         )}
@@ -181,7 +195,7 @@ export default function Cart() {
                         dataIndex="totalPrice"
                         key="totalPrice"
                         render={(_, record: any) =>
-                          formatPrice(record.quantity * record.price)
+                          formatPrice(record.variant.price * record.quantity)
                         }
                       />
                       <Table.Column
@@ -193,7 +207,7 @@ export default function Cart() {
                             okText="Có"
                             cancelText="Không"
                             onConfirm={() =>
-                              onDeleteProduct(record.product._id)
+                              onDeleteProduct(record.variant._id)
                             }
                           >
                             <Button danger>Xóa</Button>
@@ -246,17 +260,22 @@ export default function Cart() {
                           title="Tên sản phẩm"
                           dataIndex="name"
                           key="name"
-                          render={(name) => (
-                            <span style={{ fontSize: "12px" }}>{name}</span>
+                          render={(name, record: any) => (
+                            <>
+                              <p style={{ fontSize: "12px" }}>{name}</p>
+                              <p style={{ fontSize: "12px" }}>
+                                Size: {record.variant.sizeName}
+                              </p>
+                            </>
                           )}
+                          width={100}
                         />
                         <Table.Column
                           title="Giá"
-                          dataIndex="price"
                           key="price"
-                          render={(val) => (
+                          render={(_, record: any) => (
                             <span style={{ fontSize: "12px" }}>
-                              {formatPrice(val)}
+                              {formatPrice(record.variant.price)}
                             </span>
                           )}
                         />
@@ -274,7 +293,9 @@ export default function Cart() {
                           key="totalPrice"
                           render={(_, record: any) => (
                             <span style={{ fontSize: "12px" }}>
-                              {formatPrice(record.quantity * record.price)}
+                              {formatPrice(
+                                record.variant.price * record.quantity
+                              )}
                             </span>
                           )}
                         />

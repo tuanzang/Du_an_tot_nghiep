@@ -1,6 +1,5 @@
 import Order from "../models/order.js";
 import Cart from "../models/cart.js";
-import product from "../models/product.js";
 import querystring from "qs";
 import crypto from "crypto";
 import dateFormat from "dayjs";
@@ -23,32 +22,28 @@ export const createOrder = async (req, res) => {
         path: "products.product",
         model: "Product",
       })
+      .populate({
+        path: "products.variant",
+        model: "ProductSize",
+      })
       .exec();
 
     const cartProducts = cart.products?.filter((it) =>
-      productSelectedIds.includes(it.product._id.toString())
+      productSelectedIds.includes(it.variant._id.toString())
     );
     const products = cartProducts.map((item) => ({
       name: item.product.name,
-      price: item.product.price,
+      price: item.variant.price,
       quantity: item.quantity,
+      size: item.variant.sizeName,
+      variantId: item.variant._id,
     }));
 
     const totalPrice = cartProducts.reduce((total, curr) => {
-      total += curr.product.price * curr.quantity;
+      total += curr.variant.price * curr.quantity;
 
       return total;
     }, 0);
-
-    for (let item of cartProducts) {
-      await product.findByIdAndUpdate(
-        item.product._id,
-        {
-          $inc: { quantity: -item.quantity },
-        },
-        { new: true }
-      );
-    }
 
     const orders = await new Order({
       ...req.body,
@@ -59,11 +54,11 @@ export const createOrder = async (req, res) => {
       quantity: cart.products.length,
       products,
       paymentMethod,
-      status: paymentMethod === "COD"?"1":"5"
+      status: paymentMethod === "COD" ? "1" : "5",
     }).save();
 
     cart.products = cart.products.filter(
-      (it) => !productSelectedIds.includes(it.product._id.toString())
+      (it) => !productSelectedIds.includes(it.variant._id.toString())
     );
     await cart.save();
 
@@ -122,7 +117,7 @@ export const detailOrder = async (req, res) => {
       message: "Internal server error",
     });
   }
-}
+};
 
 /**
  * API danh sách hóa đơn
@@ -132,11 +127,11 @@ export const detailOrder = async (req, res) => {
  */
 
 export const getAllOrders = async (req, res) => {
-  const { status, code, createAtFrom, createAtTo, page = 1 } = req.body; 
+  const { status, code, createAtFrom, createAtTo, page = 1 } = req.body;
   const statusReq = req.query.status;
   const dateNowReq = req.query.dateNow;
   const pageSize = 10;
-  
+
   try {
     let query = {};
 
@@ -147,7 +142,7 @@ export const getAllOrders = async (req, res) => {
     if (status) {
       query.status = status;
     }
-    
+
     if (code) {
       query.code = { $regex: code, $options: "i" }; // Tìm kiếm mã hóa đơn với regex, không phân biệt hoa thường
     }
@@ -156,7 +151,7 @@ export const getAllOrders = async (req, res) => {
       const dateNow = new Date(dateNowReq);
       const startOfDay = new Date(dateNow.setUTCHours(0, 0, 0, 0));
       const endOfDay = new Date(dateNow.setUTCHours(23, 59, 59, 999));
-      
+
       query.createdAt = {
         $gte: startOfDay,
         $lte: endOfDay,
@@ -179,7 +174,7 @@ export const getAllOrders = async (req, res) => {
       .limit(pageSize);
 
     const total = await Order.countDocuments(query);
-    
+
     if (!orders || orders?.length === 0) {
       return res.status(200).json({
         message: "Không tìm thấy đơn hàng!",
@@ -202,8 +197,6 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
-
-
 export const deleteOrder = async (req, res) => {
   try {
     const id = req.params.id;
@@ -216,8 +209,8 @@ export const deleteOrder = async (req, res) => {
     res.status(500).json({
       message: "Internal server error",
     });
-  } 
-}
+  }
+};
 
 /**
  * API cập nhật trạng thái hóa đơn
@@ -319,7 +312,10 @@ export const getTotalPriceByDay = async (req, res) => {
       },
     });
 
-    const totalPrice = orders.reduce((total, order) => total + order.totalPrice, 0);
+    const totalPrice = orders.reduce(
+      (total, order) => total + order.totalPrice,
+      0
+    );
 
     return res.status(200).json({
       message: "Success",
@@ -343,7 +339,10 @@ export const getTotalPriceByWeek = async (req, res) => {
       },
     });
 
-    const totalPrice = orders.reduce((total, order) => total + order.totalPrice, 0);
+    const totalPrice = orders.reduce(
+      (total, order) => total + order.totalPrice,
+      0
+    );
 
     return res.status(200).json({
       message: "Success",
@@ -367,7 +366,10 @@ export const getTotalPriceByMonth = async (req, res) => {
       },
     });
 
-    const totalPrice = orders.reduce((total, order) => total + order.totalPrice, 0);
+    const totalPrice = orders.reduce(
+      (total, order) => total + order.totalPrice,
+      0
+    );
 
     return res.status(200).json({
       message: "Success",
@@ -391,7 +393,10 @@ export const getTotalPriceByYear = async (req, res) => {
       },
     });
 
-    const totalPrice = orders.reduce((total, order) => total + order.totalPrice, 0);
+    const totalPrice = orders.reduce(
+      (total, order) => total + order.totalPrice,
+      0
+    );
 
     return res.status(200).json({
       message: "Success",
@@ -404,7 +409,6 @@ export const getTotalPriceByYear = async (req, res) => {
   }
 };
 
-
 export const getTotalPriceByCustomDay = async (req, res) => {
   const { dateStart, dateEnd } = req.query;
 
@@ -412,7 +416,7 @@ export const getTotalPriceByCustomDay = async (req, res) => {
   if (!dateStart || !dateEnd) {
     return res.status(400).json({
       message: "Thiếu tham số ngày bắt đầu hoặc ngày kết thúc",
-      providedParams: { dateStart, dateEnd } // Thêm thông tin tham số đã gửi để debug
+      providedParams: { dateStart, dateEnd }, // Thêm thông tin tham số đã gửi để debug
     });
   }
 
@@ -423,7 +427,7 @@ export const getTotalPriceByCustomDay = async (req, res) => {
   if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
     return res.status(400).json({
       message: "Ngày không hợp lệ",
-      providedParams: { dateStart, dateEnd } // Thêm thông tin tham số đã gửi để debug
+      providedParams: { dateStart, dateEnd }, // Thêm thông tin tham số đã gửi để debug
     });
   }
 
@@ -437,7 +441,10 @@ export const getTotalPriceByCustomDay = async (req, res) => {
     });
 
     // Tính tổng giá trị của các đơn hàng
-    const totalPrice = orders.reduce((total, order) => total + order.totalPrice, 0);
+    const totalPrice = orders.reduce(
+      (total, order) => total + order.totalPrice,
+      0
+    );
 
     return res.status(200).json({
       message: "Success",
