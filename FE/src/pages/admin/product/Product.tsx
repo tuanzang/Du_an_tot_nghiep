@@ -1,15 +1,6 @@
 import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import {
-  Button,
-  Card,
-  Col,
-  Input,
-  Radio,
-  Row,
-  Switch,
-  Table,
-} from "antd";
+import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
 import {
   DownloadOutlined,
   PlusSquareOutlined,
@@ -26,6 +17,8 @@ import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
+import { socket } from "../../../socket";
+import axiosInstance from "../../../config/axios";
 
 const customTableHeaderCellStyle = {
   backgroundColor: "#c29957",
@@ -43,31 +36,31 @@ export default function Product() {
   const [cates, setCates] = useState<ICategory[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
+  const fetchData = async () => {
+    try {
+      const [productResponse, categoryResponse] = await Promise.all([
+        axios.get("http://localhost:3001/api/products"),
+        axios.get("http://localhost:3001/api/categories"),
+      ]);
+      setProducts(productResponse.data?.data);
+      setCates(categoryResponse.data?.data);
+      // console.log(productResponse.data?.data);
+      // console.log(categoryResponse.data?.data);
+
+      const sortedProducts = productResponse.data?.data.sort(
+        (a: IProduct, b: IProduct) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      setProducts(sortedProducts);
+      setCates(categoryResponse.data?.data); // Ensure categories are correctly set
+      setFilteredProducts(sortedProducts); // Set initial filtered products
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [productResponse, categoryResponse] = await Promise.all([
-          axios.get("http://localhost:3001/api/products"),
-          axios.get("http://localhost:3001/api/categories"),
-        ]);
-        setProducts(productResponse.data?.data);
-        setCates(categoryResponse.data?.data);
-        // console.log(productResponse.data?.data);
-        // console.log(categoryResponse.data?.data);
-
-        const sortedProducts = productResponse.data?.data.sort(
-          (a: IProduct, b: IProduct) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-
-        setProducts(sortedProducts);
-        setCates(categoryResponse.data?.data); // Ensure categories are correctly set
-        setFilteredProducts(sortedProducts); // Set initial filtered products
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
     fetchData();
   }, []);
 
@@ -100,7 +93,7 @@ export default function Product() {
           },
           {
             label: "Không",
-            onClick: () => { },
+            onClick: () => {},
           },
         ],
       });
@@ -114,8 +107,24 @@ export default function Product() {
     setValue(Number(e.target.value));
   };
 
-  const onChangeSwitch = (checked: boolean) => {
-    console.log(`switch to ${checked}`);
+  const onChangeSwitch = async (checked: boolean, productId: string) => {
+    updateStatusProduct(productId, checked ? 1 : 0);
+
+    if (!checked) {
+      socket.emit("hidden product", productId);
+    }
+  };
+
+  const updateStatusProduct = async (productId: string, status: number) => {
+    try {
+      await axiosInstance.put(`/products/${productId}`, {
+        status,
+      });
+
+      fetchData();
+    } catch (error) {
+      toast.error("Có lỗi xảy ra, vui lòng thử lại");
+    }
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,112 +161,111 @@ export default function Product() {
 
   const columns: (
     | ColumnGroupType<{
-      stt: number;
-      key: number;
-      name: string;
-      image: string[];
-      price: number;
-      description: string;
-      quantity: number;
-      loai: string;
-    }>
+        stt: number;
+        key: number;
+        name: string;
+        image: string[];
+        price: number;
+        description: string;
+        quantity: number;
+        loai: string;
+      }>
     | ColumnType<{
-      stt: number;
-      key: number;
-      name: string;
-      image: string[];
-      price: number;
-      description: string;
-      quantity: number;
-      loai: string;
-    }>
-  )[] =
-    [
-      {
-        title: "STT",
-        dataIndex: "stt",
-        key: "stt",
-        align: "center",
-      },
-      {
-        title: "Tên sản phẩm",
-        dataIndex: "name",
-        key: "name",
-        width: "20%",
-      },
-      {
-        title: "Ảnh",
-        dataIndex: "image",
-        key: "image",
-        width: "20%",
-        render: (images: string[]) => (
-          <div style={{ display: "flex", gap: "10px" }}>
-            {images.slice(0, 2).map((image, index) => (
-              <img
-                key={index}
-                style={{ height: "70px", width: "70px", objectFit: "cover" }}
-                src={image}
-                alt={`product-image-${index}`}
-              />
-            ))}
-          </div>
-        ),
-      },
-      {
-        title: "Giá sản phẩm",
-        dataIndex: "price",
-        key: "price",
-        width: "20%",
-      },
-      // {
-      //   title: "Giá cũ sản phẩm",
-      //   dataIndex: "priceOld",
-      //   key: "priceOld",
-      //   width: "10%",
-      // },
-      {
-        title: "Danh mục",
-        dataIndex: "loai",
-        key: "loai",
-        width: "15%",
-      },
-      {
-        title: "Trạng thái",
-        dataIndex: "status",
-        key: "status",
-        align: "center",
-        width: "30%",
-        render: (key: any) => (
-          <Switch
-            style={{ backgroundColor: key ? "green" : "gray" }}
-            checked={key}
-            onChange={() => onChangeSwitch(key)}
-          />
-        ),
-      },
-      {
-        title: "Xóa",
-        dataIndex: "key",
-        key: "key",
-        align: "center",
-        width: "10%",
-        render: (value: any) => (
-          <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
-        ),
-      },
-      {
-        title: "Chi tiết",
-        align: "center",
-        dataIndex: "key",
-        key: "key",
-        width: "20%",
-        render: (value: IProduct) => (
-          <Link to={`/admin/product/detail/${value}`}>
-            <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
-          </Link>
-        ),
-      },
-    ];
+        stt: number;
+        key: number;
+        name: string;
+        image: string[];
+        price: number;
+        description: string;
+        quantity: number;
+        loai: string;
+      }>
+  )[] = [
+    {
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+      align: "center",
+    },
+    {
+      title: "Tên sản phẩm",
+      dataIndex: "name",
+      key: "name",
+      width: "20%",
+    },
+    {
+      title: "Ảnh",
+      dataIndex: "image",
+      key: "image",
+      width: "20%",
+      render: (images: string[]) => (
+        <div style={{ display: "flex", gap: "10px" }}>
+          {images.slice(0, 2).map((image, index) => (
+            <img
+              key={index}
+              style={{ height: "70px", width: "70px", objectFit: "cover" }}
+              src={image}
+              alt={`product-image-${index}`}
+            />
+          ))}
+        </div>
+      ),
+    },
+    {
+      title: "Giá sản phẩm",
+      dataIndex: "price",
+      key: "price",
+      width: "20%",
+    },
+    // {
+    //   title: "Giá cũ sản phẩm",
+    //   dataIndex: "priceOld",
+    //   key: "priceOld",
+    //   width: "10%",
+    // },
+    {
+      title: "Danh mục",
+      dataIndex: "loai",
+      key: "loai",
+      width: "15%",
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      align: "center",
+      width: "30%",
+      render: (status: any, record: any) => (
+        <Switch
+          // style={{ backgroundColor: key ? "green" : "gray" }}
+          checked={status === 1}
+          onChange={(checked) => onChangeSwitch(checked, record.key)}
+        />
+      ),
+    },
+    // {
+    //   title: "Xóa",
+    //   dataIndex: "key",
+    //   key: "key",
+    //   align: "center",
+    //   width: "10%",
+    //   render: (value: any) => (
+    //     <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
+    //   ),
+    // },
+    {
+      title: "Chi tiết",
+      align: "center",
+      dataIndex: "key",
+      key: "key",
+      width: "20%",
+      render: (value: IProduct) => (
+        <Link to={`/admin/product/detail/${value}`}>
+          <EyeOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
+        </Link>
+      ),
+    },
+  ];
 
   const data = filteredProducts.map((item: IProduct, index: number) => {
     const category = cates.find(
@@ -274,6 +282,7 @@ export default function Product() {
       description: item.description,
       // quantity: item.quantity,
       loai: category ? category.loai : "Không tìm thấy danh mục",
+      status: item.status,
     };
   });
 
@@ -325,7 +334,11 @@ export default function Product() {
         <Row gutter={16} style={{ marginTop: "12px" }}>
           <Col span={12}>
             <span>Trạng thái: </span>
-            <Radio.Group onChange={onChangeRadio} value={value} style={{ paddingLeft: "12px" }}>
+            <Radio.Group
+              onChange={onChangeRadio}
+              value={value}
+              style={{ paddingLeft: "12px" }}
+            >
               <Radio value={1}>Tất cả</Radio>
               <Radio value={2}>Hoạt động</Radio>
               <Radio value={3}>Ngưng hoạt động</Radio>
@@ -358,7 +371,6 @@ export default function Product() {
           columns={columns}
         />
       </Card>
-
     </div>
   );
 }
