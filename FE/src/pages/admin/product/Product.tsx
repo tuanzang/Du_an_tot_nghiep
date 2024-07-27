@@ -131,14 +131,14 @@ export default function Product() {
       filteredProducts.map((product) => ({
         STT: product._id, // or any other field
         "Tên sản phẩm": product.name,
-        "Giá sản phẩm": product.price,
-        "Giá cũ sản phẩm": product.priceOld,
+        // "Giá sản phẩm": product.price,
+        // // "Giá cũ sản phẩm": product.priceOld,
         "Loại sản phẩm":
           cates.find(
             (cate) => cate._id.toString() === product.categoryId.toString()
           )?.loai || "Không có danh mục",
         "Mô tả sản phẩm": product.description,
-        "Số lượng": product.quantity,
+        // "Số lượng": product.quantity,
         // Add more fields as needed
       }))
     );
@@ -209,12 +209,12 @@ export default function Product() {
         key: "price",
         width: "20%",
       },
-      {
-        title: "Giá cũ sản phẩm",
-        dataIndex: "priceOld",
-        key: "priceOld",
-        width: "10%",
-      },
+      // {
+      //   title: "Giá cũ sản phẩm",
+      //   dataIndex: "priceOld",
+      //   key: "priceOld",
+      //   width: "10%",
+      // },
       {
         title: "Danh mục",
         dataIndex: "loai",
@@ -269,10 +269,10 @@ export default function Product() {
       key: item._id,
       name: item.name,
       image: item.image,
-      price: item.price,
-      priceOld: item.priceOld,
+      // price: item.price,
+      // priceOld: item.priceOld,
       description: item.description,
-      quantity: item.quantity,
+      // quantity: item.quantity,
       loai: category ? category.loai : "Không tìm thấy danh mục",
     };
   });

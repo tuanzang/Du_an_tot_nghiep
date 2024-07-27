@@ -290,9 +290,9 @@ export default function ProductDetail() {
                           <span className="price-regular">
                             {product?.price} VNĐ
                           </span>
-                          <span className="price-old">
+                          {/* <span className="price-old">
                             <del>{product?.priceOld} VNĐ</del>
-                          </span>
+                          </span> */}
                         </div>
                         {/* <div className="availability">
                           <i className="fa fa-check-circle"></i>
@@ -614,9 +614,9 @@ export default function ProductDetail() {
                                     <span className="price-regular">
                                       {relatedProduct.price} VNĐ
                                     </span>
-                                    <span className="price-old">
+                                    {/* <span className="price-old">
                                       <del>{relatedProduct.priceOld} VNĐ</del>
-                                    </span>
+                                    </span> */}
                                   </div>
                                 </div>
                               </figure>

@@ -1,8 +1,8 @@
 import type { FormProps } from 'antd';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Button, Form, Input, Select, Upload, Checkbox, Card } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Select, Upload, Checkbox, Card, Space } from 'antd';
+import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { IProduct } from '../../../interface/Products';
 import { useEffect, useState, useRef } from 'react';
 import { ICategory } from '../../../interface/Categories';
@@ -83,7 +83,9 @@ const ProductAdd = () => {
 
 
   // const [quantity, setQuantity] = useState<Number>(0)
-  const onFinish: FormProps<IProduct>["onFinish"] = async (values) => {
+  const onFinish: FormProps<IProduct>["onFinish"] = async (values:any) => {
+    console.log(values);
+    
     try {
       // Upload images
       // Lấy danh sách các file từ fileList
@@ -94,24 +96,27 @@ const ProductAdd = () => {
       //  console.log("Uploaded image URLs:", uploadedImageUrls);
 
       // Update values with uploaded image URLs
-      const updatedValues = { ...values, image: uploadedImageUrls, description };
+      const { name, image, description: desc, categoryId, ...rest} = { ...values, image: uploadedImageUrls, description } as any;
+      
 
       // Send product data to server
-      const dataProduct = await axios.post(`http://localhost:3001/api/products/add`, updatedValues);
+      const dataProduct = await axios.post(`http://localhost:3001/api/products/add`, {name, image, description, categoryId});
 
       // product size
-      const idSizes = updatedValues.idSize;
-      const quantity = updatedValues.quantity;
+      // const idSizes = updatedValues.idSize;
+      // const quantity = updatedValues.quantity;
+      // const price = updatedValues.price
 
-      const productSizes: IProductSize[] = [];
-      idSizes.map(s => productSizes.push({ _id: null, idProduct: dataProduct.data.data._id, idSize: s, quantity}))
+      // const productSizes: IProductSize[] = [];
+      // idSizes.map(s => productSizes.push({ _id: null, idProduct: dataProduct.data.data._id, idSize: s, quantity, price }))
 
-      await axios.post(`http://localhost:3001/api/products/add/size`, productSizes)
+      await axios.post(`http://localhost:3001/api/products/add/size`, {...rest})
       toast.success("Thêm sản phẩm thành công");
       navigate("/admin/product");
     } catch (err) {
       console.log(err);
     }
+
   };
 
   const onFinishFailed: FormProps<IProduct>["onFinishFailed"] = (errorInfo) => {
@@ -209,8 +214,9 @@ const ProductAdd = () => {
   const onDescriptionChange = (_event: any, editor: any) => {
     const data = editor.getData();
     setDescription(data);
+
   };
-  
+
 
   return (
     <div className=''>
@@ -248,14 +254,8 @@ const ProductAdd = () => {
             </Form.Item>
           </Card>
 
-          <Card>
-            <Form.Item<IProduct>
-              label="Giá"
-              name="price"
-              rules={[{ required: true, message: "Vui lòng nhập giá sản phẩm!" }]}
-            >
-              <Input type="number" />
-            </Form.Item>
+          {/* <Card>
+
             <Form.Item<IProduct>
               label="Giá cũ"
               name="priceOld"
@@ -263,10 +263,10 @@ const ProductAdd = () => {
             >
               <Input type="number" />
             </Form.Item>
-          </Card>
+          </Card> */}
 
           <Card>
-            <Form.Item<IProduct>
+            {/* <Form.Item<IProduct>
               label="Size"
               name="idSize"
               rules={[{ required: true, message: 'Vui lòng chọn size!' }]}
@@ -280,7 +280,26 @@ const ProductAdd = () => {
               rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
             >
               <Input type="number" />
-            </Form.Item>
+            </Form.Item> */}
+            <div>
+                {sizes.map((it) => (
+                  <Space key={it._id} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                    <p>{it.name}</p>
+                    <Form.Item
+                      name={'price' + '-' + it._id}
+                      rules={[{ required: true, message: 'Vui lòng nhập số lượng' }]}
+                    >
+                      <Input placeholder="Số lượng" type='number'/>
+                    </Form.Item>
+                    <Form.Item
+                      name={'quantity' + '-' + it._id}
+                      rules={[{ required: true, message: 'Vui lòng nhập giá' }]}
+                    >
+                      <Input placeholder="Giá" type='number'/>
+                    </Form.Item>
+                  </Space>
+                ))}
+            </div>
           </Card>
 
           <Card>
@@ -312,11 +331,11 @@ const ProductAdd = () => {
               <div className="editor-container__editor">
                 <div ref={editorRef}>{isLayoutReady &&
                   <CKEditor
-                  editor={ClassicEditor}
-                  config={editorConfig}
-                  data={description}
-                  onChange={onDescriptionChange}
-                  name="description"
+                    editor={ClassicEditor}
+                    config={editorConfig}
+                    data={description}
+                    onChange={onDescriptionChange}
+                    name="description"
                   />}
                 </div>
               </div>
@@ -325,7 +344,7 @@ const ProductAdd = () => {
         </div>
 
         <div className='mt-5'>
-          <Form.Item wrapperCol={{ offset: 8, span: 16 }} style={{float:'right', paddingRight: '25px'}}>
+          <Form.Item wrapperCol={{ offset: 8, span: 16 }} style={{ float: 'right', paddingRight: '25px' }}>
             <Button type="primary" htmlType="submit">
               Submit
             </Button>
