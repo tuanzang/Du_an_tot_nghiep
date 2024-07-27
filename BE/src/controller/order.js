@@ -128,6 +128,7 @@ export const detailOrder = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   const { status, code, createAtFrom, createAtTo, page = 1 } = req.body;
+
   const statusReq = req.query.status;
   const dateNowReq = req.query.dateNow;
   const pageSize = 10;
@@ -316,7 +317,6 @@ export const getTotalPriceByDay = async (req, res) => {
       (total, order) => total + order.totalPrice,
       0
     );
-
     return res.status(200).json({
       message: "Success",
       totalPrice,

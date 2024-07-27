@@ -104,10 +104,7 @@ const Header = () => {
                             {isLogged ? (
                               <>
                                 <li>
-                                  <a href="/introduce">Tài khoản của tôi</a>
-                                </li>
-                                <li>
-                                  <a href="/order_history">Đơn hàng của tôi</a>
+                                  <a href="/profile">Tài khoản của tôi</a>
                                 </li>
                                 {userInfo?.role === "admin" && (
                                   <li>
