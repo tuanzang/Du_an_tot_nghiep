@@ -49,7 +49,7 @@ const orderSchema = new mongoose.Schema(
       type: String,
       enum: ["COD", "VNPAY"],
       default: "COD",
-    },
+    }
   },
   {
     timestamps: true,

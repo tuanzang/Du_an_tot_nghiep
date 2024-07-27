@@ -61,6 +61,11 @@ export default function Dashboard() {
   const [listBestSellerByMonth, setListBestSellerByMonth] = useState([]);
   const [listBestSellerByYear, setListBestSellerByYear] = useState([]);
   const [listBestSellerByCustomDay, setListBestSellerByCustomDay] = useState([]);
+  const [listStockProductsByDay, setListStockProductsByDay] = useState([]);
+  const [listStockProductsByWeek, setListStockProductsByWeek] = useState([]);
+  const [listStockProductsByMonth, setListStockProductsByMonth] = useState([]);
+  const [listStockProductsByYear, setListStockProductsByYear] = useState([]);
+  const [listStockProductsByCustomDay, setListStockProductsByCustomDay] = useState([]);
   const [filter, setFilter] = useState<Filter>({ page: 1, size: 5, createAtFrom: null, createAtTo: null });
   const [customDateRange, setCustomDateRange] = useState([null, null]);
   const [totalOrdersToday, setTotalOrdersToday] = useState(0);
@@ -456,6 +461,8 @@ export default function Dashboard() {
       console.log(error);
     }
   }
+
+  //Danh sách sản phẩm bán chạy nhất
   const getListBestSeller = async (startDate: string, endDate: string, setter) => {
     try {
       const response = await axios.get(`http://localhost:3001/api/topOrder/top-ordered-products`, {
@@ -493,11 +500,49 @@ export default function Dashboard() {
 
   };
 
+  // Danh sách sản phẩm tồn kho
 
+  const getListStockProducts = async (startDate: string, endDate: string, setter) => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/stockOrder/stock-products`, {
+        params: { startDate, endDate }
+      });
+      setter(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
+
+  const getListStockProductsByWeek = async () => {
+    const { startDate, endDate } = getWeekRange();
+    await getListStockProducts(startDate, endDate, setListStockProductsByWeek);
+  };
+
+  const getListStockProductsByMonth = async () => {
+    const { startDate, endDate } = getMonthRange();
+    await getListStockProducts(startDate, endDate, setListStockProductsByMonth);
+  };
+
+  const getListStockProductsByYear = async () => {
+    const { startDate, endDate } = getYearRange();
+    await getListStockProducts(startDate, endDate, setListStockProductsByYear);
+  };
+
+  const getListStockProductsCustom = async () => {
+
+    const [startDate, endDate] = customDateRange;
+    if (startDate && endDate) {
+      await getListStockProducts(startDate.format('YYYY-MM-DD'), endDate.format('YYYY-MM-DD'), setListStockProductsByCustomDay);
+    }
+
+  };
   useEffect(() => {
     if (customDateRange[0] && customDateRange[1]) {
       getListBestSellerCustom();
       getOrdersByCustomDayStatus();
+      getListStockProductsCustom()
     }
   }, [customDateRange]);
 
@@ -540,6 +585,48 @@ export default function Dashboard() {
       price: item.productDetails.price,
       image: item.productDetails.image,
       description: item.productDetails.description,
+      totalQuantity: item.totalQuantity,
+    }))
+  };
+  const dataListStockProducts = {
+    1: listStockProductsByDay.map((item: any, index) => ({
+      stt: index + 1,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      description: item.description,
+      totalQuantity: item.totalQuantity,
+    })),
+    2: listStockProductsByWeek.map((item : any, index) => ({
+      stt: index + 1,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      description: item.description,
+      totalQuantity: item.totalQuantity,
+    })),
+    3: listStockProductsByMonth.map((item: any, index) => ({
+      stt: index + 1,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      description: item.description,
+      totalQuantity: item.totalQuantity,
+    })),
+    4: listStockProductsByYear.map((item: any , index) => ({
+      stt: index + 1,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      description: item.description,
+      totalQuantity: item.totalQuantity,
+    })),
+    5: listStockProductsByCustomDay.map((item: any , index) => ({
+      stt: index + 1,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      description: item.description,
       totalQuantity: item.totalQuantity,
     }))
   };
@@ -589,6 +676,7 @@ export default function Dashboard() {
         data = await getOrdersByWeekStatus();
         await getOrdersPriceByWeekStatus();
         await getListBestSellerByWeek();
+        await getListStockProductsByWeek();
         setDataBieuDo([
           { label: "Đã hoàn thành", value: completedOrdersWeek },
           { label: "Đã hủy", value: canceledOrdersWeek },
@@ -598,6 +686,7 @@ export default function Dashboard() {
         data = await getOrdersByMonthStatus();
         await getOrdersPriceByMonthStatus();
         await getListBestSellerByMonth();
+        await getListStockProductsByMonth();
         setDataBieuDo([
           { label: "Đã hoàn thành", value: completedOrdersMonth },
           { label: "Đã hủy", value: canceledOrdersMonth },
@@ -607,6 +696,7 @@ export default function Dashboard() {
         data = await getOrdersByYearStatus();
         await getOrdersPriceByYearStatus();
         await getListBestSellerByYear();
+        await getListStockProductsByYear();
         setDataBieuDo([
           { label: "Đã hoàn thành", value: completedOrdersYear },
           { label: "Đã hủy", value: canceledOrdersYear },
@@ -668,7 +758,7 @@ export default function Dashboard() {
         </div>
         <Row gutter={16} style={{ padding: "0 8px" }}>
 
-          <Col span={14}>
+          <Col span={12}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
               Danh sách sản phẩm bán chạy theo {nameButton}
             </Title>
@@ -680,15 +770,20 @@ export default function Dashboard() {
             />
 
           </Col>
-          <Col span={10}>
+          <Col span={12}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-              Biểu đồ trạng thái {nameButton}
+              Danh sách sản phẩm tồn kho theo {nameButton}
             </Title>
-            <Card style={{ borderColor: "#c29957" }}>
-              <PieChartDashBoard data={dataBieuDo} />
-            </Card>
+            <Table
+              dataSource={dataListStockProducts[indexButton]}
+              columns={columns}
+              pagination={false}
+
+            />
+
           </Col>
-          <Col span={24}>
+          
+          <Col span={14}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
               Thống kê số đơn theo {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
             </Title>
@@ -755,6 +850,14 @@ export default function Dashboard() {
               pagination={false}
             />
 
+          </Col>
+          <Col span={10}>
+            <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
+              Biểu đồ trạng thái {nameButton}
+            </Title>
+            <Card style={{ borderColor: "#c29957" }}>
+              <PieChartDashBoard data={dataBieuDo} />
+            </Card>
           </Col>
         </Row>
 
