@@ -11,5 +11,9 @@ export interface IProduct {
   categoryId: string;
   status: boolean;
   createdAt: string;
+  productSizedata: {
+    price: number;
+    quantity: number;
+    _id: string;
+  }[];
 }
- 
