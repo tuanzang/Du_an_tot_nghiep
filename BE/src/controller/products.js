@@ -14,9 +14,20 @@ export const getAllProduct = async (req, res) => {
       });
     }
 
+    const getProductsPromise = data.map(async (item) => {
+      const variants = await productSize.find({ idProduct: item._id }).exec();
+
+      return {
+        ...item.toJSON(),
+        variants,
+      };
+    });
+
+    const products = await Promise.all(getProductsPromise);
+
     return res.status(200).json({
       message: "Danh sách sản phẩm",
-      data,
+      data: products,
     });
   } catch (error) {
     return res.status(500).json({
@@ -41,9 +52,20 @@ export const searchProducts = async (req, res) => {
       });
     }
 
+    const getProductsPromise = data.map(async (item) => {
+      const variants = await productSize.find({ idProduct: item._id }).exec();
+
+      return {
+        ...item.toJSON(),
+        variants,
+      };
+    });
+
+    const products = await Promise.all(getProductsPromise);
+
     return res.status(200).json({
       message: `Kết quả tìm kiếm cho từ khóa "${query}"`,
-      data,
+      data: products,
     });
   } catch (error) {
     return res.status(500).json({
@@ -55,8 +77,9 @@ export const searchProducts = async (req, res) => {
 export const getDetailProduct = async (req, res) => {
   try {
     const data = await product.findById(req.params.id);
-    const productSizedata=  await productSize.find({ idProduct: req.params.id });
-   
+    const productSizedata = await productSize.find({
+      idProduct: req.params.id,
+    });
 
     if (!data || data.length === 0) {
       return res.status(404).json({
@@ -65,14 +88,13 @@ export const getDetailProduct = async (req, res) => {
       });
     }
 
-    data.productSize= productSizedata
-    console.log(data);
+    data.productSize = productSizedata;
 
     return res.status(200).json({
       message: "Đã tìm thấy sản phẩm",
       data: {
         ...data.toJSON(),
-        productSizedata
+        productSizedata,
       },
     });
   } catch (error) {

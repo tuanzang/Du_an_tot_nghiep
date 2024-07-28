@@ -14,7 +14,8 @@ import { IUser } from "../../interface/Users";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IProductSize } from "../../interface/ProductSize";
-import { formatPrice } from "../../services/common/formatCurrency";
+import ProductItem from "../../components/ProductItem";
+import { formatPrice } from "../../utils";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
@@ -283,7 +284,9 @@ export default function ProductDetail() {
                         </div>
                         <h3 className="product-name">{product?.name}</h3>
                         <div className="price-box">
-                          <span className="price-regular">{productPrice}</span>
+                          <span className="price-regular">
+                            {productPrice} VNĐ
+                          </span>
                         </div>
                         <div>
                           <div className="button-container mt-2">
@@ -576,39 +579,7 @@ export default function ProductDetail() {
                             className="gutter-row"
                             span={6}
                           >
-                            <div className="product-item">
-                              <figure className="product-thumb">
-                                <a href="#">
-                                  <img
-                                    className="pri-img"
-                                    src={relatedProduct?.image?.[0]}
-                                    alt="product"
-                                  />
-                                </a>
-                                <div className="product-badge">
-                                  <div className="product-label new">
-                                    <span>HOT</span>
-                                  </div>
-                                </div>
-                                <div className="cart-hover">
-                                  <button className="btn btn-cart">
-                                    Thêm vào giỏ hàng
-                                  </button>
-                                </div>
-                                <div className="product-caption text-center">
-                                  <div className="product-identity">
-                                    <p className="manufacturer-name">
-                                      <a href="#">{relatedProduct.name}</a>
-                                    </p>
-                                  </div>
-                                  <div className="price-box">
-                                    <span className="price-regular">
-                                      {/* {price} VNĐ */}
-                                    </span>
-                                  </div>
-                                </div>
-                              </figure>
-                            </div>
+                            <ProductItem data={relatedProduct} />
                           </Col>
                         ))}
                       </Row>

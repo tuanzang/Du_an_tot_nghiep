@@ -1,1 +1,7 @@
+.product-hidden {
+  filter: grayscale(1);
+}
 
+.product-hidden .image-container {
+  cursor: default;
+}
