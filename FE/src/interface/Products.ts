@@ -16,4 +16,5 @@ export interface IProduct {
     quantity: number;
     _id: string;
   }[];
+  variants: { price: number }[];
 }

@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
-import { Carousel, Col, Row, message } from "antd";
+import { Carousel, Col, Row } from "antd";
 import "./Home.css";
 import axios from "axios";
 import { IProduct } from "../../interface/Products";
-import useCartMutation from "../../hooks/useCart";
-import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
-import { Link } from "react-router-dom";
+import ProductItem from "../../components/ProductItem";
 
 const contentStyle: React.CSSProperties = {
   height: "530px",
@@ -16,14 +14,14 @@ const contentStyle: React.CSSProperties = {
 };
 
 export default function Home() {
-  const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+  // const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const [product, setProduct] = useState<IProduct[]>([]);
-  const { mutate } = useCartMutation({
-    action: "ADD",
-    onSuccess: () => {
-      message.success("Đã thêm sản phẩm vào giỏ hàng");
-    },
-  });
+  // const { mutate } = useCartMutation({
+  //   action: "ADD",
+  //   onSuccess: () => {
+  //     message.success("Đã thêm sản phẩm vào giỏ hàng");
+  //   },
+  // });
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -38,16 +36,16 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  const onAddCart = (productData: IProduct) => {
-    if (!isLogged) {
-      return message.info("Vui lòng đăng nhập tài khoản!");
-    }
+  // const onAddCart = (productData: IProduct) => {
+  //   if (!isLogged) {
+  //     return message.info("Vui lòng đăng nhập tài khoản!");
+  //   }
 
-    mutate({
-      productId: productData._id,
-      quantity: 1,
-    });
-  };
+  //   mutate({
+  //     productId: productData._id,
+  //     quantity: 1,
+  //   });
+  // };
 
   if (!product) return null;
 
@@ -173,117 +171,7 @@ export default function Home() {
                           <Row gutter={16}>
                             {product.map((p: IProduct) => (
                               <Col key={p._id} className="gutter-row" span={6}>
-                                <div className="product-item">
-                                  <figure className="product-thumb">
-                                    <Link to={`/product/${p._id}`}>
-                                      <div className="image-container">
-                                        <img
-                                          className="pri-img"
-                                          src={p.image[0]}
-                                          alt={p.name}
-                                        />
-                                        {p.image[1] && (
-                                          <img
-                                            className="sec-img"
-                                            src={p.image[1]}
-                                            alt={p.name}
-                                          />
-                                        )}
-                                      </div>
-                                    </Link>
-                                    <div className="product-badge">
-                                      <div className="product-label new">
-                                        <span>HOT</span>
-                                      </div>
-                                    </div>
-                                    <div className="button-group">
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="left"
-                                        title="Yêu thích"
-                                      >
-                                        <i className="pe-7s-like"></i>
-                                      </a>
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="left"
-                                        title="So sánhpare"
-                                      >
-                                        <i className="pe-7s-refresh-2"></i>
-                                      </a>
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#quick_view"
-                                      >
-                                        <span
-                                          data-bs-toggle="tooltip"
-                                          data-bs-placement="left"
-                                          title="Xem chi tiết"
-                                        >
-                                          <i className="pe-7s-search"></i>
-                                        </span>
-                                      </a>
-                                    </div>
-                                    <div className="cart-hover">
-                                      <button
-                                        className="btn btn-cart"
-                                        onClick={() => onAddCart(p)}
-                                      >
-                                        Thêm vào giỏ hàng
-                                      </button>
-                                    </div>
-                                    <div className="product-caption text-center">
-                                      <div className="product-identity">
-                                        <p className="manufacturer-name">
-                                          <Link to={`/product/${p._id}`}>
-                                            {p.name}
-                                          </Link>{" "}
-                                        </p>
-                                      </div>
-                                      {/* <ul className="color-categories">
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-lightblue"
-                                            title="LightSteelblue"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-darktan"
-                                            title="Darktan"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-grey"
-                                            title="Grey"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-brown"
-                                            title="Brown"
-                                          ></a>
-                                        </li>
-                                      </ul> */}
-                                      <div className="price-box">
-                                        <span className="price-regular">
-                                          {p.price + ""} VNĐ
-                                        </span>
-                                        {/* <span className="price-old">
-                                          <del>{p.priceOld + " "}VNĐ</del>
-                                        </span> */}
-                                      </div>
-                                    </div>
-                                  </figure>
-                                </div>
+                                <ProductItem data={p} />
                               </Col>
                             ))}
                           </Row>
@@ -295,117 +183,9 @@ export default function Home() {
                       <div className="tab-pane fade show active">
                         <div className="product-carousel-4 slick-row-10 slick-arrow-style">
                           <Row gutter={16}>
-                            {product.map((p, index) => (
+                            {product.map((p) => (
                               <Col key={p._id} className="gutter-row" span={6}>
-                                <div className="product-item">
-                                  <figure className="product-thumb">
-                                    <Link to={`/product/${p._id}`}>
-                                      <div className="image-container">
-                                        <img
-                                          className="pri-img"
-                                          src={p.image[0]}
-                                          alt={p.name}
-                                        />
-                                        {p.image[1] && (
-                                          <img
-                                            className="sec-img"
-                                            src={p.image[1]}
-                                            alt={p.name}
-                                          />
-                                        )}
-                                      </div>
-                                    </Link>
-                                    <div className="product-badge">
-                                      <div className="product-label new">
-                                        <span>HOT</span>
-                                      </div>
-                                    </div>
-                                    <div className="button-group">
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="left"
-                                        title="Yêu thích"
-                                      >
-                                        <i className="pe-7s-like"></i>
-                                      </a>
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="left"
-                                        title="So sánhpare"
-                                      >
-                                        <i className="pe-7s-refresh-2"></i>
-                                      </a>
-                                      <a
-                                        href="#"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#quick_view"
-                                      >
-                                        <span
-                                          data-bs-toggle="tooltip"
-                                          data-bs-placement="left"
-                                          title="Xem chi tiết"
-                                        >
-                                          <i className="pe-7s-search"></i>
-                                        </span>
-                                      </a>
-                                    </div>
-                                    <div className="cart-hover">
-                                      <button className="btn btn-cart">
-                                        Thêm vào giỏ hàng
-                                      </button>
-                                    </div>
-                                    <div className="product-caption text-center">
-                                      <div className="product-identity">
-                                        <p className="manufacturer-name">
-                                          <a href="#">{p.name}</a>
-                                        </p>
-                                      </div>
-                                      {/* <ul className="color-categories">
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-lightblue"
-                                            title="LightSteelblue"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-darktan"
-                                            title="Darktan"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-grey"
-                                            title="Grey"
-                                          ></a>
-                                        </li>
-                                        <li>
-                                          <a
-                                            href="#"
-                                            className="c-brown"
-                                            title="Brown"
-                                          ></a>
-                                        </li>
-                                      </ul> */}
-                                      {/* <h6 className="product-name">
-                                        <a href="#">Sản phẩm {index + 1}</a>
-                                      </h6> */}
-                                      <div className="price-box">
-                                        <span className="price-regular">
-                                          {p.price + " "} VNĐ
-                                        </span>
-                                        {/* <span className="price-old">
-                                          <del>{p.priceOld + " "}VNĐ</del>
-                                        </span> */}
-                                      </div>
-                                    </div>
-                                  </figure>
-                                </div>
+                                <ProductItem data={p} />
                               </Col>
                             ))}
                           </Row>
