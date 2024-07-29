@@ -150,8 +150,8 @@ export default function Dashboard() {
       const [startDate, endDate] = customDateRange;
       const resTotalPriceByCustomDay = await axios.get(`http://localhost:3001/api/orders/total-price/custom-day`, {
         params: {
-          dateStart: startDate.format('YYYY-MM-DD'),
-          dateEnd: endDate.format('YYYY-MM-DD')
+          dateStart: startDate,
+          dateEnd: endDate
         }
       });
       console.log(resTotalPriceByCustomDay.data.totalPrice);
@@ -381,8 +381,8 @@ export default function Dashboard() {
   const handleCustomDateRangeChange = (dates) => {
     setCustomDateRange(dates);
     if (dates[0] && dates[1]) {
-      const startDate = dates[0].toISOString();
-      const endDate = dates[1].toISOString();
+      const startDate = dates[0].toISOString().split('T')[0];
+    const endDate = dates[1].toISOString().split('T')[0];
       getOrdersByCustomStatus(startDate, endDate);
     }
     if (dates && dates.length === 2) {
@@ -644,8 +644,8 @@ export default function Dashboard() {
 
   const columns = [
     { title: "STT", dataIndex: "stt", key: "stt" },
-    { title: "Tên sản phẩm", dataIndex: "name", key: "name" },
-    { title: "Giá", dataIndex: "price", key: "price" },
+    { title: "Tên sản phẩm", dataIndex: "name", key: "name", width: '50%' },
+    { title: "Giá", dataIndex: "price", key: "price", width: '10%' },
     {
       title: "Ảnh",
       dataIndex: "image",
@@ -655,7 +655,7 @@ export default function Dashboard() {
           {images.slice(0,1).map((image, index) => (
             <img
               key={index}
-              style={{ width : "100%",  objectFit: "cover" }}
+              style={{ width : "70px",  objectFit: "cover" }}
               src={image}
               alt={`product-image-${index}`}
             />
@@ -781,7 +781,7 @@ export default function Dashboard() {
         </div>
         <Row gutter={16} style={{ padding: "0 8px" }}>
 
-          <Col span={12}>
+          <Col span={24}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
               Danh sách sản phẩm bán chạy theo {nameButton}
             </Title>
@@ -793,7 +793,7 @@ export default function Dashboard() {
             />
 
           </Col>
-          <Col span={12}>
+          <Col span={24}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
               Danh sách sản phẩm tồn kho theo {nameButton}
             </Title>
@@ -806,7 +806,7 @@ export default function Dashboard() {
 
           </Col>
           
-          <Col span={12}>
+          <Col span={24}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
               Thống kê số đơn theo {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
             </Title>
