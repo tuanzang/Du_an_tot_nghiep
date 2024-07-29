@@ -14,14 +14,22 @@ export const getMyCarts = async (req, res) => {
       })
       .exec();
 
-    const totalPrice = data?.products.reduce((res, curr) => {
+    if (!data) {
+      return res.json({});
+    }
+
+    const newProducts = data.products.filter((it) => it.product.status === 1);
+    data.products = newProducts;
+    const newCart = await data.save();
+
+    const totalPrice = newCart?.products.reduce((res, curr) => {
       res += curr.variant.price * curr.quantity;
 
       return res;
     }, 0);
 
     res.json({
-      ...data?._doc,
+      ...newCart?._doc,
       totalPrice,
     });
   } catch (error) {

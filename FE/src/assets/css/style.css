@@ -1134,7 +1134,8 @@ textarea:focus {
     margin-left: 14px;
   }
 }
-.header-configure-area ul li a, .header-configure-area .user-info i {
+.header-configure-area ul li a,
+.header-configure-area .user-info i {
   font-size: 26px;
   line-height: 1;
   color: #222222;
@@ -3195,17 +3196,17 @@ textarea:focus {
   padding: 13px 0 6px;
 }
 
-.product-item:hover .product-thumb .sec-img,
+.product-item:not(.product-hidden):hover .product-thumb .sec-img,
 .product-list-item:hover .product-thumb .sec-img {
   opacity: 1;
   visibility: visible;
 }
-.product-item:hover .product-thumb .pri-img,
+.product-item:not(.product-hidden):hover .product-thumb .pri-img,
 .product-list-item:hover .product-thumb .pri-img {
   opacity: 0;
   visibility: hidden;
 }
-.product-item:hover .button-group a,
+.product-item:not(.product-hidden):hover .button-group a,
 .product-list-item:hover .button-group a {
   opacity: 1;
   visibility: visible;
@@ -3213,7 +3214,7 @@ textarea:focus {
   -ms-transform: scale(1);
   transform: scale(1);
 }
-.product-item:hover .cart-hover,
+.product-item:not(.product-hidden):hover .cart-hover,
 .product-list-item:hover .cart-hover {
   bottom: 15px;
   opacity: 1;
@@ -3251,14 +3252,21 @@ textarea:focus {
 .manufacturer-name {
   padding-bottom: 5px;
   line-height: 1;
-}
-.manufacturer-name a {
-  font-family: 'Playfair', sans-serif;
+  font-family: "Playfair", sans-serif;
   font-size: 18px;
   line-height: 1;
   color: #777777;
   text-transform: capitalize;
 }
+.manufacturer-name a {
+  font-family: "Playfair", sans-serif;
+  font-size: 18px;
+  line-height: 1;
+  color: #777777;
+  text-transform: capitalize;
+}
+
+.manufacturer-name:hover,
 .manufacturer-name a:hover {
   color: #c29958;
 }
@@ -6193,3 +6201,7 @@ blockquote {
 }
 
 /*----- footer area end -----*/
+
+.image-container {
+  cursor: pointer;
+}

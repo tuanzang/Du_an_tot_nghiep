@@ -11,11 +11,14 @@ import { IUser } from "../../interface/Users";
 import { useDispatch, useSelector } from "react-redux";
 import { ICartItem } from "./Cart";
 import {
+  removeProduct,
   resetProductSelected,
   selectProductSelected,
   selectTotalPrice,
 } from "../../store/cartSlice";
 import { USER_INFO_STORAGE_KEY } from "../../services/constants";
+import { useEffect } from "react";
+import { socket } from "../../socket";
 
 type Inputs = {
   customerName: string;
@@ -36,6 +39,25 @@ const Checkout = () => {
 
   const { refetch } = useMyCartQuery();
   const navigate = useNavigate();
+
+  // initial socket
+  useEffect(() => {
+    const onHiddenProduct = (productId: string) => {
+      dispatch(removeProduct(productId));
+    };
+
+    socket.on("hidden product", onHiddenProduct);
+
+    return () => {
+      socket.off("hidden product", onHiddenProduct);
+    };
+  }, [dispatch, navigate, productSelected.length]);
+
+  useEffect(() => {
+    if (!productSelected.length) {
+      navigate(-1);
+    }
+  }, [navigate, productSelected.length]);
 
   const { register, handleSubmit } = useForm<Inputs>({
     defaultValues: {

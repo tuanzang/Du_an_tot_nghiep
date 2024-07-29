@@ -7,14 +7,16 @@ import { Link, useLocation } from "react-router-dom";
 import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
 import useCartMutation from "../../hooks/useCart";
 import { ISize } from "../../interface/Size";
-
+import ProductItem from "../../components/ProductItem";
 
 export default function Product() {
   const [product, setProduct] = useState<IProduct[]>([]);
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([200000, 500000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    200000, 500000,
+  ]);
   const [sizes, setSizes] = useState<ISize[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
@@ -31,10 +33,12 @@ export default function Product() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/categories');
+        const response = await axios.get(
+          "http://localhost:3001/api/categories"
+        );
         setCategories(response.data.data);
       } catch (error) {
-        console.error('Failed to fetch categories:', error);
+        console.error("Failed to fetch categories:", error);
       }
     };
 
@@ -49,29 +53,27 @@ export default function Product() {
     };
 
     fetchCategories();
-    fetchSizes()
+    fetchSizes();
   }, []);
 
-
   useEffect(() => {
-     // Get search term from URL
-     const queryParams = new URLSearchParams(location.search);
-     const searchQuery = queryParams.get('search');
-     if (searchQuery) {
-       setSearchTerm(searchQuery);
-     }
-     console.log(searchQuery);
-     
+    // Get search term from URL
+    const queryParams = new URLSearchParams(location.search);
+    const searchQuery = queryParams.get("search");
+    if (searchQuery) {
+      setSearchTerm(searchQuery);
+    }
+    console.log(searchQuery);
+
     const fetchProducts = async () => {
       try {
         let url = `http://localhost:3001/api/products`;
-        const response = await axios.get(url,{
+        const response = await axios.get(url, {
           params: { search: searchTerm },
         });
         console.log(response);
-        
+
         setProduct(response.data?.data);
-        
       } catch (error) {
         console.log("Không có dữ liệu");
       }
@@ -92,13 +94,13 @@ export default function Product() {
     if (selectedCategory) {
       const fetchProductsByCategory = async () => {
         try {
-           let url = selectedCategory 
-          ? `http://localhost:3001/api/products/filter/category/${selectedCategory}`
-          : `http://localhost:3001/api/products`;
-        const response = await axios.get(url);
-        setProduct(response.data?.data);
+          let url = selectedCategory
+            ? `http://localhost:3001/api/products/filter/category/${selectedCategory}`
+            : `http://localhost:3001/api/products`;
+          const response = await axios.get(url);
+          setProduct(response.data?.data);
         } catch (error) {
-          console.error('Error fetching products by category:', error);
+          console.error("Error fetching products by category:", error);
         }
       };
 
@@ -126,17 +128,20 @@ export default function Product() {
   const handleFilterClick = async () => {
     const [minPrice, maxPrice] = priceRange;
     try {
-      const response = await axios.get('http://localhost:3001/api/products/filter/price', {
-        params: { minPrice, maxPrice },
-      });
+      const response = await axios.get(
+        "http://localhost:3001/api/products/filter/price",
+        {
+          params: { minPrice, maxPrice },
+        }
+      );
       if (response.data?.data.length === 0) {
-        message.info('Không có sản phẩm nào trong khoảng giá này');
+        message.info("Không có sản phẩm nào trong khoảng giá này");
       }
-      console.log('Filtered Products:', response.data);
+      console.log("Filtered Products:", response.data);
       setProduct(response.data?.data || []);
     } catch (error) {
-      console.error('Error fetching filtered products:', error);
-      message.error('Lỗi khi lọc sản phẩm');
+      console.error("Error fetching filtered products:", error);
+      message.error("Lỗi khi lọc sản phẩm");
     }
   };
 
@@ -182,7 +187,6 @@ export default function Product() {
               {/* <!-- sidebar area start --> */}
               <div className="col-lg-3 order-2 order-lg-1">
                 <aside className="sidebar-wrapper">
-
                   {/* <!-- single sidebar start --> */}
                   <div className="sidebar-single">
                     <h5 className="sidebar-title">
@@ -190,7 +194,7 @@ export default function Product() {
                     </h5>
 
                     <div className="sidebar-body">
-                    <ul className="shop-categories">
+                      <ul className="shop-categories">
                         {/* <li>
                           <a href="#" onClick={() => handleCategoryClick('')}>
                             Tất cả
@@ -198,7 +202,10 @@ export default function Product() {
                         </li> */}
                         {categories?.map((category) => (
                           <li key={category._id}>
-                            <a href="#" onClick={() => handleCategoryClick(category._id)}>
+                            <a
+                              href="#"
+                              onClick={() => handleCategoryClick(category._id)}
+                            >
                               {category.loai}
                             </a>
                           </li>
@@ -327,7 +334,6 @@ export default function Product() {
                           </div>
                         </div>
                       </div>
-
                     </div>
                   </div>
                   {/* <!-- shop product top wrap start --> */}
@@ -340,86 +346,7 @@ export default function Product() {
                     >
                       {product.map((p: IProduct) => (
                         <Col className="gutter-row" span={8} key={p._id}>
-                          <div className="product-item">
-                            <figure className="product-thumb">
-                              <Link to={`/product/${p._id}`}>
-                                <div className="image-container">
-                                  <img
-                                    className="pri-img"
-                                    src={p.image[0]}
-                                    alt={p.name}
-                                  />
-                                  {p.image[1] && (
-                                    <img
-                                      className="sec-img"
-                                      src={p.image[1]}
-                                      alt={p.name}
-                                    />
-                                  )}
-                                </div>
-                              </Link>
-                              <div className="product-badge">
-                                <div className="product-label new">
-                                  <span>HOT</span>
-                                </div>
-                              </div>
-                              <div className="button-group">
-                                <a
-                                  href="#"
-                                  data-bs-toggle="tooltip"
-                                  data-bs-placement="left"
-                                  title="Yêu thích"
-                                >
-                                  <i className="pe-7s-like"></i>
-                                </a>
-                                <a
-                                  href="#"
-                                  data-bs-toggle="tooltip"
-                                  data-bs-placement="left"
-                                  title="So sánh"
-                                >
-                                  <i className="pe-7s-refresh-2"></i>
-                                </a>
-                                <a
-                                  href="#"
-                                  data-bs-toggle="modal"
-                                  data-bs-target="#quick_view"
-                                >
-                                  <span
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="left"
-                                    title="Xem chi tiết"
-                                  >
-                                    <i className="pe-7s-search"></i>
-                                  </span>
-                                </a>
-                              </div>
-                              <div className="cart-hover">
-                                <button
-                                  className="btn btn-cart"
-                                  onClick={() => onAddCart(p)}
-
-                                >
-                                  Thêm vào giỏ hàng
-                                </button>
-                              </div>
-                              <div className="product-caption text-center">
-                                <div className="product-identity">
-                                  <p className="manufacturer-name">
-                                    <Link to={`/product/${p._id}`}>
-                                      {p.name}
-                                    </Link>
-                                  </p>
-                                </div>
-
-                                <div className="price-box">
-                                  <span className="price-regular">
-                                    {p.price + " "} VNĐ
-                                  </span>
-                                </div>
-                              </div>
-                            </figure>
-                          </div>
+                          <ProductItem data={p} />
                         </Col>
                       ))}
                     </Row>
