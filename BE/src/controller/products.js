@@ -66,7 +66,6 @@ export const getDetailProduct = async (req, res) => {
     }
 
     data.productSize= productSizedata
-    console.log(data);
 
     return res.status(200).json({
       message: "Đã tìm thấy sản phẩm",
