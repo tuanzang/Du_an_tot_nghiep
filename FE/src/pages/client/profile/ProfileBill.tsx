@@ -82,7 +82,7 @@ export default function ProfileBill() {
     },
   ];
 
-  const listSttHD = ["1", "2", "3", "4", "5", "6", "7", "0"];
+  const listSttHD = ["1", "2", "3", "4", "5", "6", "7", "8", "0"];
 
   const [valueTabHD, setValueTabHD] = useState<string>("");
   const [totalBill, setTotalBill] = useState<number>(0);
@@ -90,11 +90,7 @@ export default function ProfileBill() {
   const [pageSize, setPageSize] = useState<number>(10);
   const [listBill, setListBill] = useState<IBill[]>([]);
 
-  const fetchOrder = async (
-    status: string,
-    user: IUser | null,
-    currentPage: number
-  ) => {
+  const fetchOrder = async (status: string, currentPage: number) => {
     if (user === null) {
       return;
     } else {
@@ -117,8 +113,8 @@ export default function ProfileBill() {
   };
 
   useEffect(() => {
-    fetchOrder(valueTabHD, user, currentPage);
-  }, [valueTabHD, user, currentPage]);
+    fetchOrder(valueTabHD, currentPage);
+  }, [valueTabHD, currentPage]);
 
   const handleChangeTab = (newValue: string) => {
     setValueTabHD(newValue);

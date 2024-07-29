@@ -27,6 +27,6 @@ router.use("/bills", billRouter);
 router.use("/history-bill", historyBillRouter);
 router.use("/trans", transBillRouter);
 router.use("/topOrder", topOrderRouter);
-router.use("/stockOrder",stockOrderRouter)
+router.use("/stockOrder", stockOrderRouter);
 
 export default router;

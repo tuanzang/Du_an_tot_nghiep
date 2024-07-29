@@ -141,11 +141,25 @@ export default function PageComment() {
       width: "20%",
     },
     {
+      title: "Kích cỡ",
+      dataIndex: "sizeName",
+      key: "sizeName",
+      align: "left" as const,
+      width: "10%",
+    },
+    {
+      title: "Đánh giá",
+      dataIndex: "rate",
+      key: "rate",
+      align: "left" as const,
+      width: "10%",
+    },
+    {
       title: "Nội dung",
       dataIndex: "comment",
       key: "comment",
       align: "left" as const,
-      width: "45%",
+      width: "30%",
     },
     {
       title: "Trạng thái",

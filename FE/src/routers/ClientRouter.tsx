@@ -13,6 +13,7 @@ import ResetPass from "../pages/client/ResetPass";
 import Profile from "../pages/client/profile/Profile";
 import ProfileBill from "../pages/client/profile/ProfileBill";
 import ProfileChangePass from "../pages/client/profile/ProfileChangePass";
+import ProfileBillDetail from "../pages/client/profile/ProfileBillDetail";
 
 export default function ClientRouter() {
   return (
@@ -30,6 +31,10 @@ export default function ClientRouter() {
         <Route path="/vnpay-callback" element={<VNPayCallback />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/bill" element={<ProfileBill />} />
+        <Route
+          path="/profile/bill/detail/:id"
+          element={<ProfileBillDetail />}
+        />
         <Route path="/profile/change-pass" element={<ProfileChangePass />} />
         <Route path="/forgotPass" element={<ForgotPass />} />
         <Route path="/resetPass" element={<ResetPass />} />
