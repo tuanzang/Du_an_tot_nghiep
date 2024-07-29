@@ -178,7 +178,7 @@ export const updateStatusBill = async (req, res) => {
 };
 
 /**
- * API trừ số lượng product size
+ * API giảm số lượng product size
  * @param req
  * @param res
  * @returns
@@ -210,19 +210,24 @@ export const decreaseProductSize = async (req, res) => {
 
       if (!currentProduct) {
         return res.status(404).json({
-          message: `Không tìm thấy sản phẩm với ID: ${_id}`,
+          message: `Không tìm thấy sản phẩm với ID: ${variantId}`,
         });
       }
 
       if (currentProduct.quantity < quantity) {
         return res.status(400).json({
-          message: `Số lượng của sản phẩm với ID: ${_id} không đủ`,
+          message: `Số lượng của sản phẩm không đủ`,
         });
       }
 
       currentProduct.quantity -= quantity;
-      await currentProduct.save();
 
+      // Cập nhật trạng thái nếu số lượng bằng 0
+      if (currentProduct.quantity === 0) {
+        currentProduct.status = false;
+      }
+
+      await currentProduct.save();
       updatedProducts.push(currentProduct);
     }
 
@@ -238,7 +243,7 @@ export const decreaseProductSize = async (req, res) => {
 };
 
 /**
- * API cập nhật product size
+ * API tăng số lượng product size
  * @param req
  * @param res
  * @returns
@@ -270,19 +275,18 @@ export const increaseProductSize = async (req, res) => {
 
       if (!currentProduct) {
         return res.status(404).json({
-          message: `Không tìm thấy sản phẩm với ID: ${_id}`,
-        });
-      }
-
-      if (currentProduct.quantity < quantity) {
-        return res.status(400).json({
-          message: `Số lượng của sản phẩm với ID: ${_id} không đủ`,
+          message: `Không tìm thấy sản phẩm với ID: ${variantId}`,
         });
       }
 
       currentProduct.quantity += quantity;
-      await currentProduct.save();
 
+      // Cập nhật trạng thái nếu số lượng > 0
+      if (currentProduct.quantity > 0) {
+        currentProduct.status = true;
+      }
+
+      await currentProduct.save();
       updatedProducts.push(currentProduct);
     }
 
