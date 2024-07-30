@@ -26,16 +26,15 @@ const VNPayCallback = () => {
   const updateOrderStatus = useCallback(
     async (orderId: string, transCode: string | null) => {
       try {
-        const res = await OrderApi.updateOrder({
+        const res = await OrderApi.detailOrder({
           id: orderId,
-          status: "Đã thanh toán",
         });
 
         const data = res.data.data;
         if (data) {
           createNewHistory(res.data.data._id, "1", user);
           handleConfirmPayment(res.data.data, user, transCode);
-          toast.success("Thanh toán thành công " + txnRef);
+          toast.success("Thanh toán thành công");
         }
         navigate("/");
       } catch (error) {
