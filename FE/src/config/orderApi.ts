@@ -8,6 +8,9 @@ const OrderApi = {
   updateOrder: (data: any) => {
     return axiosInstance.put(`/orders/${data.id}`, data);
   },
+  detailOrder: (data: any) => {
+    return axiosInstance.get(`/orders/${data.id}`);
+  },
 };
 
 export default OrderApi;

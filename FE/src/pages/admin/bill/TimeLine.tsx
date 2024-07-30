@@ -24,7 +24,7 @@ const TimeLine = ({ orderTimeLine }: Props) => {
   const getIconAndColor = (statusBill: number) => {
     switch (statusBill) {
       case 0:
-        return { color: "gray", icon: <DeleteOutlined /> }; // Đã hủy
+        return { color: "red", icon: <DeleteOutlined /> }; // Đã hủy
       case 1:
         return { color: "#00CC00", icon: <FaRegFileAlt /> }; // Chờ xác nhận
       case 2:
@@ -49,7 +49,7 @@ const TimeLine = ({ orderTimeLine }: Props) => {
       <Timeline mode="left">
         {filteredTimeLine.map((item, index) => {
           const { color, icon } = getIconAndColor(
-            Number(item.statusBill) ? Number(item.statusBill) : -1
+            item.statusBill ? Number(item.statusBill) : -1
           );
           return (
             <Timeline.Item
