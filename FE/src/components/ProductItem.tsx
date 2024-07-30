@@ -48,7 +48,7 @@ const ProductItem = ({ data }: IProductItemProps) => {
         ) : (
           <div className="product-badge">
             <div className="product-label new">
-              <span className="text-uppercase">Ngừng kinh doanh</span>
+              <span className="text-uppercase">SOLD OUT</span>
             </div>
           </div>
         )}
