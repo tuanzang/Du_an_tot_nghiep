@@ -54,7 +54,7 @@ export const createOrder = async (req, res) => {
       quantity: cart.products.length,
       products,
       paymentMethod,
-      status: paymentMethod === "COD" ? "1" : "5",
+      status: paymentMethod === "COD" ? "1" : "6",
     }).save();
 
     cart.products = cart.products.filter(

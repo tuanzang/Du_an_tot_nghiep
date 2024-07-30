@@ -7,7 +7,6 @@ import {
   Input,
   Select,
   Upload,
-  Checkbox,
   Card,
   Space,
 } from "antd";
@@ -22,9 +21,8 @@ import { ICategory } from "../../../interface/Categories";
 import { toast } from "react-toastify";
 import { uploadImage } from "../../../services/upload/upload";
 import { UploadFile } from "antd/lib";
-import { ISize } from "../../../interface/Size";
-import { IProductSize } from "../../../interface/ProductSize";
-// import TextArea from 'antd/es/input/TextArea';
+// import { ISize } from "../../../interface/Size";
+// import { IProductSize } from "../../../interface/ProductSize";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import {
@@ -90,13 +88,6 @@ const ProductAdd = () => {
     };
   });
 
-  const dataSize = sizes.map((size: ISize) => {
-    return {
-      value: size._id,
-      label: size.name,
-    };
-  });
-
   // const [quantity, setQuantity] = useState<Number>(0)
   const onFinish: FormProps<IProduct>["onFinish"] = async (values: any) => {
     console.log(values);
@@ -110,7 +101,6 @@ const ProductAdd = () => {
 
       // Upload images
       const uploadedImageUrls = await uploadImage(imageFiles);
-      //  console.log("Uploaded image URLs:", uploadedImageUrls);
 
       // Update values with uploaded image URLs
       const {
@@ -126,14 +116,6 @@ const ProductAdd = () => {
         `http://localhost:3001/api/products/add`,
         { name, image, description, categoryId }
       );
-
-      // product size
-      // const idSizes = updatedValues.idSize;
-      // const quantity = updatedValues.quantity;
-      // const price = updatedValues.price
-
-      // const productSizes: IProductSize[] = [];
-      // idSizes.map(s => productSizes.push({ _id: null, idProduct: dataProduct.data.data._id, idSize: s, quantity, price }))
 
       await axios.post(
         `http://localhost:3001/api/products/${dataProduct.data.data._id}/add/size`,
@@ -312,7 +294,7 @@ const ProductAdd = () => {
               <Input type="number" />
             </Form.Item> */}
             <div>
-              {sizes.map((it) => (
+              {sizes.map((it:any) => (
                 <Space
                   key={it._id}
                   style={{ display: "flex", marginBottom: 8 }}
