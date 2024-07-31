@@ -1,4 +1,5 @@
 import User from "../models/user.js";
+import bcryptjs from "bcryptjs";
 
 export const getAllUsers = async (req, res) => {
   try {
@@ -49,6 +50,42 @@ export const updateRoleUser = async (req, res) => {
   }
 };
 
+export const updatePassword = async (req, res) => {
+  const { userId, password } = req.body;
+
+  if (!userId || !password) {
+    return res.status(400).json({
+      message: "Thiếu thông tin userId hoặc password",
+    });
+  }
+
+  try {
+    // Băm mật khẩu mới
+    const hashedPassword = await bcryptjs.hash(password, 12);
+
+    // Cập nhật mật khẩu người dùng
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { password: hashedPassword },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        message: "Người dùng không tìm thấy",
+      });
+    }
+
+    res.json({
+      message: "Cập nhật mật khẩu thành công",
+      data: updatedUser,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 export const blockUser = async (req, res) => {
   const { userId } = req.params;
@@ -97,6 +134,21 @@ export const unlockUser = async (req, res) => {
     }
 
     res.status(200).json({ message: "Bỏ chặn thành công", data: updatedUser });
+  } catch (error) {
+    console.error("Error unlocking user:", error);
+    res.status(500).json({ message: "Bỏ chặn không thành công" });
+  }
+};
+
+export const findUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.body._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "Không tìm thấy User" });
+    }
+
+    res.status(200).json({ message: "Bỏ chặn thành công", data: user });
   } catch (error) {
     console.error("Error unlocking user:", error);
     res.status(500).json({ message: "Bỏ chặn không thành công" });

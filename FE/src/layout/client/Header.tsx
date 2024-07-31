@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import {
   ACCESS_TOKEN_STORAGE_KEY,
   USER_INFO_STORAGE_KEY,
@@ -52,19 +52,19 @@ const Header = () => {
                       <nav className="desktop-menu">
                         <ul>
                           <li>
-                            <a href="/home">Home</a>
+                            <NavLink to="/home">Home</NavLink>
                           </li>
                           <li>
-                            <a href="/product">Sản phẩm</a>
+                            <NavLink to="/product">Sản phẩm</NavLink>
                           </li>
                           <li>
-                            <a href="shop.html">Tin tức</a>
+                            <NavLink to="shop.html">Tin tức</NavLink>
                           </li>
                           <li>
-                            <a href="shop.html">Giới thiệu</a>
+                            <NavLink to="shop.html">Giới thiệu</NavLink>
                           </li>
                           <li>
-                            <a href="contact-us.html">Chính sách</a>
+                            <NavLink to="contact-us.html">Chính sách</NavLink>
                           </li>
                         </ul>
                       </nav>
@@ -104,10 +104,7 @@ const Header = () => {
                             {isLogged ? (
                               <>
                                 <li>
-                                  <a href="/introduce">Tài khoản của tôi</a>
-                                </li>
-                                <li>
-                                  <a href="/order_history">Đơn hàng của tôi</a>
+                                  <a href="/profile">Tài khoản của tôi</a>
                                 </li>
                                 {userInfo?.role === "admin" && (
                                   <li>

@@ -1,10 +1,13 @@
 export interface IComment {
   _id: string | null;
   idUser: string;
-  idProduct: string;
   fullName: string;
-  productName: string;
   avatar: string;
+  idProduct: string;
+  productName: string;
+  idProductSize: string;
+  sizeName: string;
   comment: string;
+  rate: number;
   createdAt: string;
 }

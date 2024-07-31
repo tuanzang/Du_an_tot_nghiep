@@ -8,16 +8,28 @@ export const getMyCarts = async (req, res) => {
         path: "products.product",
         model: "Product",
       })
+      .populate({
+        path: "products.variant",
+        model: "ProductSize",
+      })
       .exec();
 
-    const totalPrice = data?.products.reduce((res, curr) => {
-      res += curr.product.price * curr.quantity;
+    if (!data) {
+      return res.json({});
+    }
+
+    const newProducts = data.products.filter((it) => it.product.status === 1);
+    data.products = newProducts;
+    const newCart = await data.save();
+
+    const totalPrice = newCart?.products.reduce((res, curr) => {
+      res += curr.variant.price * curr.quantity;
 
       return res;
     }, 0);
-return
+
     res.json({
-      ...data?._doc,
+      ...newCart?._doc,
       totalPrice,
     });
   } catch (error) {
@@ -30,20 +42,23 @@ return
 export const addCart = async (req, res) => {
   try {
     const userId = req.profile._id;
-    const { productId, quantity } = req.body;
+    const { productId, quantity, variantId } = req.body;
 
     let foundCart = await Cart.findOne({ userId }).exec();
 
     let response;
     if (foundCart) {
       const foundProduct = foundCart.products.find(
-        (it) => it.product.toString() === productId
+        (it) =>
+          it.product.toString() === productId &&
+          it.variant.toString() === variantId
       );
       if (foundProduct) {
         foundProduct.quantity += quantity;
 
         const newProducts = foundCart.products.map((it) =>
-          it.product.toString() === foundProduct.product.toString()
+          it.product.toString() === foundProduct.product.toString() &&
+          it.variant.toString() === foundProduct.product.toString()
             ? foundProduct
             : it
         );
@@ -52,6 +67,7 @@ export const addCart = async (req, res) => {
         foundCart.products.push({
           product: productId,
           quantity,
+          variant: variantId,
         });
       }
 
@@ -62,6 +78,7 @@ export const addCart = async (req, res) => {
           {
             product: productId,
             quantity,
+            variant: variantId,
           },
         ],
         userId,
@@ -82,7 +99,7 @@ export const addCart = async (req, res) => {
 export const updateQuantity = async (req, res) => {
   try {
     const userId = req.profile._id;
-    const { productId, quantity } = req.body;
+    const { variantId, quantity } = req.body;
     const cart = await Cart.findOne({ userId }).exec();
     if (!cart) {
       return res.status(404).json({
@@ -91,7 +108,7 @@ export const updateQuantity = async (req, res) => {
     }
 
     const newProducts = cart.products.map((it) =>
-      it.product.toString() === productId ? { ...it, quantity } : it
+      it.variant.toString() === variantId ? { ...it, quantity } : it
     );
     cart.products = newProducts;
     await cart.save();
@@ -109,11 +126,11 @@ export const updateQuantity = async (req, res) => {
 export const removeProduct = async (req, res) => {
   try {
     const userId = req.profile._id;
-    const { productId } = req.params;
+    const { variantId } = req.params;
 
     const cart = await Cart.findOne({ userId }).exec();
     const newProducts = cart.products.filter(
-      (it) => it.product.toString() !== productId
+      (it) => it.variant.toString() !== variantId
     );
 
     cart.products = newProducts;

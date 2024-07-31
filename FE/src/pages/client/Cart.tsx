@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, InputNumber, Popconfirm, Table, Typography } from "antd";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import useCartMutation, { useMyCartQuery } from "../../hooks/useCart";
@@ -11,6 +11,7 @@ import {
   selectTotalPrice,
   updateProductSelected,
 } from "../../store/cartSlice";
+import { socket } from "../../socket";
 
 const { Text } = Typography;
 
@@ -36,19 +37,43 @@ export interface ICartItem {
     updatedAt: string;
   };
   key: string;
+  variant: {
+    _id: string;
+    price: number;
+    sizeName: string;
+  };
 }
 
 export default function Cart() {
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
   const totalPrice = useSelector(selectTotalPrice);
-  const { data } = useMyCartQuery();
+  const { data, refetch } = useMyCartQuery();
   const { mutate: onUpdateQuantity } = useCartMutation({
     action: "UPDATE",
   });
   const { mutate: onDeleteProduct } = useCartMutation({
     action: "DELETE",
   });
+
+  // initial socket
+  useEffect(() => {
+    const onConnect = () => {
+      console.log("Socket client connect");
+    };
+
+    const onHiddenProduct = () => {
+      refetch();
+    };
+
+    socket.on("connect", onConnect);
+    socket.on("hidden product", onHiddenProduct);
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("hidden product", onHiddenProduct);
+    };
+  }, [refetch]);
 
   const rowSelection = {
     onChange: (_: any, selectedRows: ICartItem[]) => {
@@ -63,9 +88,9 @@ export default function Cart() {
     }));
   }, [data?.data]);
 
-  const handleUpdateQuantity = (productId: string, quantity: number) => {
+  const handleUpdateQuantity = (variantId: string, quantity: number) => {
     onUpdateQuantity({
-      productId: productId,
+      variantId,
       quantity: quantity,
     });
   };
@@ -154,12 +179,22 @@ export default function Cart() {
                         title="Sản phẩm"
                         dataIndex="name"
                         key="name"
+                        render={(_, record: any) => {
+                          return (
+                            <div>
+                              <p>{record.name}</p>
+                              <p>Size: {record.variant.sizeName}</p>
+                            </div>
+                          );
+                        }}
+                        width={100}
                       />
                       <Table.Column
                         title="Giá"
-                        dataIndex="price"
                         key="price"
-                        render={(val) => formatPrice(val)}
+                        render={(_, record: any) =>
+                          formatPrice(record.variant.price)
+                        }
                       />
                       <Table.Column
                         title="Số lượng"
@@ -168,10 +203,9 @@ export default function Cart() {
                         render={(value, record: any) => (
                           <InputNumber
                             min={1}
-                            max={5}
                             value={value}
                             onChange={(quantity) =>
-                              handleUpdateQuantity(record.product._id, quantity)
+                              handleUpdateQuantity(record.variant._id, quantity)
                             }
                           />
                         )}
@@ -181,7 +215,7 @@ export default function Cart() {
                         dataIndex="totalPrice"
                         key="totalPrice"
                         render={(_, record: any) =>
-                          formatPrice(record.quantity * record.price)
+                          formatPrice(record.variant.price * record.quantity)
                         }
                       />
                       <Table.Column
@@ -193,7 +227,7 @@ export default function Cart() {
                             okText="Có"
                             cancelText="Không"
                             onConfirm={() =>
-                              onDeleteProduct(record.product._id)
+                              onDeleteProduct(record.variant._id)
                             }
                           >
                             <Button danger>Xóa</Button>
@@ -246,17 +280,22 @@ export default function Cart() {
                           title="Tên sản phẩm"
                           dataIndex="name"
                           key="name"
-                          render={(name) => (
-                            <span style={{ fontSize: "12px" }}>{name}</span>
+                          render={(name, record: any) => (
+                            <>
+                              <p style={{ fontSize: "12px" }}>{name}</p>
+                              <p style={{ fontSize: "12px" }}>
+                                Size: {record.variant.sizeName}
+                              </p>
+                            </>
                           )}
+                          width={100}
                         />
                         <Table.Column
                           title="Giá"
-                          dataIndex="price"
                           key="price"
-                          render={(val) => (
+                          render={(_, record: any) => (
                             <span style={{ fontSize: "12px" }}>
-                              {formatPrice(val)}
+                              {formatPrice(record.variant.price)}
                             </span>
                           )}
                         />
@@ -274,7 +313,9 @@ export default function Cart() {
                           key="totalPrice"
                           render={(_, record: any) => (
                             <span style={{ fontSize: "12px" }}>
-                              {formatPrice(record.quantity * record.price)}
+                              {formatPrice(
+                                record.variant.price * record.quantity
+                              )}
                             </span>
                           )}
                         />

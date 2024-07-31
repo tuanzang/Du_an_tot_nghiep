@@ -17,6 +17,12 @@ const userSchema = new Schema(
       minlength: 3,
       maxlength: 30,
     },
+    phoneNumber: {
+      type: String,
+      required: true,
+      minlength: 10,
+      maxlength: 20,
+    },
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -28,7 +34,7 @@ const userSchema = new Schema(
     },
     blocked: {
       type: Boolean,
-      default: false
+      default: false,
     },
   },
   { timestamps: true, versionKey: false }

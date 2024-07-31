@@ -2,7 +2,6 @@ import { Router } from "express";
 import authRouter from "./authRouter.js";
 import productRouter from "./products.js";
 import categoryRouter from "./category.js";
-import userRouter from "./users.js";
 import cartRouter from "./carts.js";
 import orderRouter from "./order.js";
 import sizeRouter from "./size";
@@ -12,6 +11,7 @@ import transBillRouter from "./transaction.js";
 import topOrderRouter from "./topOrder.js";
 import stockOrderRouter from "./stockProduct.js";
 import billRouter from "./bill.js";
+import userRouter from "./users.js";
 
 const router = Router();
 
@@ -27,6 +27,6 @@ router.use("/bills", billRouter);
 router.use("/history-bill", historyBillRouter);
 router.use("/trans", transBillRouter);
 router.use("/topOrder", topOrderRouter);
-router.use("/stockOrder",stockOrderRouter)
+router.use("/stockOrder", stockOrderRouter);
 
 export default router;

@@ -9,17 +9,19 @@ export default function statusHoaDon({ status }: Props) {
     case "1":
       return "Chờ xác nhận";
     case "2":
-      return "Đang chuẩn bị hàng";
+      return "Đã xác nhận";
     case "3":
-      return "Đang vận chuyển";
+      return "Đóng gói và vận chuyển";
     case "4":
-      return "Đã giao hàng";
+      return "Đang giao hàng";
     case "5":
-      return "Chờ thanh toán";
+      return "Đã giao hàng";
     case "6":
       return "Đã thanh toán";
     case "7":
       return "Hoàn thành";
+    case "8":
+      return "Hoàn đơn";
     default:
       return "";
   }
