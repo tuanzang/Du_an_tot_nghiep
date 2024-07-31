@@ -58,7 +58,7 @@ export const addCart = async (req, res) => {
 
         const newProducts = foundCart.products.map((it) =>
           it.product.toString() === foundProduct.product.toString() &&
-          it.variant.toString() === foundProduct.product.toString()
+            it.variant.toString() === foundProduct.product.toString()
             ? foundProduct
             : it
         );
