@@ -212,18 +212,6 @@ export default function Product() {
       ),
     },
     {
-      title: "Giá sản phẩm",
-      dataIndex: "price",
-      key: "price",
-      width: "20%",
-    },
-    // {
-    //   title: "Giá cũ sản phẩm",
-    //   dataIndex: "priceOld",
-    //   key: "priceOld",
-    //   width: "10%",
-    // },
-    {
       title: "Danh mục",
       dataIndex: "loai",
       key: "loai",
@@ -243,16 +231,16 @@ export default function Product() {
         />
       ),
     },
-    // {
-    //   title: "Xóa",
-    //   dataIndex: "key",
-    //   key: "key",
-    //   align: "center",
-    //   width: "10%",
-    //   render: (value: any) => (
-    //     <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
-    //   ),
-    // },
+    {
+      title: "Xóa",
+      dataIndex: "key",
+      key: "key",
+      align: "center",
+      width: "10%",
+      render: (value: any) => (
+        <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
+      ),
+    },
     {
       title: "Chi tiết",
       align: "center",

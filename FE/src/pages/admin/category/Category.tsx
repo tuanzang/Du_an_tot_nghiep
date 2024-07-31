@@ -1,13 +1,11 @@
 import {
   DownloadOutlined,
-  EyeOutlined,
   PlusSquareOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Col, Input, Radio, Row, Switch, Table } from "antd";
-import React, { useEffect, useState } from "react";
+import { Button, Card, Col, Input, Radio, Row, Table } from "antd";
+import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import ModalAddAndUpdate from "../../../components/ModalAddAndUpdate";
 import { ICategory } from "../../../interface/Categories";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -112,7 +110,7 @@ export default function Category() {
   });
   return (
     <div>
-      <BreadcrumbsCustom nameHere={"Danh mục"} />
+      <BreadcrumbsCustom nameHere={"Danh mục"} listLink={[]} />
       {/* filter */}
       <Card bordered={false}>
         <Row gutter={16}>
@@ -126,19 +124,6 @@ export default function Category() {
             />
           </Col>
           <Col span={12}>
-            <Button
-              icon={<DownloadOutlined />}
-              style={{
-                float: "right",
-                marginLeft: "12px",
-                backgroundColor: "white",
-                color: "green",
-                borderColor: "green",
-              }}
-              type="default"
-            >
-              Export Excel
-            </Button>
             <Button
               type="link"
               icon={<PlusSquareOutlined />}
