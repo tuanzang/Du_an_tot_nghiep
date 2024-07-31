@@ -12,6 +12,7 @@ import topOrderRouter from "./topOrder.js";
 import stockOrderRouter from "./stockProduct.js";
 import billRouter from "./bill.js";
 import userRouter from "./users.js";
+import DiscountCode from "./DiscountCode.js";
 
 const router = Router();
 
@@ -28,5 +29,5 @@ router.use("/history-bill", historyBillRouter);
 router.use("/trans", transBillRouter);
 router.use("/topOrder", topOrderRouter);
 router.use("/stockOrder", stockOrderRouter);
-
+router.use("/discountCode",DiscountCode)
 export default router;
