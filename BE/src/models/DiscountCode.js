@@ -3,8 +3,26 @@ import mongoose from 'mongoose';
 const discountCodeSchema = new mongoose.Schema({
   code: { type: String, required: true, unique: true },
   description: { type: String, default: '' },
-  discountPercentage: { type: Number, min: 0, max: 100 },
-  discountAmount: { type: Number, min: 0 },
+  discountType: {
+    type: String,
+    enum: ['percentage', 'amount'],
+    required: true,
+  },
+  discountPercentage: {
+    type: Number,
+    min: 0,
+    max: 100,
+    required: function () {
+      return this.discountType === 'percentage';
+    },
+  },
+  discountAmount: {
+    type: Number,
+    required: function () {
+      return this.discountType === 'amount';
+    },
+  },
+
   startDate: { type: Date, default: Date.now },
   expirationDate: { type: Date, required: true },
   quantity: { type: Number, required: true },

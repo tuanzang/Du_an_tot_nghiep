@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-    createDiscountCode,
+    addDiscount,
     updateDiscountCode,
     deleteDiscountCode,
     getDiscountCodes,
@@ -10,7 +10,7 @@ import {
 const DiscountCode = express.Router();
 
 // Định nghĩa các route tương ứng với các chức năng
-DiscountCode.post('/discountCodes', createDiscountCode); // Tạo mã giảm giá mới
+DiscountCode.post('/discountCodes', addDiscount); // Tạo mã giảm giá mới
 DiscountCode.put('/discountCodes/:id', updateDiscountCode); // Sửa mã giảm giá
 DiscountCode.delete('/discountCodes/:id', deleteDiscountCode); // Xóa mã giảm giá
 DiscountCode.get('/discountCodes', getDiscountCodes); // Lấy tất cả mã giảm giá
