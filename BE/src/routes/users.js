@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   blockUser,
+  findUserById,
   getAllUsers,
   unlockUser,
   updatePassword,
@@ -15,5 +16,6 @@ userRouter.patch("/:userId", updateRoleUser);
 userRouter.post("/updatePassword", updatePassword);
 userRouter.patch("/block/:userId", blockUser);
 userRouter.patch("/unlock/:userId", unlockUser);
+userRouter.post("/findUserById", findUserById);
 
 export default userRouter;

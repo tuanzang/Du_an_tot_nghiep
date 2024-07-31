@@ -3,9 +3,14 @@ export interface IBill {
   userId: string;
   code: string;
   products: {
+    id_: string;
+    productId: string;
     name: string;
     price: number;
     quantity: number;
+    category: string;
+    size: string;
+    variantId: string;
   }[];
   totalPrice: number;
   status: string;
@@ -16,4 +21,13 @@ export interface IBill {
   message: string;
   paymentMethod: string;
   createdAt: string;
+}
+
+export interface IProductBill {
+  id_: string;
+  name: string;
+  price: number;
+  quantity: number;
+  size: string;
+  variantId: string;
 }

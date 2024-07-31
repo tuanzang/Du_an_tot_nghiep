@@ -2,9 +2,11 @@ import { Router } from "express";
 import {
   createComment,
   deleteComment,
+  detailByUserAndProductSize,
   detailComment,
   findAllProduct,
   findAllUser,
+  findProductSizeById,
   getAllComment,
   getCommentByIdProduct,
   updateComment,
@@ -18,7 +20,9 @@ commentRouter.post("/add", createComment);
 commentRouter.post("/update", updateComment);
 commentRouter.post("/delete", deleteComment);
 commentRouter.post("/detail/:id", detailComment);
+commentRouter.post("/detailByUserAndProductSize", detailByUserAndProductSize);
 commentRouter.get("/allUser", findAllUser);
 commentRouter.get("/allProduct", findAllProduct);
+commentRouter.post("/findProductSizeById", findProductSizeById);
 
 export default commentRouter;

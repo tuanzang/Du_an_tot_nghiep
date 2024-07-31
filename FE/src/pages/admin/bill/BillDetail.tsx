@@ -21,7 +21,6 @@ import axios from "axios";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import TimeLine from "./TimeLine";
 import { IoReturnUpBack } from "react-icons/io5";
-import { IoIosAdd } from "react-icons/io";
 import BillHistoryDialog from "./BillHistoryDialog";
 import statusHoaDon from "../../../services/constants/statusHoaDon";
 import AdBillTransaction from "./AdBillTransaction";
@@ -33,9 +32,14 @@ import { ITransaction } from "../../../interface/Transaction";
 import styleHoaDon from "../../../services/constants/styleHoaDon";
 import "./BillStyle.css";
 import { IProduct } from "../../../interface/Products";
-import { IBill } from "../../../interface/Bill";
+import { IBill, IProductBill } from "../../../interface/Bill";
 import { USER_INFO_STORAGE_KEY } from "../../../services/constants";
 import dayjs from "dayjs";
+
+interface IProductSizeBill {
+  variantId: string;
+  quantity: number;
+}
 
 const listHis = [{ link: "/admin/bill", name: "Quản lý đơn hàng" }];
 export default function BillDetail() {
@@ -50,6 +54,9 @@ export default function BillDetail() {
 
   // lấy ra hóa đơn
   const [loadingBill, setLoadingBill] = useState(true);
+  const [listProductSize, setListProductSize] = useState<IProductSizeBill[]>(
+    []
+  );
   const [billDetail, setBillDetail] = useState<IBill>();
   const fetchDetailBill = async (id: string | null) => {
     setLoadingBill(true);
@@ -60,58 +67,21 @@ export default function BillDetail() {
         const response = await axios.get(
           `http://localhost:3001/api/bills/${id}`
         );
-        setBillDetail(response.data?.data);
-        setIdCustomer(response.data?.data.userId);
-        setStatusBill(response.data?.data.status);
-      } catch (error) {
-        toast.error("Không tìm thấy hóa đơn");
-      }
-    }
-    setLoadingBill(false);
-  };
+        const billData = response.data?.data;
 
-  // hủy hóa đơn
-  const handleCancelBill = async (
-    id: string | null,
-    user: IUser | null,
-    note: string
-  ) => {
-    setLoadingBill(true);
-    if (id === null || user === null) {
-      toast.error("Thiếu thông tin đầu vào");
-    } else {
-      try {
-        await axios.post("http://localhost:3001/api/orders/update-status", {
-          id: id,
-          status: "0",
-        });
-        handleUpdateStatusBill(id, "0", user, note);
-      } catch (error) {
-        toast.error("Không tìm thấy hóa đơn");
-      }
-    }
-    setLoadingBill(false);
-  };
-
-  // cập nhật trạng thái hóa đơn
-  const handleUpdateStatusBill = async (
-    id: string | null,
-    status: string,
-    user: IUser | null,
-    note: string
-  ) => {
-    setLoadingBill(true);
-    if (id === null || user === null) {
-      toast.error("Không tìm thấy hóa đơn");
-    } else {
-      try {
-        const response = await axios.post(
-          "http://localhost:3001/api/orders/update-status",
-          { id: id, status: status }
-        );
-        createNewHistory(response.data.data, user, note);
-        getBillHistoryByIdBill(id);
-        setStatusBill(status);
+        if (billData) {
+          setBillDetail(billData);
+          setIdCustomer(billData.userId);
+          setStatusBill(billData.status);
+          // Trích xuất variantId và quantity từ products
+          const productSizes = billData.products.map(
+            (product: IProductSizeBill) => ({
+              variantId: product.variantId,
+              quantity: product.quantity,
+            })
+          );
+          setListProductSize(productSizes);
+        }
       } catch (error) {
         toast.error("Không tìm thấy hóa đơn");
       }
@@ -164,6 +134,7 @@ export default function BillDetail() {
         "http://localhost:3001/api//history-bill/add",
         dataHistoryBill
       );
+      getBillHistoryByIdBill(bill._id);
     } catch (error) {
       toast.error("Tạo lịch sử thất bại");
     }
@@ -221,11 +192,124 @@ export default function BillDetail() {
     getTransBillByIdBill(id ? id : null);
   }, [id, idCustomer]);
 
+  // hủy đơn hàng
+  function ModalCancelBill() {
+    const [ghiChu, setGhiChu] = useState("");
+    const [errorGhiChu, setErrorGhiChu] = useState("");
+
+    // API hủy đơn hàng
+    const cancelBill = async () => {
+      if (ghiChu === "") {
+        setErrorGhiChu("Bạn cần nhập lý do");
+        return;
+      }
+      confirmStatus({ title: "Xác nhận", text: "Xác nhận hủy hoá đơn?" }).then(
+        (result) => {
+          if (result) {
+            if (listProductSize.length < 1) {
+              toast.error("Không thể hủy hoá đơn!");
+            } else {
+              // cập nhật trạng thái
+              if (statusBill === "2" || statusBill === "3") {
+                handleIncreaseProductSize(listProductSize);
+              }
+              handleUpdateStatusBill(
+                id ? id : null,
+                "0",
+                user ? user : null,
+                ghiChu
+              );
+              toast.success("Hủy đơn hàng thành công!");
+              setOpenModalCancelBill(false);
+            }
+          }
+        }
+      );
+    };
+
+    return (
+      <DialogAddUpdate
+        open={openModalCancelBill}
+        setOpen={setOpenModalCancelBill}
+        title={"Huỷ đơn hàng"}
+        buttonSubmit={
+          <Button
+            style={{
+              boxShadow: "none",
+              textTransform: "none",
+              borderRadius: "8px",
+            }}
+            onClick={cancelBill}
+          >
+            Lưu
+          </Button>
+        }
+      >
+        <div>
+          <Input
+            size="small"
+            placeholder="Ghi chú"
+            value={ghiChu}
+            onChange={(e) => setGhiChu(e.target.value)}
+          />
+        </div>
+        <div>
+          {errorGhiChu !== "" && (
+            <span style={{ color: "red" }}>{errorGhiChu}</span>
+          )}
+        </div>
+      </DialogAddUpdate>
+    );
+  }
+
+  // tăng số lượng product size
+  const handleIncreaseProductSize = async (
+    listProductSize: IProductSizeBill[]
+  ) => {
+    if (listProductSize.length < 1) {
+      toast.error("Không thể hủy đơn hàng");
+    } else {
+      try {
+        await axios.post(
+          "http://localhost:3001/api/bills/increase-product-size",
+          { listProductSize: listProductSize }
+        );
+      } catch (error) {
+        toast.error("Không thể hủy đơn hàng");
+      }
+    }
+  };
+
+  // cập nhật trạng thái hóa đơn
+  const handleUpdateStatusBill = async (
+    id: string | null,
+    status: string,
+    user: IUser | null,
+    note: string
+  ) => {
+    setLoadingBill(true);
+    if (id === null || user === null) {
+      toast.error("Không tìm thấy hóa đơn");
+    } else {
+      try {
+        const response = await axios.post(
+          "http://localhost:3001/api/bills/update-status",
+          { id: id, status: status }
+        );
+        createNewHistory(response.data.data, user, note);
+        setStatusBill(status);
+      } catch (error) {
+        toast.error("Không tìm thấy hóa đơn");
+      }
+    }
+    setLoadingBill(false);
+  };
+
   // State variables for controlling modal visibility
   const [openModalCancelBill, setOpenModalCancelBill] = useState(false);
+  const [openModalReturnBill, setOpenModalReturnBill] = useState(false);
   const [openModalConfirm, setOpenModalConfirm] = useState(false);
   const [openModalConfirmDelive, setOpenModalConfirmDelive] = useState(false);
-  const [openModalConfirmPayment, setOpenModalConfirmPayment] = useState(false);
   const [openModalConfirmComplete, setOpenModalConfirmComplete] =
     useState(false);
   const [openCodalConfirmReceived, setOpenCodalConfirmReceived] =
@@ -240,14 +324,19 @@ export default function BillDetail() {
       confirmStatus({ title: "Xác nhận", text: "Xác nhận hoá đơn?" }).then(
         (result) => {
           if (result) {
-            handleUpdateStatusBill(
-              id ? id : null,
-              "2",
-              user ? user : null,
-              ghiChu
-            );
-            toast.success("Xác nhận đơn hàng thành công!");
-            setOpenModalConfirm(false);
+            if (listProductSize.length < 1) {
+              toast.error("Không thể xác nhận đơn hàng!");
+            } else {
+              handleUpdateStatusBill(
+                id ? id : null,
+                "2",
+                user ? user : null,
+                ghiChu
+              );
+              handleDecreaseProductSize(listProductSize);
+              toast.success("Xác nhận đơn hàng thành công!");
+              setOpenModalConfirm(false);
+            }
           }
         }
       );
@@ -283,30 +372,49 @@ export default function BillDetail() {
     );
   }
 
-  // xác nhận giao hàng
+  // giảm số lượng product size
+  const handleDecreaseProductSize = async (
+    listProductSize: IProductSizeBill[]
+  ) => {
+    if (listProductSize.length < 1) {
+      toast.error("Không thể xác nhận đơn hàng");
+    } else {
+      try {
+        await axios.post(
+          "http://localhost:3001/api/bills/decrease-product-size",
+          { listProductSize: listProductSize }
+        );
+      } catch (error) {
+        toast.error("Không thể xác nhận đơn hàng");
+      }
+    }
+  };
+
+  // xác nhận đóng gói & vận chuyển
   function ModalConfirmDeliver() {
     const [ghiChu, setGhiChu] = useState("");
     const handleConfirmDelever = () => {
-      confirmStatus({ title: "Xác nhận", text: "Xác nhận giao hàng?" }).then(
-        (result) => {
-          if (result) {
-            handleUpdateStatusBill(
-              id ? id : null,
-              "3",
-              user ? user : null,
-              ghiChu
-            );
-            toast.success("Xác nhận giao hàng thành công!");
-            setOpenModalConfirmDelive(false);
-          }
+      confirmStatus({
+        title: "Xác nhận",
+        text: "Xác nhận đóng gói & vận chuyển?",
+      }).then((result) => {
+        if (result) {
+          handleUpdateStatusBill(
+            id ? id : null,
+            "3",
+            user ? user : null,
+            ghiChu
+          );
+          toast.success("Xác nhận đóng gói & vận chuyển thành công!");
+          setOpenModalConfirmDelive(false);
         }
-      );
+      });
     };
     return (
       <DialogAddUpdate
         open={openModalConfirmDelive}
         setOpen={setOpenModalConfirmDelive}
-        title={"Xác nhận giao hàng"}
+        title={"Xác nhận đóng gói & vận chuyển"}
         buttonSubmit={
           <Button
             style={{
@@ -332,49 +440,32 @@ export default function BillDetail() {
     );
   }
 
-  // xác nhận đã nhận hàng
+  // xác nhận đang giao hàng
   function ModalConfirmReceived() {
     const [ghiChu, setGhiChu] = useState("");
     const handleConfirmReceived = () => {
-      confirmStatus({ title: "Xác nhận", text: "Xác nhận đã nhận hàng?" }).then(
-        (result) => {
-          if (result) {
-            if (listTransaction.length > 0) {
-              handleUpdateStatusBill(
-                id ? id : null,
-                "4",
-                user ? user : null,
-                ghiChu
-              );
-              toast.success("Xác nhận nhận hàng thành công!");
-              fetchDetailBill(id ? id : null);
-              setOpenCodalConfirmReceived(false);
-            } else {
-              handleUpdateStatusBill(
-                id ? id : null,
-                "4",
-                user ? user : null,
-                ghiChu
-              );
-              handleUpdateStatusBill(
-                id ? id : null,
-                "5",
-                user ? user : null,
-                ghiChu
-              );
-              toast.success("Xác nhận nhận hàng thành công!");
-              fetchDetailBill(id ? id : null);
-              setOpenCodalConfirmReceived(false);
-            }
-          }
+      confirmStatus({
+        title: "Xác nhận",
+        text: "Xác nhận đang giao hàng?",
+      }).then((result) => {
+        if (result) {
+          handleUpdateStatusBill(
+            id ? id : null,
+            "4",
+            user ? user : null,
+            ghiChu
+          );
+          toast.success("Xác nhận đang giao hàng!");
+          setOpenCodalConfirmReceived(false);
         }
-      );
+      });
     };
+
     return (
       <DialogAddUpdate
         open={openCodalConfirmReceived}
         setOpen={setOpenCodalConfirmReceived}
-        title={"Xác nhận đã giao hàng"}
+        title={"Xác nhận đang giao hàng"}
         buttonSubmit={
           <Button
             style={{
@@ -394,142 +485,6 @@ export default function BillDetail() {
             placeholder="Ghi chú"
             value={ghiChu}
             onChange={(e) => setGhiChu(e.target.value)}
-          />
-        </div>
-      </DialogAddUpdate>
-    );
-  }
-
-  // thanh toán
-  function ModalConfirmPayment() {
-    const [ghiChu, setGhiChu] = useState("");
-    const [transCode, setTransCode] = useState("");
-    const [errorTransCode, setErrorTransCode] = useState("");
-
-    // xác nhận thanh toán hóa đơn
-    const handleConfirmPayment = async () => {
-      setLoadingTransBill(true);
-      if (!billDetail || !user) {
-        toast.error("Không thể thanh toán");
-        return;
-      }
-      if (transCode === "") {
-        setErrorTransCode("Bạn cần nhập mã giao dịch");
-        return;
-      }
-
-      const confirmPaymentRequest: ITransaction = {
-        _id: null,
-        idUser: user._id,
-        idBill: billDetail._id,
-        transCode: transCode,
-        totalMoney: billDetail.totalPrice,
-        note: ghiChu,
-        status: true,
-        createdAt: "",
-      };
-
-      // xác nhận thanh toán
-      try {
-        await axios.post(
-          "http://localhost:3001/api/trans/add",
-          confirmPaymentRequest
-        );
-        getTransBillByIdBill(billDetail._id);
-        // cập nhật trạng thái
-        handleUpdateStatusBill(
-          billDetail._id,
-          "6",
-          user,
-          confirmPaymentRequest.note
-        );
-        toast.success("Thanh toán thành công");
-        setOpenModalConfirmPayment(false);
-      } catch (error) {
-        toast.error("Thanh toán thất bại");
-        setOpenModalConfirmPayment(false);
-      }
-      setLoadingTransBill(false);
-    };
-
-    return (
-      <DialogAddUpdate
-        open={openModalConfirmPayment}
-        setOpen={setOpenModalConfirmPayment}
-        title={"Xác nhận thanh toán"}
-        buttonSubmit={
-          <Button
-            style={{
-              boxShadow: "none",
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-            onClick={handleConfirmPayment}
-          >
-            Lưu
-          </Button>
-        }
-      >
-        <div>
-          <Typography.Text strong>
-            Tổng tiền hóa đơn <span style={{ color: "red" }}>*</span>
-          </Typography.Text>
-          <Input
-            size="small"
-            value={
-              billDetail
-                ? formatCurrency({ money: String(billDetail.totalPrice) })
-                : formatCurrency({ money: "0" })
-            }
-            disabled
-            style={{ marginTop: "5px", marginBottom: "10px" }}
-          />
-
-          <Typography.Text strong>
-            Tiền khách trả <span style={{ color: "red" }}>*</span>
-          </Typography.Text>
-          <Input
-            size="small"
-            value={
-              billDetail
-                ? formatCurrency({ money: String(billDetail.totalPrice) })
-                : formatCurrency({ money: "0" })
-            }
-            disabled
-            style={{ marginTop: "5px", marginBottom: "10px" }}
-          />
-          <Typography.Text strong>
-            Mã giao dịch <span style={{ color: "red" }}>*</span>
-          </Typography.Text>
-          <Input
-            size="small"
-            value={transCode}
-            onChange={(e) => {
-              setTransCode(e.target.value);
-              setErrorTransCode("");
-            }}
-            style={{
-              marginTop: errorTransCode === "" ? "5px" : "",
-              marginBottom: errorTransCode === "" ? "10px" : "",
-            }}
-            required
-          />
-          <div>
-            {errorTransCode !== "" && (
-              <span
-                style={{ color: "red", marginTop: "5px", marginBottom: "10px" }}
-              >
-                {errorTransCode}
-              </span>
-            )}
-          </div>
-          <Typography.Text strong>Ghi chú</Typography.Text>
-          <Input
-            size="small"
-            value={ghiChu}
-            onChange={(e) => setGhiChu(e.target.value)}
-            style={{ marginTop: "5px", marginBottom: "10px" }}
-            required
           />
         </div>
       </DialogAddUpdate>
@@ -605,10 +560,6 @@ export default function BillDetail() {
         } catch (error) {
           toast.error("Thanh toán thất bại");
         }
-      }
-
-      if (statusBill === "5") {
-        // cập nhật trạng thái
         handleUpdateStatusBill(
           id ? id : null,
           String(Number(statusBill) - 2),
@@ -617,6 +568,16 @@ export default function BillDetail() {
         );
         setOpenModalReturnStt(false);
       } else {
+        if (statusBill === "2" && listProductSize.length > 0) {
+          try {
+            await axios.post(
+              "http://localhost:3001/api/bills/increase-product-size",
+              { listProductSize: listProductSize }
+            );
+          } catch (error) {
+            toast.error("Không thể quay về trạng thái trước");
+          }
+        }
         // cập nhật trạng thái
         handleUpdateStatusBill(
           id ? id : null,
@@ -664,27 +625,27 @@ export default function BillDetail() {
     );
   }
 
-  // hủy đơn hàng
-  function ModalCancelBill() {
+  // hoàn đơn hàng
+  function ModalReturnBill() {
     const [ghiChu, setGhiChu] = useState("");
     const [errorGhiChu, setErrorGhiChu] = useState("");
 
-    // API hủy đơn hàng
-    const cancelBill = async () => {
+    // API hoàn đơn hàng
+    const returnBill = async () => {
       if (ghiChu === "") {
         setErrorGhiChu("Bạn cần nhập lý do");
         return;
       }
       // cập nhật trạng thái
-      handleCancelBill(id ? id : null, user ? user : null, ghiChu);
-      setOpenModalCancelBill(false);
+      handleUpdateStatusBill(id ? id : null, "8", user ? user : null, ghiChu);
+      setOpenModalReturnBill(false);
     };
 
     return (
       <DialogAddUpdate
-        open={openModalCancelBill}
-        setOpen={setOpenModalCancelBill}
-        title={"Huỷ đơn hàng"}
+        open={openModalReturnBill}
+        setOpen={setOpenModalReturnBill}
+        title={"Hoàn đơn hàng"}
         buttonSubmit={
           <Button
             style={{
@@ -692,7 +653,7 @@ export default function BillDetail() {
               textTransform: "none",
               borderRadius: "8px",
             }}
-            onClick={cancelBill}
+            onClick={returnBill}
           >
             Lưu
           </Button>
@@ -719,8 +680,7 @@ export default function BillDetail() {
   const genBtnHandleBill = (statusBill: string) => {
     if (
       listTransaction.filter((trans) => trans.status === true).length > 0 &&
-      Number(statusBill) > 3 &&
-      Number(statusBill) < 7
+      Number(statusBill) === 6
     ) {
       return (
         <Button
@@ -762,7 +722,7 @@ export default function BillDetail() {
                 style={{ marginRight: "5px" }}
                 onClick={() => setOpenModalConfirmDelive(true)}
               >
-                Xác nhận giao hàng
+                Xác nhận đóng gói & vận chuyển
               </Button>
               <Button
                 color="error"
@@ -782,7 +742,7 @@ export default function BillDetail() {
                 style={{ marginRight: "5px" }}
                 onClick={() => setOpenCodalConfirmReceived(true)}
               >
-                Xác nhận nhận hàng
+                Xác nhận đang giao hàng
               </Button>
               <Button
                 className="them-moi"
@@ -794,14 +754,23 @@ export default function BillDetail() {
               </Button>
             </div>
           );
+        case "4":
+          return (
+            <div>
+              <Button
+                className="them-moi"
+                color="cam"
+                style={{ marginRight: "5px" }}
+                onClick={() => setOpenModalReturnBill(true)}
+              >
+                Xác nhận hoàn đơn hàng
+              </Button>
+            </div>
+          );
         default:
           return null;
       }
     }
-  };
-
-  const handleOpenModalChonNhanVien = () => {
-    //TODO: call api danh sách nhân viên và chọn nhân viên => 2 api
   };
 
   return (
@@ -809,9 +778,9 @@ export default function BillDetail() {
       {openModalConfirm && <ModalConfirmBill />}
       {openModalConfirmDelive && <ModalConfirmDeliver />}
       {openCodalConfirmReceived && <ModalConfirmReceived />}
-      {openModalConfirmPayment && <ModalConfirmPayment />}
       {openModalConfirmComplete && <ModalConfirmComplete />}
       {openModalCancelBill && <ModalCancelBill />}
+      {openModalReturnBill && <ModalReturnBill />}
       {openmodalReturnStt && <ModalReturnSttBill />}
 
       <BreadcrumbsCustom
@@ -861,23 +830,6 @@ export default function BillDetail() {
               </Button>
             )}
           </Col>
-
-          <Col>
-            {user &&
-              user.role === "admin" &&
-              billDetail &&
-              Number(statusBill) < 7 &&
-              Number(statusBill) > 1 && (
-                <Button
-                  type="default"
-                  style={{ marginLeft: 5 }}
-                  onClick={handleOpenModalChonNhanVien}
-                >
-                  <IoIosAdd style={{ fontSize: 20 }} />
-                  Thêm nhân viên tiếp nhận
-                </Button>
-              )}
-          </Col>
         </Row>
       </Card>
 
@@ -897,7 +849,7 @@ export default function BillDetail() {
                   style={{ marginRight: 8 }}
                   onClick={() => setOpenDialog(true)}
                 >
-                  Chi tiết
+                  Chi tiết lịch sử
                 </Button>
               </Col>
             </Row>
@@ -1006,7 +958,7 @@ export default function BillDetail() {
           <Space direction="vertical" style={{ width: "100%" }}>
             <Row justify="space-between" align="middle">
               <Typography.Title level={4}>Lịch sử thanh toán</Typography.Title>
-              {Number(statusBill) > 3 &&
+              {/* {Number(statusBill) > 3 &&
                 Number(statusBill) < 7 &&
                 listTransaction.filter((trans) => trans.status === true)
                   .length === 0 && (
@@ -1020,7 +972,7 @@ export default function BillDetail() {
                   >
                     Xác nhận thanh toán
                   </Button>
-                )}
+                )} */}
             </Row>
 
             {listTransaction.length > 0 ? (
@@ -1052,14 +1004,6 @@ export default function BillDetail() {
               }}
             >
               <Typography.Title level={3}>Danh sách sản phẩm</Typography.Title>
-              {billDetail &&
-                billDetail.paymentMethod === "COD" &&
-                statusBill === "1" &&
-                listTransaction.length === 0 && (
-                  <Button type="primary" style={{ marginRight: 5 }}>
-                    Thêm sản phẩm
-                  </Button>
-                )}
             </div>
             <Divider
               style={{
@@ -1083,15 +1027,17 @@ export default function BillDetail() {
                 render={(text: string) => <Image src={text} width={100} />}
               />
               <Table.Column
-                title="Tên sản phẩm"
+                title="Sản phẩm"
                 dataIndex="name"
                 key="name"
                 width={"25%"}
-                render={(name, record: any) => {
-                  return <>
-                  <p>{name}</p>
-                  <p>Size: {record?.size}</p>
-                  </>
+                render={(name, record: IProductBill) => {
+                  return (
+                    <>
+                      <p>Tên: {name}</p>
+                      <p>kích cỡ: {record?.size}</p>
+                    </>
+                  );
                 }}
               />
               <Table.Column
