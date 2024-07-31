@@ -1,4 +1,3 @@
-import { sanitizeFilter } from "mongoose";
 import product from "../models/product.js";
 import productSize from "../models/productSize.js";
 import size from "../models/size.js";
@@ -37,34 +36,22 @@ export const getAllProduct = async (req, res) => {
 };
 
 export const searchProducts = async (req, res) => {
-  const { query } = req.query;
+  const { name } = req.body;
 
   try {
-    const regex = new RegExp(query, "i"); // Tạo regex để tìm kiếm không phân biệt hoa thường
-    const data = await product.find({
-      $or: [{ name: regex }, { description: regex }],
+    const products = await product.find({
+      name: { $regex: name, $options: "i" }, // Sửa đối tượng tìm kiếm ở đây
     });
 
-    if (!data || data.length === 0) {
-      return res.status(404).json({
-        message: `Không tìm thấy sản phẩm nào phù hợp với từ khóa "${query}"!`,
+    if (products.length === 0) {
+      return res.status(200).json({
+        message: "Không tìm thấy sản phẩm!",
         data: [],
       });
     }
 
-    const getProductsPromise = data.map(async (item) => {
-      const variants = await productSize.find({ idProduct: item._id }).exec();
-
-      return {
-        ...item.toJSON(),
-        variants,
-      };
-    });
-
-    const products = await Promise.all(getProductsPromise);
-
     return res.status(200).json({
-      message: `Kết quả tìm kiếm cho từ khóa "${query}"`,
+      message: "Danh sách sản phẩm tìm được",
       data: products,
     });
   } catch (error) {
