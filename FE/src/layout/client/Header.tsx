@@ -1,12 +1,22 @@
-import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import {
   ACCESS_TOKEN_STORAGE_KEY,
   USER_INFO_STORAGE_KEY,
 } from "../../services/constants";
 import { useMyCartQuery } from "../../hooks/useCart";
+import { IProduct } from "../../interface/Products";
+import axios from "axios";
+import { AutoComplete, Input, Spin } from "antd";
+
+interface optionSearch {
+  label: string;
+  value: string;
+  image: string; // Thêm trường image
+}
 
 const Header = () => {
+  const navigate = useNavigate();
   const [openMenuCart, setOpenMenuCart] = useState(false);
   const { data } = useMyCartQuery();
 
@@ -21,6 +31,51 @@ const Header = () => {
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const userInfo =
     JSON.parse(localStorage.getItem(USER_INFO_STORAGE_KEY) as string) || "";
+
+  const [optionsSearch, setOptionsSearch] = useState<optionSearch[]>([]);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+  const [textSearch, setTextSearch] = useState<string>("");
+
+  const handleSearchProduct = async (textSearch: string) => {
+    try {
+      setLoadingSearch(true);
+      if (textSearch !== "") {
+        const response = await axios.post(
+          `http://localhost:3001/api/products/search`,
+          { name: textSearch }
+        );
+        const productData = response.data?.data;
+        if (productData.length > 0) {
+          setOptionsSearch(
+            productData.map((p: IProduct) => ({
+              label: p.name,
+              value: p._id,
+              image: p.image[0], // Giả sử image là mảng và lấy ảnh đầu tiên
+            }))
+          );
+        } else {
+          setOptionsSearch([{ label: "No option", value: "", image: "" }]);
+        }
+      } else {
+        setOptionsSearch([]);
+      }
+      setLoadingSearch(false);
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      setLoadingSearch(false);
+    }
+  };
+
+  const handleSelect = (option: optionSearch) => {
+    if (option.value !== "") {
+      navigate(`/product/${option.value}`);
+      setTextSearch("");
+    }
+  };
+
+  useEffect(() => {
+    handleSearchProduct(textSearch);
+  }, [textSearch]);
 
   return (
     <div>
@@ -58,7 +113,7 @@ const Header = () => {
                             <NavLink to="/product">Sản phẩm</NavLink>
                           </li>
                           <li>
-                            <NavLink to="shop.html">Tin tức</NavLink>
+                            <NavLink to="/blog">Tin tức</NavLink>
                           </li>
                           <li>
                             <NavLink to="shop.html">Giới thiệu</NavLink>
@@ -78,19 +133,33 @@ const Header = () => {
                 <div className="col-lg-4">
                   <div className="header-right d-flex align-items-center justify-content-xl-between justify-content-lg-end">
                     <div className="header-search-container">
-                      <button className="search-trigger d-xl-none d-lg-block">
-                        <i className="pe-7s-search"></i>
-                      </button>
-                      <form className="header-search-box d-lg-none d-xl-block">
-                        <input
-                          type="text"
-                          placeholder="Tìm kiếm"
-                          className="header-search-field bg-white"
-                        />
-                        <button className="header-search-btn">
-                          <i className="pe-7s-search"></i>
-                        </button>
-                      </form>
+                      <Spin spinning={loadingSearch}>
+                        <AutoComplete
+                          options={optionsSearch.map((option) => ({
+                            label: (
+                              <div className="autocomplete-option">
+                                <img
+                                  src={option.image}
+                                  alt={option.label}
+                                  style={{ width: 50, marginRight: 10 }}
+                                />
+                                <span>{option.label}</span>
+                              </div>
+                            ),
+                            value: option.value,
+                          }))}
+                          onSelect={(_, option: optionSearch) =>
+                            handleSelect(option)
+                          }
+                          value={textSearch}
+                          style={{ width: 250 }}
+                        >
+                          <Input.Search
+                            placeholder="Tìm kiếm sản phẩm"
+                            onChange={(e) => setTextSearch(e.target.value)}
+                          />
+                        </AutoComplete>
+                      </Spin>
                     </div>
                     <div className="header-configure-area">
                       <ul className="nav justify-content-end">
@@ -221,111 +290,25 @@ const Header = () => {
                       <a href="/product">Sản phẩm</a>
                     </li>
                     <li className="menu-item-has-children">
-                      <a href="shop.html">Tin tức</a>
+                      <a href="/news">Tin tức</a>
                     </li>
                     <li className="menu-item-has-children">
-                      <a href="shop.html">Về chúng tôi</a>
+                      <a href="/about">Giới thiệu</a>
                     </li>
-                    <li>
-                      <a href="contact-us.html">Tra cứu đơn hàng</a>
+                    <li className="menu-item-has-children">
+                      <a href="/policy">Chính sách</a>
+                    </li>
+                    <li className="menu-item-has-children">
+                      <a href="/contact">Liên hệ</a>
                     </li>
                   </ul>
                 </nav>
               </div>
               {/* mobile menu end */}
-
-              <div className="mobile-settings">
-                <ul className="nav">
-                  <li>
-                    <div className="dropdown mobile-top-dropdown">
-                      <a
-                        href="#"
-                        className="dropdown-toggle"
-                        id="currency"
-                        data-bs-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                      >
-                        Cao Đẳng FPT Polytechnic
-                      </a>
-                    </div>
-                  </li>
-                  <li>
-                    <div className="dropdown mobile-top-dropdown">
-                      <a
-                        href="#"
-                        className="dropdown-toggle"
-                        id="myaccount"
-                        data-bs-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                      >
-                        Thông tin tài khoản
-                        <i className="fa fa-angle-down"></i>
-                      </a>
-                      <div
-                        className="dropdown-menu"
-                        aria-labelledby="myaccount"
-                      >
-                        {isLogged ? (
-                          <a className="dropdown-item" href="my-account.html">
-                            Tài khoản của tôi
-                          </a>
-                        ) : (
-                          <>
-                            <Link to="/register" className="dropdown-item">
-                              Đăng ký
-                            </Link>
-                            <Link to="/login" className="dropdown-item">
-                              Đăng nhập
-                            </Link>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-
-              {/* offcanvas widget area start */}
-              <div className="offcanvas-widget-area">
-                <div className="off-canvas-contact-widget">
-                  <ul>
-                    <li>
-                      <i className="fa fa-mobile"></i>
-                      <a href="#">0123456789</a>
-                    </li>
-                    <li>
-                      <i className="fa fa-envelope-o"></i>
-                      <a href="#">info@yourdomain.com</a>
-                    </li>
-                  </ul>
-                </div>
-                <div className="off-canvas-social-widget">
-                  <a href="#">
-                    <i className="fa fa-facebook"></i>
-                  </a>
-                  <a href="#">
-                    <i className="fa fa-twitter"></i>
-                  </a>
-                  <a href="#">
-                    <i className="fa fa-pinterest-p"></i>
-                  </a>
-                  <a href="#">
-                    <i className="fa fa-linkedin"></i>
-                  </a>
-                  <a href="#">
-                    <i className="fa fa-youtube-play"></i>
-                  </a>
-                </div>
-              </div>
-              {/* offcanvas widget area end */}
             </div>
           </div>
         </aside>
         {/* offcanvas mobile menu end */}
-
-        {openMenuCart && <div></div>}
       </header>
     </div>
   );

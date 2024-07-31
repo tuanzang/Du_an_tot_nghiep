@@ -2503,7 +2503,7 @@ textarea:focus {
   padding-bottom: 6px;
   overflow-wrap: break-word;
   text-transform: uppercase;
-  font-family: "Playfair", sans-serif;
+  font-family: "Playfair";
 }
 @media only screen and (min-width: 992px) and (max-width: 1199px) {
   .slider-item-content h2 {
@@ -2521,7 +2521,7 @@ textarea:focus {
   font-weight: 400;
   line-height: 1.2;
   text-transform: capitalize;
-  font-family: "Playfair", sans-serif;
+  font-family: "Playfair";
 }
 @media only screen and (max-width: 479.98px) {
   .slider-item-content h3 {
@@ -3259,7 +3259,7 @@ textarea:focus {
   text-transform: capitalize;
 }
 .manufacturer-name a {
-  font-family: "Playfair", sans-serif;
+  font-family: "Playfair";
   font-size: 18px;
   line-height: 1;
   color: #777777;
@@ -3431,7 +3431,7 @@ textarea:focus {
 }
 
 .price-box {
-  font-family: "Fair play";
+  font-family: "PlayFair";
   font-size: 15px;
   line-height: 1;
 }

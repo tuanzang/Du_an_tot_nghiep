@@ -217,7 +217,7 @@ const ProductAdd = () => {
         },
       ],
     },
-    initialData: "Mô tả sản phẩm",
+    initialData: "",
     link: {
       addTargetToExternalLinks: true,
       defaultProtocol: "https://",
