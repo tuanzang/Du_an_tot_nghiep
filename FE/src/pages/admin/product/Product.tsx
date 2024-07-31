@@ -231,16 +231,16 @@ export default function Product() {
         />
       ),
     },
-    // {
-    //   title: "Xóa",
-    //   dataIndex: "key",
-    //   key: "key",
-    //   align: "center",
-    //   width: "10%",
-    //   render: (value: any) => (
-    //     <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
-    //   ),
-    // },
+    {
+      title: "Xóa",
+      dataIndex: "key",
+      key: "key",
+      align: "center",
+      width: "10%",
+      render: (value: any) => (
+        <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
+      ),
+    },
     {
       title: "Chi tiết",
       align: "center",

@@ -91,6 +91,8 @@ export default function ProductDetail() {
         const { data } = await axios.get(
           `http://localhost:3001/api/products/productSize/${id}`
         );
+        console.log(data);
+
         setProductSizes(data.data);
       } catch (error) {
         console.error("Error fetching product sizes:", error);
@@ -293,11 +295,10 @@ export default function ProductDetail() {
                             {productSizes.map((size) => (
                               <Button
                                 key={size._id}
-                                className={`mx-1 ${
-                                  selectedSize?._id === size._id
-                                    ? "selected"
-                                    : ""
-                                }`}
+                                className={`mx-1 ${selectedSize?._id === size._id
+                                  ? "selected"
+                                  : ""
+                                  }`}
                                 style={{
                                   padding: "10px 20px",
                                   fontSize: "16px",
@@ -315,13 +316,14 @@ export default function ProductDetail() {
                           </div>
                         )}
 
-                        <p className="pro-desc mt-3">Mô tả sản phẩm:</p>
+                        {/* <p className="pro-desc mt-3">Mô tả sản phẩm:</p>
                         <div
                           dangerouslySetInnerHTML={{
                             __html: product?.description || "",
                           }}
-                        />
-                        <div className="quantity-cart-box d-flex align-items-center">
+                        /> */}
+
+                        <div className="quantity-cart-box d-flex align-items-center mt-5">
                           <h6 className="option-title">Số lượng:</h6>
                           <div className="quantity-controls">
                             <button
@@ -395,10 +397,11 @@ export default function ProductDetail() {
                               className="tab-pane fade show active"
                             >
                               <div className="product-tab-content">
-                                <h6 className="product-tab-title">
-                                  Mô tả sản phẩm
-                                </h6>
-                                <p>{product?.description}</p>
+                                <div
+                                  dangerouslySetInnerHTML={{
+                                    __html: product?.description || "",
+                                  }}
+                                />
                               </div>
                             </div>
                             <div id="tab_two" className="tab-pane fade">

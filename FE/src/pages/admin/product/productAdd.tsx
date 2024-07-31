@@ -11,8 +11,6 @@ import {
   Space,
 } from "antd";
 import {
-  MinusCircleOutlined,
-  PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import { IProduct } from "../../../interface/Products";
@@ -26,29 +24,9 @@ import { UploadFile } from "antd/lib";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import {
-  ClassicEditor,
-  AccessibilityHelp,
-  Alignment,
-  Autosave,
-  Bold,
-  Essentials,
-  GeneralHtmlSupport,
-  Highlight,
-  Italic,
-  Link,
-  Paragraph,
-  SelectAll,
-  SpecialCharacters,
-  Table,
-  TableCaption,
-  TableCellProperties,
-  TableColumnResize,
-  TableProperties,
-  TableToolbar,
-  TextPartLanguage,
-  Title,
-  Underline,
-  Undo,
+  ClassicEditor,AccessibilityHelp,Alignment,Autosave,Bold,Essentials,GeneralHtmlSupport,Highlight,Italic,
+  Link,Paragraph,SelectAll,SpecialCharacters,Table,TableCaption,TableCellProperties,TableColumnResize,
+  TableProperties,TableToolbar,TextPartLanguage,Title,Underline,Undo,
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 
@@ -143,51 +121,15 @@ const ProductAdd = () => {
 
   const editorConfig = {
     toolbar: {
-      items: [
-        "undo",
-        "redo",
-        "|",
-        "selectAll",
-        "textPartLanguage",
-        "|",
-        "bold",
-        "italic",
-        "underline",
-        "|",
-        "specialCharacters",
-        "link",
-        "insertTable",
-        "highlight",
-        "|",
-        "alignment",
-        "|",
-        "accessibilityHelp",
+      items: ["undo","redo","|","selectAll","textPartLanguage","|","bold","italic","underline","|","specialCharacters","link",
+        "insertTable","highlight","|","alignment","|","accessibilityHelp",
       ],
       shouldNotGroupWhenFull: false,
     },
     plugins: [
-      AccessibilityHelp,
-      Alignment,
-      Autosave,
-      Bold,
-      Essentials,
-      GeneralHtmlSupport,
-      Highlight,
-      Italic,
-      Link,
-      Paragraph,
-      SelectAll,
-      SpecialCharacters,
-      Table,
-      TableCaption,
-      TableCellProperties,
-      TableColumnResize,
-      TableProperties,
-      TableToolbar,
-      TextPartLanguage,
-      Title,
-      Underline,
-      Undo,
+      AccessibilityHelp,Alignment,Autosave,Bold,Essentials,GeneralHtmlSupport,Highlight,Italic,Link,Paragraph,
+      SelectAll,SpecialCharacters,Table,TableCaption,TableCellProperties,TableColumnResize,TableProperties,
+      TableToolbar,TextPartLanguage,Title,Underline,Undo,
     ],
     htmlSupport: {
       allow: [
@@ -266,33 +208,7 @@ const ProductAdd = () => {
             </Form.Item>
           </Card>
 
-          {/* <Card>
-
-            <Form.Item<IProduct>
-              label="Giá cũ"
-              name="priceOld"
-              rules={[{ required: true, message: "Vui lòng nhập giá cũ sản phẩm!" }]}
-            >
-              <Input type="number" />
-            </Form.Item>
-          </Card> */}
-
           <Card>
-            {/* <Form.Item<IProduct>
-              label="Size"
-              name="idSize"
-              rules={[{ required: true, message: 'Vui lòng chọn size!' }]}
-            >
-              <Checkbox.Group options={dataSize} />
-            </Form.Item>
-
-            <Form.Item<IProduct>
-              label="Số lượng"
-              name="quantity"
-              rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
-            >
-              <Input type="number" />
-            </Form.Item> */}
             <div>
               {sizes.map((it:any) => (
                 <Space
