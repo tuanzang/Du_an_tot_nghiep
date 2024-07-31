@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useRef } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Button, Card, Form, Upload } from "antd";
+import { Button, Card, Form, Input, Space, Upload } from "antd";
 // import formatCurrency from "../../../services/common/formatCurrency";
 import { EditOutlined, UploadOutlined } from "@ant-design/icons";
 import { UploadFile } from "antd/lib";
@@ -36,6 +36,7 @@ import {
   Undo,
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
+import { uploadImage } from "../../../services/upload/upload";
 import { toast } from "react-toastify";
 
 export default function ProductDetailAndEdit() {
@@ -55,6 +56,7 @@ export default function ProductDetailAndEdit() {
   const [isChanged, setIsChanged] = useState(false);
   const [isChanged1, setIsChanged1] = useState(false);
   const [isChanged2, setIsChanged2] = useState(false);
+  const [productSizeForm] = Form.useForm();
 
   useEffect(() => {
     // Gọi API để lấy chi tiết sản phẩm
@@ -66,7 +68,6 @@ export default function ProductDetailAndEdit() {
         setProduct(data.data);
         setName(data.data.name);
         setPrice(data.data.price);
-        // setPriceOld(data.data.priceOld);
         setDescription(data.data.description);
         if (data.data.image) {
           setFileList(
@@ -91,12 +92,10 @@ export default function ProductDetailAndEdit() {
         );
         setProductSizes(data.data);
 
-        // Cập nhật state quantities
-        const initialQuantities: { [key: string]: number } = {};
-        data.data.forEach((productSize: IProductSize) => {
-          initialQuantities[productSize.sizeName] = productSize.quantity;
+        data?.data?.forEach((it) => {
+          productSizeForm.setFieldValue(`price-${it._id}`, it.price);
+          productSizeForm.setFieldValue(`quantity-${it._id}`, it.quantity);
         });
-        setQuantities(initialQuantities);
       } catch (error) {
         console.error("Error fetching product sizes:", error);
       }
@@ -107,11 +106,15 @@ export default function ProductDetailAndEdit() {
   }, [id]);
 
   // Hàm xử lý khi thay đổi số lượng
-  const handleQuantityChange = (sizeName: any, value: any) => {
-    setQuantities({
-      ...quantities,
-      [sizeName]: value,
-    });
+  // const handleQuantityChange = (sizeName: any, value: any) => {
+  //   setQuantities({
+  //     ...quantities,
+  //     [sizeName]: value
+  //   });
+  //   setIsChanged1(true);
+  // };
+
+  const onFieldsChange = () => {
     setIsChanged1(true);
   };
 
@@ -125,16 +128,6 @@ export default function ProductDetailAndEdit() {
     setIsChanged(true);
   };
 
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPrice(Number(e.target.value));
-    setIsChanged(true);
-  };
-
-  // const handleOldPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setPriceOld(Number(e.target.value));
-  //   setIsChanged(true);
-  // };
-
   const handleDescriptionChange = (_event: any, editor: any) => {
     const data = editor.getData();
     setDescription(data);
@@ -145,22 +138,25 @@ export default function ProductDetailAndEdit() {
     try {
       const formData = new FormData();
       formData.append("name", name || "");
-      formData.append("price", (price || 0).toString());
-      // formData.append('priceOld', (priceOld || 0).toString());
+      // formData.append('price', (price || 0).toString());
       formData.append("description", description || "");
+      let image: any = [];
 
       // Nối fileList vào formData
-      fileList.forEach((file) => {
-        if (file.originFileObj) {
-          formData.append("image", file.originFileObj);
-        }
-      });
+      if (fileList.length) {
+        const imageFiles: File[] = fileList.map(
+          (file) => file.originFileObj as File
+        );
+
+        image = await uploadImage(imageFiles);
+        console.log(image);
+      }
 
       // Cập nhật thông tin sản phẩm
-      await axios.put(`http://localhost:3001/api/products/${id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      await axios.put(`http://localhost:3001/api/products/${id}`, {
+        name,
+        description,
+        image,
       });
       toast.success("Cập nhật sản phẩm thành công");
     } catch (error) {
@@ -174,7 +170,7 @@ export default function ProductDetailAndEdit() {
       for (const productSize of productSizes) {
         const updatedQuantity = quantities[productSize.sizeName];
         await axios.put(
-          `http://localhost:3001/api/products/productSize/${productSize._id}`,
+          `http://localhost:3001/api/products/productSize/${id}`,
           {
             quantity: updatedQuantity,
           }
@@ -333,60 +329,41 @@ export default function ProductDetailAndEdit() {
         </Card>
 
         <Card style={{ padding: "10px", marginBottom: "10px" }}>
-          <table className="table">
-            <thead>
-              <tr>
-                <th scope="col">Tên</th>
-                <th scope="col">Số lượng</th>
-                <th scope="col">Giá</th>
-                <th scope="col">Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productSizes.map((size) => (
-                <tr key={size._id}>
-                  <td>{size.sizeName}</td>
-                  <td>
-                    <input
-                      type="number"
-                      value={quantities[size.sizeName]}
-                      onChange={(e) =>
-                        handleQuantityChange(
-                          size.sizeName,
-                          Number(e.target.value)
-                        )
-                      }
-                    />
-                  </td>
-
-                  <td>
-                    <input
-                      type="number"
-                      value={size.price}
-                      onChange={(e) => handlePriceChange()}
-                    />
-                  </td>
-                  <td>
-                    {/* {size.status} */}
-                    <div className="form-check form-switch">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        role="switch"
-                        id="flexSwitchCheckDefault"
-                      />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {isChanged1 && (
-            <Button type="primary" onClick={handleUpdateProductSize}>
-              <EditOutlined />
-              Cập nhật
-            </Button>
-          )}
+          <Form form={productSizeForm} onFieldsChange={onFieldsChange}>
+            {productSizes.map((it) => (
+              <Space
+                key={it._id}
+                style={{ display: "flex", marginBottom: 8 }}
+                align="baseline"
+              >
+                <p>{it.sizeName}</p>
+                <Form.Item
+                  name={"quantity" + "-" + it._id}
+                  rules={[
+                    { required: true, message: "Vui lòng nhập số lượng" },
+                  ]}
+                >
+                  <Input placeholder="Số lượng" type="number" />
+                </Form.Item>
+                <Form.Item
+                  name={"price" + "-" + it._id}
+                  rules={[{ required: true, message: "Vui lòng nhập giá" }]}
+                >
+                  <Input placeholder="Giá" type="number" />
+                </Form.Item>
+              </Space>
+            ))}
+            {isChanged1 && (
+              <Button
+                type="primary"
+                onClick={handleUpdateProductSize}
+                className="mt-4"
+              >
+                <EditOutlined />
+                Cập nhật
+              </Button>
+            )}
+          </Form>
         </Card>
 
         <Card style={{ padding: "10px", marginBottom: "10px" }}>

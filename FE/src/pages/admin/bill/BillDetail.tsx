@@ -73,7 +73,6 @@ export default function BillDetail() {
           setBillDetail(billData);
           setIdCustomer(billData.userId);
           setStatusBill(billData.status);
-
           // Trích xuất variantId và quantity từ products
           const productSizes = billData.products.map(
             (product: IProductSizeBill) => ({
@@ -135,6 +134,7 @@ export default function BillDetail() {
         "http://localhost:3001/api//history-bill/add",
         dataHistoryBill
       );
+      getBillHistoryByIdBill(bill._id);
     } catch (error) {
       toast.error("Tạo lịch sử thất bại");
     }
@@ -210,42 +210,21 @@ export default function BillDetail() {
               toast.error("Không thể hủy hoá đơn!");
             } else {
               // cập nhật trạng thái
-              handleIncreaseProductSize(listProductSize, ghiChu, statusBill);
+              if (statusBill === "2" || statusBill === "3") {
+                handleIncreaseProductSize(listProductSize);
+              }
+              handleUpdateStatusBill(
+                id ? id : null,
+                "0",
+                user ? user : null,
+                ghiChu
+              );
+              toast.success("Hủy đơn hàng thành công!");
               setOpenModalCancelBill(false);
             }
           }
         }
       );
-    };
-
-    // tăng số lượng product size
-    const handleIncreaseProductSize = async (
-      listProductSize: IProductSizeBill[],
-      ghiChu: string,
-      statusBill: string
-    ) => {
-      if (listProductSize.length < 1) {
-        toast.error("Không thể hủy đơn hàng");
-      } else {
-        try {
-          if (statusBill === "2" || statusBill === "3") {
-            await axios.post(
-              "http://localhost:3001/api/bills/increase-product-size",
-              { listProductSize: listProductSize }
-            );
-          }
-          handleUpdateStatusBill(
-            id ? id : null,
-            "0",
-            user ? user : null,
-            ghiChu
-          );
-          toast.success("Hủy đơn hàng thành công!");
-        } catch (error) {
-          toast.error("Không thể hủy đơn hàng");
-        }
-      }
-      setLoadingBill(false);
     };
 
     return (
@@ -283,27 +262,22 @@ export default function BillDetail() {
     );
   }
 
-  // hoàn hóa đơn
-  const handleReturnBill = async (
-    id: string | null,
-    user: IUser | null,
-    note: string
+  // tăng số lượng product size
+  const handleIncreaseProductSize = async (
+    listProductSize: IProductSizeBill[]
   ) => {
-    setLoadingBill(true);
-    if (id === null || user === null) {
-      toast.error("Thiếu thông tin đầu vào");
+    if (listProductSize.length < 1) {
+      toast.error("Không thể hủy đơn hàng");
     } else {
       try {
-        await axios.post("http://localhost:3001/api/bills/update-status", {
-          id: id,
-          status: "8",
-        });
-        handleUpdateStatusBill(id, "8", user, note);
+        await axios.post(
+          "http://localhost:3001/api/bills/increase-product-size",
+          { listProductSize: listProductSize }
+        );
       } catch (error) {
-        toast.error("Không tìm thấy hóa đơn");
+        toast.error("Không thể hủy đơn hàng");
       }
     }
-    setLoadingBill(false);
   };
 
   // cập nhật trạng thái hóa đơn
@@ -323,7 +297,6 @@ export default function BillDetail() {
           { id: id, status: status }
         );
         createNewHistory(response.data.data, user, note);
-        getBillHistoryByIdBill(id);
         setStatusBill(status);
       } catch (error) {
         toast.error("Không tìm thấy hóa đơn");
@@ -354,38 +327,19 @@ export default function BillDetail() {
             if (listProductSize.length < 1) {
               toast.error("Không thể xác nhận đơn hàng!");
             } else {
-              handleDecreaseProductSize(listProductSize);
               handleUpdateStatusBill(
                 id ? id : null,
                 "2",
                 user ? user : null,
                 ghiChu
               );
+              handleDecreaseProductSize(listProductSize);
               toast.success("Xác nhận đơn hàng thành công!");
               setOpenModalConfirm(false);
             }
           }
         }
       );
-    };
-
-    // giảm số lượng product size
-    const handleDecreaseProductSize = async (
-      listProductSize: IProductSizeBill[]
-    ) => {
-      if (listProductSize.length < 1) {
-        toast.error("Không thể xác nhận đơn hàng");
-      } else {
-        try {
-          await axios.post(
-            "http://localhost:3001/api/bills/decrease-product-size",
-            { listProductSize: listProductSize }
-          );
-        } catch (error) {
-          toast.error("Không thể xác nhận đơn hàng");
-        }
-      }
-      setLoadingBill(false);
     };
 
     return (
@@ -417,6 +371,24 @@ export default function BillDetail() {
       </DialogAddUpdate>
     );
   }
+
+  // giảm số lượng product size
+  const handleDecreaseProductSize = async (
+    listProductSize: IProductSizeBill[]
+  ) => {
+    if (listProductSize.length < 1) {
+      toast.error("Không thể xác nhận đơn hàng");
+    } else {
+      try {
+        await axios.post(
+          "http://localhost:3001/api/bills/decrease-product-size",
+          { listProductSize: listProductSize }
+        );
+      } catch (error) {
+        toast.error("Không thể xác nhận đơn hàng");
+      }
+    }
+  };
 
   // xác nhận đóng gói & vận chuyển
   function ModalConfirmDeliver() {
@@ -585,16 +557,16 @@ export default function BillDetail() {
         try {
           await axios.post("http://localhost:3001/api/trans/update");
           getTransBillByIdBill(id ? id : null);
-          handleUpdateStatusBill(
-            id ? id : null,
-            String(Number(statusBill) - 2),
-            user ? user : null,
-            ghiChu
-          );
-          setOpenModalReturnStt(false);
         } catch (error) {
           toast.error("Thanh toán thất bại");
         }
+        handleUpdateStatusBill(
+          id ? id : null,
+          String(Number(statusBill) - 2),
+          user ? user : null,
+          ghiChu
+        );
+        setOpenModalReturnStt(false);
       } else {
         if (statusBill === "2" && listProductSize.length > 0) {
           try {
@@ -665,7 +637,7 @@ export default function BillDetail() {
         return;
       }
       // cập nhật trạng thái
-      handleReturnBill(id ? id : null, user ? user : null, ghiChu);
+      handleUpdateStatusBill(id ? id : null, "8", user ? user : null, ghiChu);
       setOpenModalReturnBill(false);
     };
 
@@ -1032,14 +1004,6 @@ export default function BillDetail() {
               }}
             >
               <Typography.Title level={3}>Danh sách sản phẩm</Typography.Title>
-              {billDetail &&
-                billDetail.paymentMethod === "COD" &&
-                statusBill === "1" &&
-                listTransaction.length === 0 && (
-                  <Button type="primary" style={{ marginRight: 5 }}>
-                    Thêm sản phẩm
-                  </Button>
-                )}
             </div>
             <Divider
               style={{
