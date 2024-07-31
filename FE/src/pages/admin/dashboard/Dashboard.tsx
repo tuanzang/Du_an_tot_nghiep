@@ -13,7 +13,6 @@
 //   // Pagination,
 // } from "antd";
 
-
 // import axios from "axios";
 // import formatCurrency from "../../../services/common/formatCurrency";
 // import { ColumnGroupType, ColumnType } from "antd/es/table";
@@ -84,7 +83,7 @@
 //   const [completedOrdersYear, setCompletedOrdersYear] = useState(0);
 //   const [canceledOrdersYear, setCanceledOrdersYear] = useState(0);
 
-//   //tính tổng tiền 
+//   //tính tổng tiền
 //   const getOrdersPriceByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
 //     try {
 //       const resTotalPriceByDay = await axios.get(`http://localhost:3001/api/orders/total-price/day`, {
@@ -161,7 +160,6 @@
 //     }
 //   };
 
-
 //   // tính số đơn hàng
 //   const getOrdersByCustomStatus = async (createAtFrom: string, createAtTo: string) => {
 //     try {
@@ -188,7 +186,6 @@
 //         status: "0",
 //         ...customDateRange,
 //       });
-
 
 //       setTotalOrdersByCustomDay(resAllOrdersByCustomDay.data.data.length);
 //       setCompletedOrdersByCustomDay(resCompleted.data.data.length);
@@ -445,7 +442,7 @@
 
 //   const dataForButton = getDataForButton();
 
-//   // Sản phẩm được bán chạy nhất 
+//   // Sản phẩm được bán chạy nhất
 //   const getListBestSellerByDay = async (date = new Date().toISOString().split('T')[0]) => {
 //     try {
 //       const allListBestSellerByDay = await axios.get(`http://localhost:3001/api/topOrder/top-ordered-products`, {
@@ -471,8 +468,6 @@
 //       console.log(error);
 //     }
 //   };
-
-
 
 //   const getListBestSellerByWeek = async () => {
 //     const { startDate, endDate } = getWeekRange();
@@ -523,8 +518,6 @@
 //       console.log(error);
 //     }
 //   };
-
-
 
 //   const getListStockProductsByWeek = async () => {
 //     const { startDate, endDate } = getWeekRange();
@@ -676,9 +669,6 @@
 //     { title: "Số lượng bán ra", dataIndex: "totalQuantity", key: "totalQuantity" },
 //   ];
 
-
-
-
 //   const handleChangeButton = async (index: number, type: string) => {
 //     setIndexButton(index);
 //     setNameButton(type);
@@ -743,9 +733,7 @@
 //         return;
 //     }
 
-
 //   }
-
 
 //   return (
 //     <div>
@@ -805,7 +793,7 @@
 //             />
 
 //           </Col>
-          
+
 //           <Col span={12}>
 //             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
 //               Thống kê số đơn theo {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
