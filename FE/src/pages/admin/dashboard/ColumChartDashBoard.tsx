@@ -77,5 +77,5 @@ export default function ColumChartDashBoard({
     };
   }, [data]);
 
-  return <div id="chartdiv" style={{ width: "130%", height: "450px" }}></div>;
+  return <div id="chartdiv" style={{ width: "100%", height: "400px" }}></div>;
 }

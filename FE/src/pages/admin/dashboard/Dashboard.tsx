@@ -52,6 +52,7 @@ interface BestSellerItem {
 
 export default function Dashboard() {
   const [dataBieuDo, setDataBieuDo] = useState([]);
+  const [dataBieuDo2, setDataBieuDo2] = useState([]);
   const [indexButton, setIndexButton] = useState(1);
   const [nameButton, setNameButton] = useState("ngày");
   const [totalPriceByDay, setTotalPriceByDay] = useState(0);
@@ -59,6 +60,16 @@ export default function Dashboard() {
   const [totalPriceByMonth, setTotalPriceByMonth] = useState(0);
   const [totalPriceByYear, setTotalPriceByYear] = useState(0);
   const [totalPriceByCustomDay, setTotalPriceByCustomDay] = useState(0);
+  const [priceRefundByDay, setPriceRefundByDay] = useState(0);
+  const [priceRefundByWeek, setPriceRefundByWeek] = useState(0);
+  const [priceRefundByMonth, setPriceRefundByMonth] = useState(0);
+  const [priceRefundByYear, setPriceRefundByYear] = useState(0);
+  const [priceRefundByCustomDay, setPriceRefundByCustomDay] = useState(0);
+  const [priceCancelByDay, setPriceCancelByDay] = useState(0);
+  const [priceCancelByWeek, setPriceCancelByWeek] = useState(0);
+  const [priceCancelByMonth, setPriceCancelByMonth] = useState(0);
+  const [priceCancelByYear, setPriceCancelByYear] = useState(0);
+  const [priceCancelByCustomDay, setPriceCancelByCustomDay] = useState(0);
   const [listBestSellerByDay, setListBestSellerByDay] = useState([]);
   const [listBestSellerByWeek, setListBestSellerByWeek] = useState([]);
   const [listBestSellerByMonth, setListBestSellerByMonth] = useState([]);
@@ -96,10 +107,24 @@ export default function Dashboard() {
   const getOrdersPriceByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
     try {
       const resTotalPriceByDay = await axios.get(`http://localhost:3001/api/orders/total-price/day`, {
-        params: { dateNow: date }
+        params: { 
+          dateNow: date,
+         }
       });
-
+      const resPriceRefundByDay = await axios.get(`http://localhost:3001/api/orders/price-refund/day`, {
+        params: {
+          dateNow: date,
+        }
+      })
+      const resPriceCancelByDay = await axios.get(`http://localhost:3001/api/orders/price-cancel/day`, {
+        params: {
+          dateNow: date,
+        }
+      })
+      
       setTotalPriceByDay(resTotalPriceByDay.data.totalPrice);
+      setPriceRefundByDay(resPriceRefundByDay.data.totalPrice);
+      setPriceCancelByDay(resPriceCancelByDay.data.totalPrice);
     } catch (error) {
       console.log(error);
     }
@@ -111,11 +136,25 @@ export default function Dashboard() {
       const resTotalPriceByWeek = await axios.get(`http://localhost:3001/api/orders/total-price/week`, {
         params: {
           dateStart: startDate,
-          dateEnd: endDate
+          dateEnd: endDate,
         }
       });
-      console.log(resTotalPriceByWeek.data.totalPrice);
+      const resPriceRefundByWeek = await axios.get(`http://localhost:3001/api/orders/price-refund/week`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
+      const resPriceCancelByWeek = await axios.get(`http://localhost:3001/api/orders/price-cancel/week`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
+      
       setTotalPriceByWeek(resTotalPriceByWeek.data.totalPrice);
+      setPriceRefundByWeek(resPriceRefundByWeek.data.totalPrice);
+      setPriceCancelByWeek(resPriceCancelByWeek.data.totalPrice);
     } catch (error) {
       console.log(error);
     }
@@ -127,11 +166,24 @@ export default function Dashboard() {
       const resTotalPriceByMonth = await axios.get(`http://localhost:3001/api/orders/total-price/month`, {
         params: {
           dateStart: startDate,
-          dateEnd: endDate
+          dateEnd: endDate,
         }
       });
-
+      const resPriceRefundByMonth = await axios.get(`http://localhost:3001/api/orders/price-refund/month`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
+      const resPriceCancelByMonth = await axios.get(`http://localhost:3001/api/orders/price-cancel/month`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
       setTotalPriceByMonth(resTotalPriceByMonth.data.totalPrice);
+      setPriceRefundByMonth(resPriceRefundByMonth.data.totalPrice);
+      setPriceCancelByMonth(resPriceCancelByMonth.data.totalPrice);
     } catch (error) {
       console.log(error);
     }
@@ -143,11 +195,24 @@ export default function Dashboard() {
       const resTotalPriceByYear = await axios.get(`http://localhost:3001/api/orders/total-price/year`, {
         params: {
           dateStart: startDate,
-          dateEnd: endDate
+          dateEnd: endDate,
         }
       });
-
+      const resPriceRefundByYear = await axios.get(`http://localhost:3001/api/orders/price-refund/year`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
+      const resPriceCancelByYear = await axios.get(`http://localhost:3001/api/orders/price-cancel/year`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
       setTotalPriceByYear(resTotalPriceByYear.data.totalPrice);
+      setPriceRefundByYear(resPriceRefundByYear.data.totalPrice);
+      setPriceCancelByYear(resPriceCancelByYear.data.totalPrice);
     } catch (error) {
       console.log(error);
     }
@@ -159,11 +224,24 @@ export default function Dashboard() {
       const resTotalPriceByCustomDay = await axios.get(`http://localhost:3001/api/orders/total-price/custom-day`, {
         params: {
           dateStart: startDate,
-          dateEnd: endDate
+          dateEnd: endDate,
         }
       });
-      console.log(resTotalPriceByCustomDay.data.totalPrice);
+      const resPriceRefundByCustomDay = await axios.get(`http://localhost:3001/api/orders/price-refund/custom-day`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
+      const resPriceCancelByCustomDay = await axios.get(`http://localhost:3001/api/orders/price-cancel/custom-day`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
       setTotalPriceByCustomDay(resTotalPriceByCustomDay.data.totalPrice);
+      setPriceRefundByCustomDay(resPriceRefundByCustomDay.data.totalPrice);
+      setPriceCancelByCustomDay(resPriceCancelByCustomDay.data.totalPrice);
     } catch (error) {
       console.log(error);
     }
@@ -438,44 +516,44 @@ export default function Dashboard() {
     handleChangeButton(indexButton, nameButton);
   }, []);
 
-  const getDataForButton = () => {
-    switch (indexButton) {
-      case 1:
-        return {
-          total: totalOrdersToday,
-          totalPrice: totalPriceByDay,
-          color: "#e3d7c3",
-        };
-      case 2:
-        return {
-          total: totalOrdersThisWeek,
-          totalPrice: totalPriceByWeek,
-          color: "#e0ccab",
-        };
-      case 3:
-        return {
-          total: totalOrdersThisMonth,
-          totalPrice: totalPriceByMonth,
-          color: "#e0ccab",
-        };
-      case 4:
-        return {
-          total: totalOrdersThisYear,
-          totalPrice: totalPriceByYear,
-          color: "#e3d7c3",
-        };
-      case 5:
-        return {
-          total: totalOrdersByCustomDay,
-          totalPrice: totalPriceByCustomDay,
-          color: "#e0ccab",
-        }
-      default:
-        return {};
-    }
-  };
+  // const getDataForButton = () => {
+  //   switch (indexButton) {
+  //     case 1:
+  //       return {
+  //         total: totalOrdersToday,
+  //         totalPrice: totalPriceByDay,
+  //         color: "#e3d7c3",
+  //       };
+  //     case 2:
+  //       return {
+  //         total: totalOrdersThisWeek,
+  //         totalPrice: totalPriceByWeek,
+  //         color: "#e0ccab",
+  //       };
+  //     case 3:
+  //       return {
+  //         total: totalOrdersThisMonth,
+  //         totalPrice: totalPriceByMonth,
+  //         color: "#e0ccab",
+  //       };
+  //     case 4:
+  //       return {
+  //         total: totalOrdersThisYear,
+  //         totalPrice: totalPriceByYear,
+  //         color: "#e3d7c3",
+  //       };
+  //     case 5:
+  //       return {
+  //         total: totalOrdersByCustomDay,
+  //         totalPrice: totalPriceByCustomDay,
+  //         color: "#e0ccab",
+  //       }
+  //     default:
+  //       return {};
+  //   }
+  // };
 
-  const dataForButton = getDataForButton();
+  // const dataForButton = getDataForButton();
 
   // Sản phẩm được bán chạy nhất 
   const getListBestSellerByDay = async (date = new Date().toISOString().split('T')[0]) => {
@@ -765,6 +843,11 @@ export default function Dashboard() {
           { label: "Cancel", value: canceledOrdersDay },
           { label: "Return", value: returnedOrdersDay },
         ]);
+        setDataBieuDo2([
+          { label: "TotalPrice", value: totalPriceByDay },
+          { label: "TotalPriceReturn", value: priceRefundByDay },
+          { label: "TotalPriceCancel", value: priceCancelByDay },
+        ])
         break;
       case 2:
         data = await getOrdersByWeekStatus();
@@ -777,6 +860,11 @@ export default function Dashboard() {
           { label: "Cancel", value: canceledOrdersWeek },
           { label: "Return", value: returnedOrdersWeek },
         ]);
+        setDataBieuDo2([
+          { label: "TotalPrice", value: totalPriceByWeek },
+          { label: "TotalPriceReturn", value: priceRefundByWeek },
+          { label: "TotalPriceCancel", value: priceCancelByWeek },
+        ])
         break;
       case 3:
         data = await getOrdersByMonthStatus();
@@ -789,6 +877,11 @@ export default function Dashboard() {
           { label: "Cancel", value: canceledOrdersMonth },
           { label: "Return", value: returnedOrdersMonth },
         ]);
+        setDataBieuDo2([
+          { label: "TotalPrice", value: totalPriceByMonth },
+          { label: "TotalPriceReturn", value: priceRefundByMonth },
+          { label: "TotalPriceCancel", value: priceCancelByMonth },
+        ])
         break;
       case 4:
         data = await getOrdersByYearStatus();
@@ -801,6 +894,11 @@ export default function Dashboard() {
           { label: "Cancel", value: canceledOrdersYear },
           { label: "Return", value: returnedOrdersYear },
         ]);
+        setDataBieuDo2([
+          { label: "TotalPrice", value: totalPriceByYear },
+          { label: "TotalPriceReturn", value: priceRefundByYear },
+          { label: "TotalPriceCancel", value: priceCancelByYear },
+        ])
         break;
       case 5: // Trường hợp chọn khoảng thời gian tùy chỉnh
         if (filter.createAtFrom && filter.createAtTo) {
@@ -810,6 +908,11 @@ export default function Dashboard() {
             { label: "Complete", value : completedOrdersByCustomDay},
             { label: "Cancel", value: canceledOrdersByCustomDay},
             { label: "Return", value: returnedOrdersByCustomDay},
+          ])
+          setDataBieuDo2([
+            { label: "TotalPrice", value: totalPriceByCustomDay},
+            { label: "TotalPriceReturn", value: priceRefundByCustomDay},
+            { label: "TotalPriceCancel", value: priceCancelByCustomDay},
           ])
         } else {
           // Có thể thông báo cho người dùng rằng cần chọn ngày
@@ -885,11 +988,14 @@ export default function Dashboard() {
 
           </Col>
           
-          <Col span={24}>
+          <Col span={12}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-              Thống kê Doanh Thu theo {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
+              Thống kê Doanh Thu theo {nameButton}
             </Title>
-            <Table
+            <Card style={{ borderColor: "#c29957" }}>
+              <ColumChartDashBoard data={dataBieuDo2} />
+            </Card>
+            {/* <Table
               dataSource={[dataForButton]}
               columns={[
                 {
@@ -923,15 +1029,14 @@ export default function Dashboard() {
                 },
               ]}
               pagination={false}
-            />
-
+            /> */}
           </Col>
-          <Col span={10}>
+          <Col span={12}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
               Biểu đồ trạng thái, số lượng đơn theo {nameButton}
             </Title>
             <Card style={{ borderColor: "#c29957" }}>
-              <ColumChartDashBoard data={dataBieuDo} />
+              <PieChartDashBoard data={dataBieuDo} />
             </Card>
           </Col>
         </Row>

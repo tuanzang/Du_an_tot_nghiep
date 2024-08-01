@@ -5,7 +5,7 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 
 export default function PieChartDashBoard({ data }) {
   useLayoutEffect(() => {
-    let root = am5.Root.new("chartdiv");
+    let root = am5.Root.new("chartdiv1");
 
     root.setThemes([am5themes_Animated.new(root)]);
 
@@ -51,5 +51,5 @@ export default function PieChartDashBoard({ data }) {
     };
   }, [data]);
 
-  return <div id="chartdiv" style={{ width: "100%", height: "400px" }}></div>;
+  return <div id="chartdiv1" style={{ width: "100%", height: "400px" }}></div>;
 }
