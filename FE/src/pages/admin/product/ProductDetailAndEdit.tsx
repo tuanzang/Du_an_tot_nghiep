@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useRef } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import { Button, Card, Form, Input, Space, Upload } from "antd";
-// import formatCurrency from "../../../services/common/formatCurrency";
 import { EditOutlined, UploadOutlined } from "@ant-design/icons";
 import { UploadFile } from "antd/lib";
 import { IProduct } from "../../../interface/Products";
@@ -41,12 +40,11 @@ import { toast } from "react-toastify";
 
 export default function ProductDetailAndEdit() {
   const { id } = useParams<{ id: string }>(); // Lấy ID sản phẩm từ URL
+  const navigate = useNavigate();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [product, setProduct] = useState<IProduct | null>(null);
   const [name, setName] = useState<string | undefined>(undefined);
   const [price, setPrice] = useState<number | undefined>(undefined);
-  // const [priceOld, setPriceOld] = useState<number | undefined>(undefined);
-  // const [category, setCategory] = useState<string | undefined>(undefined);
   const [description, setDescription] = useState<string | undefined>(undefined);
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
@@ -93,8 +91,8 @@ export default function ProductDetailAndEdit() {
         setProductSizes(data.data);
 
         data?.data?.forEach((it) => {
-          productSizeForm.setFieldValue(`price-${it._id}`, it.price);
-          productSizeForm.setFieldValue(`quantity-${it._id}`, it.quantity);
+          productSizeForm.setFieldValue(`price-${it.idSize}`, it.price);
+          productSizeForm.setFieldValue(`quantity-${it.idSize}`, it.quantity);
         });
       } catch (error) {
         console.error("Error fetching product sizes:", error);
@@ -104,15 +102,6 @@ export default function ProductDetailAndEdit() {
     fetchProductDetails();
     fetchProductSizes();
   }, [id]);
-
-  // Hàm xử lý khi thay đổi số lượng
-  // const handleQuantityChange = (sizeName: any, value: any) => {
-  //   setQuantities({
-  //     ...quantities,
-  //     [sizeName]: value
-  //   });
-  //   setIsChanged1(true);
-  // };
 
   const onFieldsChange = () => {
     setIsChanged1(true);
@@ -138,18 +127,17 @@ export default function ProductDetailAndEdit() {
     try {
       const formData = new FormData();
       formData.append("name", name || "");
-      // formData.append('price', (price || 0).toString());
       formData.append("description", description || "");
-      let image: any = [];
+      let image: any = fileList.map(it => it.url);
 
       // Nối fileList vào formData
-      if (fileList.length) {
-        const imageFiles: File[] = fileList.map(
+      const newFileList = fileList.filter(it => !it.status);
+      if (newFileList.length) {
+        const imageFiles: File[] = newFileList.map(
           (file) => file.originFileObj as File
         );
 
         image = await uploadImage(imageFiles);
-        console.log(image);
       }
 
       // Cập nhật thông tin sản phẩm
@@ -159,24 +147,20 @@ export default function ProductDetailAndEdit() {
         image,
       });
       toast.success("Cập nhật sản phẩm thành công");
+      navigate("/admin/product");
     } catch (error) {
       console.error("Error updating product:", error);
       toast.error("Cập nhật sản phẩm thất bại");
     }
   };
 
-  const handleUpdateProductSize = async () => {
+  const handleUpdateProductSize = async (values: any) => {
     try {
-      for (const productSize of productSizes) {
-        const updatedQuantity = quantities[productSize.sizeName];
-        await axios.put(
-          `http://localhost:3001/api/products/productSize/${id}`,
-          {
-            quantity: updatedQuantity,
-          }
-        );
-      }
+      await axios.put(
+        `http://localhost:3001/api/products/productSize/${id}`, values
+      );
       toast.success("Cập nhật sản phẩm thành công");
+      navigate("/admin/product");
     } catch (error) {
       console.error("Error updating product sizes:", error);
       toast.error("Cập nhật sản phẩm thất bại");
@@ -329,7 +313,7 @@ export default function ProductDetailAndEdit() {
         </Card>
 
         <Card style={{ padding: "10px", marginBottom: "10px" }}>
-          <Form form={productSizeForm} onFieldsChange={onFieldsChange}>
+          <Form form={productSizeForm} onFinish={handleUpdateProductSize} onFieldsChange={onFieldsChange}>
             {productSizes.map((it) => (
               <Space
                 key={it._id}
@@ -338,7 +322,7 @@ export default function ProductDetailAndEdit() {
               >
                 <p>{it.sizeName}</p>
                 <Form.Item
-                  name={"quantity" + "-" + it._id}
+                  name={"quantity" + "-" + it.idSize}
                   rules={[
                     { required: true, message: "Vui lòng nhập số lượng" },
                   ]}
@@ -346,7 +330,7 @@ export default function ProductDetailAndEdit() {
                   <Input placeholder="Số lượng" type="number" />
                 </Form.Item>
                 <Form.Item
-                  name={"price" + "-" + it._id}
+                  name={"price" + "-" + it.idSize}
                   rules={[{ required: true, message: "Vui lòng nhập giá" }]}
                 >
                   <Input placeholder="Giá" type="number" />
@@ -356,8 +340,8 @@ export default function ProductDetailAndEdit() {
             {isChanged1 && (
               <Button
                 type="primary"
-                onClick={handleUpdateProductSize}
                 className="mt-4"
+                onClick={productSizeForm.submit}
               >
                 <EditOutlined />
                 Cập nhật

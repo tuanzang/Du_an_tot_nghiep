@@ -1,8 +1,4 @@
-import {
-  DownloadOutlined,
-  PlusSquareOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { PlusSquareOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Card, Col, Input, Radio, Row, Table } from "antd";
 import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
@@ -21,6 +17,8 @@ const customTableHeaderCellStyle = {
 export default function Category() {
   const [value, setValue] = useState(1);
   const [cates, setCates] = useState<ICategory[]>([]);
+  const [filteredCates, setFilteredCates] = useState<ICategory[]>([]);
+  const [searchText, setSearchText] = useState<string>("");
 
   useEffect(() => {
     const fetchCate = async () => {
@@ -29,6 +27,7 @@ export default function Category() {
           "http://localhost:3001/api/categories"
         );
         setCates(response.data?.data);
+        setFilteredCates(response.data?.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -36,10 +35,10 @@ export default function Category() {
 
     fetchCate();
   }, []);
+
   const deleteCategory = async (id: number) => {
     try {
-      //dùng confirm để xóa
-      const confirm = window.confirm("Bạn muốn xóa danh mục này ?");
+      const confirm = window.confirm("Bạn muốn xóa danh mục này?");
       if (confirm) {
         const response = await axios.delete(
           `http://localhost:3001/api/categories/${id}`
@@ -47,19 +46,32 @@ export default function Category() {
         if (response.status === 200) {
           const newArr = cates.filter((item) => item["_id"] !== id);
           setCates(newArr);
+          setFilteredCates(newArr);
         }
       }
     } catch (error) {
       console.log(error);
     }
   };
+
+  const onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchText(value);
+    if (value) {
+      setFilteredCates(
+        cates.filter((category) =>
+          category.loai.toLowerCase().includes(value.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredCates(cates);
+    }
+  };
+
   const onChangeRadio = (e) => {
     console.log("radio checked", e.target.value);
     setValue(e.target.value);
-  };
-
-  const onChangeSwith = (checked) => {
-    console.log(`switch to ${checked}`);
+    // Implement your logic to filter categories based on radio button value
   };
 
   const columns = [
@@ -101,17 +113,17 @@ export default function Category() {
     },
   ];
 
-  const data = cates.map((item: ICategory, index: number) => {
+  const data = filteredCates.map((item: ICategory, index: number) => {
     return {
       stt: index + 1,
       key: item._id,
       loai: item.loai,
     };
   });
+
   return (
     <div>
       <BreadcrumbsCustom nameHere={"Danh mục"} listLink={[]} />
-      {/* filter */}
       <Card bordered={false}>
         <Row gutter={16}>
           <Col span={12}>
@@ -121,6 +133,8 @@ export default function Category() {
               size="middle"
               placeholder="Tìm kiếm danh mục"
               prefix={<SearchOutlined style={{ color: "#1890ff" }} />}
+              value={searchText}
+              onChange={onSearch}
             />
           </Col>
           <Col span={12}>
@@ -138,25 +152,14 @@ export default function Category() {
           </Col>
         </Row>
         <Row gutter={16} style={{ marginTop: "12px" }}>
-          <Col span={12}>
+          {/* <Col span={12}>
             <span>Trạng thái: </span>
             <Radio.Group onChange={onChangeRadio} value={value}>
               <Radio value={1}>Tất cả</Radio>
               <Radio value={2}>Hoạt động</Radio>
               <Radio value={3}>Ngưng hoạt động</Radio>
             </Radio.Group>
-            <Button
-              type="default"
-              icon={<SearchOutlined />}
-              style={{
-                float: "right",
-                borderColor: "#c29957",
-                color: "#c29957",
-              }}
-            >
-              Tìm kiếm
-            </Button>
-          </Col>
+          </Col> */}
         </Row>
       </Card>
       <Card style={{ marginTop: "12px" }}>

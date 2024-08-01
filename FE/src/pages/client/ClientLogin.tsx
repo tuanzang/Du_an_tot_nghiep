@@ -246,14 +246,14 @@ const LoginPanel = () => {
           <Button type="primary" htmlType="submit">
             Đăng nhập
           </Button>
-          <GoogleOAuthProvider clientId="520968091112-fcbec2sb49beti8ugc2rmqngkdobq4j7.apps.googleusercontent.com">
+          {/* <GoogleOAuthProvider clientId="520968091112-fcbec2sb49beti8ugc2rmqngkdobq4j7.apps.googleusercontent.com">
             <GoogleLogin
               onSuccess={(e) => console.log(e)}
               onError={() => {
                 message.error("Đăng nhập Google không thành công!");
               }}
             />
-          </GoogleOAuthProvider>
+          </GoogleOAuthProvider> */}
         </Space>
       </Form.Item>
       <Typography>
