@@ -96,7 +96,7 @@ export const createProduct = async (req, res) => {
     // cái ni mình nói thêm là chưa gì mà create phải có validate chứ lỡ ko nhập thì bị lỗi đó
     const data = await product.create(req.body);
     if (!data || data.length === 0) {
-      res.status(404).json({
+       res.status(404).json({
         message: "Không thêm được sản phẩm !",
         data: [],
       });

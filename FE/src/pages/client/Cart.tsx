@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button, InputNumber, Popconfirm, Table, Typography } from "antd";
 import { useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import useCartMutation, { useMyCartQuery } from "../../hooks/useCart";
 import { formatPrice } from "../../services/common/formatCurrency";
+
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectProductSelected,
@@ -14,6 +15,7 @@ import {
 import { socket } from "../../socket";
 
 const { Text } = Typography;
+const SHIPPING_COST = 30000; 
 
 export interface ICartItem {
   _id: string;
@@ -23,6 +25,7 @@ export interface ICartItem {
   description: string;
   quantity: number;
   categoryId: string[];
+
   createdAt: string;
   updatedAt: string;
   product: {
@@ -48,6 +51,7 @@ export default function Cart() {
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
   const totalPrice = useSelector(selectTotalPrice);
+  
   const { data, refetch } = useMyCartQuery();
   const { mutate: onUpdateQuantity } = useCartMutation({
     action: "UPDATE",
@@ -55,6 +59,7 @@ export default function Cart() {
   const { mutate: onDeleteProduct } = useCartMutation({
     action: "DELETE",
   });
+  // const navigate = useNavigate();
 
   // initial socket
   useEffect(() => {
@@ -74,6 +79,7 @@ export default function Cart() {
       socket.off("hidden product", onHiddenProduct);
     };
   }, [refetch]);
+ 
 
   const rowSelection = {
     onChange: (_: any, selectedRows: ICartItem[]) => {
@@ -88,12 +94,35 @@ export default function Cart() {
     }));
   }, [data?.data]);
 
-  const handleUpdateQuantity = (variantId: string, quantity: number) => {
+  const handleUpdateQuantity = (variantId: string, quantity: number, maxQuantity: number) => {
+
+    if (quantity > maxQuantity) {
+      alert("Số lượng mua vượt quá số lượng còn lại trong kho");
+      return;
+    }
     onUpdateQuantity({
       variantId,
       quantity: quantity,
     });
   };
+  const handleDeleteProduct = (variantId: string) => {
+    onDeleteProduct(variantId, {
+      onSuccess: () => {
+        // Lọc ra các sản phẩm không bị xóa
+        const updatedProductSelected = productSelected.filter(
+          (item) => item.variant._id !== variantId
+        );
+        dispatch(updateProductSelected(updatedProductSelected));
+      },
+    });
+  };
+
+  // const totalPriceWithShipping = totalPrice + SHIPPING_COST;
+
+  // Tính tổng tiền bao gồm phí ship nếu có sản phẩm đã chọn
+  const totalPriceWithShipping = productSelected.length > 0 
+    ? totalPrice + SHIPPING_COST
+    : totalPrice;
 
   return (
     <div>
@@ -205,7 +234,7 @@ export default function Cart() {
                             min={1}
                             value={value}
                             onChange={(quantity) =>
-                              handleUpdateQuantity(record.variant._id, quantity)
+                              handleUpdateQuantity(record.variant._id, quantity, record.quantity)
                             }
                           />
                         )}
@@ -227,7 +256,7 @@ export default function Cart() {
                             okText="Có"
                             cancelText="Không"
                             onConfirm={() =>
-                              onDeleteProduct(record.variant._id)
+                              handleDeleteProduct(record.variant._id)
                             }
                           >
                             <Button danger>Xóa</Button>
@@ -322,6 +351,23 @@ export default function Cart() {
                       </Table>
                     </div>
                   )}
+                  {productSelected.length > 0 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        padding: "10px 20px",
+                        borderTop: "1px solid gray",
+                        marginTop: "20px",
+                      }}
+                    >
+                      <span>Phí ship</span>
+                      <Text style={{ fontWeight: 800, color: "red" }}>
+                        {formatPrice(SHIPPING_COST)}
+                      </Text>
+                    </div>
+                  )}
+                
                   <div
                     style={{
                       display: "flex",
@@ -331,9 +377,10 @@ export default function Cart() {
                       marginTop: "20px",
                     }}
                   >
+                    
                     <span>Tổng tiền</span>
                     <Text style={{ fontWeight: 800, color: "red" }}>
-                      {formatPrice(totalPrice)}
+                      {formatPrice(totalPriceWithShipping)}
                     </Text>
                   </div>
                   <Link to="/checkout">
@@ -341,6 +388,8 @@ export default function Cart() {
                       type="primary"
                       style={{ float: "right" }}
                       disabled={!productSelected.length}
+                     
+                    
                     >
                       Thanh toán
                     </Button>
