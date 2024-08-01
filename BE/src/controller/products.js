@@ -40,7 +40,9 @@ export const searchProducts = async (req, res) => {
 
   try {
     const products = await product.find({
-      name: { $regex: name, $options: "i" }, // Sửa đối tượng tìm kiếm ở đây
+      name: { $regex: name, $options: "i" },
+      status: 1,
+      // Sửa đối tượng tìm kiếm ở đây
     });
 
     if (products.length === 0) {
