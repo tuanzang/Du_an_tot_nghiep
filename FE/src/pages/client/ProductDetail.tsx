@@ -261,11 +261,10 @@ export default function ProductDetail() {
                             {productSizes.map((size) => (
                               <Button
                                 key={size._id}
-                                className={`mx-1 ${
-                                  selectedSize?._id === size._id
+                                className={`mx-1 ${selectedSize?._id === size._id
                                     ? "selected"
                                     : ""
-                                }`}
+                                  }`}
                                 style={{
                                   padding: "10px 20px",
                                   fontSize: "16px",
@@ -371,13 +370,16 @@ export default function ProductDetail() {
                                     }}
                                   >
                                     <hr />
-                                    <p className="product-tab-title" style={{fontSize:"18px"}}>
-                                      {product?.description}
-                                    </p>
+                                    <div
+                                      dangerouslySetInnerHTML={{
+                                        __html: product?.description || "",
+                                      }}
+                                    />
                                   </div>
                                 </div>
                               </div>
                             </div>
+
                             <div id="tab_two" className="tab-pane fade">
                               <div className="product-tab-content">
                                 <div
