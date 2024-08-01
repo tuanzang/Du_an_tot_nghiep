@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMyCartQuery } from "../../hooks/useCart";
+import {  Typography } from "antd";
 import { formatPrice } from "../../services/common/formatCurrency";
 import { SubmitHandler, useForm } from "react-hook-form";
 import OrderApi from "../../config/orderApi";
@@ -19,7 +20,9 @@ import {
 import { USER_INFO_STORAGE_KEY } from "../../services/constants";
 import { useEffect } from "react";
 import { socket } from "../../socket";
-
+const SHIPPING_COST = 30000; 
+// import { useLocation } from "react-router-dom";
+const { Text } = Typography;
 type Inputs = {
   customerName: string;
   address: string;
@@ -32,11 +35,13 @@ const Checkout = () => {
   // lấy thông tin user đăng nhập
   const isLogged = localStorage.getItem(USER_INFO_STORAGE_KEY);
   const user: IUser | null = isLogged ? JSON.parse(isLogged) : null;
-
+  // const location = useLocation();
+  // const state = location.state as { shippingCost: number; totalPriceWithShipping: number };
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
   const totalPrice = useSelector(selectTotalPrice);
-
+  // const SHIPPING_COST = state?.shippingCost || 0;
+  // const totalPriceWithShipping = state?.totalPriceWithShipping || 0;
   const { refetch } = useMyCartQuery();
   const navigate = useNavigate();
 
@@ -71,6 +76,7 @@ const Checkout = () => {
       const res = await OrderApi.createOrder({
         ...data,
         productSelectedIds,
+        shippingCost: SHIPPING_COST
       });
 
       if (data?.paymentMethod === "COD") {
@@ -78,7 +84,6 @@ const Checkout = () => {
         toast.success("Đặt hàng thành công!");
         navigate("/");
         refetch();
-        dispatch(resetProductSelected());
       } else {
         window.location.href = res?.data?.paymentUrl;
       }
@@ -117,6 +122,8 @@ const Checkout = () => {
       toast.error("Tạo lịch sử thất bại");
     }
   };
+  const totalPriceWithShipping =
+  productSelected.length > 0 ? totalPrice + SHIPPING_COST : totalPrice;
 
   return (
     <div className="container mt-5">
@@ -229,11 +236,57 @@ const Checkout = () => {
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
                   <td>{formatPrice(item.variant.price * item.quantity)}</td>
+                  {/* <td> {formatPrice(SHIPPING_COST)}</td> */}
                 </tr>
               ))}
             </tbody>
           </table>
-          <h4>Tổng tiền: {formatPrice(totalPrice)}</h4>
+          
+          <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "10px 20px",
+                      borderTop: "1px solid gray",
+                      marginTop: "20px",
+                    }}
+                  >
+                    
+                    <span>Tổng tiền:</span>
+                    <Text style={{ fontWeight: 800, color: "red" }}>
+                        {formatPrice(totalPrice)}
+                    </Text>
+          </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "10px 20px",
+                      borderTop: "1px solid gray",
+                      marginTop: "20px",
+                    }}
+                  >
+                    
+                    <span>Phí ship:</span>
+                    <Text style={{ fontWeight: 800, color: "red" }}>
+                        {formatPrice(SHIPPING_COST)}
+                    </Text>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "10px 20px",
+                      borderTop: "1px solid gray",
+                      marginTop: "20px",
+                    }}
+                  >
+                    
+                    <span>Tổng tiền bao gồm ship: </span>
+                    <Text style={{ fontWeight: 800, color: "red" }}>
+                        {formatPrice(totalPriceWithShipping)}
+                    </Text>
+                  </div>
         </div>
       </div>
     </div>
