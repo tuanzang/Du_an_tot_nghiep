@@ -164,25 +164,6 @@ export default function Product() {
     XLSX.writeFile(wb, "products.xlsx");
   };
 
-  // useEffect(() => {
-  //   // Gọi API để lấy số lượng sản phẩm theo kích cỡ
-  //   const fetchProductSizes = async () => {
-  //     try {
-  //       const { data } = await axios.get(
-  //         `http://localhost:3001/api/products/productSize/${id}`
-  //       );
-  //       setProductSizes(data.data);
-
-  //       data?.data?.forEach((it) => {
-  //         productSizeForm.setFieldValue(`quantity-${it._id}`, it.quantity);
-  //       });
-  //     } catch (error) {
-  //       console.error("Error fetching product sizes:", error);
-  //     }
-  //   };
-
-  //   fetchProductSizes();
-  // }, [id]);
 
   const columns: (
     | ColumnGroupType<{
@@ -193,7 +174,9 @@ export default function Product() {
         price: number;
         description: string;
         quantity: number;
-        loai: string;
+        variants: {
+          quantity: number;
+        }[];
       }>
     | ColumnType<{
         stt: number;
@@ -203,7 +186,9 @@ export default function Product() {
         price: number;
         description: string;
         quantity: number;
-        loai: string;
+        variants: {
+          quantity: number;
+        }[];
       }>
   )[] = [
     {
@@ -247,6 +232,13 @@ export default function Product() {
       dataIndex: "quantity",
       key: "quantity",
       width: "10%",
+      render: (_, record) => {
+        const totalQuantity = record.variants.reduce((total, curr) => {
+          return total += curr.quantity
+        }, 0);
+
+        return totalQuantity
+      }
     },
     {
       title: "Trạng thái",
@@ -299,6 +291,7 @@ export default function Product() {
       // quantity: item.quantity,
       loai: category ? category.loai : "Không tìm thấy danh mục",
       status: item.status,
+      variants: item.variants
     };
   });
 

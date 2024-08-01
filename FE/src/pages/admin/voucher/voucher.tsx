@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { render } from "react-dom";
+import dayjs from "dayjs";
 
 const customTableHeaderCellStyle = {
     backgroundColor: "#c29957",
@@ -18,38 +20,7 @@ const customTableHeaderCellStyle = {
 
 export default function Voucher() {
     const [value, setValue] = useState(1);
-
-    // useEffect(() => {
-    //   const fetchCate = async () => {
-    //     try {
-    //       const  response  = await axios.get("http://localhost:3001/api/sizes");
-    //       setSize(response.data?.data);
-    //       console.log(response.data?.data);
-
-    //     } catch (error) {
-    //       console.error("Error fetching data:", error);
-    //     }
-    //   };
-
-    //   fetchCate();
-    // }, []);
-
-
-    // const deleteCategory = async (id: number) => {
-    //   try {
-    //     //dùng confirm để xóa
-    //      const confirm = window.confirm("Bạn muốn xóa size này ?");
-    //      if (confirm) {
-    //       const response = await axios.delete(`http://localhost:3001/api/sizes/${id}`);
-    //       if (response.status === 200) {
-    //       const newArr = size.filter((item) => item["_id"] !== id);
-    //       setSize(newArr);
-    //     }
-    //      }
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // }
+    const [vouchers, setVouchers] = useState([]);
 
     const onChangeRadio = (e: any) => {
         console.log("radio checked", e.target.value);
@@ -59,7 +30,21 @@ export default function Voucher() {
 
     const onChange = (checked: boolean) => {
         console.log(`switch to ${checked}`);
-      };
+    };
+
+    const fetchVouchers = async () => {      
+        try {
+            const response = await axios.get('http://localhost:3001/api/discountCode/discountCodes');
+            setVouchers(response.data);
+            console.log(response.data);
+        } catch (error) {
+            console.error("Failed to fetch vouchers:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchVouchers();
+    }, []);
 
 
     const columns = [
@@ -69,58 +54,69 @@ export default function Voucher() {
             key: "stt",
             align: "center",
             width: "5%",
+            render: (text: any, record: any, index: number) => index + 1,
         },
         {
             title: "Mã giảm giá",
-            dataIndex: "",
-            key: "",
+            dataIndex: "code",
+            key: "code",
             align: "center",
             width: "15%",
         },
         {
             title: "Mô tả",
-            dataIndex: "",
-            key: "",
+            dataIndex: "description",
+            key: "description",
             align: "center",
             width: "15%",
         },
         {
             title: "Số lượng",
-            dataIndex: "",
-            key: "",
+            dataIndex: "quantity",
+            key: "quantity",
             align: "center",
             width: "10%",
         },
         {
             title: "Giảm giá",
-            dataIndex: "",
-            key: "",
+            dataIndex: "discountType",
+            key: "discountType",
             align: "center",
             width: "10%",
+            render: (text: string, record: any) => 
+                record.discountType === 'percentage' ? `${record.discountPercentage}%` : `${record.discountAmount} VNĐ`
         },
         {
             title: "Ngày bắt đầu",
-            dataIndex: "",
-            key: "",
+            dataIndex: "startDate",
+            key: "startDate",
             align: "center",
             width: "10%",
+            render:(value:any) => {
+                return dayjs(value).format('DD/MM/YYYY HH:mm:ss')
+            }
         },
         {
             title: "Ngày kết thúc",
-            dataIndex: "",
-            key: "",
+            dataIndex: "expirationDate",
+            key: "expirationDate",
             align: "center",
             width: "10%",
+            render:(value:any) => {
+                return dayjs(value).format('DD/MM/YYYY HH:mm:ss')
+            }
         },
-        ,
         {
             title: "Trạng thái",
             dataIndex: "status",
             key: "status",
             align: "center",
-            width: "10",
-            render: (status: any, record: any) => (
-                <Switch defaultChecked onChange={onChange} />
+            width: "10%",
+            render: (status: string, record: any) => (
+                <Switch 
+                    defaultChecked={status === "active"}
+                    onChange={(checked) => onChange(checked, record)}
+                />
             ),
         },
         {
@@ -130,20 +126,10 @@ export default function Voucher() {
             align: "center",
             width: "5%",
             render: (value: any) => (
-                <Button
-                //   onClick={() => deleteCategory(value!)} 
-                >Xóa</Button>
+                <Button>Xóa</Button>
             ),
         },
     ];
-
-    // const data = size.map((item: ISize, index: number) => {
-    //   return {
-    //     stt: index + 1,
-    //     key: item._id,
-    //     size : item.name,
-    //   };
-    // })
 
     return (
         <div>
@@ -194,7 +180,7 @@ export default function Voucher() {
                             ),
                         },
                     }}
-                    // dataSource={data}
+                    dataSource={vouchers}
                     columns={columns}
                 />
             </Card>
