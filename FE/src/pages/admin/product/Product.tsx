@@ -44,8 +44,6 @@ export default function Product() {
       ]);
       setProducts(productResponse.data?.data);
       setCates(categoryResponse.data?.data);
-      // console.log(productResponse.data?.data);
-      // console.log(categoryResponse.data?.data);
 
       const sortedProducts = productResponse.data?.data.sort(
         (a: IProduct, b: IProduct) =>
@@ -151,15 +149,11 @@ export default function Product() {
       filteredProducts.map((product) => ({
         STT: product._id, // or any other field
         "Tên sản phẩm": product.name,
-        // "Giá sản phẩm": product.price,
-        // // "Giá cũ sản phẩm": product.priceOld,
         "Loại sản phẩm":
           cates.find(
             (cate) => cate._id.toString() === product.categoryId.toString()
           )?.loai || "Không có danh mục",
         "Mô tả sản phẩm": product.description,
-        // "Số lượng": product.quantity,
-        // Add more fields as needed
       }))
     );
 
@@ -169,6 +163,26 @@ export default function Product() {
     // Export workbook to file
     XLSX.writeFile(wb, "products.xlsx");
   };
+
+  // useEffect(() => {
+  //   // Gọi API để lấy số lượng sản phẩm theo kích cỡ
+  //   const fetchProductSizes = async () => {
+  //     try {
+  //       const { data } = await axios.get(
+  //         `http://localhost:3001/api/products/productSize/${id}`
+  //       );
+  //       setProductSizes(data.data);
+
+  //       data?.data?.forEach((it) => {
+  //         productSizeForm.setFieldValue(`quantity-${it._id}`, it.quantity);
+  //       });
+  //     } catch (error) {
+  //       console.error("Error fetching product sizes:", error);
+  //     }
+  //   };
+
+  //   fetchProductSizes();
+  // }, [id]);
 
   const columns: (
     | ColumnGroupType<{
@@ -229,14 +243,19 @@ export default function Product() {
       width: "15%",
     },
     {
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
+      width: "10%",
+    },
+    {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       align: "center",
-      width: "30%",
+      width: "10%",
       render: (status: any, record: any) => (
         <Switch
-          // style={{ backgroundColor: key ? "green" : "gray" }}
           checked={status === 1}
           onChange={(checked) => onChangeSwitch(checked, record.key)}
         />
@@ -276,8 +295,6 @@ export default function Product() {
       key: item._id,
       name: item.name,
       image: item.image,
-      // price: item.price,
-      // priceOld: item.priceOld,
       description: item.description,
       // quantity: item.quantity,
       loai: category ? category.loai : "Không tìm thấy danh mục",
@@ -338,17 +355,6 @@ export default function Product() {
               <Radio value={2}>Hoạt động</Radio>
               <Radio value={3}>Ngưng hoạt động</Radio>
             </Radio.Group>
-            {/* <Button
-              type="default"
-              icon={<SearchOutlined />}
-              style={{
-                float: "right",
-                borderColor: "#c29957",
-                color: "#c29957",
-              }}
-            >
-              Tìm kiếm
-            </Button> */}
           </Col>
         </Row>
       </Card>

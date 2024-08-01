@@ -210,7 +210,7 @@ export default function Product() {
                   {/* <!-- single sidebar end --> */}
 
                   {/* <!-- single sidebar start --> */}
-                  <div className="sidebar-single">
+                  {/* <div className="sidebar-single">
                     <h5
                       className="sidebar-title"
                       style={{
@@ -241,11 +241,11 @@ export default function Product() {
                         </Button>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                   {/* <!-- single sidebar end --> */}
 
                   {/* <!-- single sidebar start --> */}
-                  <div className="sidebar-single">
+                  {/* <div className="sidebar-single">
                     <h5
                       className="sidebar-title"
                       style={{
@@ -277,7 +277,7 @@ export default function Product() {
                         ))}
                       </ul>
                     </div>
-                  </div>
+                  </div> */}
                   {/* <!-- single sidebar end --> */}
 
                   {/* <!-- single sidebar start --> */}

@@ -15,17 +15,18 @@ import { toast } from "react-toastify";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 
 const VoucherAdd = () => {
+    const navigate = useNavigate();
     const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
+    const [expirationDate, setExpirationDate] = useState(null);
 
     const onStartDateChange: DatePickerProps['onChange'] = (date, dateString) => {
-        // setStartDate(date);
+        setStartDate(date);
         console.log(date,dateString);
         
     };
 
     const onEndDateChange: DatePickerProps['onChange'] = (date, dateString) => {
-        // setEndDate(date);
+        setExpirationDate(date);
         console.log(date,dateString);
     };
 
@@ -33,20 +34,40 @@ const VoucherAdd = () => {
         console.log(`selected ${value}`);
     };
 
+    const onFinish = async (values: any) => {
+        try {
+            const response = await axios.post('http://localhost:3001/api/discountCode/add', {
+                ...values,
+                startDate: startDate,
+                expirationDate: expirationDate
+            });
+            toast.success("Mã giảm giá đã được thêm thành công!");
+            navigate('admin/vouchers');
+        } catch (error) {
+            console.error(error);
+            toast.error("Đã xảy ra lỗi khi thêm mã giảm giá!");
+        }
+    };
+
+    const onFinishFailed = (errorInfo: any) => {
+        console.log('Failed:', errorInfo);
+        toast.error("Vui lòng điền đầy đủ thông tin!");
+    };
+
     return (
         <div className="">
             <BreadcrumbsCustom nameHere={"Thêm mã giảm giá"} listLink={[]} />
             <Form
                 name="basic"
-                // onFinish={onFinish}
-                // onFinishFailed={onFinishFailed}
+                onFinish={onFinish}
+                onFinishFailed={onFinishFailed}
                 autoComplete="off"
             >
                 <div className="w-75 mx-auto">
                     <Card>
                         <Form.Item
                             label="Mã giảm giá"
-                            name="name"
+                            name="code"
                             rules={[
                                 { required: true, message: "Vui lòng nhập mã giảm giá!" },
                             ]}
@@ -70,7 +91,7 @@ const VoucherAdd = () => {
                     <Card>
                         <Form.Item
                             label="Kiểu"
-                            name=""
+                            name="discountType"
                             rules={[
                                 { required: true, message: "Vui lòng chọn kiểu!" },
                             ]}
@@ -80,8 +101,8 @@ const VoucherAdd = () => {
                                 style={{ width: 850 }}
                                 onChange={handleChange}
                                 options={[
-                                    { value: '%', label: '%' },
-                                    { value: 'VNĐ', label: 'VNĐ' },
+                                    { value: 'percentage', label: '%' },
+                                    { value: 'amount', label: 'VNĐ' },
                                 ]}
                             />
                         </Form.Item>
@@ -90,7 +111,7 @@ const VoucherAdd = () => {
                     <Card>
                         <Form.Item
                             label="Giảm"
-                            name=""
+                            name="discountAmount"
                             rules={[
                                 { required: true, message: "Vui lòng nhập!" },
                             ]}
@@ -113,7 +134,7 @@ const VoucherAdd = () => {
 
                             <Form.Item
                                 label="Ngày kết thúc"
-                                name="endDate"
+                                name="expirationDate"
                                 rules={[
                                     { required: true, message: "Vui lòng nhập ngày kết thúc!" },
                                     ({ getFieldValue }) => ({
@@ -134,7 +155,7 @@ const VoucherAdd = () => {
                     <Card>
                         <Form.Item
                             label="Số lượng"
-                            name=""
+                            name="quantity"
                             rules={[
                                 { required: true, message: "Vui lòng nhập số lượng mã giảm giá!" },
                             ]}
@@ -146,7 +167,7 @@ const VoucherAdd = () => {
                     <Card>
                         <Form.Item
                             label="Giá trị đơn hàng tối thiểu"
-                            name=""
+                            name="minPurchaseAmount"
                             rules={[
                                 { required: true, message: "Vui lòng nhập giá trị đơn hàng tối thiểu!" },
                             ]}
