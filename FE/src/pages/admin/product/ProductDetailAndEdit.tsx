@@ -3,7 +3,7 @@ import { useParams,useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useRef } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Button, Card, Form, Input, Space, Upload } from "antd";
+import { Button, Card, Form, Input, Space, Switch, Upload } from "antd";
 import { EditOutlined, UploadOutlined } from "@ant-design/icons";
 import { UploadFile } from "antd/lib";
 import { IProduct } from "../../../interface/Products";
@@ -166,6 +166,12 @@ export default function ProductDetailAndEdit() {
       toast.error("Cập nhật sản phẩm thất bại");
     }
   };
+
+  const handleStatusChange = (checked, idSize) => {
+    // Cập nhật trạng thái cho sản phẩm theo kích thước
+    // Ví dụ, bạn có thể cập nhật trạng thái trong `productSizes` hoặc gọi một API để cập nhật trạng thái trên server
+    console.log(`Status changed for size ${idSize}: ${checked}`);
+};
 
   useEffect(() => {
     setIsLayoutReady(true);
@@ -335,8 +341,14 @@ export default function ProductDetailAndEdit() {
                 >
                   <Input placeholder="Giá" type="number" />
                 </Form.Item>
+                
+                <Switch
+                            checked={it.status === "active"}
+                            onChange={(checked) => handleStatusChange(checked, it.idSize)}
+                        />
               </Space>
             ))}
+
             {isChanged1 && (
               <Button
                 type="primary"

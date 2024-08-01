@@ -4,4 +4,5 @@ export interface IProductSize {
     idSize: string;
     quantity: number;
     sizeName?:string
+    status:number|boolean;
   }

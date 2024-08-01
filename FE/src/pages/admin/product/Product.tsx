@@ -164,25 +164,6 @@ export default function Product() {
     XLSX.writeFile(wb, "products.xlsx");
   };
 
-  // useEffect(() => {
-  //   // Gọi API để lấy số lượng sản phẩm theo kích cỡ
-  //   const fetchProductSizes = async () => {
-  //     try {
-  //       const { data } = await axios.get(
-  //         `http://localhost:3001/api/products/productSize/${id}`
-  //       );
-  //       setProductSizes(data.data);
-
-  //       data?.data?.forEach((it) => {
-  //         productSizeForm.setFieldValue(`quantity-${it._id}`, it.quantity);
-  //       });
-  //     } catch (error) {
-  //       console.error("Error fetching product sizes:", error);
-  //     }
-  //   };
-
-  //   fetchProductSizes();
-  // }, [id]);
 
   const columns: (
     | ColumnGroupType<{
