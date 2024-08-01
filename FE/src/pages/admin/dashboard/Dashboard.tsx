@@ -22,6 +22,8 @@ import { log } from "console";
 import { GiLogicGateAnd } from "react-icons/gi";
 import { start } from "repl";
 import PieChartDashBoard from "./PieChartDashBoard";
+import ColumChartDashBoard from "./ColumChartDashBoard";
+import { text } from "stream/consumers";
 // import { LineChart } from "./LineChartDashBoard"; // Assuming you have a LineChartDashBoard component
 
 const { Title } = Typography;
@@ -34,7 +36,6 @@ interface Filter {
 }
 
 interface ProductDetails {
-  price: number;
   image: string;
   description?: string;
 }
@@ -45,6 +46,8 @@ interface BestSellerItem {
   productDetails: ProductDetails;
   categoryName: string;
   totalQuantity: number;
+  price: number;
+  totalRevenue : number;
 }
 
 export default function Dashboard() {
@@ -75,14 +78,19 @@ export default function Dashboard() {
   const [totalOrdersByCustomDay, setTotalOrdersByCustomDay] = useState(0);
   const [completedOrdersByCustomDay, setCompletedOrdersByCustomDay] = useState(0);
   const [canceledOrdersByCustomDay, setCanceledOrdersByCustomDay] = useState(0);
+  const [returnedOrdersByCustomDay, setReturnedOrdersByCustomDay] = useState(0);
   const [completedOrdersDay, setCompletedOrdersDay] = useState(0);
   const [canceledOrdersDay, setCanceledOrdersDay] = useState(0);
+  const [returnedOrdersDay, setReturnedOrdersDay] = useState(0);
   const [completedOrdersWeek, setCompletedOrdersWeek] = useState(0);
   const [canceledOrdersWeek, setCanceledOrdersWeek] = useState(0);
+  const [returnedOrdersWeek, setReturnedOrdersWeek] = useState(0);
   const [completedOrdersMonth, setCompletedOrdersMonth] = useState(0);
   const [canceledOrdersMonth, setCanceledOrdersMonth] = useState(0);
+  const [returnedOrdersMonth, setReturnedOrdersMonth] = useState(0);
   const [completedOrdersYear, setCompletedOrdersYear] = useState(0);
   const [canceledOrdersYear, setCanceledOrdersYear] = useState(0);
+  const [returnedOrdersYear, setReturnedOrdersYear] = useState(0);
 
   //tính tổng tiền 
   const getOrdersPriceByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
@@ -188,11 +196,17 @@ export default function Dashboard() {
         status: "0",
         ...customDateRange,
       });
-
+      const resReturned = await axios.post("http://localhost:3001/api/orders", {
+        createAtFrom: formattedCreateAtFrom,
+        createAtTo: formattedCreateAtTo,
+        status: "8",
+        ...customDateRange,
+      })
 
       setTotalOrdersByCustomDay(resAllOrdersByCustomDay.data.data.length);
       setCompletedOrdersByCustomDay(resCompleted.data.data.length);
       setCanceledOrdersByCustomDay(resCanceled.data.data.length);
+      setReturnedOrdersByCustomDay(resReturned.data.data.length);
     } catch (error) {
       console.error("Error fetching statistics:", error);
       return {
@@ -222,9 +236,16 @@ export default function Dashboard() {
           dateNow: date,
         },
       });
+      const resReturned = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "8",
+          dateNow: date,
+        }
+      })
       setTotalOrdersToday(resAllOrdersByDay.data.data.length);
       setCompletedOrdersDay(resCompleted.data.data.length);
       setCanceledOrdersDay(resCanceled.data.data.length);
+      setReturnedOrdersDay(resReturned.data.data.length);
     } catch (error) {
       console.log(error);
       return {
@@ -259,10 +280,17 @@ export default function Dashboard() {
           dateEnd: endDate,
         },
       });
-
+      const resReturned = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "8",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
       setTotalOrdersThisWeek(resAllOrdersByWeek.data.data.length);
       setCompletedOrdersWeek(resCompleted.data.data.length);
       setCanceledOrdersWeek(resCanceled.data.data.length);
+      setReturnedOrdersWeek(resReturned.data.data.length);
     } catch (error) {
       console.log(error);
       return {
@@ -307,10 +335,17 @@ export default function Dashboard() {
           dateEnd: endDate,
         },
       });
-
+      const resReturned = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "8",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
       setTotalOrdersThisMonth(resAllOrdersByMonth.data.data.length);
       setCompletedOrdersMonth(resCompleted.data.data.length);
       setCanceledOrdersMonth(resCanceled.data.data.length);
+      setReturnedOrdersMonth(resReturned.data.data.length);
     } catch (error) {
       console.log(error);
       return {
@@ -355,10 +390,17 @@ export default function Dashboard() {
           dateEnd: endDate,
         },
       });
-
+      const resReturned = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "8",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      })
       setTotalOrdersThisYear(resAllOrdersByYear.data.data.length);
       setCompletedOrdersYear(resCompleted.data.data.length);
       setCanceledOrdersYear(resCanceled.data.data.length);
+      setReturnedOrdersYear(resReturned.data.data.length);
     } catch (error) {
       console.log(error);
       return {
@@ -401,40 +443,30 @@ export default function Dashboard() {
       case 1:
         return {
           total: totalOrdersToday,
-          completed: completedOrdersDay,
-          canceled: canceledOrdersDay,
           totalPrice: totalPriceByDay,
           color: "#e3d7c3",
         };
       case 2:
         return {
           total: totalOrdersThisWeek,
-          completed: completedOrdersWeek,
-          canceled: canceledOrdersWeek,
           totalPrice: totalPriceByWeek,
           color: "#e0ccab",
         };
       case 3:
         return {
           total: totalOrdersThisMonth,
-          completed: completedOrdersMonth,
-          canceled: canceledOrdersMonth,
           totalPrice: totalPriceByMonth,
           color: "#e0ccab",
         };
       case 4:
         return {
           total: totalOrdersThisYear,
-          completed: completedOrdersYear,
-          canceled: canceledOrdersYear,
           totalPrice: totalPriceByYear,
           color: "#e3d7c3",
         };
       case 5:
         return {
           total: totalOrdersByCustomDay,
-          completed: completedOrdersByCustomDay,
-          canceled: canceledOrdersByCustomDay,
           totalPrice: totalPriceByCustomDay,
           color: "#e0ccab",
         }
@@ -561,91 +593,91 @@ export default function Dashboard() {
     1: listBestSellerByDay.map((item: BestSellerItem, index) => ({
       stt: index + 1,
       name: item.name,
-      price: item.productDetails.price,
+      price: item.price,
       image: item.productDetails.image,
       description: item.productDetails.description,
       totalQuantity: item.totalQuantity,
+      totalRevenue: item.totalRevenue
     })),
     2: listBestSellerByWeek.map((item: BestSellerItem, index) => ({
       stt: index + 1,
       name: item.name,
-      price: item.productDetails.price,
+      price: item.price,
       image: item.productDetails.image,
       description: item.productDetails.description,
       totalQuantity: item.totalQuantity,
+      totalRevenue: item.totalRevenue
     })),
-    3: listBestSellerByMonth.map((item: BestSellerItem, index) => ({
+    3: listBestSellerByMonth.map((item: BestSellerItem , index) => ({
       stt: index + 1,
       name: item.name,
-      price: item.productDetails.price,
+      price: item.price,
       image: item.productDetails.image,
       description: item.productDetails.description,
       totalQuantity: item.totalQuantity,
+      totalRevenue: item.totalRevenue
     })),
     4: listBestSellerByYear.map((item: BestSellerItem, index) => ({
       stt: index + 1,
       name: item.name,
-      price: item.productDetails.price,
+      price: item.price,
       image: item.productDetails.image,
       description: item.productDetails.description,
       totalQuantity: item.totalQuantity,
+      totalRevenue: item.totalRevenue
     })),
     5: listBestSellerByCustomDay.map((item: BestSellerItem, index) => ({
       stt: index + 1,
       name: item.name,
-      price: item.productDetails.price,
+      price: item.price  ,
       image: item.productDetails.image,
       description: item.productDetails.description,
       totalQuantity: item.totalQuantity,
+      totalRevenue: item.totalRevenue
     }))
   };
   const dataListStockProducts = {
     1: listStockProductsByDay.map((item: any, index) => ({
       stt: index + 1,
       name: item.name,
-      price: item.price,
       image: item.image,
       description: item.description,
-      totalQuantity: item.totalQuantity,
     })),
     2: listStockProductsByWeek.map((item : any, index) => ({
       stt: index + 1,
       name: item.name,
-      price: item.price,
       image: item.image,
       description: item.description,
-      totalQuantity: item.totalQuantity,
     })),
     3: listStockProductsByMonth.map((item: any, index) => ({
       stt: index + 1,
       name: item.name,
-      price: item.price,
       image: item.image,
       description: item.description,
-      totalQuantity: item.totalQuantity,
     })),
     4: listStockProductsByYear.map((item: any , index) => ({
       stt: index + 1,
       name: item.name,
-      price: item.price,
       image: item.image,
       description: item.description,
-      totalQuantity: item.totalQuantity,
     })),
     5: listStockProductsByCustomDay.map((item: any , index) => ({
       stt: index + 1,
       name: item.name,
-      price: item.price,
       image: item.image,
       description: item.description,
-      totalQuantity: item.totalQuantity,
     }))
   };
 
-  const columns = [
+  const BestSeller = [
     { title: "STT", dataIndex: "stt", key: "stt" },
-    { title: "Tên sản phẩm", dataIndex: "name", key: "name", width: '50%' },
-    { title: "Giá", dataIndex: "price", key: "price", width: '10%' },
+    { title: "Tên sản phẩm", dataIndex: "name", key: "name", width: '35%' },
+    { title: "Giá bán", dataIndex: "price", key: "price", width: '10%',
+      render: text => (
+        <div style={{ textAlign: 'center' }}>
+         {parseFloat(text).toLocaleString()} 
+        </div>)
+     },
     {
       title: "Ảnh",
       dataIndex: "image",
@@ -673,10 +705,47 @@ export default function Dashboard() {
         </div>
       )
     },
-    { title: "Số lượng bán ra", dataIndex: "totalQuantity", key: "totalQuantity" },
+    { title: "Số lượng bán ", dataIndex: "totalQuantity", key: "totalQuantity", align: "center"},
+    { title: "Tổng tiền thu được ", dataIndex: "totalRevenue", key: "totalRevenue",
+      render: text => (
+        <div style={{ textAlign: 'center' }}>
+         {parseFloat(text).toLocaleString()} 
+        </div>
+      )
+     },
   ];
 
-
+  const StockOrder = [
+    { title: "STT", dataIndex: "stt", key: "stt" },
+    { title: "Tên sản phẩm", dataIndex: "name", key: "name", width: '35%' },
+    {
+      title: "Ảnh",
+      dataIndex: "image",
+      key: "image",
+      render: (images: string[]) => (
+        <div style={{ display: "flex", gap: "10px" }}>
+          {images.slice(0,1).map((image, index) => (
+            <img
+              key={index}
+              style={{ width : "70px",  objectFit: "cover" }}
+              src={image}
+              alt={`product-image-${index}`}
+            />
+          ))}
+        </div>
+      ),
+    },
+    {
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      render: (text) => (
+        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
+          {text.length > 0 ? text.substring(0, 20) + '...' : text}
+        </div>
+      )
+    }
+  ];
 
 
   const handleChangeButton = async (index: number, type: string) => {
@@ -691,8 +760,10 @@ export default function Dashboard() {
         await getListBestSellerByDay();
         await getListStockProductsByDay();
         setDataBieuDo([
-          { label: "Đã hoàn thành", value: completedOrdersDay },
-          { label: "Đã hủy", value: canceledOrdersDay },
+          { label: "Total", value: totalOrdersToday },
+          { label: "Complete", value: completedOrdersDay },
+          { label: "Cancel", value: canceledOrdersDay },
+          { label: "Return", value: returnedOrdersDay },
         ]);
         break;
       case 2:
@@ -701,8 +772,10 @@ export default function Dashboard() {
         await getListBestSellerByWeek();
         await getListStockProductsByWeek();
         setDataBieuDo([
-          { label: "Đã hoàn thành", value: completedOrdersWeek },
-          { label: "Đã hủy", value: canceledOrdersWeek },
+          { label: "Total", value: totalOrdersThisWeek },
+          { label: "Complete", value: completedOrdersWeek },
+          { label: "Cancel", value: canceledOrdersWeek },
+          { label: "Return", value: returnedOrdersWeek },
         ]);
         break;
       case 3:
@@ -711,9 +784,11 @@ export default function Dashboard() {
         await getListBestSellerByMonth();
         await getListStockProductsByMonth();
         setDataBieuDo([
-          { label: "Đã hoàn thành", value: completedOrdersMonth },
-          { label: "Đã hủy", value: canceledOrdersMonth },
-        ])
+          { label: "Total", value: totalOrdersThisMonth },
+          { label: "Complete", value: completedOrdersMonth },
+          { label: "Cancel", value: canceledOrdersMonth },
+          { label: "Return", value: returnedOrdersMonth },
+        ]);
         break;
       case 4:
         data = await getOrdersByYearStatus();
@@ -721,17 +796,21 @@ export default function Dashboard() {
         await getListBestSellerByYear();
         await getListStockProductsByYear();
         setDataBieuDo([
-          { label: "Đã hoàn thành", value: completedOrdersYear },
-          { label: "Đã hủy", value: canceledOrdersYear },
-        ])
+          { label: "Total", value: totalOrdersThisYear },
+          { label: "Complete", value: completedOrdersYear },
+          { label: "Cancel", value: canceledOrdersYear },
+          { label: "Return", value: returnedOrdersYear },
+        ]);
         break;
       case 5: // Trường hợp chọn khoảng thời gian tùy chỉnh
         if (filter.createAtFrom && filter.createAtTo) {
           data = await getOrdersByCustomStatus(filter.createAtFrom, filter.createAtTo);
-          // setDataBieuDo([
-          //   { label: "Đã hoàn thành", value : completedOrdersByCustomDay},
-          //   { label: "Đã hủy", value: canceledOrdersByCustomDay},
-          // ])
+          setDataBieuDo([
+            { label: "Total", value: totalOrdersByCustomDay},
+            { label: "Complete", value : completedOrdersByCustomDay},
+            { label: "Cancel", value: canceledOrdersByCustomDay},
+            { label: "Return", value: returnedOrdersByCustomDay},
+          ])
         } else {
           // Có thể thông báo cho người dùng rằng cần chọn ngày
           console.warn("Vui lòng chọn khoảng thời gian.");
@@ -787,7 +866,7 @@ export default function Dashboard() {
             </Title>
             <Table
               dataSource={dataListBestSeller[indexButton]}
-              columns={columns}
+              columns={BestSeller}
               pagination={false}
 
             />
@@ -799,7 +878,7 @@ export default function Dashboard() {
             </Title>
             <Table
               dataSource={dataListStockProducts[indexButton]}
-              columns={columns}
+              columns={StockOrder}
               pagination={false}
 
             />
@@ -808,7 +887,7 @@ export default function Dashboard() {
           
           <Col span={24}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-              Thống kê số đơn theo {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
+              Thống kê Doanh Thu theo {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'][indexButton - 1]}
             </Title>
             <Table
               dataSource={[dataForButton]}
@@ -827,34 +906,7 @@ export default function Dashboard() {
                     </div>
                   )
                 },
-                {
-                  title: (
-                    <div style={{ textAlign: 'center', fontWeight: 'bold' }}>
-                      Đơn hoàn thành
-                    </div>
-                  ),
-                  dataIndex: "completed",
-                  key: "completed",
-                  render: text => (
-                    <div style={{ textAlign: 'center' }}>
-                      {text}
-                    </div>
-                  )
-                },
-                {
-                  title: (
-                    <div style={{ textAlign: 'center', fontWeight: 'bold'}}>
-                      Đơn hủy
-                    </div>
-                  ),
-                  dataIndex: "canceled",
-                  key: "canceled",
-                  render: text => (
-                    <div style={{  textAlign: 'center' }}>
-                      {text }
-                    </div>
-                  )
-                },
+                
                 {
                   title: (
                     <div style={{ textAlign: 'center', fontWeight: 'bold'}}>
@@ -876,10 +928,10 @@ export default function Dashboard() {
           </Col>
           <Col span={10}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-              Biểu đồ trạng thái {nameButton}
+              Biểu đồ trạng thái, số lượng đơn theo {nameButton}
             </Title>
             <Card style={{ borderColor: "#c29957" }}>
-              <PieChartDashBoard data={dataBieuDo} />
+              <ColumChartDashBoard data={dataBieuDo} />
             </Card>
           </Col>
         </Row>

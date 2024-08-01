@@ -311,6 +311,7 @@ export const getTotalPriceByDay = async (req, res) => {
         $gte: startOfDay,
         $lte: endOfDay,
       },
+      status : "7"
     });
 
     const totalPrice = orders.reduce(
@@ -337,6 +338,7 @@ export const getTotalPriceByWeek = async (req, res) => {
         $gte: new Date(dateStart),
         $lte: new Date(dateEnd),
       },
+      status : "7"
     });
 
     const totalPrice = orders.reduce(
@@ -364,6 +366,7 @@ export const getTotalPriceByMonth = async (req, res) => {
         $gte: new Date(dateStart),
         $lte: new Date(dateEnd),
       },
+      status : "7"
     });
 
     const totalPrice = orders.reduce(
@@ -391,6 +394,7 @@ export const getTotalPriceByYear = async (req, res) => {
         $gte: new Date(dateStart),
         $lte: new Date(dateEnd),
       },
+      status : "7"
     });
 
     const totalPrice = orders.reduce(
@@ -438,6 +442,7 @@ export const getTotalPriceByCustomDay = async (req, res) => {
         $gte: startDate,
         $lte: endDate,
       },
+      status : "7"
     });
 
     // Tính tổng giá trị của các đơn hàng
