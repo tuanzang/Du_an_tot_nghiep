@@ -117,7 +117,7 @@ export default function ProductDetail() {
       return message.info("Vui lòng chọn size!");
     }
 
-    if (quantity >= selectedSize.quantity) {
+    if (quantity > selectedSize.quantity) {
       return message.info("Vượt quá số lượng còn trong kho");
     }
 
@@ -165,7 +165,7 @@ export default function ProductDetail() {
     }
   };
 
-  const handleSizeClick = (sizeId: string) => {
+  const handleSizeClick = (sizeId: string  | null) => {
     const findSize = productSizes.find((it) => it._id === sizeId);
     setSelectedSize(findSize);
   };

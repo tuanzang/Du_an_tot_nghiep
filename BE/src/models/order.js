@@ -52,6 +52,10 @@ const orderSchema = new mongoose.Schema(
       enum: ["COD", "VNPAY"],
       default: "COD",
     },
+    shippingCost: {
+      type: Number,
+      required: true
+    }
   },
   {
     timestamps: true,

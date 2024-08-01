@@ -17,6 +17,7 @@ import { socket } from "../../socket";
 const { Text } = Typography;
 const SHIPPING_COST = 30000;
 
+
 export interface ICartItem {
   _id: string;
   name: string;
@@ -117,8 +118,7 @@ export default function Cart() {
   // const totalPriceWithShipping = totalPrice + SHIPPING_COST;
 
   // Tính tổng tiền bao gồm phí ship nếu có sản phẩm đã chọn
-  const totalPriceWithShipping =
-    productSelected.length > 0 ? totalPrice + SHIPPING_COST : totalPrice;
+ 
 
   return (
     <div>
@@ -356,22 +356,7 @@ export default function Cart() {
                       </Table>
                     </div>
                   )}
-                  {productSelected.length > 0 && (
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        padding: "10px 20px",
-                        borderTop: "1px solid gray",
-                        marginTop: "20px",
-                      }}
-                    >
-                      <span>Phí ship</span>
-                      <Text style={{ fontWeight: 800, color: "red" }}>
-                        {formatPrice(SHIPPING_COST)}
-                      </Text>
-                    </div>
-                  )}
+                
 
                   <div
                     style={{
@@ -384,7 +369,7 @@ export default function Cart() {
                   >
                     <span>Tổng tiền</span>
                     <Text style={{ fontWeight: 800, color: "red" }}>
-                      {formatPrice(totalPriceWithShipping)}
+                      {formatPrice(totalPrice)}
                     </Text>
                   </div>
                   <Link to="/checkout">
