@@ -82,8 +82,6 @@ export default function ProductDetail() {
         const { data } = await axios.get(
           `http://localhost:3001/api/products/productSize/${id}`
         );
-        console.log(data);
-
         setProductSizes(data.data);
       } catch (error) {
         console.error("Error fetching product sizes:", error);
@@ -169,133 +167,125 @@ export default function ProductDetail() {
   return (
     <div>
       <main>
-        <div>
-          {/* breadcrumb area start */}
-          <div className="breadcrumb-area">
-            <div className="container">
-              <div className="row">
-                <div className="col-12">
-                  <div className="breadcrumb-wrap">
-                    <nav aria-label="breadcrumb">
-                      <ul className="breadcrumb">
-                        <li className="breadcrumb-item">
-                          <a href="/home">
-                            <i className="fa fa-home"></i>
-                          </a>
-                        </li>
-                        <li
-                          className="breadcrumb-item active"
-                          aria-current="page"
-                        >
-                          <a href="/product">Sản phẩm</a>
-                        </li>
-                        <li
-                          className="breadcrumb-item active"
-                          aria-current="page"
-                        >
-                          Sản phẩm chi tiết
-                        </li>
-                      </ul>
-                    </nav>
-                  </div>
+        {/* breadcrumb area start */}
+        <div className="breadcrumb-area">
+          <div className="container">
+            <div className="row">
+              <div className="col-12">
+                <div className="breadcrumb-wrap">
+                  <nav aria-label="breadcrumb">
+                    <ul className="breadcrumb">
+                      <li className="breadcrumb-item">
+                        <a href="/home">
+                          <i className="fa fa-home"></i>
+                        </a>
+                      </li>
+                      <li
+                        className="breadcrumb-item active"
+                        aria-current="page"
+                      >
+                        <a href="/product">Sản phẩm</a>
+                      </li>
+                      <li
+                        className="breadcrumb-item active"
+                        aria-current="page"
+                      >
+                        Sản phẩm chi tiết
+                      </li>
+                    </ul>
+                  </nav>
                 </div>
               </div>
             </div>
           </div>
-          {/* breadcrumb area end */}
+        </div>
+        {/* breadcrumb area end */}
 
-          {/* page main wrapper start */}
-          <div className="shop-main-wrapper section-padding pb-0">
-            <div className="container">
-              <div className="row" style={{ marginBottom: "5rem" }}>
-                {/* product details wrapper start */}
-                <div className="col-lg-12 order-1 order-lg-2">
-                  {/* product details inner end */}
-                  <div className="product-details-inner">
-                    <div className="row">
-                      <div className="col-lg-5">
-                        <div
-                          className="pro-large-img img-zoom"
-                          style={{ marginBottom: "10px" }}
-                        >
-                          <Image
-                            width={"100%"}
-                            src={product?.image?.[0]}
-                            alt="product-details"
-                          />
-                        </div>
-                        <div className="tab-content"></div>
+        {/* page main wrapper start */}
+        <div className="shop-main-wrapper section-padding pb-0">
+          <div className="container">
+            <div className="row" style={{ marginBottom: "5rem" }}>
+              {/* product details wrapper start */}
+              <div className="col-lg-12 order-1 order-lg-2">
+                {/* product details inner end */}
+                <div className="product-details-inner">
+                  <div className="row">
+                    <div className="col-lg-5">
+                      <div
+                        className="pro-large-img img-zoom"
+                        style={{ marginBottom: "10px" }}
+                      >
+                        <Image
+                          width={"100%"}
+                          src={product?.image?.[0]}
+                          alt="product-details"
+                        />
                       </div>
-                      <div className="col-lg-7">
-                        <div className="product-details-des">
-                          {/* <div className="manufacturer-name">
+                      <div className="tab-content"></div>
+                    </div>
+                    <div className="col-lg-7">
+                      <div className="product-details-des">
+                        {/* <div className="manufacturer-name">
                           <a>HOT</a>
                         </div> */}
-                          <h3
-                            className="product-name"
-                            style={{ fontWeight: "300", fontSize: "30px" }}
+                        <h3
+                          className="product-name"
+                          style={{ fontWeight: "300", fontSize: "30px" }}
+                        >
+                          {product?.name}
+                          <Rate
+                            style={{
+                              float: "right",
+                            }}
+                            allowHalf
+                            value={averageRate}
+                            disabled
+                          />
+                        </h3>
+                        <div className="price-box">
+                          <span
+                            className="price-regular"
+                            style={{ color: "red", fontSize: "20px" }}
                           >
-                            {product?.name}
-                            <Rate
-                              style={{
-                                float: "right",
-                              }}
-                              allowHalf
-                              value={averageRate}
-                              disabled
-                            />
-                          </h3>
-                          <div className="price-box">
-                            <span
+                            {productPrice} VNĐ
+                          </span>
+                        </div>
+                        <div>
+                          <div className="button-container mt-2">
+                            <p
                               className="price-regular"
-                              style={{ color: "red", fontSize: "20px" }}
+                              style={{ color: "black", fontSize: "20px" }}
                             >
-                              {productPrice} VNĐ
-                            </span>
-                          </div>
-                          <div>
-                            <div className="button-container mt-2">
-                              <p
-                                className="price-regular"
-                                style={{ color: "black", fontSize: "20px" }}
-                              >
-                                Kích cỡ:
-                              </p>
-                              {productSizes.map((size) => (
-                                <Button
-                                  key={size._id}
-                                  className={`mx-1 ${selectedSize?._id === size._id
+                              Kích cỡ:
+                            </p>
+                            {productSizes.map((size) => (
+                              <Button
+                                key={size._id}
+                                className={`mx-1 ${selectedSize?._id === size._id
                                     ? "selected"
                                     : ""
-                                    }`}
-                                  style={{
-                                    padding: "10px 20px",
-                                    fontSize: "16px",
-                                  }}
-                                  onClick={() => handleSizeClick(size._id)}
-                                >
-                                  {size.sizeName}
-                                </Button>
-                              ))}
-                            </div>
+                                  }`}
+                                style={{
+                                  padding: "10px 20px",
+                                  fontSize: "16px",
+                                }}
+                                onClick={() => handleSizeClick(size._id)}
+                              >
+                                {size.sizeName}
+                              </Button>
+                            ))}
                           </div>
-                          {selectedSize && (
-                            <div
-                              className="mt-2"
-                              style={{ color: "black", fontSize: "15px" }}
-                            >
-                              <p>sản phẩm hiện có: {selectedSize?.quantity}</p>
-                            </div>
-                          )}
+                        </div>
+                        {selectedSize && (
+                          <div
+                            className="mt-2"
+                            style={{ color: "black", fontSize: "15px" }}
+                          >
+                            <p>sản phẩm hiện có: {selectedSize?.quantity}</p>
+                          </div>
+                        )}
 
-                          {/* <p className="pro-desc mt-3">Mô tả sản phẩm:</p>
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: product?.description || "",
-                          }}
-                        /> */}
-
-                          <div className="quantity-cart-box d-flex align-items-center mt-5"></div>
+                        <div className="quantity-cart-box d-flex align-items-center pt-5">
                           <h6 className="option-title">Số lượng:</h6>
                           <div className="quantity-controls">
                             <button
@@ -380,13 +370,16 @@ export default function ProductDetail() {
                                     }}
                                   >
                                     <hr />
-                                    <h6 className="product-tab-title">
-                                      {product?.description}
-                                    </h6>
+                                    <div
+                                      dangerouslySetInnerHTML={{
+                                        __html: product?.description || "",
+                                      }}
+                                    />
                                   </div>
                                 </div>
                               </div>
                             </div>
+
                             <div id="tab_two" className="tab-pane fade">
                               <div className="product-tab-content">
                                 <div
@@ -592,7 +585,7 @@ export default function ProductDetail() {
                   {/* <!-- section title start --> */}
                   <div className="section-title text-center">
                     <h2 className="title">Sản phẩm liên quan</h2>
-                    <p className="sub-title">Sản phẩm liên quan</p>
+                    {/* <p className="sub-title">Sản phẩm liên quan</p> */}
                   </div>
                   {/* <!-- section title start --> */}
                 </div>
@@ -622,7 +615,7 @@ export default function ProductDetail() {
           </div>
         </div>
         {/* <!-- page main wrapper end --> */}
-      </main >
-    </div >
+      </main>
+    </div>
   );
 }

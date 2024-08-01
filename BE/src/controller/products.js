@@ -218,14 +218,55 @@ export const updateProduct = async (req, res) => {
 };
 
 export const updateProductSizes = async (req, res) => {
-  const idProduct = req.params.id
+  const idProduct = req.params.id;
+  const requestData = req.body; // Lấy danh sách productSize từ req.body
+
   try {
-     await productSize.deleteMany({
+    await productSize.deleteMany({
       idProduct, 
     })
-    
+
+    const transformData = Object.keys(requestData);
+
+    const body = transformData.reduce((total, curr) => {
+      if (curr.startsWith("price")) {
+        const [_, idSize] = curr.split("-");
+        const isExists = total.find((it) => it.idSize === idSize);
+
+        const quantity = requestData[`quantity-${idSize}`];
+        const price = requestData[`price-${idSize}`];
+
+        if (!isExists) {
+          total.push({
+            idProduct,
+            idSize,
+            quantity,
+            price,
+          });
+        }
+
+        return total;
+      }
+
+      return total;
+    }, []);
+
+    let transformBody = [];
+
+    for await (const item of body) {
+      const sizeData = await size.findById(item.idSize).exec();
+
+      transformBody.push({
+        ...item,
+        sizeName: sizeData.name,
+      });
+    }
+
+    const productSizeUpdated = await productSize.insertMany(transformBody);
+
     return res.json({
-      message:'cdsvefdsfvsd'
+      message: 'Cập nhật thành công',
+      productSizeUpdated
     })
   } catch (error) {
     return res.status(500).json({
