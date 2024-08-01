@@ -15,7 +15,7 @@ import {
 import { socket } from "../../socket";
 
 const { Text } = Typography;
-const SHIPPING_COST = 30000; 
+const SHIPPING_COST = 30000;
 
 export interface ICartItem {
   _id: string;
@@ -51,7 +51,7 @@ export default function Cart() {
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
   const totalPrice = useSelector(selectTotalPrice);
-  
+
   const { data, refetch } = useMyCartQuery();
   const { mutate: onUpdateQuantity } = useCartMutation({
     action: "UPDATE",
@@ -79,13 +79,7 @@ export default function Cart() {
       socket.off("hidden product", onHiddenProduct);
     };
   }, [refetch]);
- 
 
-  const rowSelection = {
-    onChange: (_: any, selectedRows: ICartItem[]) => {
-      dispatch(updateProductSelected(selectedRows));
-    },
-  };
   const productsFormatted = useMemo(() => {
     return data?.data?.products?.map((it) => ({
       ...it.product,
@@ -94,8 +88,11 @@ export default function Cart() {
     }));
   }, [data?.data]);
 
-  const handleUpdateQuantity = (variantId: string, quantity: number, maxQuantity: number) => {
-
+  const handleUpdateQuantity = (
+    variantId: string,
+    quantity: number,
+    maxQuantity: number
+  ) => {
     if (quantity > maxQuantity) {
       alert("Số lượng mua vượt quá số lượng còn lại trong kho");
       return;
@@ -120,9 +117,8 @@ export default function Cart() {
   // const totalPriceWithShipping = totalPrice + SHIPPING_COST;
 
   // Tính tổng tiền bao gồm phí ship nếu có sản phẩm đã chọn
-  const totalPriceWithShipping = productSelected.length > 0 
-    ? totalPrice + SHIPPING_COST
-    : totalPrice;
+  const totalPriceWithShipping =
+    productSelected.length > 0 ? totalPrice + SHIPPING_COST : totalPrice;
 
   return (
     <div>
@@ -186,7 +182,12 @@ export default function Cart() {
                       rowKey="key"
                       pagination={false}
                       className="cart-table"
-                      rowSelection={rowSelection}
+                      rowSelection={{
+                        onChange: (_: any, selectedRows: ICartItem[]) => {
+                          dispatch(updateProductSelected(selectedRows));
+                        },
+                        selectedRowKeys: productSelected.map((it) => it._id),
+                      }}
                     >
                       <Table.Column
                         title="Hình ảnh"
@@ -234,7 +235,11 @@ export default function Cart() {
                             min={1}
                             value={value}
                             onChange={(quantity) =>
-                              handleUpdateQuantity(record.variant._id, quantity, record.quantity)
+                              handleUpdateQuantity(
+                                record.variant._id,
+                                quantity,
+                                record.quantity
+                              )
                             }
                           />
                         )}
@@ -367,7 +372,7 @@ export default function Cart() {
                       </Text>
                     </div>
                   )}
-                
+
                   <div
                     style={{
                       display: "flex",
@@ -377,7 +382,6 @@ export default function Cart() {
                       marginTop: "20px",
                     }}
                   >
-                    
                     <span>Tổng tiền</span>
                     <Text style={{ fontWeight: 800, color: "red" }}>
                       {formatPrice(totalPriceWithShipping)}
@@ -388,8 +392,6 @@ export default function Cart() {
                       type="primary"
                       style={{ float: "right" }}
                       disabled={!productSelected.length}
-                     
-                    
                     >
                       Thanh toán
                     </Button>

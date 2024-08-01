@@ -117,6 +117,10 @@ export default function ProductDetail() {
       return message.info("Vui lòng chọn size!");
     }
 
+    if (quantity >= selectedSize.quantity) {
+      return message.info("Vượt quá số lượng còn trong kho");
+    }
+
     const body = {
       productId: product?._id,
       quantity,
@@ -264,10 +268,11 @@ export default function ProductDetail() {
                               {productSizes.map((size) => (
                                 <Button
                                   key={size._id}
-                                  className={`mx-1 ${selectedSize?._id === size._id
-                                    ? "selected"
-                                    : ""
-                                    }`}
+                                  className={`mx-1 ${
+                                    selectedSize?._id === size._id
+                                      ? "selected"
+                                      : ""
+                                  }`}
                                   style={{
                                     padding: "10px 20px",
                                     fontSize: "16px",
@@ -622,7 +627,7 @@ export default function ProductDetail() {
           </div>
         </div>
         {/* <!-- page main wrapper end --> */}
-      </main >
-    </div >
+      </main>
+    </div>
   );
 }
