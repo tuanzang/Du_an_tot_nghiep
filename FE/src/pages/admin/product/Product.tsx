@@ -102,10 +102,21 @@ export default function Product() {
     }
   };
 
-  const onChangeRadio = (e: RadioChangeEvent) => {
-    console.log("radio checked", e.target.value);
-    setValue(Number(e.target.value));
-  };
+ const onChangeRadio = (e: RadioChangeEvent) => {
+   console.log("radio checked", e.target.value);
+   setValue(Number(e.target.value));
+
+   if (e.target.value === 1) {
+     // Tất cả sản phẩm
+     setFilteredProducts(products);
+   } else if (e.target.value === 2) {
+     // Sản phẩm hoạt động (status === 1 là hoạt động)
+     setFilteredProducts(products.filter((product) => product.status === 1));
+   } else if (e.target.value === 3) {
+     // Sản phẩm ngưng hoạt động (status === 0 là ngưng hoạt động)
+     setFilteredProducts(products.filter((product) => product.status === 0));
+   }
+ };
 
   const onChangeSwitch = async (checked: boolean, productId: string) => {
     updateStatusProduct(productId, checked ? 1 : 0);
@@ -322,16 +333,12 @@ export default function Product() {
         <Row gutter={16} style={{ marginTop: "12px" }}>
           <Col span={12}>
             <span>Trạng thái: </span>
-            <Radio.Group
-              onChange={onChangeRadio}
-              value={value}
-              style={{ paddingLeft: "12px" }}
-            >
+            <Radio.Group onChange={onChangeRadio} value={value}>
               <Radio value={1}>Tất cả</Radio>
               <Radio value={2}>Hoạt động</Radio>
               <Radio value={3}>Ngưng hoạt động</Radio>
             </Radio.Group>
-            <Button
+            {/* <Button
               type="default"
               icon={<SearchOutlined />}
               style={{
@@ -341,7 +348,7 @@ export default function Product() {
               }}
             >
               Tìm kiếm
-            </Button>
+            </Button> */}
           </Col>
         </Row>
       </Card>
