@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { render } from "react-dom";
+import dayjs from "dayjs";
 
 const customTableHeaderCellStyle = {
     backgroundColor: "#c29957",
@@ -52,7 +54,7 @@ export default function Voucher() {
             key: "stt",
             align: "center",
             width: "5%",
-            render: (_: any, __: any, index: number) => index + 1,
+            render: (text: any, record: any, index: number) => index + 1,
         },
         {
             title: "Mã giảm giá",
@@ -90,6 +92,9 @@ export default function Voucher() {
             key: "startDate",
             align: "center",
             width: "10%",
+            render:(value:any) => {
+                return dayjs(value).format('DD/MM/YYYY HH:mm:ss')
+            }
         },
         {
             title: "Ngày kết thúc",
@@ -97,6 +102,9 @@ export default function Voucher() {
             key: "expirationDate",
             align: "center",
             width: "10%",
+            render:(value:any) => {
+                return dayjs(value).format('DD/MM/YYYY HH:mm:ss')
+            }
         },
         {
             title: "Trạng thái",
@@ -172,7 +180,7 @@ export default function Voucher() {
                             ),
                         },
                     }}
-                    // dataSource={data}
+                    dataSource={vouchers}
                     columns={columns}
                 />
             </Card>

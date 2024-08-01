@@ -174,7 +174,9 @@ export default function Product() {
         price: number;
         description: string;
         quantity: number;
-        loai: string;
+        variants: {
+          quantity: number;
+        }[];
       }>
     | ColumnType<{
         stt: number;
@@ -184,7 +186,9 @@ export default function Product() {
         price: number;
         description: string;
         quantity: number;
-        loai: string;
+        variants: {
+          quantity: number;
+        }[];
       }>
   )[] = [
     {
@@ -228,6 +232,13 @@ export default function Product() {
       dataIndex: "quantity",
       key: "quantity",
       width: "10%",
+      render: (_, record) => {
+        const totalQuantity = record.variants.reduce((total, curr) => {
+          return total += curr.quantity
+        }, 0);
+
+        return totalQuantity
+      }
     },
     {
       title: "Trạng thái",
@@ -280,6 +291,7 @@ export default function Product() {
       // quantity: item.quantity,
       loai: category ? category.loai : "Không tìm thấy danh mục",
       status: item.status,
+      variants: item.variants
     };
   });
 

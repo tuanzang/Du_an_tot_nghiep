@@ -1,4 +1,3 @@
-import type { FormProps } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,41 +7,48 @@ import {
     Select,
     Card,
     DatePicker,
-    DatePickerProps
+    DatePickerProps,
 } from "antd";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
+import dayjs from "dayjs";
 
 const VoucherAdd = () => {
     const navigate = useNavigate();
     const [startDate, setStartDate] = useState(null);
     const [expirationDate, setExpirationDate] = useState(null);
 
-    const onStartDateChange: DatePickerProps['onChange'] = (date, dateString) => {
+    const onStartDateChange: DatePickerProps['onChange'] = (date) => {
         setStartDate(date);
-        console.log(date,dateString);
         
     };
 
-    const onEndDateChange: DatePickerProps['onChange'] = (date, dateString) => {
+    const onEndDateChange: DatePickerProps['onChange'] = (date) => {
         setExpirationDate(date);
-        console.log(date,dateString);
     };
 
     const handleChange = (value: string) => {
         console.log(`selected ${value}`);
     };
 
-    const onFinish = async (values: any) => {
+    const onFinish = async ({discountVal, ...values}: any) => {
         try {
-            const response = await axios.post('http://localhost:3001/api/discountCode/add', {
+            const body = {
                 ...values,
                 startDate: startDate,
                 expirationDate: expirationDate
-            });
+            }
+
+            if (body.discountType === 'percentage') {
+                body.discountPercentage = discountVal                
+            } else {
+                body.discountAmount = discountVal
+            }
+            
+            const response = await axios.post('http://localhost:3001/api/discountCode/add', body);
             toast.success("Mã giảm giá đã được thêm thành công!");
-            navigate('admin/vouchers');
+            navigate('/admin/voucher');
         } catch (error) {
             console.error(error);
             toast.error("Đã xảy ra lỗi khi thêm mã giảm giá!");
@@ -53,6 +59,7 @@ const VoucherAdd = () => {
         console.log('Failed:', errorInfo);
         toast.error("Vui lòng điền đầy đủ thông tin!");
     };
+    
 
     return (
         <div className="">
@@ -111,7 +118,7 @@ const VoucherAdd = () => {
                     <Card>
                         <Form.Item
                             label="Giảm"
-                            name="discountAmount"
+                            name="discountVal"
                             rules={[
                                 { required: true, message: "Vui lòng nhập!" },
                             ]}
@@ -129,7 +136,7 @@ const VoucherAdd = () => {
                                     { required: true, message: "Vui lòng nhập ngày bắt đầu!" },
                                 ]}
                             >
-                                <DatePicker onChange={onStartDateChange} />
+                                <DatePicker onChange={onStartDateChange}  showTime />
                             </Form.Item>
 
                             <Form.Item
@@ -147,7 +154,7 @@ const VoucherAdd = () => {
                                     }),
                                 ]}
                             >
-                                <DatePicker  onChange={onEndDateChange} />
+                                <DatePicker  onChange={onEndDateChange} showTime />
                             </Form.Item>
                         </div>
                     </Card>
