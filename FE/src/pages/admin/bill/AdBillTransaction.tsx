@@ -10,7 +10,7 @@ interface Props {
 
 const AdBillTransaction = ({ listTransaction }: Props) => {
   return (
-    <Table
+    <Table 
       dataSource={listTransaction}
       rowKey="id"
       pagination={false}

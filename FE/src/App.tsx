@@ -5,6 +5,7 @@ import AdminRouter from "./routers/AdminRouter";
 import NotFound404 from "./routers/NotFound404";
 import PrivateRouter from "./components/PrivateRouter";
 import { ToastContainer } from "react-toastify";
+import "./App.css";
 
 export default function App() {
   return (
