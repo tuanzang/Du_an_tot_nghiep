@@ -54,7 +54,7 @@ const Header = () => {
             }))
           );
         } else {
-          setOptionsSearch([{ label: "No option", value: "", image: "" }]);
+          setOptionsSearch([{ label: "Không tìm thấy sảm phẩm", value: "", image: ""}]);
         }
       } else {
         setOptionsSearch([]);
