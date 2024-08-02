@@ -26,9 +26,15 @@ const discountCodeSchema = new mongoose.Schema({
   startDate: { type: Date, default: Date.now },
   expirationDate: { type: Date, required: true },
   quantity: { type: Number, required: true },
-  usedCount: { type: Number, default: 0},
+  usedCount: { type: Number, default: 0 },
   status: { type: String, enum: ['active', 'expired', 'disabled'], default: 'active' },
   minPurchaseAmount: { type: Number, min: 0, default: 0 },
+  userId: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ]
 
 }, { timestamps: true });
 
