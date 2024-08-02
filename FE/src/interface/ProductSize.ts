@@ -1,8 +1,8 @@
 export interface IProductSize {
-    _id: string|null;
-    idProduct: string;
-    idSize: string;
-    quantity: number;
-    sizeName?:string
-    status:number|boolean;
-  }
+  _id: string | null;
+  idProduct: string;
+  idSize: string;
+  quantity: number;
+  sizeName?: string;
+  status: number | boolean;
+}

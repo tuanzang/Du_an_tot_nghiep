@@ -100,21 +100,21 @@ export default function Product() {
     }
   };
 
- const onChangeRadio = (e: RadioChangeEvent) => {
-   console.log("radio checked", e.target.value);
-   setValue(Number(e.target.value));
+  const onChangeRadio = (e: RadioChangeEvent) => {
+    console.log("radio checked", e.target.value);
+    setValue(Number(e.target.value));
 
-   if (e.target.value === 1) {
-     // Tất cả sản phẩm
-     setFilteredProducts(products);
-   } else if (e.target.value === 2) {
-     // Sản phẩm hoạt động (status === 1 là hoạt động)
-     setFilteredProducts(products.filter((product) => product.status === 1));
-   } else if (e.target.value === 3) {
-     // Sản phẩm ngưng hoạt động (status === 0 là ngưng hoạt động)
-     setFilteredProducts(products.filter((product) => product.status === 0));
-   }
- };
+    if (e.target.value === 1) {
+      // Tất cả sản phẩm
+      setFilteredProducts(products);
+    } else if (e.target.value === 2) {
+      // Sản phẩm hoạt động (status === 1 là hoạt động)
+      setFilteredProducts(products.filter((product) => product.status === 1));
+    } else if (e.target.value === 3) {
+      // Sản phẩm ngưng hoạt động (status === 0 là ngưng hoạt động)
+      setFilteredProducts(products.filter((product) => product.status === 0));
+    }
+  };
 
   const onChangeSwitch = async (checked: boolean, productId: string) => {
     updateStatusProduct(productId, checked ? 1 : 0);
@@ -163,7 +163,6 @@ export default function Product() {
     // Export workbook to file
     XLSX.writeFile(wb, "products.xlsx");
   };
-
 
   const columns: (
     | ColumnGroupType<{
@@ -234,11 +233,11 @@ export default function Product() {
       width: "10%",
       render: (_, record) => {
         const totalQuantity = record.variants.reduce((total, curr) => {
-          return total += curr.quantity
+          return (total += curr.quantity);
         }, 0);
 
-        return totalQuantity
-      }
+        return totalQuantity;
+      },
     },
     {
       title: "Trạng thái",
@@ -291,7 +290,7 @@ export default function Product() {
       // quantity: item.quantity,
       loai: category ? category.loai : "Không tìm thấy danh mục",
       status: item.status,
-      variants: item.variants
+      variants: item.variants,
     };
   });
 
