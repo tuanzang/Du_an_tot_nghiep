@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, InputNumber, Popconfirm, Table, Typography, Modal, Radio, Card } from "antd";
+import { Button, InputNumber, Popconfirm, Table, Typography, } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
@@ -13,12 +13,11 @@ import {
   updateProductSelected,
 } from "../../store/cartSlice";
 import { socket } from "../../socket";
-import axios from "axios";
-import { IVoucher } from "../../interface/Voucher";
-import dayjs from "dayjs";
+
+
 
 const { Text } = Typography;
-const SHIPPING_COST = 30000;
+// const SHIPPING_COST = 30000;
 
 
 export interface ICartItem {
@@ -63,13 +62,9 @@ export default function Cart() {
   const { mutate: onDeleteProduct } = useCartMutation({
     action: "DELETE",
   });
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [discountCodes, setDiscountCodes] = useState([]);
-  const [selectedDiscountCode, setSelectedDiscountCode] = useState(null);
-  const [totalDiscount, setTotalDiscount] = useState(0);
 
-  const finalTotalPrice = totalPrice - totalDiscount;
 
+  
   // initial socket
   useEffect(() => {
     const onConnect = () => {
@@ -106,12 +101,10 @@ export default function Cart() {
   const handleUpdateQuantity = (
     variantId: string,
     quantity: number,
-    maxQuantity: number
+   
   ) => {
-    if (quantity > maxQuantity) {
-      alert("Số lượng mua vượt quá số lượng còn lại trong kho");
-      return;
-    }
+  
+   
     onUpdateQuantity({
       variantId,
       quantity: quantity,
@@ -134,44 +127,7 @@ export default function Cart() {
   // Tính tổng tiền bao gồm phí ship nếu có sản phẩm đã chọn
  
 
-  useEffect(() => {
-    // Fetch mã giảm giá từ API
-    axios.get("http://localhost:3001/api/discountCode/discountCodes")
-      .then(response => {
-        setDiscountCodes(response.data);
-      })
-      .catch(error => {
-        console.error("Error fetching discount codes:", error);
-      });
-  }, []);
-
-  const showDiscountModal = () => {
-    setIsModalVisible(true);
-  };
-
-  const handleOk = () => {
-    if (selectedDiscountCode) {
-      const selectedCode = discountCodes.find((code) => code.code === selectedDiscountCode);
-      if (selectedCode) {
-        let discountAmount = 0;
-        if (selectedCode.discountType === 'percentage') {
-          discountAmount = (totalPrice * selectedCode.discountPercentage) / 100;
-        } else if (selectedCode.discountType === 'amount') {
-          discountAmount = selectedCode.discountAmount;
-        }
-        setTotalDiscount(discountAmount);
-      }
-    }
-    setIsModalVisible(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
-
-  const handleDiscountCodeChange = (e: any) => {
-    setSelectedDiscountCode(e.target.value);
-  };
+ 
 
 
 
@@ -293,7 +249,7 @@ export default function Cart() {
                               handleUpdateQuantity(
                                 record.variant._id,
                                 quantity,
-                                record.quantity
+                               
                               )
                             }
                           />
@@ -410,47 +366,6 @@ export default function Cart() {
                         />
                       </Table>
 
-                      <a onClick={showDiscountModal}>Sử dụng mã giảm giá</a>
-                      {/* <span style={{float:"right"}}>- 10.000 VNĐ</span> */}
-                      <Modal
-                        title="Mã giảm giá"
-                        visible={isModalVisible}
-                        onOk={handleOk}
-                        onCancel={handleCancel}
-                      >
-                        <Radio.Group onChange={handleDiscountCodeChange} value={selectedDiscountCode}>
-                          {discountCodes.map((code: IVoucher) => (
-                            <Card key={code._id}
-                              style={{
-                                marginBottom: 10,
-                                opacity: code.minPurchaseAmount !== undefined && totalPrice >= code.minPurchaseAmount ? 1 : 0.5,
-                                pointerEvents: code.minPurchaseAmount !== undefined && totalPrice >= code.minPurchaseAmount ? 'auto' : 'none'
-                              }}>
-                              <Radio value={code.code} className="discount-radio" disabled={totalPrice < !code.minPurchaseAmount}>
-                                <strong className="discount-code">{code.code}</strong>
-                                {code.discountType === 'percentage' ? (
-                                  <span className="discount-detail"> - Giảm {code.discountPercentage}%</span>
-                                ) : (
-                                  <span className="discount-detail"> - Giảm {code.discountAmount} VNĐ</span>
-                                )}
-                                <span style={{ paddingLeft: 1 }} className="discount-detail"> (Đơn tối thiểu {code.minPurchaseAmount}đ)</span><br />
-                                <span className="expiration-date">HSD: {dayjs(code.expirationDate).format('DD/MM/YYYY HH:mm:ss')}</span>
-                              </Radio>
-                            </Card>
-                          ))}
-                        </Radio.Group>
-                      </Modal>
-
-                      <div style={{ marginTop: "20px" }}>
-                        {(selectedDiscountCode) ? (
-                          <div className="d-flex justify-content-between">
-                            <p>{selectedDiscountCode}</p>
-                            <p>-{totalDiscount > 0 ? formatPrice(totalDiscount) : null}</p>
-                          </div>
-                        ) : (
-                          null
-                        )}
-                      </div>
 
                     </div>
                   )}
@@ -467,7 +382,7 @@ export default function Cart() {
                   >
                     <span>Tổng tiền</span>
                     <Text style={{ fontWeight: 800, color: "red" }}>
-                      {formatPrice(finalTotalPrice)}
+                      {formatPrice(totalPrice)}
                     </Text>
                   </div>
                   <Link to="/checkout">

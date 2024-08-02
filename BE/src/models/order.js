@@ -56,6 +56,10 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    discouVoucher: {
+      type: Number,
+      required: true,
+    },
     statusShip: {
       type: Boolean,
       default: false,

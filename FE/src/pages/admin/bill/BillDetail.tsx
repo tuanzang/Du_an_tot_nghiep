@@ -1193,7 +1193,7 @@ export default function BillDetail() {
             >
               Phí ship:
               {billDetail && billDetail.totalPrice >= 1000000 ? (
-                <span>0 VND</span>
+                <span>Ơ</span>
               ) : (
                 <Input
                   size="middle"
