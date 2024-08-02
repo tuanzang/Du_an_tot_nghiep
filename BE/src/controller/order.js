@@ -43,7 +43,7 @@ export const createOrder = async (req, res) => {
       total += curr.variant.price * curr.quantity;
 
       return total;
-    }, 0);
+    }, 0) + bodyData.shippingCost;
 
     const orders = await new Order({
       ...req.body,

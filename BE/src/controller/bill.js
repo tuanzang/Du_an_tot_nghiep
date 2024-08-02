@@ -146,7 +146,7 @@ export const getAllBillByIdUser = async (req, res) => {
  */
 export const updateStatusBill = async (req, res) => {
   try {
-    const { id, status } = req.body;
+    const { id, status, statusShip } = req.body;
 
     if (!status) {
       return res.status(400).json({
@@ -156,7 +156,7 @@ export const updateStatusBill = async (req, res) => {
 
     const updatedOrder = await Order.findByIdAndUpdate(
       id,
-      { $set: { status: status } },
+      { $set: { status: status, statusShip: statusShip } },
       { new: true }
     ).exec();
 
