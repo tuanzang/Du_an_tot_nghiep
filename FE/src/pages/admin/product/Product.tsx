@@ -100,21 +100,21 @@ export default function Product() {
     }
   };
 
- const onChangeRadio = (e: RadioChangeEvent) => {
-   console.log("radio checked", e.target.value);
-   setValue(Number(e.target.value));
+  const onChangeRadio = (e: RadioChangeEvent) => {
+    console.log("radio checked", e.target.value);
+    setValue(Number(e.target.value));
 
-   if (e.target.value === 1) {
-     // Tất cả sản phẩm
-     setFilteredProducts(products);
-   } else if (e.target.value === 2) {
-     // Sản phẩm hoạt động (status === 1 là hoạt động)
-     setFilteredProducts(products.filter((product) => product.status === 1));
-   } else if (e.target.value === 3) {
-     // Sản phẩm ngưng hoạt động (status === 0 là ngưng hoạt động)
-     setFilteredProducts(products.filter((product) => product.status === 0));
-   }
- };
+    if (e.target.value === 1) {
+      // Tất cả sản phẩm
+      setFilteredProducts(products);
+    } else if (e.target.value === 2) {
+      // Sản phẩm hoạt động (status === 1 là hoạt động)
+      setFilteredProducts(products.filter((product) => product.status === 1));
+    } else if (e.target.value === 3) {
+      // Sản phẩm ngưng hoạt động (status === 0 là ngưng hoạt động)
+      setFilteredProducts(products.filter((product) => product.status === 0));
+    }
+  };
 
   const onChangeSwitch = async (checked: boolean, productId: string) => {
     updateStatusProduct(productId, checked ? 1 : 0);
@@ -164,26 +164,6 @@ export default function Product() {
     XLSX.writeFile(wb, "products.xlsx");
   };
 
-  // useEffect(() => {
-  //   // Gọi API để lấy số lượng sản phẩm theo kích cỡ
-  //   const fetchProductSizes = async () => {
-  //     try {
-  //       const { data } = await axios.get(
-  //         `http://localhost:3001/api/products/productSize/${id}`
-  //       );
-  //       setProductSizes(data.data);
-
-  //       data?.data?.forEach((it) => {
-  //         productSizeForm.setFieldValue(`quantity-${it._id}`, it.quantity);
-  //       });
-  //     } catch (error) {
-  //       console.error("Error fetching product sizes:", error);
-  //     }
-  //   };
-
-  //   fetchProductSizes();
-  // }, [id]);
-
   const columns: (
     | ColumnGroupType<{
         stt: number;
@@ -193,7 +173,9 @@ export default function Product() {
         price: number;
         description: string;
         quantity: number;
-        loai: string;
+        variants: {
+          quantity: number;
+        }[];
       }>
     | ColumnType<{
         stt: number;
@@ -203,7 +185,9 @@ export default function Product() {
         price: number;
         description: string;
         quantity: number;
-        loai: string;
+        variants: {
+          quantity: number;
+        }[];
       }>
   )[] = [
     {
@@ -247,6 +231,13 @@ export default function Product() {
       dataIndex: "quantity",
       key: "quantity",
       width: "10%",
+      render: (_, record) => {
+        const totalQuantity = record.variants.reduce((total, curr) => {
+          return (total += curr.quantity);
+        }, 0);
+
+        return totalQuantity;
+      },
     },
     {
       title: "Trạng thái",
@@ -299,6 +290,7 @@ export default function Product() {
       // quantity: item.quantity,
       loai: category ? category.loai : "Không tìm thấy danh mục",
       status: item.status,
+      variants: item.variants,
     };
   });
 

@@ -354,6 +354,8 @@ export default function Cart() {
                           )}
                         />
                       </Table>
+
+                      <a href="">Sử dụng mã giảm giá</a>
                     </div>
                   )}
                 
