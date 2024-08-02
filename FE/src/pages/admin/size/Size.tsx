@@ -33,23 +33,23 @@ export default function Size() {
     fetchSizes();
   }, []);
 
-  const deleteSize = async (id: number) => {
-    try {
-      const confirm = window.confirm("Bạn muốn xóa size này?");
-      if (confirm) {
-        const response = await axios.delete(
-          `http://localhost:3001/api/sizes/${id}`
-        );
-        if (response.status === 200) {
-          const newArr = sizes.filter((item) => item["_id"] !== id);
-          setSizes(newArr);
-          setFilteredSizes(newArr);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const deleteSize = async (id: number) => {
+  //   try {
+  //     const confirm = window.confirm("Bạn muốn xóa size này?");
+  //     if (confirm) {
+  //       const response = await axios.delete(
+  //         `http://localhost:3001/api/sizes/${id}`
+  //       );
+  //       if (response.status === 200) {
+  //         const newArr = sizes.filter((item) => item["_id"] !== id);
+  //         setSizes(newArr);
+  //         setFilteredSizes(newArr);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -80,16 +80,16 @@ export default function Size() {
       align: "center",
       width: "20%",
     },
-    {
-      title: "Xóa",
-      dataIndex: "key",
-      key: "key",
-      align: "center",
-      width: "10%",
-      render: (value: any) => (
-        <Button onClick={() => deleteSize(value)}>Xóa</Button>
-      ),
-    },
+    // {
+    //   title: "Xóa",
+    //   dataIndex: "key",
+    //   key: "key",
+    //   align: "center",
+    //   width: "10%",
+    //   render: (value: any) => (
+    //     <Button onClick={() => deleteSize(value)}>Xóa</Button>
+    //   ),
+    // },
   ];
 
   const data = filteredSizes.map((item: ISize, index: number) => ({

@@ -79,9 +79,9 @@ const ProductItem = ({ data }: IProductItemProps) => {
             </span>
           </a>
         </div>
-        <div className="cart-hover">
+        {/* <div className="cart-hover">
           <button className="btn btn-cart">Thêm vào giỏ hàng</button>
-        </div>
+        </div> */}
         <div className="product-caption text-center">
           <div className="product-identity">
             <p

@@ -101,16 +101,16 @@ export default function Category() {
         </Button>
       ),
     },
-    {
-      title: "Xóa",
-      dataIndex: "key",
-      key: "key",
-      align: "center",
-      width: "2%",
-      render: (value: any) => (
-        <Button onClick={() => deleteCategory(value!)}>Xóa</Button>
-      ),
-    },
+    // {
+    //   title: "Xóa",
+    //   dataIndex: "key",
+    //   key: "key",
+    //   align: "center",
+    //   width: "2%",
+    //   render: (value: any) => (
+    //     <Button onClick={() => deleteCategory(value!)}>Xóa</Button>
+    //   ),
+    // },
   ];
 
   const data = filteredCates.map((item: ICategory, index: number) => {
