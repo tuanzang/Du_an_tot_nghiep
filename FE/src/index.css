@@ -4,4 +4,22 @@
     border-color: #1890ff; /* Màu viền khi size được chọn */
   }
 
-  
+  /* DiscountModal.css */
+.discount-radio {
+  font-family: 'YourFontFamily', sans-serif; /* Thay đổi 'YourFontFamily' bằng font chữ bạn muốn */
+}
+
+.discount-code {
+  font-size: 16px; /* Kích thước chữ */
+  font-weight: bold; /* Độ đậm chữ */
+}
+
+.discount-detail {
+  font-size: 12px;
+  color: #555; /* Màu chữ */
+}
+
+.expiration-date {
+  font-size: 12px;
+  color: #a2a1a1;
+}

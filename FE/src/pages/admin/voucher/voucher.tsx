@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { render } from "react-dom";
 import dayjs from "dayjs";
 
 const customTableHeaderCellStyle = {
