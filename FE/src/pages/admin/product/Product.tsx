@@ -44,8 +44,6 @@ export default function Product() {
       ]);
       setProducts(productResponse.data?.data);
       setCates(categoryResponse.data?.data);
-      // console.log(productResponse.data?.data);
-      // console.log(categoryResponse.data?.data);
 
       const sortedProducts = productResponse.data?.data.sort(
         (a: IProduct, b: IProduct) =>
@@ -102,10 +100,21 @@ export default function Product() {
     }
   };
 
-  const onChangeRadio = (e: RadioChangeEvent) => {
-    console.log("radio checked", e.target.value);
-    setValue(Number(e.target.value));
-  };
+ const onChangeRadio = (e: RadioChangeEvent) => {
+   console.log("radio checked", e.target.value);
+   setValue(Number(e.target.value));
+
+   if (e.target.value === 1) {
+     // Tất cả sản phẩm
+     setFilteredProducts(products);
+   } else if (e.target.value === 2) {
+     // Sản phẩm hoạt động (status === 1 là hoạt động)
+     setFilteredProducts(products.filter((product) => product.status === 1));
+   } else if (e.target.value === 3) {
+     // Sản phẩm ngưng hoạt động (status === 0 là ngưng hoạt động)
+     setFilteredProducts(products.filter((product) => product.status === 0));
+   }
+ };
 
   const onChangeSwitch = async (checked: boolean, productId: string) => {
     updateStatusProduct(productId, checked ? 1 : 0);
@@ -140,15 +149,11 @@ export default function Product() {
       filteredProducts.map((product) => ({
         STT: product._id, // or any other field
         "Tên sản phẩm": product.name,
-        // "Giá sản phẩm": product.price,
-        // // "Giá cũ sản phẩm": product.priceOld,
         "Loại sản phẩm":
           cates.find(
             (cate) => cate._id.toString() === product.categoryId.toString()
           )?.loai || "Không có danh mục",
         "Mô tả sản phẩm": product.description,
-        // "Số lượng": product.quantity,
-        // Add more fields as needed
       }))
     );
 
@@ -158,6 +163,26 @@ export default function Product() {
     // Export workbook to file
     XLSX.writeFile(wb, "products.xlsx");
   };
+
+  // useEffect(() => {
+  //   // Gọi API để lấy số lượng sản phẩm theo kích cỡ
+  //   const fetchProductSizes = async () => {
+  //     try {
+  //       const { data } = await axios.get(
+  //         `http://localhost:3001/api/products/productSize/${id}`
+  //       );
+  //       setProductSizes(data.data);
+
+  //       data?.data?.forEach((it) => {
+  //         productSizeForm.setFieldValue(`quantity-${it._id}`, it.quantity);
+  //       });
+  //     } catch (error) {
+  //       console.error("Error fetching product sizes:", error);
+  //     }
+  //   };
+
+  //   fetchProductSizes();
+  // }, [id]);
 
   const columns: (
     | ColumnGroupType<{
@@ -212,47 +237,40 @@ export default function Product() {
       ),
     },
     {
-      title: "Giá sản phẩm",
-      dataIndex: "price",
-      key: "price",
-      width: "20%",
-    },
-    // {
-    //   title: "Giá cũ sản phẩm",
-    //   dataIndex: "priceOld",
-    //   key: "priceOld",
-    //   width: "10%",
-    // },
-    {
       title: "Danh mục",
       dataIndex: "loai",
       key: "loai",
       width: "15%",
     },
     {
+      title: "Số lượng",
+      dataIndex: "quantity",
+      key: "quantity",
+      width: "10%",
+    },
+    {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       align: "center",
-      width: "30%",
+      width: "10%",
       render: (status: any, record: any) => (
         <Switch
-          // style={{ backgroundColor: key ? "green" : "gray" }}
           checked={status === 1}
           onChange={(checked) => onChangeSwitch(checked, record.key)}
         />
       ),
     },
-    // {
-    //   title: "Xóa",
-    //   dataIndex: "key",
-    //   key: "key",
-    //   align: "center",
-    //   width: "10%",
-    //   render: (value: any) => (
-    //     <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
-    //   ),
-    // },
+    {
+      title: "Xóa",
+      dataIndex: "key",
+      key: "key",
+      align: "center",
+      width: "10%",
+      render: (value: any) => (
+        <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
+      ),
+    },
     {
       title: "Chi tiết",
       align: "center",
@@ -277,8 +295,6 @@ export default function Product() {
       key: item._id,
       name: item.name,
       image: item.image,
-      // price: item.price,
-      // priceOld: item.priceOld,
       description: item.description,
       // quantity: item.quantity,
       loai: category ? category.loai : "Không tìm thấy danh mục",
@@ -334,26 +350,11 @@ export default function Product() {
         <Row gutter={16} style={{ marginTop: "12px" }}>
           <Col span={12}>
             <span>Trạng thái: </span>
-            <Radio.Group
-              onChange={onChangeRadio}
-              value={value}
-              style={{ paddingLeft: "12px" }}
-            >
+            <Radio.Group onChange={onChangeRadio} value={value}>
               <Radio value={1}>Tất cả</Radio>
               <Radio value={2}>Hoạt động</Radio>
               <Radio value={3}>Ngưng hoạt động</Radio>
             </Radio.Group>
-            <Button
-              type="default"
-              icon={<SearchOutlined />}
-              style={{
-                float: "right",
-                borderColor: "#c29957",
-                color: "#c29957",
-              }}
-            >
-              Tìm kiếm
-            </Button>
           </Col>
         </Row>
       </Card>

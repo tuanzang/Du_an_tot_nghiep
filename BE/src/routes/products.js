@@ -16,7 +16,7 @@ import {
 const productRouter = Router();
 
 productRouter.get("/", getAllProduct);
-productRouter.get("/search", searchProducts);
+productRouter.post("/search", searchProducts);
 productRouter.get("/:id", getDetailProduct);
 productRouter.post("/add", createProduct);
 productRouter.post("/:productId/add/size", createProductSizes);

@@ -14,9 +14,7 @@ export default function Product() {
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [priceRange, setPriceRange] = useState<[number, number]>([
-    200000, 500000,
-  ]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([200000, 500000]);
   const [sizes, setSizes] = useState<ISize[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
@@ -99,11 +97,12 @@ export default function Product() {
             : `http://localhost:3001/api/products`;
           const response = await axios.get(url);
           setProduct(response.data?.data);
+          console.log(response.data);
+          
         } catch (error) {
           console.error("Error fetching products by category:", error);
         }
       };
-
       fetchProductsByCategory();
     }
   }, [selectedCategory]);
@@ -195,11 +194,6 @@ export default function Product() {
 
                     <div className="sidebar-body">
                       <ul className="shop-categories">
-                        {/* <li>
-                          <a href="#" onClick={() => handleCategoryClick('')}>
-                            Tất cả
-                          </a>
-                        </li> */}
                         {categories?.map((category) => (
                           <li key={category._id}>
                             <a
@@ -216,7 +210,7 @@ export default function Product() {
                   {/* <!-- single sidebar end --> */}
 
                   {/* <!-- single sidebar start --> */}
-                  <div className="sidebar-single">
+                  {/* <div className="sidebar-single">
                     <h5
                       className="sidebar-title"
                       style={{
@@ -247,11 +241,11 @@ export default function Product() {
                         </Button>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                   {/* <!-- single sidebar end --> */}
 
                   {/* <!-- single sidebar start --> */}
-                  <div className="sidebar-single">
+                  {/* <div className="sidebar-single">
                     <h5
                       className="sidebar-title"
                       style={{
@@ -283,7 +277,7 @@ export default function Product() {
                         ))}
                       </ul>
                     </div>
-                  </div>
+                  </div> */}
                   {/* <!-- single sidebar end --> */}
 
                   {/* <!-- single sidebar start --> */}

@@ -14,6 +14,7 @@ import Profile from "../pages/client/profile/Profile";
 import ProfileBill from "../pages/client/profile/ProfileBill";
 import ProfileChangePass from "../pages/client/profile/ProfileChangePass";
 import ProfileBillDetail from "../pages/client/profile/ProfileBillDetail";
+import BlogJewelry from "../pages/client/BlogJewelry";
 
 export default function ClientRouter() {
   return (
@@ -22,6 +23,7 @@ export default function ClientRouter() {
       <Routes>
         <Route path="/" element={<Navigate to="/home" />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/blog" element={<BlogJewelry />} />
         <Route path="/product" element={<Product />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />

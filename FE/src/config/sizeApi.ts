@@ -27,4 +27,4 @@ export const deleteSize = async (size: ISize) => {
     } catch (error) {
       console.log(error);
     }
-  };
+  }

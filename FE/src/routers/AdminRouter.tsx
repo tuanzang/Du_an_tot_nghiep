@@ -16,6 +16,8 @@ import Users from "../pages/admin/users/Users";
 import ProductAdd from "../pages/admin/product/productAdd";
 import PageComment from "../pages/admin/comment/PageComment";
 import ChangePassword from "../pages/admin/changepassword/ChangePassword";
+import Voucher from "../pages/admin/voucher/voucher";
+import VoucherAdd from "../pages/admin/voucher/voucherAdd";
 
 export default function AdminRouter() {
   return (
@@ -38,6 +40,8 @@ export default function AdminRouter() {
         <Route path="/users" element={<Users />} />
         <Route path="/comments" element={<PageComment />} />
         <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/voucher" element={<Voucher />} />
+        <Route path="/voucher/add" element={<VoucherAdd />} />
       </Routes>
     </HeaderAdmin>
   );
