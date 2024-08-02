@@ -54,8 +54,13 @@ const orderSchema = new mongoose.Schema(
     },
     shippingCost: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
+    statusShip: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
   },
   {
     timestamps: true,

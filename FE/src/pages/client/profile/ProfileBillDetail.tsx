@@ -267,7 +267,7 @@ export default function ProfileBillDetail() {
       try {
         const response = await axios.post(
           "http://localhost:3001/api/orders/update-status",
-          { id: id, status: status }
+          { id: id, status: status, statusShip: true }
         );
         createNewHistory(response.data.data, user, note);
         getBillHistoryByIdBill(id);
@@ -543,6 +543,10 @@ export default function ProfileBillDetail() {
         toast.error("Không thể bình luận!");
         return;
       } else {
+        if (productSize._id === null || !productSize.sizeName) {
+          toast.error("Không thể bình luận!");
+          return;
+        }
         const dataComment: IComment = {
           _id: null,
           idUser: user._id,

@@ -25,9 +25,10 @@ const productSizeSchema = new mongoose.Schema(
       required: true,
     },
     status: {
-      type: Boolean,
+      type: Number,
+      enum: [0, 1], // 0: ẩn, 1: hiện,
       required: true,
-      default: true,
+      default: 1,
     },
   },
   {
