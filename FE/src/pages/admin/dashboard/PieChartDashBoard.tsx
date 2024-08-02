@@ -5,6 +5,9 @@ import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 
 export default function PieChartDashBoard({ data }) {
   useLayoutEffect(() => {
+    // Filter out data with value 0%
+    const filteredData = data.filter(item => item.value > 0);
+
     let root = am5.Root.new("chartdiv1");
 
     root.setThemes([am5themes_Animated.new(root)]);
@@ -22,7 +25,7 @@ export default function PieChartDashBoard({ data }) {
       })
     );
 
-    series.data.setAll(data);
+    series.data.setAll(filteredData);
 
     series.labels.template.setAll({
       textType: "circular",

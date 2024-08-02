@@ -82,11 +82,6 @@ export default function Dashboard() {
   const [listStockProductsByCustomDay, setListStockProductsByCustomDay] = useState([]);
   const [filter, setFilter] = useState<Filter>({ page: 1, size: 5, createAtFrom: null, createAtTo: null });
   const [customDateRange, setCustomDateRange] = useState([null, null]);
-  const [totalOrdersToday, setTotalOrdersToday] = useState(0);
-  const [totalOrdersThisWeek, setTotalOrdersThisWeek] = useState(0);
-  const [totalOrdersThisMonth, setTotalOrdersThisMonth] = useState(0);
-  const [totalOrdersThisYear, setTotalOrdersThisYear] = useState(0);
-  const [totalOrdersByCustomDay, setTotalOrdersByCustomDay] = useState(0);
   const [completedOrdersByCustomDay, setCompletedOrdersByCustomDay] = useState(0);
   const [canceledOrdersByCustomDay, setCanceledOrdersByCustomDay] = useState(0);
   const [returnedOrdersByCustomDay, setReturnedOrdersByCustomDay] = useState(0);
@@ -102,7 +97,36 @@ export default function Dashboard() {
   const [completedOrdersYear, setCompletedOrdersYear] = useState(0);
   const [canceledOrdersYear, setCanceledOrdersYear] = useState(0);
   const [returnedOrdersYear, setReturnedOrdersYear] = useState(0);
-
+  const [waitConfirmOrdersDay, setWaitConfirmOrdersDay] = useState(0);
+  const [waitConfirmOrdersWeek, setWaitConfirmOrdersWeek] = useState(0);
+  const [waitConfirmOrdersMonth, setWaitConfirmOrdersMonth] = useState(0);
+  const [waitConfirmOrdersYear, setWaitConfirmOrdersYear] = useState(0);
+  const [waitConfirmOrdersCustomDay, setWaitConfirmOrdersCustomDay] = useState(0);
+  const [confirmedOrdersDay, setConfirmedOrdersDay] = useState(0);
+  const [confirmedOrdersWeek, setConfirmedOrdersWeek] = useState(0);
+  const [confirmedOrdersMonth, setConfirmedOrdersMonth] = useState(0);
+  const [confirmedOrdersYear, setConfirmedOrdersYear] = useState(0);
+  const [confirmedOrdersCustomDay, setConfirmedOrdersCustomDay] = useState(0);
+  const [packingOrdersDay, setPackingOrdersDay] = useState(0);
+  const [packingOrdersWeek, setPackingOrdersWeek] = useState(0);
+  const [packingOrdersMonth, setPackingOrdersMonth] = useState(0);
+  const [packingOrdersYear, setPackingOrdersYear] = useState(0);
+  const [packingOrdersCustomDay, setPackingOrdersCustomDay] = useState(0);
+  const [shippingOrdersDay, setShippingOrdersDay] = useState(0);
+  const [shippingOrdersWeek, setShippingOrdersWeek] = useState(0);
+  const [shippingOrdersMonth, setShippingOrdersMonth] = useState(0);
+  const [shippingOrdersYear, setShippingOrdersYear] = useState(0);
+  const [shippingOrdersCustomDay, setShippingOrdersCustomDay] = useState(0);
+  const [deliveredOrdersDay, setDeliveredOrdersDay] = useState(0);
+  const [deliveredOrdersWeek, setDeliveredOrdersWeek] = useState(0);
+  const [deliveredOrdersMonth, setDeliveredOrdersMonth] = useState(0);
+  const [deliveredOrdersYear, setDeliveredOrdersYear] = useState(0);
+  const [deliveredOrdersCustomDay, setDeliveredOrdersCustomDay] = useState(0);
+  const [paidOrdersDay, setPaidOrdersDay] = useState(0);
+  const [paidOrdersWeek, setPaidOrdersWeek] = useState(0);
+  const [paidOrdersMonth, setPaidOrdersMonth] = useState(0);
+  const [paidOrdersYear, setPaidOrdersYear] = useState(0);
+  const [paidOrdersCustomDay, setPaidOrdersCustomDay] = useState(0);
   //tính tổng tiền 
   const getOrdersPriceByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
     try {
@@ -218,25 +242,26 @@ export default function Dashboard() {
     }
   };
 
-  const getOrdersByCustomDayStatus = async () => {
+  const getOrdersPriceByCustomDayStatus = async (createAtFrom: string, createAtTo: string) => {
     try {
-      const [startDate, endDate] = customDateRange;
+      const formattedCreateAtFrom = new Date(createAtFrom).toISOString().split('T')[0];
+      const formattedCreateAtTo = new Date(createAtTo).toISOString().split('T')[0];
       const resTotalPriceByCustomDay = await axios.get(`http://localhost:3001/api/orders/total-price/custom-day`, {
         params: {
-          dateStart: startDate,
-          dateEnd: endDate,
+          createAtFrom: formattedCreateAtFrom,
+        createAtTo: formattedCreateAtTo,
         }
       });
       const resPriceRefundByCustomDay = await axios.get(`http://localhost:3001/api/orders/price-refund/custom-day`, {
         params: {
-          dateStart: startDate,
-          dateEnd: endDate,
+          createAtFrom: formattedCreateAtFrom,
+        createAtTo: formattedCreateAtTo,
         }
       })
       const resPriceCancelByCustomDay = await axios.get(`http://localhost:3001/api/orders/price-cancel/custom-day`, {
         params: {
-          dateStart: startDate,
-          dateEnd: endDate,
+          createAtFrom: formattedCreateAtFrom,
+        createAtTo: formattedCreateAtTo,
         }
       })
       setTotalPriceByCustomDay(resTotalPriceByCustomDay.data.totalPrice);
@@ -254,24 +279,52 @@ export default function Dashboard() {
       // Chuyển đổi ngày về định dạng YYYY-MM-DD
       const formattedCreateAtFrom = new Date(createAtFrom).toISOString().split('T')[0];
       const formattedCreateAtTo = new Date(createAtTo).toISOString().split('T')[0];
-
-      const resAllOrdersByCustomDay = await axios.post("http://localhost:3001/api/orders", {
-        createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
-        ...customDateRange,
-      });
-
-      const resCompleted = await axios.post("http://localhost:3001/api/orders", {
-        createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
-        status: "7",
-        ...customDateRange,
-      });
-
       const resCanceled = await axios.post("http://localhost:3001/api/orders", {
         createAtFrom: formattedCreateAtFrom,
         createAtTo: formattedCreateAtTo,
         status: "0",
+        ...customDateRange,
+      });
+      const resWaitConfirmed = await axios.post("http://localhost:3001/api/orders", {
+        createAtFrom: formattedCreateAtFrom,
+        createAtTo: formattedCreateAtTo,
+        status: "1",
+        ...customDateRange
+      })
+      const resConfirmed = await axios.post("http://localhost:3001/api/orders", {
+        createAtFrom: formattedCreateAtFrom,
+        createAtTo: formattedCreateAtTo,
+        status: "2",
+        ...customDateRange
+      })
+      const resPacking = await axios.post("http://localhost:3001/api/orders", {
+        createAtFrom: formattedCreateAtFrom,
+        createAtTo: formattedCreateAtTo,
+        status: "3",
+        ...customDateRange
+      })
+      const resShipping = await axios.post("http://localhost:3001/api/orders", {
+        createAtFrom: formattedCreateAtFrom,
+        createAtTo: formattedCreateAtTo,
+        status: "4",
+        ...customDateRange
+      })
+      const resDelivered = await axios.post("http://localhost:3001/api/orders", {
+        createAtFrom: formattedCreateAtFrom,
+        createAtTo: formattedCreateAtTo,
+        status: "5",
+        ...customDateRange
+      })
+      const resPaid = await axios.post("http://localhost:3001/api/orders", {
+        createAtFrom: formattedCreateAtFrom,
+        createAtTo: formattedCreateAtTo,
+        status: "6",
+        ...customDateRange
+      })
+      const resCompleted = await axios.post("http://localhost:3001/api/orders", {
+        createAtFrom: formattedCreateAtFrom,
+        createAtTo: formattedCreateAtTo,
+        status: "7",
         ...customDateRange,
       });
       const resReturned = await axios.post("http://localhost:3001/api/orders", {
@@ -280,8 +333,12 @@ export default function Dashboard() {
         status: "8",
         ...customDateRange,
       })
-
-      setTotalOrdersByCustomDay(resAllOrdersByCustomDay.data.data.length);
+      setWaitConfirmOrdersCustomDay(resWaitConfirmed.data.data.length);
+      setConfirmedOrdersCustomDay(resConfirmed.data.data.length);
+      setPackingOrdersCustomDay(resPacking.data.data.length);
+      setShippingOrdersCustomDay(resShipping.data.data.length);
+      setDeliveredOrdersCustomDay(resDelivered.data.data.length);
+      setPaidOrdersCustomDay(resPaid.data.data.length);
       setCompletedOrdersByCustomDay(resCompleted.data.data.length);
       setCanceledOrdersByCustomDay(resCanceled.data.data.length);
       setReturnedOrdersByCustomDay(resReturned.data.data.length);
@@ -296,8 +353,45 @@ export default function Dashboard() {
   };
   const getOrdersByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
     try {
-      const resAllOrdersByDay = await axios.get(`http://localhost:3001/api/orders`, {
+      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
+          status: "0",
+          dateNow: date,
+        },
+      });
+      const resWaitConfirmed = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "1",
+          dateNow: date,
+        }
+      });
+      const resConfirmed = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "2",
+          dateNow: date,
+        }
+      });
+      const resPacking = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "3",
+          dateNow: date,
+        }
+      });
+      const resShipping = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "4",
+          dateNow: date,
+        }
+      });
+      const resDelivered = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "5",
+          dateNow: date,
+        }
+      });
+      const resPaid = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "6",
           dateNow: date,
         }
       })
@@ -307,20 +401,18 @@ export default function Dashboard() {
           dateNow: date,
         },
       });
-
-      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
-        params: {
-          status: "0",
-          dateNow: date,
-        },
-      });
       const resReturned = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "8",
           dateNow: date,
         }
       })
-      setTotalOrdersToday(resAllOrdersByDay.data.data.length);
+      setWaitConfirmOrdersDay(resWaitConfirmed.data.data.length);
+      setConfirmedOrdersDay(resConfirmed.data.data.length);
+      setPackingOrdersDay(resPacking.data.data.length);
+      setShippingOrdersDay(resShipping.data.data.length);
+      setDeliveredOrdersDay(resDelivered.data.data.length);
+      setPaidOrdersDay(resPaid.data.data.length);
       setCompletedOrdersDay(resCompleted.data.data.length);
       setCanceledOrdersDay(resCanceled.data.data.length);
       setReturnedOrdersDay(resReturned.data.data.length);
@@ -336,24 +428,58 @@ export default function Dashboard() {
   const getOrdersByWeekStatus = async () => {
     try {
       const { startDate, endDate } = getWeekRange();
-      const resAllOrdersByWeek = await axios.get(`http://localhost:3001/api/orders`, {
+      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
-          dateStart: startDate,
-          dateEnd: endDate,
-
-        }
-
-      })
-      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
-        params: {
-          status: "7",
+          status: "0",
           dateStart: startDate,
           dateEnd: endDate,
         },
       });
-      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
+      const resWaitConfirmed = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
-          status: "0",
+          status: "1",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resConfirmed = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "2",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resPacking = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "3",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resShipping = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "4",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resDelivered = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "5",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resPaid = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "6",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "7",
           dateStart: startDate,
           dateEnd: endDate,
         },
@@ -365,7 +491,12 @@ export default function Dashboard() {
           dateEnd: endDate,
         }
       })
-      setTotalOrdersThisWeek(resAllOrdersByWeek.data.data.length);
+      setWaitConfirmOrdersWeek(resWaitConfirmed.data.data.length);
+      setConfirmedOrdersWeek(resConfirmed.data.data.length);
+      setPackingOrdersWeek(resPacking.data.data.length);
+      setShippingOrdersWeek(resShipping.data.data.length);
+      setDeliveredOrdersWeek(resDelivered.data.data.length);
+      setPaidOrdersWeek(resPaid.data.data.length);
       setCompletedOrdersWeek(resCompleted.data.data.length);
       setCanceledOrdersWeek(resCanceled.data.data.length);
       setReturnedOrdersWeek(resReturned.data.data.length);
@@ -392,8 +523,51 @@ export default function Dashboard() {
   const getOrdersByMonthStatus = async () => {
     try {
       const { startDate, endDate } = getMonthRange();
-      const resAllOrdersByMonth = await axios.get(`http://localhost:3001/api/orders`, {
+      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
+          status: "0",
+          dateStart: startDate,
+          dateEnd: endDate,
+        },
+      });
+      const resWaitConfirmed = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "1",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resConfirmed = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "2",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resPacking = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "3",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resShipping = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "4",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resDelivered = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "5",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resPaid = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "6",
           dateStart: startDate,
           dateEnd: endDate,
         }
@@ -405,14 +579,6 @@ export default function Dashboard() {
           dateEnd: endDate,
         },
       });
-
-      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
-        params: {
-          status: "0",
-          dateStart: startDate,
-          dateEnd: endDate,
-        },
-      });
       const resReturned = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "8",
@@ -420,7 +586,12 @@ export default function Dashboard() {
           dateEnd: endDate,
         }
       })
-      setTotalOrdersThisMonth(resAllOrdersByMonth.data.data.length);
+      setWaitConfirmOrdersMonth(resWaitConfirmed.data.data.length);
+      setConfirmedOrdersMonth(resConfirmed.data.data.length);
+      setPackingOrdersMonth(resPacking.data.data.length);
+      setShippingOrdersMonth(resShipping.data.data.length);
+      setDeliveredOrdersMonth(resDelivered.data.data.length);
+      setPaidOrdersMonth(resPaid.data.data.length);
       setCompletedOrdersMonth(resCompleted.data.data.length);
       setCanceledOrdersMonth(resCanceled.data.data.length);
       setReturnedOrdersMonth(resReturned.data.data.length);
@@ -447,8 +618,51 @@ export default function Dashboard() {
   const getOrdersByYearStatus = async () => {
     try {
       const { startDate, endDate } = getYearRange();
-      const resAllOrdersByYear = await axios.get(`http://localhost:3001/api/orders`, {
+      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
+          status: "0",
+          dateStart: startDate,
+          dateEnd: endDate,
+        },
+      });
+      const resWaitConfirmed = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "1",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resConfirmed = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "2",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resPacking = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "3",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resShipping = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "4",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resDelivered = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "5",
+          dateStart: startDate,
+          dateEnd: endDate,
+        }
+      });
+      const resPaid = await axios.get(`http://localhost:3001/api/orders`, {
+        params: {
+          status: "6",
           dateStart: startDate,
           dateEnd: endDate,
         }
@@ -460,14 +674,6 @@ export default function Dashboard() {
           dateEnd: endDate,
         },
       });
-
-      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
-        params: {
-          status: "0",
-          dateStart: startDate,
-          dateEnd: endDate,
-        },
-      });
       const resReturned = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "8",
@@ -475,7 +681,12 @@ export default function Dashboard() {
           dateEnd: endDate,
         }
       })
-      setTotalOrdersThisYear(resAllOrdersByYear.data.data.length);
+      setWaitConfirmOrdersYear(resWaitConfirmed.data.data.length);
+      setConfirmedOrdersYear(resConfirmed.data.data.length);
+      setPackingOrdersYear(resPacking.data.data.length);
+      setShippingOrdersYear(resShipping.data.data.length);
+      setDeliveredOrdersYear(resDelivered.data.data.length);
+      setPaidOrdersYear(resPaid.data.data.length);
       setCompletedOrdersYear(resCompleted.data.data.length);
       setCanceledOrdersYear(resCanceled.data.data.length);
       setReturnedOrdersYear(resReturned.data.data.length);
@@ -515,45 +726,6 @@ export default function Dashboard() {
     getOrdersByCustomStatus(today, today);
     handleChangeButton(indexButton, nameButton);
   }, []);
-
-  // const getDataForButton = () => {
-  //   switch (indexButton) {
-  //     case 1:
-  //       return {
-  //         total: totalOrdersToday,
-  //         totalPrice: totalPriceByDay,
-  //         color: "#e3d7c3",
-  //       };
-  //     case 2:
-  //       return {
-  //         total: totalOrdersThisWeek,
-  //         totalPrice: totalPriceByWeek,
-  //         color: "#e0ccab",
-  //       };
-  //     case 3:
-  //       return {
-  //         total: totalOrdersThisMonth,
-  //         totalPrice: totalPriceByMonth,
-  //         color: "#e0ccab",
-  //       };
-  //     case 4:
-  //       return {
-  //         total: totalOrdersThisYear,
-  //         totalPrice: totalPriceByYear,
-  //         color: "#e3d7c3",
-  //       };
-  //     case 5:
-  //       return {
-  //         total: totalOrdersByCustomDay,
-  //         totalPrice: totalPriceByCustomDay,
-  //         color: "#e0ccab",
-  //       }
-  //     default:
-  //       return {};
-  //   }
-  // };
-
-  // const dataForButton = getDataForButton();
 
   // Sản phẩm được bán chạy nhất 
   const getListBestSellerByDay = async (date = new Date().toISOString().split('T')[0]) => {
@@ -662,7 +834,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (customDateRange[0] && customDateRange[1]) {
       getListBestSellerCustom();
-      getOrdersByCustomDayStatus();
+      getOrdersPriceByCustomDayStatus();
       getListStockProductsCustom()
     }
   }, [customDateRange]);
@@ -838,15 +1010,20 @@ export default function Dashboard() {
         await getListBestSellerByDay();
         await getListStockProductsByDay();
         setDataBieuDo([
-          { label: "Total", value: totalOrdersToday },
-          { label: "Complete", value: completedOrdersDay },
-          { label: "Cancel", value: canceledOrdersDay },
-          { label: "Return", value: returnedOrdersDay },
+          { label: "Thành công", value: completedOrdersDay },
+          { label: "Đã hủy", value: canceledOrdersDay },
+          { label: "Hoàn trả", value: returnedOrdersDay },
+          { label: "Chờ xác nhận", value: waitConfirmOrdersDay },
+          { label: "Đã xác nhận", value: confirmedOrdersDay },
+          { label: "Đang đóng gói", value: packingOrdersDay },
+          { label: "Đang giao đơn", value: shippingOrdersDay },
+          { label: "Đã giao đơn", value: deliveredOrdersDay },
+          { label: "Đã thanh toán", value: paidOrdersDay },
         ]);
         setDataBieuDo2([
-          { label: "TotalPrice", value: totalPriceByDay },
-          { label: "TotalPriceReturn", value: priceRefundByDay },
-          { label: "TotalPriceCancel", value: priceCancelByDay },
+          { label: "Lợi nhuận", value: totalPriceByDay },
+          { label: "Số tiền đơn hoàn", value: priceRefundByDay },
+          { label: "Số tiền đơn hủy", value: priceCancelByDay },
         ])
         break;
       case 2:
@@ -855,15 +1032,20 @@ export default function Dashboard() {
         await getListBestSellerByWeek();
         await getListStockProductsByWeek();
         setDataBieuDo([
-          { label: "Total", value: totalOrdersThisWeek },
-          { label: "Complete", value: completedOrdersWeek },
-          { label: "Cancel", value: canceledOrdersWeek },
-          { label: "Return", value: returnedOrdersWeek },
+          { label: "Thành công", value: completedOrdersWeek },
+          { label: "Đã hủy", value: canceledOrdersWeek },
+          { label: "Hoàn trả", value: returnedOrdersWeek },
+          { label: "Chờ xác nhận", value: waitConfirmOrdersWeek },
+          { label: "Đã xác nhận", value: confirmedOrdersWeek },
+          { label: "Đang đóng gói", value: packingOrdersWeek },
+          { label: "Đang giao đơn", value: shippingOrdersWeek },
+          { label: "Đã giao đơn", value: deliveredOrdersWeek },
+          { label: "Đã thanh toán", value: paidOrdersWeek },
         ]);
         setDataBieuDo2([
-          { label: "TotalPrice", value: totalPriceByWeek },
-          { label: "TotalPriceReturn", value: priceRefundByWeek },
-          { label: "TotalPriceCancel", value: priceCancelByWeek },
+          { label: "Lợi nhuận", value: totalPriceByWeek },
+          { label: "Số tiền đơn hoàn", value: priceRefundByWeek },
+          { label: "Số tiền đơn hủy", value: priceCancelByWeek },
         ])
         break;
       case 3:
@@ -872,15 +1054,20 @@ export default function Dashboard() {
         await getListBestSellerByMonth();
         await getListStockProductsByMonth();
         setDataBieuDo([
-          { label: "Total", value: totalOrdersThisMonth },
-          { label: "Complete", value: completedOrdersMonth },
-          { label: "Cancel", value: canceledOrdersMonth },
-          { label: "Return", value: returnedOrdersMonth },
+          { label: "Thành công", value: completedOrdersMonth },
+          { label: "Đã hủy", value: canceledOrdersMonth },
+          { label: "Hoàn trả", value: returnedOrdersMonth },
+          { label: "Chờ xác nhận", value: waitConfirmOrdersMonth },
+          { label: "Đã xác nhận", value: confirmedOrdersMonth },
+          { label: "Đang đóng gói", value: packingOrdersMonth },
+          { label: "Đang giao đơn", value: shippingOrdersMonth },
+          { label: "Đã giao đơn", value: deliveredOrdersMonth },
+          { label: "Đã thanh toán", value: paidOrdersMonth },
         ]);
         setDataBieuDo2([
-          { label: "TotalPrice", value: totalPriceByMonth },
-          { label: "TotalPriceReturn", value: priceRefundByMonth },
-          { label: "TotalPriceCancel", value: priceCancelByMonth },
+          { label: "Lợi nhuận", value: totalPriceByMonth },
+          { label: "Số tiền đơn hoàn", value: priceRefundByMonth },
+          { label: "Số tiền đơn hủy", value: priceCancelByMonth },
         ])
         break;
       case 4:
@@ -889,37 +1076,49 @@ export default function Dashboard() {
         await getListBestSellerByYear();
         await getListStockProductsByYear();
         setDataBieuDo([
-          { label: "Total", value: totalOrdersThisYear },
-          { label: "Complete", value: completedOrdersYear },
-          { label: "Cancel", value: canceledOrdersYear },
-          { label: "Return", value: returnedOrdersYear },
+          { label: "Thành công", value: completedOrdersYear },
+          { label: "Đã hủy", value: canceledOrdersYear },
+          { label: "Hoàn trả", value: returnedOrdersYear },
+          { label: "Chờ xác nhận", value: waitConfirmOrdersYear },
+          { label: "Đã xác nhận", value: confirmedOrdersYear },
+          { label: "Đang đóng gói", value: packingOrdersYear },
+          { label: "Đang giao đơn", value: shippingOrdersYear },
+          { label: "Đã giao đơn", value: deliveredOrdersYear },
+          { label: "Đã thanh toán", value: paidOrdersYear },
         ]);
         setDataBieuDo2([
-          { label: "TotalPrice", value: totalPriceByYear },
-          { label: "TotalPriceReturn", value: priceRefundByYear },
-          { label: "TotalPriceCancel", value: priceCancelByYear },
+          { label: "Lợi nhuận", value: totalPriceByYear },
+          { label: "Số tiền đơn hoàn", value: priceRefundByYear },
+          { label: "Số tiền đơn hủy", value: priceCancelByYear },
         ])
         break;
       case 5: // Trường hợp chọn khoảng thời gian tùy chỉnh
-        if (filter.createAtFrom && filter.createAtTo) {
-          data = await getOrdersByCustomStatus(filter.createAtFrom, filter.createAtTo);
+          try {
+          await getOrdersByCustomStatus();
+          await getOrdersPriceByCustomDayStatus();
+          await getListBestSellerCustom();
+          await getListStockProductsCustom();
           setDataBieuDo([
-            { label: "Total", value: totalOrdersByCustomDay},
-            { label: "Complete", value : completedOrdersByCustomDay},
-            { label: "Cancel", value: canceledOrdersByCustomDay},
-            { label: "Return", value: returnedOrdersByCustomDay},
+            { label: "Thành công", value : completedOrdersByCustomDay},
+            { label: "Đã hủy", value: canceledOrdersByCustomDay},
+            { label: "Hoàn trả", value: returnedOrdersByCustomDay},
+            { label: "Chờ xác nhận", value: waitConfirmOrdersCustomDay},
+            { label: "Đã xác nhận", value: confirmedOrdersCustomDay},
+            { label: "Đang đóng gói", value: packingOrdersCustomDay},
+            { label: "Đang giao đơn", value: shippingOrdersCustomDay},
+            { label: "Đã giao đơn", value: deliveredOrdersCustomDay},
+            { label: "Đã thanh toán", value: paidOrdersCustomDay},
           ])
           setDataBieuDo2([
-            { label: "TotalPrice", value: totalPriceByCustomDay},
-            { label: "TotalPriceReturn", value: priceRefundByCustomDay},
-            { label: "TotalPriceCancel", value: priceCancelByCustomDay},
+            { label: "Lợi nhuận", value: totalPriceByCustomDay},
+            { label: "Số tiền đơn hoàn", value: priceRefundByCustomDay},
+            { label: "Số tiền đơn hủy", value: priceCancelByCustomDay},
           ])
-        } else {
-          // Có thể thông báo cho người dùng rằng cần chọn ngày
-          console.warn("Vui lòng chọn khoảng thời gian.");
-          return;
-        }
-
+          console.log(setDataBieuDo[1]);
+          } catch (error) {
+            console.log(error);
+          }
+          
         break;
       default:
         return;
