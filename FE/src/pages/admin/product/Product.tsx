@@ -13,7 +13,7 @@ import { IProduct } from "../../../interface/Products";
 import { ICategory } from "../../../interface/Categories";
 import { ColumnGroupType, ColumnType } from "antd/es/table";
 import { RadioChangeEvent } from "antd/lib";
-import { confirmAlert } from "react-confirm-alert";
+// import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
@@ -69,52 +69,52 @@ export default function Product() {
     setFilteredProducts(results);
   }, [searchTerm, products]);
 
-  const deleteProduct = async (id: number) => {
-    try {
-      confirmAlert({
-        title: "Xác nhận xoá",
-        message: "Bạn có chắc muốn xoá sản phẩm này?",
-        buttons: [
-          {
-            label: "Có",
-            onClick: async () => {
-              const response = await axios.delete(
-                `http://localhost:3001/api/products/${id}`
-              );
-              if (response.status === 200) {
-                const newArr = products.filter((item) => item["_id"] !== id);
-                setProducts(newArr);
-                setFilteredProducts(newArr); // Update filtered products as well
-                toast.success("Xoá sản phẩm thành công!");
-              }
-            },
-          },
-          {
-            label: "Không",
-            onClick: () => {},
-          },
-        ],
-      });
-    } catch (error) {
-      console.log(error);
+  // const deleteProduct = async (id: number) => {
+  //   try {
+  //     confirmAlert({
+  //       title: "Xác nhận xoá",
+  //       message: "Bạn có chắc muốn xoá sản phẩm này?",
+  //       buttons: [
+  //         {
+  //           label: "Có",
+  //           onClick: async () => {
+  //             const response = await axios.delete(
+  //               `http://localhost:3001/api/products/${id}`
+  //             );
+  //             if (response.status === 200) {
+  //               const newArr = products.filter((item) => item["_id"] !== id);
+  //               setProducts(newArr);
+  //               setFilteredProducts(newArr); // Update filtered products as well
+  //               toast.success("Xoá sản phẩm thành công!");
+  //             }
+  //           },
+  //         },
+  //         {
+  //           label: "Không",
+  //           onClick: () => {},
+  //         },
+  //       ],
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  const onChangeRadio = (e: RadioChangeEvent) => {
+    console.log("radio checked", e.target.value);
+    setValue(Number(e.target.value));
+
+    if (e.target.value === 1) {
+      // Tất cả sản phẩm
+      setFilteredProducts(products);
+    } else if (e.target.value === 2) {
+      // Sản phẩm hoạt động (status === 1 là hoạt động)
+      setFilteredProducts(products.filter((product) => product.status === 1));
+    } else if (e.target.value === 3) {
+      // Sản phẩm ngưng hoạt động (status === 0 là ngưng hoạt động)
+      setFilteredProducts(products.filter((product) => product.status === 0));
     }
   };
-
- const onChangeRadio = (e: RadioChangeEvent) => {
-   console.log("radio checked", e.target.value);
-   setValue(Number(e.target.value));
-
-   if (e.target.value === 1) {
-     // Tất cả sản phẩm
-     setFilteredProducts(products);
-   } else if (e.target.value === 2) {
-     // Sản phẩm hoạt động (status === 1 là hoạt động)
-     setFilteredProducts(products.filter((product) => product.status === 1));
-   } else if (e.target.value === 3) {
-     // Sản phẩm ngưng hoạt động (status === 0 là ngưng hoạt động)
-     setFilteredProducts(products.filter((product) => product.status === 0));
-   }
- };
 
   const onChangeSwitch = async (checked: boolean, productId: string) => {
     updateStatusProduct(productId, checked ? 1 : 0);
@@ -163,7 +163,6 @@ export default function Product() {
     // Export workbook to file
     XLSX.writeFile(wb, "products.xlsx");
   };
-
 
   const columns: (
     | ColumnGroupType<{
@@ -234,11 +233,11 @@ export default function Product() {
       width: "10%",
       render: (_, record) => {
         const totalQuantity = record.variants.reduce((total, curr) => {
-          return total += curr.quantity
+          return (total += curr.quantity);
         }, 0);
 
-        return totalQuantity
-      }
+        return totalQuantity;
+      },
     },
     {
       title: "Trạng thái",
@@ -253,16 +252,16 @@ export default function Product() {
         />
       ),
     },
-    {
-      title: "Xóa",
-      dataIndex: "key",
-      key: "key",
-      align: "center",
-      width: "10%",
-      render: (value: any) => (
-        <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
-      ),
-    },
+    // {
+    //   title: "Xóa",
+    //   dataIndex: "key",
+    //   key: "key",
+    //   align: "center",
+    //   width: "10%",
+    //   render: (value: any) => (
+    //     <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
+    //   ),
+    // },
     {
       title: "Chi tiết",
       align: "center",
@@ -291,7 +290,7 @@ export default function Product() {
       // quantity: item.quantity,
       loai: category ? category.loai : "Không tìm thấy danh mục",
       status: item.status,
-      variants: item.variants
+      variants: item.variants,
     };
   });
 
@@ -353,7 +352,7 @@ export default function Product() {
       </Card>
 
       <Card style={{ marginTop: "12px" }}>
-        <Table
+        <Table 
           components={{
             header: {
               cell: (props: any) => (

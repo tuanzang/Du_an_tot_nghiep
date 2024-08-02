@@ -115,6 +115,10 @@ export default function ProductDetail() {
       return message.info("Vui lòng chọn size!");
     }
 
+    if (quantity > selectedSize.quantity) {
+      return message.info("Vượt quá số lượng còn trong kho");
+    }
+
     const body = {
       productId: product?._id,
       quantity,
@@ -159,7 +163,7 @@ export default function ProductDetail() {
     }
   };
 
-  const handleSizeClick = (sizeId: string) => {
+  const handleSizeClick = (sizeId: string  | null) => {
     const findSize = productSizes.find((it) => it._id === sizeId);
     setSelectedSize(findSize);
   };
@@ -252,19 +256,40 @@ export default function ProductDetail() {
                         </div>
                         <div>
                           <div className="button-container mt-2">
-                            <p
-                              className="price-regular"
-                              style={{ color: "black", fontSize: "20px" }}
-                            >
-                              Kích cỡ:
-                            </p>
+                            {/* <div>
+                              <p
+                                className="price-regular"
+                                style={{ color: "black", fontSize: "20px" }}
+                              >
+                                Kích cỡ:
+                              </p>
+                              {productSizes.map((size) => (
+                                <Button
+                                  key={size._id}
+                                  className={`mx-1 ${
+                                    selectedSize?._id === size._id
+                                      ? "selected"
+                                      : ""
+                                  }`}
+                                  style={{
+                                    padding: "10px 20px",
+                                    fontSize: "16px",
+                                  }}
+                                  onClick={() => handleSizeClick(size._id)}
+                                >
+                                  {size.sizeName}
+                                </Button>
+                              ))}
+                            </div> */}
+                            <p>Kích cỡ:</p>
                             {productSizes.map((size) => (
                               <Button
                                 key={size._id}
-                                className={`mx-1 ${selectedSize?._id === size._id
+                                className={`mx-1 ${
+                                  selectedSize?._id === size._id
                                     ? "selected"
                                     : ""
-                                  }`}
+                                }`}
                                 style={{
                                   padding: "10px 20px",
                                   fontSize: "16px",

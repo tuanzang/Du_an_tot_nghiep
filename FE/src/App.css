@@ -3,6 +3,8 @@
 @media print {
 	body {
 		margin: 0 !important;
+	font-family: 'Playfair' !important;
+
 	}
 }
 
@@ -24,4 +26,12 @@
 	max-width: 795px;
 }
 
-  
+.admin-menu{
+	font-family: "SpaceGrotesk-Light";
+	font-size: 15px;
+}
+
+.status-bill{
+	font-family: "SpaceGrotesk-Light";
+	font-size: 15px;
+}

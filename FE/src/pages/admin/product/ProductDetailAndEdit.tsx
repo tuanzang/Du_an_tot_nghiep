@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams,useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useRef } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
@@ -128,10 +128,10 @@ export default function ProductDetailAndEdit() {
       const formData = new FormData();
       formData.append("name", name || "");
       formData.append("description", description || "");
-      let image: any = fileList.map(it => it.url);
+      let image: any = fileList.map((it) => it.url);
 
       // Nối fileList vào formData
-      const newFileList = fileList.filter(it => !it.status);
+      const newFileList = fileList.filter((it) => !it.status);
       if (newFileList.length) {
         const imageFiles: File[] = newFileList.map(
           (file) => file.originFileObj as File
@@ -157,7 +157,8 @@ export default function ProductDetailAndEdit() {
   const handleUpdateProductSize = async (values: any) => {
     try {
       await axios.put(
-        `http://localhost:3001/api/products/productSize/${id}`, values
+        `http://localhost:3001/api/products/productSize/${id}`,
+        values
       );
       toast.success("Cập nhật sản phẩm thành công");
       navigate("/admin/product");
@@ -171,7 +172,7 @@ export default function ProductDetailAndEdit() {
     // Cập nhật trạng thái cho sản phẩm theo kích thước
     // Ví dụ, bạn có thể cập nhật trạng thái trong `productSizes` hoặc gọi một API để cập nhật trạng thái trên server
     console.log(`Status changed for size ${idSize}: ${checked}`);
-};
+  };
 
   useEffect(() => {
     setIsLayoutReady(true);
@@ -319,7 +320,11 @@ export default function ProductDetailAndEdit() {
         </Card>
 
         <Card style={{ padding: "10px", marginBottom: "10px" }}>
-          <Form form={productSizeForm} onFinish={handleUpdateProductSize} onFieldsChange={onFieldsChange}>
+          <Form
+            form={productSizeForm}
+            onFinish={handleUpdateProductSize}
+            onFieldsChange={onFieldsChange}
+          >
             {productSizes.map((it) => (
               <Space
                 key={it._id}
@@ -341,11 +346,11 @@ export default function ProductDetailAndEdit() {
                 >
                   <Input placeholder="Giá" type="number" />
                 </Form.Item>
-                
+
                 <Switch
-                            checked={it.status === "active"}
-                            onChange={(checked) => handleStatusChange(checked, it.idSize)}
-                        />
+                  checked={it.status === "active"}
+                  onChange={(checked) => handleStatusChange(checked, it.idSize)}
+                />
               </Space>
             ))}
 

@@ -54,7 +54,7 @@ const Header = () => {
             }))
           );
         } else {
-          setOptionsSearch([{ label: "No option", value: "", image: "" }]);
+          setOptionsSearch([{ label: "Không tìm thấy sảm phẩm", value: "", image: ""}]);
         }
       } else {
         setOptionsSearch([]);
@@ -100,7 +100,7 @@ const Header = () => {
                 {/* start logo area */}
 
                 {/* main menu area start */}
-                <div className="col-lg-6 position-static">
+                <div className="col-lg-5 position-static">
                   <div className="main-menu-area">
                     <div className="main-menu">
                       {/* main menu navbar start */}
@@ -130,7 +130,7 @@ const Header = () => {
                 {/* main menu area end */}
 
                 {/* mini cart area start */}
-                <div className="col-lg-4">
+                <div className="col-lg-5">
                   <div className="header-right d-flex align-items-center justify-content-xl-between justify-content-lg-end">
                     <div className="header-search-container">
                       <Spin spinning={loadingSearch}>
@@ -141,7 +141,7 @@ const Header = () => {
                                 <img
                                   src={option.image}
                                   alt={option.label}
-                                  style={{ width: 50, marginRight: 10 }}
+                                  style={{ width: 50, marginRight: 10}}
                                 />
                                 <span>{option.label}</span>
                               </div>
@@ -152,7 +152,7 @@ const Header = () => {
                             handleSelect(option)
                           }
                           value={textSearch}
-                          style={{ width: 250 }}
+                          style={{ width: 300 , marginLeft: 20 }}
                         >
                           <Input.Search
                             placeholder="Tìm kiếm sản phẩm"

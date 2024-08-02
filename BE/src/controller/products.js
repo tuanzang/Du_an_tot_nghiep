@@ -40,7 +40,9 @@ export const searchProducts = async (req, res) => {
 
   try {
     const products = await product.find({
-      name: { $regex: name, $options: "i" }, // Sửa đối tượng tìm kiếm ở đây
+      name: { $regex: name, $options: "i" },
+      status: 1,
+      // Sửa đối tượng tìm kiếm ở đây
     });
 
     if (products.length === 0) {
@@ -223,8 +225,8 @@ export const updateProductSizes = async (req, res) => {
 
   try {
     await productSize.deleteMany({
-      idProduct, 
-    })
+      idProduct,
+    });
 
     const transformData = Object.keys(requestData);
 
@@ -265,16 +267,15 @@ export const updateProductSizes = async (req, res) => {
     const productSizeUpdated = await productSize.insertMany(transformBody);
 
     return res.json({
-      message: 'Cập nhật thành công',
-      productSizeUpdated
-    })
+      message: "Cập nhật thành công",
+      productSizeUpdated,
+    });
   } catch (error) {
     return res.status(500).json({
       message: error.message,
     });
   }
 };
-
 
 export const deleteProduct = async (req, res) => {
   try {
@@ -317,7 +318,9 @@ export const filterProductsByPrice = async (req, res) => {
     }
 
     const getProductsPromise = data.map(async (item) => {
-      const variants = await productSize.find({ idProduct: item.idProduct }).exec();
+      const variants = await productSize
+        .find({ idProduct: item.idProduct })
+        .exec();
       return {
         ...item.toJSON(),
         variants,
@@ -328,7 +331,7 @@ export const filterProductsByPrice = async (req, res) => {
 
     return res.status(200).json({
       message: `Danh sách sản phẩm trong khoảng giá từ ${minPrice} đến ${maxPrice}`,
-      data: products
+      data: products,
     });
   } catch (error) {
     return res.status(500).json({
@@ -352,7 +355,9 @@ export const filterProductByCategory = async (req, res) => {
     const data = await product.find({ categoryId });
 
     const getProductsPromise = data.map(async (item) => {
-      const variants = await productSize.find({ idProduct: item.idProduct }).exec();
+      const variants = await productSize
+        .find({ idProduct: item.idProduct })
+        .exec();
       return {
         ...item.toJSON(),
         variants,
