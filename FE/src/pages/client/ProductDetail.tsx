@@ -11,6 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { IProductSize } from "../../interface/ProductSize";
 import ProductItem from "../../components/ProductItem";
 import { formatPrice } from "../../utils";
+import { IOption } from "../../interface/Option";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
@@ -19,23 +20,27 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1); // State for quantity
   const [selectedSize, setSelectedSize] = useState<IProductSize | undefined>();
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
+  const [optionSelected, setOptionSelected] = useState<IOption | null>()
+
+  console.log(123, product?.options);
 
   // product price
   const productPrice = useMemo(() => {
     if (selectedSize) {
+      if (optionSelected?.price) {
+        return formatPrice(selectedSize?.price + optionSelected.price)
+      }
       return formatPrice(selectedSize?.price);
     }
 
     const productSizePrices = product?.productSizedata?.map((it) => it.price) || [];
-    // const minPrice = Math.min(...productSizePrice);
-    // const maxPrice = Math.max(...productSizePrice);
 
     const nonZeroPrices = productSizePrices.filter(price => price > 0).sort((a, b) => a - b);
     const minPrice = nonZeroPrices[0];
     const secondMinPrice = nonZeroPrices[1] || minPrice;
 
     return `${formatPrice(minPrice === 0 ? secondMinPrice : minPrice)} - ${formatPrice(Math.max(...productSizePrices))}`;
-  }, [selectedSize, product]);
+  }, [selectedSize, product, optionSelected]);
 
   // lấy token đăng nhập
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
@@ -171,6 +176,10 @@ export default function ProductDetail() {
     setSelectedSize(findSize);
   };
 
+  const onOptionClick = (option?: IOption) => {
+    setOptionSelected(option)
+  }
+
   return (
     <div>
       <main>
@@ -288,6 +297,30 @@ export default function ProductDetail() {
                             <p>sản phẩm hiện có: {selectedSize?.quantity}</p>
                           </div>
                         )}
+
+                        <div>
+                          <div className="button-container mt-2">
+                            <p>Options:</p>
+                            <Button onClick={() => onOptionClick()} className="mx-1" type={!optionSelected ? 'primary' : 'default'}>
+                              Không chọn
+                            </Button>
+
+                            {product?.options.map((item) => (
+                              <Button
+                                key={item._id}
+                                className={`mx-1`}
+                                type={optionSelected?._id === item._id ? 'primary' : 'default'}
+                                style={{
+                                  padding: "10px 20px",
+                                  fontSize: "16px",
+                                }}
+                                onClick={() => onOptionClick(item)}
+                              >
+                                {item.name}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
 
                         <div className="quantity-cart-box d-flex align-items-center pt-5">
                           <h6 className="option-title">Số lượng:</h6>

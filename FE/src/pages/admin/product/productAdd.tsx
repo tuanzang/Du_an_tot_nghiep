@@ -1,18 +1,8 @@
 import type { FormProps } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-  Upload,
-  Card,
-  Space,
-} from "antd";
-import {
-  UploadOutlined,
-} from "@ant-design/icons";
+import { Button, Form, Input, Select, Upload, Card, Space } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import { IProduct } from "../../../interface/Products";
 import { useEffect, useState, useRef } from "react";
 import { ICategory } from "../../../interface/Categories";
@@ -24,11 +14,118 @@ import { UploadFile } from "antd/lib";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import {
-  ClassicEditor,AccessibilityHelp,Alignment,Autosave,Bold,Essentials,GeneralHtmlSupport,Highlight,Italic,
-  Link,Paragraph,SelectAll,SpecialCharacters,Table,TableCaption,TableCellProperties,TableColumnResize,
-  TableProperties,TableToolbar,TextPartLanguage,Title,Underline,Undo,
+  ClassicEditor,
+  AccessibilityHelp,
+  Alignment,
+  Autosave,
+  Bold,
+  Essentials,
+  GeneralHtmlSupport,
+  Highlight,
+  Italic,
+  Link,
+  Paragraph,
+  SelectAll,
+  SpecialCharacters,
+  Table,
+  TableCaption,
+  TableCellProperties,
+  TableColumnResize,
+  TableProperties,
+  TableToolbar,
+  TextPartLanguage,
+  Title,
+  Underline,
+  Undo,
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
+import OptionFormItem from "./OptionFormItem";
+import axiosInstance from "../../../config/axios";
+import { IOption } from "../../../interface/Option";
+
+const editorConfig = {
+  toolbar: {
+    items: [
+      "undo",
+      "redo",
+      "|",
+      "selectAll",
+      "textPartLanguage",
+      "|",
+      "bold",
+      "italic",
+      "underline",
+      "|",
+      "specialCharacters",
+      "link",
+      "insertTable",
+      "highlight",
+      "|",
+      "alignment",
+      "|",
+      "accessibilityHelp",
+    ],
+    shouldNotGroupWhenFull: false,
+  },
+  plugins: [
+    AccessibilityHelp,
+    Alignment,
+    Autosave,
+    Bold,
+    Essentials,
+    GeneralHtmlSupport,
+    Highlight,
+    Italic,
+    Link,
+    Paragraph,
+    SelectAll,
+    SpecialCharacters,
+    Table,
+    TableCaption,
+    TableCellProperties,
+    TableColumnResize,
+    TableProperties,
+    TableToolbar,
+    TextPartLanguage,
+    Title,
+    Underline,
+    Undo,
+  ],
+  htmlSupport: {
+    allow: [
+      {
+        name: /^.*$/,
+        styles: true,
+        attributes: true,
+        classes: true,
+      },
+    ],
+  },
+  initialData: "",
+  link: {
+    addTargetToExternalLinks: true,
+    defaultProtocol: "https://",
+    decorators: {
+      toggleDownloadable: {
+        mode: "manual",
+        label: "Downloadable",
+        attributes: {
+          download: "file",
+        },
+      },
+    },
+  },
+  placeholder: "Type or paste your content here!",
+  table: {
+    contentToolbar: [
+      "tableColumn",
+      "tableRow",
+      "mergeTableCells",
+      "tableProperties",
+      "tableCellProperties",
+    ],
+  },
+};
 
 const ProductAdd = () => {
   const navigate = useNavigate();
@@ -39,6 +136,11 @@ const ProductAdd = () => {
   const editorRef = useRef(null);
   const [isLayoutReady, setIsLayoutReady] = useState(false);
   const [description, setDescription] = useState<string>("");
+  const [options, setOptions] = useState<IOption[]>([])
+
+  const [form] = Form.useForm();
+
+  const categoryId = Form.useWatch('categoryId', form);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,6 +161,19 @@ const ProductAdd = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    categoryId && fetchOptions(categoryId);
+  }, [categoryId])
+
+  const fetchOptions = async (categoryId: string) => {
+    try {
+      const {data} = await axiosInstance.get(`/options/${categoryId}`);
+      setOptions(data.data);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   const dataCates = cates.map((item: ICategory) => {
     return {
       value: item._id,
@@ -68,8 +183,6 @@ const ProductAdd = () => {
 
   // const [quantity, setQuantity] = useState<Number>(0)
   const onFinish: FormProps<IProduct>["onFinish"] = async (values: any) => {
-    console.log(values);
-
     try {
       // Upload images
       // Lấy danh sách các file từ fileList
@@ -86,13 +199,14 @@ const ProductAdd = () => {
         image,
         description: desc,
         categoryId,
+        options,
         ...rest
       } = { ...values, image: uploadedImageUrls, description } as any;
 
       // Send product data to server
       const dataProduct = await axios.post(
         `http://localhost:3001/api/products/add`,
-        { name, image, description, categoryId }
+        { name, image, description, categoryId, options }
       );
 
       await axios.post(
@@ -119,54 +233,6 @@ const ProductAdd = () => {
     return () => setIsLayoutReady(false);
   }, []);
 
-  const editorConfig = {
-    toolbar: {
-      items: ["undo","redo","|","selectAll","textPartLanguage","|","bold","italic","underline","|","specialCharacters","link",
-        "insertTable","highlight","|","alignment","|","accessibilityHelp",
-      ],
-      shouldNotGroupWhenFull: false,
-    },
-    plugins: [
-      AccessibilityHelp,Alignment,Autosave,Bold,Essentials,GeneralHtmlSupport,Highlight,Italic,Link,Paragraph,
-      SelectAll,SpecialCharacters,Table,TableCaption,TableCellProperties,TableColumnResize,TableProperties,
-      TableToolbar,TextPartLanguage,Title,Underline,Undo,
-    ],
-    htmlSupport: {
-      allow: [
-        {
-          name: /^.*$/,
-          styles: true,
-          attributes: true,
-          classes: true,
-        },
-      ],
-    },
-    initialData: "",
-    link: {
-      addTargetToExternalLinks: true,
-      defaultProtocol: "https://",
-      decorators: {
-        toggleDownloadable: {
-          mode: "manual",
-          label: "Downloadable",
-          attributes: {
-            download: "file",
-          },
-        },
-      },
-    },
-    placeholder: "Type or paste your content here!",
-    table: {
-      contentToolbar: [
-        "tableColumn",
-        "tableRow",
-        "mergeTableCells",
-        "tableProperties",
-        "tableCellProperties",
-      ],
-    },
-  };
-
   const onDescriptionChange = (_event: any, editor: any) => {
     const data = editor.getData();
     setDescription(data);
@@ -180,6 +246,7 @@ const ProductAdd = () => {
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
         autoComplete="off"
+        form={form}
       >
         <div className="d-flex flex-row px-5 py-3">
           <Card>
@@ -210,7 +277,7 @@ const ProductAdd = () => {
 
           <Card>
             <div>
-              {sizes.map((it:any) => (
+              {sizes.map((it: any) => (
                 <Space
                   key={it._id}
                   style={{ display: "flex", marginBottom: 8 }}
@@ -259,6 +326,14 @@ const ProductAdd = () => {
           </Card>
         </div>
 
+        <Card className="mb-3">
+          <p>Phụ kiện</p>
+
+          <Form.Item name='options'>
+            <OptionFormItem options={options} />
+          </Form.Item>
+        </Card>
+
         <div>
           <Card>
             <div
@@ -270,10 +345,9 @@ const ProductAdd = () => {
                   {isLayoutReady && (
                     <CKEditor
                       editor={ClassicEditor}
-                      config={editorConfig}
+                      config={editorConfig as any}
                       data={description}
                       onChange={onDescriptionChange}
-                      name="description"
                     />
                   )}
                 </div>

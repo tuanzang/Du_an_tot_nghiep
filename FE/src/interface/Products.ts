@@ -1,3 +1,5 @@
+import { IOption } from "./Option";
+
 export interface IProduct {
   _id: string | number;
   name: string;
@@ -17,4 +19,5 @@ export interface IProduct {
     _id: string;
   }[];
   variants: { price: number }[];
+  options: IOption[]
 }
