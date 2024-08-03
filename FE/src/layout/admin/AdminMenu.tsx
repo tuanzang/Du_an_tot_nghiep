@@ -126,7 +126,7 @@ export default function AdminMenu({ small }: Props) {
   ];
 
   return (
-    <Menu
+    <Menu className="admin-menu"
       mode="inline"
       defaultOpenKeys={openKeys}
       selectedKeys={[]}

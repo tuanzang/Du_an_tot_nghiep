@@ -54,6 +54,7 @@ export default function BillDetail() {
   const [statusShip, setStatusShip] = useState<boolean | null>(null);
 
   // lấy ra hóa đơn
+  const [totalProductPrice, setTotalProductPrice] = useState<number>(0);
   const [loadingBill, setLoadingBill] = useState(true);
   const [listProductSize, setListProductSize] = useState<IProductSizeBill[]>(
     []
@@ -83,6 +84,13 @@ export default function BillDetail() {
             })
           );
           setListProductSize(productSizes);
+          // lấy ra tổng tiền hàng
+          const totalProductPrice = billData.products.reduce(
+            (total: number, product: IProductBill) =>
+              total + product.price * product.quantity,
+            0
+          );
+          setTotalProductPrice(totalProductPrice);
         }
       } catch (error) {
         toast.error("Không tìm thấy hóa đơn");
@@ -1070,7 +1078,17 @@ export default function BillDetail() {
                 dataIndex="imgae"
                 key="image"
                 width={"15%"}
-                render={(text: string) => <Image src={text} width={100} />}
+                render={(_, record: IProductBill) => (
+                  <img
+                    src={record.image}
+                    alt="Product"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
               />
               <Table.Column
                 title="Sản phẩm"
@@ -1180,7 +1198,7 @@ export default function BillDetail() {
               Tổng tiền hàng:
               <span style={{ fontWeight: "bold" }}>
                 {formatCurrency({
-                  money: String(billDetail?.totalPrice || 0),
+                  money: String(totalProductPrice),
                 })}
               </span>
             </div>
@@ -1192,16 +1210,23 @@ export default function BillDetail() {
               }}
             >
               Phí ship:
-              {billDetail && billDetail.totalPrice >= 1000000 ? (
-                <span>0 VND</span>
-              ) : (
-                <Input
-                  size="middle"
-                  style={{ width: "75%" }}
-                  value={0}
-                  disabled={billDetail && Number(statusBill) !== 1}
-                />
-              )}
+              <span style={{ fontWeight: "bold" }}>
+                {billDetail &&
+                  formatCurrency({ money: String(billDetail.shippingCost) })}
+              </span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 10,
+              }}
+            >
+              Giảm giá:
+              <span style={{ fontWeight: "bold" }}>
+                {billDetail &&
+                  formatCurrency({ money: String(billDetail.discouVoucher) })}
+              </span>
             </div>
             {billDetail && billDetail.totalPrice >= 1000000 && (
               <div style={{ fontSize: 12 }}>

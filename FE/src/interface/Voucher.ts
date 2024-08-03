@@ -2,7 +2,8 @@ export interface IVoucher {
     _id: string;
     code: string;
     description: string;
-    discountPercentage: number;
+    discountType: 'percentage' | 'amount';
+    discountPercentage?: number;
     discountAmount?: number;
     startDate: Date;
     expirationDate: Date;

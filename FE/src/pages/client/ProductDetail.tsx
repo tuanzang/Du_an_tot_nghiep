@@ -256,7 +256,7 @@ export default function ProductDetail() {
                         </div>
                         <div>
                           <div className="button-container mt-2">
-                            <div>
+                            {/* <div>
                               <p
                                 className="price-regular"
                                 style={{ color: "black", fontSize: "20px" }}
@@ -280,7 +280,7 @@ export default function ProductDetail() {
                                   {size.sizeName}
                                 </Button>
                               ))}
-                            </div>
+                            </div> */}
                             <p>Kích cỡ:</p>
                             {productSizes.map((size) => (
                               <Button

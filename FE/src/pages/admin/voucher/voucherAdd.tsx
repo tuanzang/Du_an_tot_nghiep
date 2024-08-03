@@ -12,7 +12,6 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import dayjs from "dayjs";
 
 const VoucherAdd = () => {
   const navigate = useNavigate();
@@ -45,7 +44,7 @@ const VoucherAdd = () => {
         body.discountAmount = discountVal;
       }
 
-      const response = await axios.post(
+      await axios.post(
         "http://localhost:3001/api/discountCode/add",
         body
       );

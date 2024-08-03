@@ -1,21 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, InputNumber, Popconfirm, Table, Typography } from "antd";
-import { useEffect, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Button, InputNumber, Popconfirm, Table, Typography, } from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import useCartMutation, { useMyCartQuery } from "../../hooks/useCart";
 import { formatPrice } from "../../services/common/formatCurrency";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
+  removeProduct,
   selectProductSelected,
   selectTotalPrice,
   updateProductSelected,
 } from "../../store/cartSlice";
 import { socket } from "../../socket";
 
+
+
+
 const { Text } = Typography;
-const SHIPPING_COST = 30000;
+// const SHIPPING_COST = 30000;
 
 
 export interface ICartItem {
@@ -45,6 +49,7 @@ export interface ICartItem {
     _id: string;
     price: number;
     sizeName: string;
+  
   };
 }
 
@@ -60,16 +65,18 @@ export default function Cart() {
   const { mutate: onDeleteProduct } = useCartMutation({
     action: "DELETE",
   });
-  // const navigate = useNavigate();
 
+
+  
   // initial socket
   useEffect(() => {
     const onConnect = () => {
       console.log("Socket client connect");
     };
 
-    const onHiddenProduct = () => {
+    const onHiddenProduct = (productId: string) => {
       refetch();
+      dispatch(removeProduct(productId))
     };
 
     socket.on("connect", onConnect);
@@ -81,6 +88,9 @@ export default function Cart() {
     };
   }, [refetch]);
 
+ 
+  
+
   const productsFormatted = useMemo(() => {
     return data?.data?.products?.map((it) => ({
       ...it.product,
@@ -89,19 +99,33 @@ export default function Cart() {
     }));
   }, [data?.data]);
 
-  const handleUpdateQuantity = (
-    variantId: string,
-    quantity: number,
-    maxQuantity: number
-  ) => {
-    if (quantity > maxQuantity) {
-      alert("Số lượng mua vượt quá số lượng còn lại trong kho");
-      return;
-    }
+  // const handleUpdateQuantity = (
+  //   variantId: string,
+  //   quantity: number,
+   
+  // ) => {
+  //   onUpdateQuantity({
+  //     variantId,
+  //     quantity: quantity,
+  //   });
+  // };
+ 
+  const handleUpdateQuantity = (variantId: string, quantity: number) => {
     onUpdateQuantity({
       variantId,
-      quantity: quantity,
+      quantity,
     });
+    // Cập nhật productSelected với số lượng mới
+    const updatedProductSelected = productSelected.map((item) =>
+      item.variant._id === variantId ? { ...item, quantity } : item
+    );
+    dispatch(updateProductSelected(updatedProductSelected));
+
+    // Cập nhật totalPrice
+    const newTotalPrice = updatedProductSelected.reduce((total, item) => {
+      return total + item.variant.price * item.quantity;
+    }, 0);
+    dispatch(totalPrice(newTotalPrice));
   };
   const handleDeleteProduct = (variantId: string) => {
     onDeleteProduct(variantId, {
@@ -119,6 +143,10 @@ export default function Cart() {
 
   // Tính tổng tiền bao gồm phí ship nếu có sản phẩm đã chọn
  
+
+ 
+
+
 
   return (
     <div>
@@ -238,12 +266,14 @@ export default function Cart() {
                               handleUpdateQuantity(
                                 record.variant._id,
                                 quantity,
-                                record.quantity
+                               
                               )
                             }
                           />
                         )}
                       />
+  
+
                       <Table.Column
                         title="Thành tiền"
                         dataIndex="totalPrice"
@@ -355,7 +385,7 @@ export default function Cart() {
                         />
                       </Table>
 
-                      <a href="">Sử dụng mã giảm giá</a>
+
                     </div>
                   )}
                 
