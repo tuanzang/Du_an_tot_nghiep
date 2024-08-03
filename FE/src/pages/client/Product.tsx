@@ -255,29 +255,6 @@ export default function Product() {
                     >
                       <span>Kích cỡ</span>
                     </h5>
-
-                    <div className="sidebar-body">
-                      <ul className="checkbox-container categories-list">
-                        {sizes.map((size, index) => (
-                          <li key={size._id}>
-                            <div className="custom-control custom-checkbox">
-                              <input
-                                type="checkbox"
-                                className="custom-control-input"
-                                id={`customCheck${index}`}
-                              />
-                              <label
-                                className="custom-control-label"
-                                htmlFor={`customCheck${index}`}
-                              >
-                                {size.name}
-                              </label>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div> */}
                   {/* <!-- single sidebar end --> */}
 
                   {/* <!-- single sidebar start --> */}
