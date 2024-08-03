@@ -35,15 +35,19 @@ export const createOrder = async (req, res) => {
       name: item.product.name,
       price: item.variant.price,
       quantity: item.quantity,
+      image: item.product.image[0],
       size: item.variant.sizeName,
       variantId: item.variant._id,
     }));
 
-    const totalPrice = cartProducts.reduce((total, curr) => {
-      total += curr.variant.price * curr.quantity;
+    const totalPrice =
+      cartProducts.reduce((total, curr) => {
+        total += curr.variant.price * curr.quantity;
 
-      return total;
-    }, 0)- bodyData.discouVoucher+ bodyData.shippingCost;
+        return total;
+      }, 0) -
+      bodyData.discouVoucher +
+      bodyData.shippingCost;
 
     const orders = await new Order({
       ...req.body,
