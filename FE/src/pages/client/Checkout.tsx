@@ -22,9 +22,12 @@ import { socket } from "../../socket";
 import { IVoucher } from "../../interface/Voucher";
 import dayjs from "dayjs";
 import axios from "axios";
+
 const SHIPPING_COST = 30000;
+
 // import { useLocation } from "react-router-dom";
 const { Text } = Typography;
+
 type Inputs = {
   customerName: string;
   address: string;
@@ -280,7 +283,6 @@ const Checkout = () => {
                   <td>
                     {item.product.name} (Size: {item.variant?.sizeName})
                   </td>
-
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
                   <td>{formatPrice(item.variant.price * item.quantity)}</td>
@@ -416,7 +418,7 @@ const Checkout = () => {
               marginTop: "20px",
             }}
           >
-            <span>Tổng tiền bao gồm ship: </span>
+            <span>Tổng tiền: </span>
             <Text style={{ fontWeight: 800, color: "red" }}>
               {formatPrice(totalPriceWithShipping)}
             </Text>
