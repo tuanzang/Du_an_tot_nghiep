@@ -28,6 +28,13 @@ const productSchema = new mongoose.Schema(
       required: true,
       default: 1,
     },
+    options: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'options',
+        required: true
+      }
+    ]
   },
   {
     timestamps: true,

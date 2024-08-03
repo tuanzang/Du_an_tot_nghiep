@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useRef } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Button, Card, Form, Input, Space, Switch, Upload } from "antd";
+import { Button, Card, Form, Input, Select, Space, Switch, Upload } from "antd";
 import { EditOutlined, UploadOutlined } from "@ant-design/icons";
 import { UploadFile } from "antd/lib";
 import { IProduct } from "../../../interface/Products";
@@ -37,6 +37,10 @@ import {
 import "ckeditor5/ckeditor5.css";
 import { uploadImage } from "../../../services/upload/upload";
 import { toast } from "react-toastify";
+import OptionFormItem from "./OptionFormItem";
+import axiosInstance from "../../../config/axios";
+import { ICategory } from "../../../interface/Categories";
+import { IOption } from "../../../interface/Option";
 
 export default function ProductDetailAndEdit() {
   const { id } = useParams<{ id: string }>(); // Lấy ID sản phẩm từ URL
@@ -55,6 +59,11 @@ export default function ProductDetailAndEdit() {
   const [isChanged1, setIsChanged1] = useState(false);
   const [isChanged2, setIsChanged2] = useState(false);
   const [productSizeForm] = Form.useForm();
+  const [form] = Form.useForm()
+  const [categories, setCategories] = useState<ICategory[]>([])
+  const [options, setOptions] = useState<IOption[]>([])
+
+  const categoryId = Form.useWatch('categoryId', form);
 
   useEffect(() => {
     // Gọi API để lấy chi tiết sản phẩm
@@ -63,6 +72,8 @@ export default function ProductDetailAndEdit() {
         const { data } = await axios.get(
           `http://localhost:3001/api/products/${id}`
         );
+        form.setFieldValue('categoryId', data.data.categoryId[0]);
+        form.setFieldValue('options', data.data.options);
         setProduct(data.data);
         setName(data.data.name);
         setPrice(data.data.price);
@@ -102,6 +113,32 @@ export default function ProductDetailAndEdit() {
     fetchProductDetails();
     fetchProductSizes();
   }, [id]);
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  useEffect(() => {
+    categoryId && fetchOptions(categoryId);
+  }, [categoryId])
+
+  const fetchOptions = async (categoryId: string) => {
+    try {
+      const {data} = await axiosInstance.get(`/options/${categoryId}`);
+      setOptions(data.data);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axiosInstance.get('/categories');
+      setCategories(data.data);
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const onFieldsChange = () => {
     setIsChanged1(true);
@@ -263,6 +300,16 @@ export default function ProductDetailAndEdit() {
     },
   };
 
+  const onFinish = async (values: any) => {
+    try {
+      await axiosInstance.put(`/products/${id}`, values);
+      toast.success("Cập nhật sản phẩm thành công");
+      navigate("/admin/product");
+    } catch (error) {
+      console.log(error)      
+    }
+  }
+
   return (
     <div>
       <BreadcrumbsCustom
@@ -364,6 +411,20 @@ export default function ProductDetailAndEdit() {
                 Cập nhật
               </Button>
             )}
+          </Form>
+        </Card>
+
+        <Card className="my-3">
+          <Form form={form} layout='vertical' onFinish={onFinish}>
+            <Form.Item name='categoryId' label="Danh mục SP">
+              <Select onChange={() => form.setFieldValue('options', [])} options={categories.map(it => ({ label: it.loai, value: it._id }))} />
+            </Form.Item>
+
+            <Form.Item name='options'>
+              <OptionFormItem options={options} />
+            </Form.Item>
+
+            <Button type='primary' htmlType='submit'>Update</Button>
           </Form>
         </Card>
 
