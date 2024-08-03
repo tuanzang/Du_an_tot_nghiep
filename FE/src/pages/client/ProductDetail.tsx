@@ -26,12 +26,15 @@ export default function ProductDetail() {
       return formatPrice(selectedSize?.price);
     }
 
-    const productSizePrice =
-      product?.productSizedata?.map((it) => it.price) || [];
-    const minPrice = Math.min(...productSizePrice);
-    const maxPrice = Math.max(...productSizePrice);
+    const productSizePrices = product?.productSizedata?.map((it) => it.price) || [];
+    // const minPrice = Math.min(...productSizePrice);
+    // const maxPrice = Math.max(...productSizePrice);
 
-    return `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
+    const nonZeroPrices = productSizePrices.filter(price => price > 0).sort((a, b) => a - b);
+    const minPrice = nonZeroPrices[0];
+    const secondMinPrice = nonZeroPrices[1] || minPrice;
+
+    return `${formatPrice(minPrice === 0 ? secondMinPrice : minPrice)} - ${formatPrice(Math.max(...productSizePrices))}`;
   }, [selectedSize, product]);
 
   // lấy token đăng nhập
@@ -115,6 +118,10 @@ export default function ProductDetail() {
       return message.info("Vui lòng chọn size!");
     }
 
+    if (quantity > selectedSize.quantity) {
+      return message.info("Vượt quá số lượng còn trong kho");
+    }
+
     const body = {
       productId: product?._id,
       quantity,
@@ -159,7 +166,7 @@ export default function ProductDetail() {
     }
   };
 
-  const handleSizeClick = (sizeId: string) => {
+  const handleSizeClick = (sizeId: string | null) => {
     const findSize = productSizes.find((it) => it._id === sizeId);
     setSelectedSize(findSize);
   };
@@ -252,25 +259,21 @@ export default function ProductDetail() {
                         </div>
                         <div>
                           <div className="button-container mt-2">
-                            <p
-                              className="price-regular"
-                              style={{ color: "black", fontSize: "20px" }}
-                            >
-                              Kích cỡ:
-                            </p>
+                            <p>Kích cỡ:</p>
                             {productSizes.map((size) => (
                               <Button
                                 key={size._id}
-                                className={`mx-1 ${
-                                  selectedSize?._id === size._id
+                                className={`mx-1 ${selectedSize?._id === size._id
                                     ? "selected"
                                     : ""
-                                }`}
+                                  }`}
                                 style={{
                                   padding: "10px 20px",
                                   fontSize: "16px",
+                                  opacity: size.quantity === 0 ? 0.5 : 1, // Làm mờ nếu số lượng là 0
+                                  cursor: size.quantity === 0 ? "not-allowed" : "pointer"
                                 }}
-                                onClick={() => handleSizeClick(size._id)}
+                                onClick={() => size.quantity > 0 && handleSizeClick(size._id)}
                               >
                                 {size.sizeName}
                               </Button>
@@ -286,7 +289,7 @@ export default function ProductDetail() {
                           </div>
                         )}
 
-                        <div className="quantity-cart-box d-flex align-items-center">
+                        <div className="quantity-cart-box d-flex align-items-center pt-5">
                           <h6 className="option-title">Số lượng:</h6>
                           <div className="quantity-controls">
                             <button
@@ -371,13 +374,16 @@ export default function ProductDetail() {
                                     }}
                                   >
                                     <hr />
-                                    <h6 className="product-tab-title">
-                                      {product?.description}
-                                    </h6>
+                                    <div
+                                      dangerouslySetInnerHTML={{
+                                        __html: product?.description || "",
+                                      }}
+                                    />
                                   </div>
                                 </div>
                               </div>
                             </div>
+
                             <div id="tab_two" className="tab-pane fade">
                               <div className="product-tab-content">
                                 <div
@@ -510,46 +516,6 @@ export default function ProductDetail() {
                                           </div>
                                         </div>
                                       </div>
-                                      // <div className="review-content">
-                                      //   <hr />
-                                      //   <div
-                                      //     className="row"
-                                      //     key={comment._id}
-                                      //   >
-                                      //     <div className="col-lg-3">
-                                      //       <div className="rev-author">
-                                      //         <img
-                                      //           src={comment.avatar}
-                                      //           alt="avatar"
-                                      //           style={{
-                                      //             marginRight: "10px",
-                                      //           }}
-                                      //         />
-                                      //         <span>{comment.fullName}</span>
-                                      //         <span
-                                      //           style={{ float: "right" }}
-                                      //         >
-                                      //           {dayjs(
-                                      //             comment.createdAt
-                                      //           ).format(
-                                      //             "DD/MM/YYYY HH:mm:ss"
-                                      //           )}
-                                      //         </span>
-                                      //       </div>
-                                      //     </div>
-                                      //     <div className="col-lg-12">
-                                      //       <div className="rev-content">
-                                      //         <p
-                                      //           style={{
-                                      //             paddingLeft: "20px",
-                                      //           }}
-                                      //         >
-                                      //           {comment.comment}
-                                      //         </p>
-                                      //       </div>
-                                      //     </div>
-                                      //   </div>
-                                      // </div>
                                     ))
                                   ) : (
                                     <div className="form-group row">
@@ -583,7 +549,7 @@ export default function ProductDetail() {
                   {/* <!-- section title start --> */}
                   <div className="section-title text-center">
                     <h2 className="title">Sản phẩm liên quan</h2>
-                    <p className="sub-title">Sản phẩm liên quan</p>
+                    {/* <p className="sub-title">Sản phẩm liên quan</p> */}
                   </div>
                   {/* <!-- section title start --> */}
                 </div>

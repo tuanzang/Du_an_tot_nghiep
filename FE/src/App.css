@@ -1,20 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 @media print {
 	body {
 		margin: 0 !important;
+	font-family: 'Playfair' !important;
+
 	}
 }
 
 .main-container {
-	font-family: 'Lato';
+	font-family: 'Playfair';
 	width: fit-content;
 	margin-left: auto;
 	margin-right: auto;
 }
 
 .ck-content {
-	font-family: 'Lato';
+	font-family: 'Playfair';
 	line-height: 1.6;
 	word-break: break-word;
 }
@@ -24,4 +26,12 @@
 	max-width: 795px;
 }
 
-  
+.admin-menu{
+	font-family: "SpaceGrotesk-Light";
+	font-size: 15px;
+}
+
+.status-bill{
+	font-family: "SpaceGrotesk-Light";
+	font-size: 15px;
+}

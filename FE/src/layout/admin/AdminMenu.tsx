@@ -106,6 +106,11 @@ export default function AdminMenu({ small }: Props) {
           key: "size",
           label: <Link to="/admin/size">Size</Link>,
         }
+        ,
+        {
+          key: "voucher",
+          label: <Link to="/admin/voucher">Mã giảm giá</Link>,
+        }
       ],
     },
     {
@@ -121,7 +126,7 @@ export default function AdminMenu({ small }: Props) {
   ];
 
   return (
-    <Menu
+    <Menu className="admin-menu"
       mode="inline"
       defaultOpenKeys={openKeys}
       selectedKeys={[]}

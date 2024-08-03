@@ -153,14 +153,18 @@ export default function Bill() {
   const listSttHD = ["1", "2", "3", "4", "5", "6", "7", "8", "0"];
 
   return (
-    <div>
+    <div className="bill-container">
       <BreadcrumbsCustom listLink={[]} nameHere={"Đơn hàng"} />
       <Card bordered={false}>
         <Row gutter={16}>
           <Col span={10}>
             <Input
               id="hd-input-search"
-              style={{ width: "100%", borderColor: "#c29957" }}
+              style={{
+                width: "100%",
+                borderColor: "#c29957",
+                fontFamily: "PlayFair",
+              }}
               size="middle"
               placeholder="Tìm kiếm hoá đơn theo mã hóa đơn"
               prefix={<SearchOutlined style={{ color: "#1890ff" }} />}
@@ -168,7 +172,15 @@ export default function Bill() {
             />
           </Col>
           <Col span={5}>
-            <span style={{ marginRight: "10px" }}>Từ ngày</span>
+            <span
+              style={{
+                marginRight: "10px",
+                fontFamily: "PlayFair",
+                fontSize: "15px",
+              }}
+            >
+              Từ ngày
+            </span>
             <DatePicker
               format={"DD-MM-YYYY"}
               onChange={(e) =>
@@ -180,7 +192,15 @@ export default function Bill() {
             />
           </Col>
           <Col span={5}>
-            <span style={{ marginRight: "10px" }}>Đến ngày</span>
+            <span
+              style={{
+                marginRight: "10px",
+                fontFamily: "PlayFair",
+                fontSize: "15px",
+              }}
+            >
+              Đến ngày
+            </span>
             <DatePicker
               format={"DD-MM-YYYY"}
               onChange={(e) =>
@@ -200,6 +220,8 @@ export default function Bill() {
                 float: "right",
                 borderColor: "#c29957",
                 color: "#c29957",
+                fontFamily: "PlayFair",
+                fontSize: "15px",
               }}
               onClick={() => handleFilter(codeSearch, dateSearch)}
             >
@@ -208,7 +230,7 @@ export default function Bill() {
           </Col>
         </Row>
       </Card>
-      <Card style={{ marginTop: "12px" }}>
+      <Card style={{ marginTop: "12px" }} >
         <Tabs activeKey={valueTabHD} onChange={handleChangeTab}>
           <TabPane tab="Tất cả" key="" />
           {listSttHD.map((row) => (
@@ -216,6 +238,7 @@ export default function Bill() {
           ))}
         </Tabs>
         <Table
+          className="status-bill"
           dataSource={listBill}
           columns={columns}
           pagination={{

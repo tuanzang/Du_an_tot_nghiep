@@ -1,24 +1,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMyCartQuery } from "../../hooks/useCart";
+import { Typography, Modal, Radio, Card, Button } from "antd";
 import { formatPrice } from "../../services/common/formatCurrency";
 import { SubmitHandler, useForm } from "react-hook-form";
 import OrderApi from "../../config/orderApi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { IHistoryBill } from "../../interface/HistoryBill";
-import axios from "axios";
+
 import { IUser } from "../../interface/Users";
 import { useDispatch, useSelector } from "react-redux";
 import { ICartItem } from "./Cart";
 import {
   removeProduct,
-  resetProductSelected,
   selectProductSelected,
   selectTotalPrice,
 } from "../../store/cartSlice";
 import { USER_INFO_STORAGE_KEY } from "../../services/constants";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { socket } from "../../socket";
+import { IVoucher } from "../../interface/Voucher";
+import dayjs from "dayjs";
+import axios from "axios";
+
+const SHIPPING_COST = 30000;
+
+// import { useLocation } from "react-router-dom";
+const { Text } = Typography;
 
 type Inputs = {
   customerName: string;
@@ -39,6 +47,10 @@ const Checkout = () => {
 
   const { refetch } = useMyCartQuery();
   const navigate = useNavigate();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [discountCodes, setDiscountCodes] = useState([]);
+  const [selectedDiscountCode, setSelectedDiscountCode] = useState(null);
+  const [totalDiscount, setTotalDiscount] = useState(0);
 
   // initial socket
   useEffect(() => {
@@ -71,6 +83,8 @@ const Checkout = () => {
       const res = await OrderApi.createOrder({
         ...data,
         productSelectedIds,
+        shippingCost: SHIPPING_COST,
+        discouVoucher: totalDiscount,
       });
 
       if (data?.paymentMethod === "COD") {
@@ -78,12 +92,11 @@ const Checkout = () => {
         toast.success("Đặt hàng thành công!");
         navigate("/");
         refetch();
-        dispatch(resetProductSelected());
       } else {
         window.location.href = res?.data?.paymentUrl;
       }
     } catch (error) {
-      console.log(data);
+      toast.error("Đặt hàng thất bại!");
     }
   };
 
@@ -116,6 +129,51 @@ const Checkout = () => {
     } catch (error) {
       toast.error("Tạo lịch sử thất bại");
     }
+  };
+  
+const discountedPrice = totalPrice - totalDiscount;
+const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
+
+  useEffect(() => {
+    // Fetch mã giảm giá từ API
+    axios
+      .get("http://localhost:3001/api/discountCode/discountCodes")
+      .then((response) => {
+        setDiscountCodes(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching discount codes:", error);
+      });
+  }, []);
+
+  const showDiscountModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleOk = () => {
+    if (selectedDiscountCode) {
+      const selectedCode = discountCodes.find(
+        (code) => code.code === selectedDiscountCode
+      );
+      if (selectedCode) {
+        let discountAmount = 0;
+        if (selectedCode.discountType === "percentage") {
+          discountAmount = (totalPrice * selectedCode.discountPercentage) / 100;
+        } else if (selectedCode.discountType === "amount") {
+          discountAmount = selectedCode.discountAmount;
+        }
+        setTotalDiscount(discountAmount);
+      }
+    }
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleDiscountCodeChange = (e: any) => {
+    setSelectedDiscountCode(e.target.value);
   };
 
   return (
@@ -229,11 +287,143 @@ const Checkout = () => {
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
                   <td>{formatPrice(item.variant.price * item.quantity)}</td>
+                  {/* <td> {formatPrice(SHIPPING_COST)}</td> */}
                 </tr>
               ))}
             </tbody>
           </table>
-          <h4>Tổng tiền: {formatPrice(totalPrice)}</h4>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "10px 20px",
+              borderTop: "1px solid gray",
+              marginTop: "20px",
+            }}
+          >
+            <span>Tổng tiền:</span>
+            <Text style={{ fontWeight: 800, color: "red" }}>
+              {formatPrice(totalPrice)}
+            </Text>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "10px 20px",
+            }}
+          >
+            <span>Phí ship:</span>
+            <Text style={{ fontWeight: 800, color: "red" }}>
+              {formatPrice(SHIPPING_COST)}
+            </Text>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "10px 20px",
+            }}
+          >
+            <span>
+              Mã giảm giá:
+              <span
+                style={{ fontWeight: 800, color: "red", marginLeft: "20px" }}
+              >
+                {selectedDiscountCode}
+              </span>
+            </span>
+            <div style={{ fontWeight: 800, color: "red" }}>
+              {selectedDiscountCode ? (
+                <div className="d-flex justify-content-between">
+                  <p>{totalDiscount > 0 ? formatPrice(totalDiscount) : null}</p>
+                </div>
+              ) : null}
+            </div>
+          </div>
+
+          {/* <span style={{float:"right"}}>- 10.000 VNĐ</span> */}
+          <Modal
+            title="Mã giảm giá"
+            visible={isModalVisible}
+            onOk={handleOk}
+            onCancel={handleCancel}
+          >
+            <Radio.Group
+              onChange={handleDiscountCodeChange}
+              value={selectedDiscountCode}
+            >
+              {discountCodes.map((code: IVoucher) => (
+                <Card
+                  key={code._id}
+                  style={{
+                    backgroundColor: "#66FF66",
+                    marginBottom: 10,
+                    opacity:
+                      code.minPurchaseAmount !== undefined &&
+                      totalPrice >= code.minPurchaseAmount
+                        ? 1
+                        : 0.5,
+                    pointerEvents:
+                      code.minPurchaseAmount !== undefined &&
+                      totalPrice >= code.minPurchaseAmount
+                        ? "auto"
+                        : "none",
+                  }}
+                >
+                  <Radio
+                    value={code.code}
+                    className="discount-radio"
+                    disabled={totalPrice < !code.minPurchaseAmount}
+                  >
+                    <strong className="discount-code">{code.code}</strong>
+                    {code.discountType === "percentage" ? (
+                      <span className="discount-detail">
+                        {" "}
+                        - Giảm {code.discountPercentage}%
+                      </span>
+                    ) : (
+                      <span className="discount-detail">
+                        {" "}
+                        - Giảm {code.discountAmount} VNĐ
+                      </span>
+                    )}
+                    <span
+                      style={{ paddingLeft: 1 }}
+                      className="discount-detail"
+                    >
+                      {" "}
+                      (Đơn tối thiểu {code.minPurchaseAmount}đ)
+                    </span>
+                    <br />
+                    <span className="expiration-date">
+                      HSD:{" "}
+                      {dayjs(code.expirationDate).format("DD/MM/YYYY HH:mm:ss")}
+                    </span>
+                  </Radio>
+                </Card>
+              ))}
+            </Radio.Group>
+          </Modal>
+
+          <div style={{ padding: "0px 20px" }}>
+            <Button onClick={showDiscountModal}>Chọn mã</Button>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "10px 20px",
+              borderTop: "1px solid gray",
+              marginTop: "20px",
+            }}
+          >
+            <span>Tổng tiền: </span>
+            <Text style={{ fontWeight: 800, color: "red" }}>
+              {formatPrice(totalPriceWithShipping)}
+            </Text>
+          </div>
         </div>
       </div>
     </div>

@@ -81,19 +81,19 @@ const ProductEdit = () => {
       onFinishFailed={onFinishFailed}
       autoComplete="off"
     >
-      <Form.Item<IProduct> label="Tên sản phẩm" name="name">
+      <Form.Item<IProduct> label="Tên sản phẩm" className="name">
         <Input type="text" />
       </Form.Item>
-      <Form.Item<IProduct> label="Giá" name="price">
+      <Form.Item<IProduct> label="Giá" className="price">
         <Input />
       </Form.Item>
-      <Form.Item<IProduct> label="Giá cũ" name="priceOld">
+      <Form.Item<IProduct> label="Giá cũ" className="priceOld">
         <Input />
       </Form.Item>
-      <Form.Item<IProduct> label="Số lượng" name="quantity">
+      <Form.Item<IProduct> label="Số lượng" className="quantity">
         <Input />
       </Form.Item>
-      <Form.Item<IProduct> label="Ảnh" name="image">
+      <Form.Item<IProduct> label="Ảnh" className="image">
         <Upload
           listType="picture"
           fileList={fileList}
@@ -105,7 +105,7 @@ const ProductEdit = () => {
           <Button icon={<UploadOutlined />}>Tải ảnh lên</Button>
         </Upload>
       </Form.Item>
-      <Form.Item<IProduct> label="Mô tả" name="description">
+      <Form.Item<IProduct> label="Mô tả" className="description">
         <Input />
       </Form.Item>
       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>

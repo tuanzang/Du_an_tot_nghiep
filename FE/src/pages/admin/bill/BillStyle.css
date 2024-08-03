@@ -94,3 +94,17 @@
   background: rgb(224, 246, 224) !important;
   border-color: rgb(23, 150, 23) !important;
 }
+/* BillStyle.css */
+.bill-container {
+  font-family: "Playfair", serif;
+  font-size: 18px;
+}
+
+.bill-container .ant-input,
+.bill-container .ant-btn,
+.bill-container .ant-tabs-tab-btn,
+.bill-container .ant-table-cell,
+.bill-container .ant-table-thead > tr > th {
+  font-family: "SpaceGrotesk-Light", serif;
+  font-size: 16px;
+}

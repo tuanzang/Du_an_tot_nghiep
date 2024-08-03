@@ -9,7 +9,7 @@ export interface IProduct {
   quantity: number;
   description: string;
   categoryId: string;
-  status: boolean;
+  status: number|boolean;
   createdAt: string;
   productSizedata: {
     price: number;

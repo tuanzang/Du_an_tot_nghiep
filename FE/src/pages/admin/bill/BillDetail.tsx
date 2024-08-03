@@ -7,6 +7,7 @@ import {
   Divider,
   Image,
   Input,
+  Radio,
   Row,
   Space,
   Spin,
@@ -20,7 +21,6 @@ import DialogAddUpdate from "./DialogAddUpdateProps ";
 import axios from "axios";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import TimeLine from "./TimeLine";
-import { IoReturnUpBack } from "react-icons/io5";
 import BillHistoryDialog from "./BillHistoryDialog";
 import statusHoaDon from "../../../services/constants/statusHoaDon";
 import AdBillTransaction from "./AdBillTransaction";
@@ -51,8 +51,10 @@ export default function BillDetail() {
   const { id } = useParams();
   const [idCustomer, setIdCustomer] = useState<string | null>(null);
   const [statusBill, setStatusBill] = useState<string>("");
+  const [statusShip, setStatusShip] = useState<boolean | null>(null);
 
   // lấy ra hóa đơn
+  const [totalProductPrice, setTotalProductPrice] = useState<number>(0);
   const [loadingBill, setLoadingBill] = useState(true);
   const [listProductSize, setListProductSize] = useState<IProductSizeBill[]>(
     []
@@ -73,6 +75,7 @@ export default function BillDetail() {
           setBillDetail(billData);
           setIdCustomer(billData.userId);
           setStatusBill(billData.status);
+          setStatusShip(billData.statusShip);
           // Trích xuất variantId và quantity từ products
           const productSizes = billData.products.map(
             (product: IProductSizeBill) => ({
@@ -81,6 +84,13 @@ export default function BillDetail() {
             })
           );
           setListProductSize(productSizes);
+          // lấy ra tổng tiền hàng
+          const totalProductPrice = billData.products.reduce(
+            (total: number, product: IProductBill) =>
+              total + product.price * product.quantity,
+            0
+          );
+          setTotalProductPrice(totalProductPrice);
         }
       } catch (error) {
         toast.error("Không tìm thấy hóa đơn");
@@ -217,7 +227,8 @@ export default function BillDetail() {
                 id ? id : null,
                 "0",
                 user ? user : null,
-                ghiChu
+                ghiChu,
+                statusShip
               );
               toast.success("Hủy đơn hàng thành công!");
               setOpenModalCancelBill(false);
@@ -285,16 +296,17 @@ export default function BillDetail() {
     id: string | null,
     status: string,
     user: IUser | null,
-    note: string
+    note: string,
+    statusShip: boolean | null
   ) => {
     setLoadingBill(true);
-    if (id === null || user === null) {
+    if (id === null || user === null || statusShip === null) {
       toast.error("Không tìm thấy hóa đơn");
     } else {
       try {
         const response = await axios.post(
           "http://localhost:3001/api/bills/update-status",
-          { id: id, status: status }
+          { id: id, status: status, statusShip: statusShip }
         );
         createNewHistory(response.data.data, user, note);
         setStatusBill(status);
@@ -314,7 +326,7 @@ export default function BillDetail() {
     useState(false);
   const [openCodalConfirmReceived, setOpenCodalConfirmReceived] =
     useState(false);
-  const [openmodalReturnStt, setOpenModalReturnStt] = useState(false);
+  // const [openmodalReturnStt, setOpenModalReturnStt] = useState(false);
 
   // xác nhận đơn hàng
   function ModalConfirmBill() {
@@ -331,7 +343,8 @@ export default function BillDetail() {
                 id ? id : null,
                 "2",
                 user ? user : null,
-                ghiChu
+                ghiChu,
+                statusShip
               );
               handleDecreaseProductSize(listProductSize);
               toast.success("Xác nhận đơn hàng thành công!");
@@ -403,7 +416,8 @@ export default function BillDetail() {
             id ? id : null,
             "3",
             user ? user : null,
-            ghiChu
+            ghiChu,
+            statusShip
           );
           toast.success("Xác nhận đóng gói & vận chuyển thành công!");
           setOpenModalConfirmDelive(false);
@@ -453,7 +467,8 @@ export default function BillDetail() {
             id ? id : null,
             "4",
             user ? user : null,
-            ghiChu
+            ghiChu,
+            statusShip
           );
           toast.success("Xác nhận đang giao hàng!");
           setOpenCodalConfirmReceived(false);
@@ -504,7 +519,8 @@ export default function BillDetail() {
             id ? id : null,
             "7",
             user ? user : null,
-            ghiChu
+            ghiChu,
+            statusShip
           );
           toast.success("Xác nhận hoàn thành đơn hàng thành công!");
           setOpenModalConfirmComplete(false);
@@ -543,92 +559,94 @@ export default function BillDetail() {
   }
 
   // return trạng thái đơn hàng
-  function ModalReturnSttBill() {
-    const [ghiChu, setGhiChu] = useState("");
-    const [errorGhiChu, setErrorGhiChu] = useState("");
+  // function ModalReturnSttBill() {
+  //   const [ghiChu, setGhiChu] = useState("");
+  //   const [errorGhiChu, setErrorGhiChu] = useState("");
 
-    // api quay lại trạng thái trước
-    const handleReturnStt = async () => {
-      if (ghiChu === "") {
-        setErrorGhiChu("Bạn cần nhập lý do");
-        return;
-      }
-      if (statusBill === "6") {
-        try {
-          await axios.post("http://localhost:3001/api/trans/update");
-          getTransBillByIdBill(id ? id : null);
-        } catch (error) {
-          toast.error("Thanh toán thất bại");
-        }
-        handleUpdateStatusBill(
-          id ? id : null,
-          String(Number(statusBill) - 2),
-          user ? user : null,
-          ghiChu
-        );
-        setOpenModalReturnStt(false);
-      } else {
-        if (statusBill === "2" && listProductSize.length > 0) {
-          try {
-            await axios.post(
-              "http://localhost:3001/api/bills/increase-product-size",
-              { listProductSize: listProductSize }
-            );
-          } catch (error) {
-            toast.error("Không thể quay về trạng thái trước");
-          }
-        }
-        // cập nhật trạng thái
-        handleUpdateStatusBill(
-          id ? id : null,
-          String(Number(statusBill) - 1),
-          user ? user : null,
-          ghiChu
-        );
-        setOpenModalReturnStt(false);
-      }
-      toast.success("Xác nhận quay trở lại trạng thái thành công!");
-    };
+  //   // api quay lại trạng thái trước
+  //   const handleReturnStt = async () => {
+  //     if (ghiChu === "") {
+  //       setErrorGhiChu("Bạn cần nhập lý do");
+  //       return;
+  //     }
+  //     if (statusBill === "6") {
+  //       try {
+  //         await axios.post("http://localhost:3001/api/trans/update");
+  //         getTransBillByIdBill(id ? id : null);
+  //       } catch (error) {
+  //         toast.error("Thanh toán thất bại");
+  //       }
+  //       handleUpdateStatusBill(
+  //         id ? id : null,
+  //         String(Number(statusBill) - 2),
+  //         user ? user : null,
+  //         ghiChu
+  //       );
+  //       setOpenModalReturnStt(false);
+  //     } else {
+  //       if (statusBill === "2" && listProductSize.length > 0) {
+  //         try {
+  //           await axios.post(
+  //             "http://localhost:3001/api/bills/increase-product-size",
+  //             { listProductSize: listProductSize }
+  //           );
+  //         } catch (error) {
+  //           toast.error("Không thể quay về trạng thái trước");
+  //         }
+  //       }
+  //       // cập nhật trạng thái
+  //       handleUpdateStatusBill(
+  //         id ? id : null,
+  //         String(Number(statusBill) - 1),
+  //         user ? user : null,
+  //         ghiChu
+  //       );
+  //       setOpenModalReturnStt(false);
+  //     }
+  //     toast.success("Xác nhận quay trở lại trạng thái thành công!");
+  //   };
 
-    return (
-      <DialogAddUpdate
-        open={openmodalReturnStt}
-        setOpen={setOpenModalReturnStt}
-        title={"Quay lại trạng thái trước"}
-        buttonSubmit={
-          <Button
-            style={{
-              boxShadow: "none",
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-            onClick={handleReturnStt}
-          >
-            Lưu
-          </Button>
-        }
-      >
-        <div>
-          <Input
-            size="small"
-            placeholder={"Ghi chú"}
-            value={ghiChu}
-            onChange={(e) => setGhiChu(e.target.value)}
-          />
-        </div>
-        <div>
-          {errorGhiChu !== "" && (
-            <span style={{ color: "red" }}>{errorGhiChu}</span>
-          )}
-        </div>
-      </DialogAddUpdate>
-    );
-  }
+  //   return (
+  //     <DialogAddUpdate
+  //       open={openmodalReturnStt}
+  //       setOpen={setOpenModalReturnStt}
+  //       title={"Quay lại trạng thái trước"}
+  //       buttonSubmit={
+  //         <Button
+  //           style={{
+  //             boxShadow: "none",
+  //             textTransform: "none",
+  //             borderRadius: "8px",
+  //           }}
+  //           onClick={handleReturnStt}
+  //         >
+  //           Lưu
+  //         </Button>
+  //       }
+  //     >
+  //       <div>
+  //         <Input
+  //           size="small"
+  //           placeholder={"Ghi chú"}
+  //           value={ghiChu}
+  //           onChange={(e) => setGhiChu(e.target.value)}
+  //         />
+  //       </div>
+  //       <div>
+  //         {errorGhiChu !== "" && (
+  //           <span style={{ color: "red" }}>{errorGhiChu}</span>
+  //         )}
+  //       </div>
+  //     </DialogAddUpdate>
+  //   );
+  // }
 
   // hoàn đơn hàng
   function ModalReturnBill() {
     const [ghiChu, setGhiChu] = useState("");
     const [errorGhiChu, setErrorGhiChu] = useState("");
+    const [statusShip, setStatusShip] = useState<boolean | null>(null);
+    const [errorStatusShip, setErrorStatusShip] = useState("");
 
     // API hoàn đơn hàng
     const returnBill = async () => {
@@ -636,8 +654,18 @@ export default function BillDetail() {
         setErrorGhiChu("Bạn cần nhập lý do");
         return;
       }
+      if (statusShip !== true && statusShip !== false) {
+        setErrorStatusShip("Bạn chọn loại phí ship");
+        return;
+      }
       // cập nhật trạng thái
-      handleUpdateStatusBill(id ? id : null, "8", user ? user : null, ghiChu);
+      handleUpdateStatusBill(
+        id ? id : null,
+        "8",
+        user ? user : null,
+        ghiChu,
+        statusShip
+      );
       setOpenModalReturnBill(false);
     };
 
@@ -665,11 +693,32 @@ export default function BillDetail() {
             placeholder="Ghi chú"
             value={ghiChu}
             onChange={(e) => setGhiChu(e.target.value)}
+            style={{ marginBottom: "10px" }}
           />
         </div>
         <div>
           {errorGhiChu !== "" && (
             <span style={{ color: "red" }}>{errorGhiChu}</span>
+          )}
+        </div>
+        <div>
+          <span
+            style={{ fontSize: "17px", fontWeight: "600", marginRight: "5px" }}
+          >
+            Phí ship:
+          </span>
+
+          <Radio.Group
+            onChange={(e) => setStatusShip(e.target.value)}
+            value={statusShip}
+          >
+            <Radio value={false}>Chưa gửi</Radio>
+            <Radio value={true}>Đã gửi</Radio>
+          </Radio.Group>
+        </div>
+        <div>
+          {errorStatusShip !== "" && (
+            <span style={{ color: "red" }}>{errorStatusShip}</span>
           )}
         </div>
       </DialogAddUpdate>
@@ -781,7 +830,7 @@ export default function BillDetail() {
       {openModalConfirmComplete && <ModalConfirmComplete />}
       {openModalCancelBill && <ModalCancelBill />}
       {openModalReturnBill && <ModalReturnBill />}
-      {openmodalReturnStt && <ModalReturnSttBill />}
+      {/* {openmodalReturnStt && <ModalReturnSttBill />} */}
 
       <BreadcrumbsCustom
         listLink={listHis}
@@ -808,7 +857,7 @@ export default function BillDetail() {
             )}
           </Col>
         </Row>
-        <Row justify="end" style={{ marginTop: 16 }}>
+        {/* <Row justify="end" style={{ marginTop: 16 }}>
           <Col>
             {billDetail && Number(statusBill) > 1 && Number(statusBill) < 7 && (
               <Button
@@ -830,7 +879,7 @@ export default function BillDetail() {
               </Button>
             )}
           </Col>
-        </Row>
+        </Row> */}
       </Card>
 
       <Card
@@ -923,7 +972,12 @@ export default function BillDetail() {
               </Col>
               <Col xs={24} sm={8}>
                 <Typography.Text>
-                  <strong>Sđt người nhận:</strong> {billDetail?.phone || ""}
+                  <strong>SĐT khách hàng:</strong> {customer?.phoneNumber}
+                </Typography.Text>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Typography.Text>
+                  <strong>Ghi chú:</strong> {billDetail?.message || ""}
                 </Typography.Text>
               </Col>
               <Col xs={24} sm={8}>
@@ -934,12 +988,12 @@ export default function BillDetail() {
               </Col>
               <Col xs={24} sm={8}>
                 <Typography.Text>
-                  <strong>Địa chỉ:</strong> {billDetail?.address || ""}
+                  <strong>SĐT người nhận:</strong> {billDetail?.phone || ""}
                 </Typography.Text>
               </Col>
               <Col xs={24} sm={8}>
                 <Typography.Text>
-                  <strong>Ghi chú:</strong> {billDetail?.message || ""}
+                  <strong>Địa chỉ:</strong> {billDetail?.address || ""}
                 </Typography.Text>
               </Col>
             </Row>
@@ -1024,7 +1078,17 @@ export default function BillDetail() {
                 dataIndex="imgae"
                 key="image"
                 width={"15%"}
-                render={(text: string) => <Image src={text} width={100} />}
+                render={(_, record: IProductBill) => (
+                  <img
+                    src={record.image}
+                    alt="Product"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
               />
               <Table.Column
                 title="Sản phẩm"
@@ -1134,7 +1198,7 @@ export default function BillDetail() {
               Tổng tiền hàng:
               <span style={{ fontWeight: "bold" }}>
                 {formatCurrency({
-                  money: String(billDetail?.totalPrice || 0),
+                  money: String(totalProductPrice),
                 })}
               </span>
             </div>
@@ -1146,16 +1210,23 @@ export default function BillDetail() {
               }}
             >
               Phí ship:
-              {billDetail && billDetail.totalPrice >= 1000000 ? (
-                <span>0 VND</span>
-              ) : (
-                <Input
-                  size="middle"
-                  style={{ width: "75%" }}
-                  value={0}
-                  disabled={billDetail && Number(statusBill) !== 1}
-                />
-              )}
+              <span style={{ fontWeight: "bold" }}>
+                {billDetail &&
+                  formatCurrency({ money: String(billDetail.shippingCost) })}
+              </span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 10,
+              }}
+            >
+              Giảm giá:
+              <span style={{ fontWeight: "bold" }}>
+                {billDetail &&
+                  formatCurrency({ money: String(billDetail.discouVoucher) })}
+              </span>
             </div>
             {billDetail && billDetail.totalPrice >= 1000000 && (
               <div style={{ fontSize: 12 }}>

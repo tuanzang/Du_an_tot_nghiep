@@ -1,19 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, InputNumber, Popconfirm, Table, Typography } from "antd";
-import { useEffect, useMemo } from "react";
+import { Button, InputNumber, Popconfirm, Table, Typography, } from "antd";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import useCartMutation, { useMyCartQuery } from "../../hooks/useCart";
 import { formatPrice } from "../../services/common/formatCurrency";
+
 import { useDispatch, useSelector } from "react-redux";
 import {
+  removeProduct,
   selectProductSelected,
   selectTotalPrice,
   updateProductSelected,
 } from "../../store/cartSlice";
 import { socket } from "../../socket";
 
+
+
+
 const { Text } = Typography;
+// const SHIPPING_COST = 30000;
+
 
 export interface ICartItem {
   _id: string;
@@ -23,6 +30,7 @@ export interface ICartItem {
   description: string;
   quantity: number;
   categoryId: string[];
+
   createdAt: string;
   updatedAt: string;
   product: {
@@ -41,6 +49,7 @@ export interface ICartItem {
     _id: string;
     price: number;
     sizeName: string;
+  
   };
 }
 
@@ -48,6 +57,7 @@ export default function Cart() {
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
   const totalPrice = useSelector(selectTotalPrice);
+
   const { data, refetch } = useMyCartQuery();
   const { mutate: onUpdateQuantity } = useCartMutation({
     action: "UPDATE",
@@ -56,14 +66,17 @@ export default function Cart() {
     action: "DELETE",
   });
 
+
+  
   // initial socket
   useEffect(() => {
     const onConnect = () => {
       console.log("Socket client connect");
     };
 
-    const onHiddenProduct = () => {
+    const onHiddenProduct = (productId: string) => {
       refetch();
+      dispatch(removeProduct(productId))
     };
 
     socket.on("connect", onConnect);
@@ -75,11 +88,9 @@ export default function Cart() {
     };
   }, [refetch]);
 
-  const rowSelection = {
-    onChange: (_: any, selectedRows: ICartItem[]) => {
-      dispatch(updateProductSelected(selectedRows));
-    },
-  };
+ 
+  
+
   const productsFormatted = useMemo(() => {
     return data?.data?.products?.map((it) => ({
       ...it.product,
@@ -88,12 +99,54 @@ export default function Cart() {
     }));
   }, [data?.data]);
 
+  // const handleUpdateQuantity = (
+  //   variantId: string,
+  //   quantity: number,
+   
+  // ) => {
+  //   onUpdateQuantity({
+  //     variantId,
+  //     quantity: quantity,
+  //   });
+  // };
+ 
   const handleUpdateQuantity = (variantId: string, quantity: number) => {
     onUpdateQuantity({
       variantId,
-      quantity: quantity,
+      quantity,
+    });
+    // Cập nhật productSelected với số lượng mới
+    const updatedProductSelected = productSelected.map((item) =>
+      item.variant._id === variantId ? { ...item, quantity } : item
+    );
+    dispatch(updateProductSelected(updatedProductSelected));
+
+    // Cập nhật totalPrice
+    const newTotalPrice = updatedProductSelected.reduce((total, item) => {
+      return total + item.variant.price * item.quantity;
+    }, 0);
+    dispatch(totalPrice(newTotalPrice));
+  };
+  const handleDeleteProduct = (variantId: string) => {
+    onDeleteProduct(variantId, {
+      onSuccess: () => {
+        // Lọc ra các sản phẩm không bị xóa
+        const updatedProductSelected = productSelected.filter(
+          (item) => item.variant._id !== variantId
+        );
+        dispatch(updateProductSelected(updatedProductSelected));
+      },
     });
   };
+
+  // const totalPriceWithShipping = totalPrice + SHIPPING_COST;
+
+  // Tính tổng tiền bao gồm phí ship nếu có sản phẩm đã chọn
+ 
+
+ 
+
+
 
   return (
     <div>
@@ -157,7 +210,12 @@ export default function Cart() {
                       rowKey="key"
                       pagination={false}
                       className="cart-table"
-                      rowSelection={rowSelection}
+                      rowSelection={{
+                        onChange: (_: any, selectedRows: ICartItem[]) => {
+                          dispatch(updateProductSelected(selectedRows));
+                        },
+                        selectedRowKeys: productSelected.map((it) => it._id),
+                      }}
                     >
                       <Table.Column
                         title="Hình ảnh"
@@ -205,11 +263,17 @@ export default function Cart() {
                             min={1}
                             value={value}
                             onChange={(quantity) =>
-                              handleUpdateQuantity(record.variant._id, quantity)
+                              handleUpdateQuantity(
+                                record.variant._id,
+                                quantity,
+                               
+                              )
                             }
                           />
                         )}
                       />
+  
+
                       <Table.Column
                         title="Thành tiền"
                         dataIndex="totalPrice"
@@ -227,7 +291,7 @@ export default function Cart() {
                             okText="Có"
                             cancelText="Không"
                             onConfirm={() =>
-                              onDeleteProduct(record.variant._id)
+                              handleDeleteProduct(record.variant._id)
                             }
                           >
                             <Button danger>Xóa</Button>
@@ -320,8 +384,12 @@ export default function Cart() {
                           )}
                         />
                       </Table>
+
+
                     </div>
                   )}
+                
+
                   <div
                     style={{
                       display: "flex",

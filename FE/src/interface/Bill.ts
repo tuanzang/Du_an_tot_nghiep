@@ -4,11 +4,10 @@ export interface IBill {
   code: string;
   products: {
     id_: string;
-    productId: string;
     name: string;
     price: number;
     quantity: number;
-    category: string;
+    image: string;
     size: string;
     variantId: string;
   }[];
@@ -17,9 +16,11 @@ export interface IBill {
   customerName: string;
   address: string;
   phone: string;
-  email: string;
   message: string;
   paymentMethod: string;
+  shippingCost: number;
+  discouVoucher: number;
+  statusShip: boolean;
   createdAt: string;
 }
 
@@ -28,6 +29,7 @@ export interface IProductBill {
   name: string;
   price: number;
   quantity: number;
+  image: string;
   size: string;
   variantId: string;
 }

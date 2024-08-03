@@ -52,6 +52,19 @@ const orderSchema = new mongoose.Schema(
       enum: ["COD", "VNPAY"],
       default: "COD",
     },
+    shippingCost: {
+      type: Number,
+      required: true,
+    },
+    discouVoucher: {
+      type: Number,
+      required: true,
+    },
+    statusShip: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
   },
   {
     timestamps: true,

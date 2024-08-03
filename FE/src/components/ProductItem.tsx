@@ -15,7 +15,14 @@ const ProductItem = ({ data }: IProductItemProps) => {
       return formatPrice(0);
     }
 
-    const priceArr = data.variants.map((it) => it.price);
+    const priceArr = data.variants
+      .filter((it) => it.quantity > 0) // Chỉ lấy những biến thể có số lượng > 0
+      .map((it) => it.price);
+
+    if (priceArr.length === 0) {
+      return "Liên hệ"; // Nếu không có biến thể nào có số lượng > 0, hiển thị "Liên hệ"
+    }
+
     const minPrice = Math.min(...priceArr);
     const maxPrice = Math.max(...priceArr);
 
@@ -48,7 +55,7 @@ const ProductItem = ({ data }: IProductItemProps) => {
         ) : (
           <div className="product-badge">
             <div className="product-label new">
-              <span className="text-uppercase">Ngừng kinh doanh</span>
+              <span className="text-uppercase">SOLD OUT</span>
             </div>
           </div>
         )}
@@ -78,9 +85,6 @@ const ProductItem = ({ data }: IProductItemProps) => {
               <i className="pe-7s-search"></i>
             </span>
           </a>
-        </div>
-        <div className="cart-hover">
-          <button className="btn btn-cart">Thêm vào giỏ hàng</button>
         </div>
         <div className="product-caption text-center">
           <div className="product-identity">

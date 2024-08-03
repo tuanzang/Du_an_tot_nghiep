@@ -28,7 +28,7 @@ export const getMyCarts = async (req, res) => {
       return res;
     }, 0);
 
-    res.json({
+  return res.json({
       ...newCart?._doc,
       totalPrice,
     });
@@ -58,7 +58,7 @@ export const addCart = async (req, res) => {
 
         const newProducts = foundCart.products.map((it) =>
           it.product.toString() === foundProduct.product.toString() &&
-          it.variant.toString() === foundProduct.product.toString()
+            it.variant.toString() === foundProduct.product.toString()
             ? foundProduct
             : it
         );
