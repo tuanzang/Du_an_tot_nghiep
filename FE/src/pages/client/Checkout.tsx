@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMyCartQuery } from "../../hooks/useCart";
-import {  Typography , Modal, Radio, Card} from "antd";
+import { Typography, Modal, Radio, Card, Button } from "antd";
 import { formatPrice } from "../../services/common/formatCurrency";
 import { SubmitHandler, useForm } from "react-hook-form";
 import OrderApi from "../../config/orderApi";
@@ -12,7 +12,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { ICartItem } from "./Cart";
 import {
   removeProduct,
-  resetProductSelected,
   selectProductSelected,
   selectTotalPrice,
 } from "../../store/cartSlice";
@@ -26,6 +25,7 @@ import "./checkout.css"
 const SHIPPING_COST = 30000; 
 // import { useLocation } from "react-router-dom";
 const { Text } = Typography;
+
 type Inputs = {
   customerName: string;
   address: string;
@@ -42,15 +42,13 @@ const Checkout = () => {
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
   const totalPrice = useSelector(selectTotalPrice);
-  
+
   const { refetch } = useMyCartQuery();
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [discountCodes, setDiscountCodes] = useState([]);
   const [selectedDiscountCode, setSelectedDiscountCode] = useState(null);
   const [totalDiscount, setTotalDiscount] = useState(0);
-
-
 
   // initial socket
   useEffect(() => {
@@ -84,7 +82,7 @@ const Checkout = () => {
         ...data,
         productSelectedIds,
         shippingCost: SHIPPING_COST,
-        discouVoucher:totalDiscount
+        discouVoucher: totalDiscount,
       });
 
       if (data?.paymentMethod === "COD") {
@@ -96,7 +94,7 @@ const Checkout = () => {
         window.location.href = res?.data?.paymentUrl;
       }
     } catch (error) {
-      console.log(data);
+      toast.error("Đặt hàng thất bại!");
     }
   };
 
@@ -130,17 +128,18 @@ const Checkout = () => {
       toast.error("Tạo lịch sử thất bại");
     }
   };
-  const discountedPrice = totalPrice - totalDiscount;
+  
+const discountedPrice = totalPrice - totalDiscount;
 const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
-  // const totalPriceWithShipping =
-  // productSelected.length > 0 ? totalPrice + SHIPPING_COST : totalPrice;
+
   useEffect(() => {
     // Fetch mã giảm giá từ API
-    axios.get("http://localhost:3001/api/discountCode/discountCodes")
-      .then(response => {
+    axios
+      .get("http://localhost:3001/api/discountCode/discountCodes")
+      .then((response) => {
         setDiscountCodes(response.data);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching discount codes:", error);
       });
   }, []);
@@ -151,11 +150,14 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
 
   const handleOk = () => {
     if (selectedDiscountCode) {
-      const selectedCode = discountCodes.find((code) => code.code === selectedDiscountCode);
-if (selectedCode && selectedCode.discountType === 'percentage') {        let discountAmount = 0;
-        if (selectedCode.discountType === 'percentage') {
+      const selectedCode = discountCodes.find(
+        (code) => code.code === selectedDiscountCode
+      );
+      if (selectedCode) {
+        let discountAmount = 0;
+        if (selectedCode.discountType === "percentage") {
           discountAmount = (totalPrice * selectedCode.discountPercentage) / 100;
-        } else if (selectedCode.discountType === 'amount') {
+        } else if (selectedCode.discountType === "amount") {
           discountAmount = selectedCode.discountAmount;
         }
         setTotalDiscount(discountAmount);

@@ -44,7 +44,7 @@ const VoucherAdd = () => {
         body.discountAmount = discountVal;
       }
 
-      const response = await axios.post(
+      await axios.post(
         "http://localhost:3001/api/discountCode/add",
         body
       );
