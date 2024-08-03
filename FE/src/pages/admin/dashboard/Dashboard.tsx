@@ -242,28 +242,28 @@ export default function Dashboard() {
     }
   };
 
-  const getOrdersPriceByCustomDayStatus = async (createAtFrom: string, createAtTo: string) => {
+  const getOrdersPriceByCustomDayStatus = async () => {
     try {
-      const formattedCreateAtFrom = new Date(createAtFrom).toISOString().split('T')[0];
-      const formattedCreateAtTo = new Date(createAtTo).toISOString().split('T')[0];
+      const [dateStart, dateEnd]  = customDateRange;
       const resTotalPriceByCustomDay = await axios.get(`http://localhost:3001/api/orders/total-price/custom-day`, {
         params: {
-          createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
+          dateStart, dateEnd,
         }
       });
       const resPriceRefundByCustomDay = await axios.get(`http://localhost:3001/api/orders/price-refund/custom-day`, {
         params: {
-          createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
+          dateStart, dateEnd,
         }
       })
       const resPriceCancelByCustomDay = await axios.get(`http://localhost:3001/api/orders/price-cancel/custom-day`, {
         params: {
-          createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
+          dateStart, dateEnd,
         }
       })
+      console.log(resTotalPriceByCustomDay.data.totalPrice);
+      console.log(resPriceRefundByCustomDay.data.totalPrice);
+      console.log(resPriceCancelByCustomDay.data.totalPrice);
+      
       setTotalPriceByCustomDay(resTotalPriceByCustomDay.data.totalPrice);
       setPriceRefundByCustomDay(resPriceRefundByCustomDay.data.totalPrice);
       setPriceCancelByCustomDay(resPriceCancelByCustomDay.data.totalPrice);
@@ -274,64 +274,48 @@ export default function Dashboard() {
 
 
   // tính số đơn hàng
-  const getOrdersByCustomStatus = async (createAtFrom: string, createAtTo: string) => {
+  const getOrdersByCustomStatus = async () => {
     try {
-      // Chuyển đổi ngày về định dạng YYYY-MM-DD
-      const formattedCreateAtFrom = new Date(createAtFrom).toISOString().split('T')[0];
-      const formattedCreateAtTo = new Date(createAtTo).toISOString().split('T')[0];
+      const formatDate = (date) => new Date(date).toISOString().split('T')[0];
+      const [rawStartDate, rawEndDate] = customDateRange;
+      const startDate = formatDate(rawStartDate);
+      const endDate = formatDate(rawEndDate);
+      
       const resCanceled = await axios.post("http://localhost:3001/api/orders", {
-        createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
+        startDate, endDate,
         status: "0",
-        ...customDateRange,
       });
       const resWaitConfirmed = await axios.post("http://localhost:3001/api/orders", {
-        createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
+        startDate, endDate,
         status: "1",
-        ...customDateRange
       })
       const resConfirmed = await axios.post("http://localhost:3001/api/orders", {
-        createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
+        startDate, endDate,
         status: "2",
-        ...customDateRange
       })
       const resPacking = await axios.post("http://localhost:3001/api/orders", {
-        createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
+        startDate, endDate,
         status: "3",
-        ...customDateRange
       })
       const resShipping = await axios.post("http://localhost:3001/api/orders", {
-        createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
+        startDate, endDate,
         status: "4",
-        ...customDateRange
       })
       const resDelivered = await axios.post("http://localhost:3001/api/orders", {
-        createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
+        startDate, endDate,
         status: "5",
-        ...customDateRange
       })
       const resPaid = await axios.post("http://localhost:3001/api/orders", {
-        createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
+        startDate, endDate,
         status: "6",
-        ...customDateRange
       })
       const resCompleted = await axios.post("http://localhost:3001/api/orders", {
-        createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
+        startDate, endDate,
         status: "7",
-        ...customDateRange,
       });
       const resReturned = await axios.post("http://localhost:3001/api/orders", {
-        createAtFrom: formattedCreateAtFrom,
-        createAtTo: formattedCreateAtTo,
+        startDate, endDate,
         status: "8",
-        ...customDateRange,
       })
       setWaitConfirmOrdersCustomDay(resWaitConfirmed.data.data.length);
       setConfirmedOrdersCustomDay(resConfirmed.data.data.length);
@@ -711,19 +695,14 @@ export default function Dashboard() {
   };
   const handleCustomDateRangeChange = (dates) => {
     setCustomDateRange(dates);
-    if (dates[0] && dates[1]) {
-      const startDate = dates[0].toISOString().split('T')[0];
-    const endDate = dates[1].toISOString().split('T')[0];
-      getOrdersByCustomStatus(startDate, endDate);
-    }
     if (dates && dates.length === 2) {
       setCustomDateRange(dates);
     }
+    getOrdersByCustomStatus();
+    getOrdersPriceByCustomDayStatus();
   };
 
   useEffect(() => {
-    const today = new Date().toISOString();
-    getOrdersByCustomStatus(today, today);
     handleChangeButton(indexButton, nameButton);
   }, []);
 
@@ -832,11 +811,11 @@ export default function Dashboard() {
 
   };
   useEffect(() => {
-    if (customDateRange[0] && customDateRange[1]) {
+    
       getListBestSellerCustom();
+      getListStockProductsCustom();
       getOrdersPriceByCustomDayStatus();
-      getListStockProductsCustom()
-    }
+      getOrdersByCustomStatus();
   }, [customDateRange]);
 
   const dataListBestSeller = {
@@ -1092,10 +1071,10 @@ export default function Dashboard() {
           { label: "Số tiền đơn hủy", value: priceCancelByYear },
         ])
         break;
-      case 5: // Trường hợp chọn khoảng thời gian tùy chỉnh
-          try {
-          await getOrdersByCustomStatus();
-          await getOrdersPriceByCustomDayStatus();
+      // case 5: 
+            try {
+              await getOrdersByCustomStatus();
+            await getOrdersPriceByCustomDayStatus();
           await getListBestSellerCustom();
           await getListStockProductsCustom();
           setDataBieuDo([
@@ -1114,17 +1093,15 @@ export default function Dashboard() {
             { label: "Số tiền đơn hoàn", value: priceRefundByCustomDay},
             { label: "Số tiền đơn hủy", value: priceCancelByCustomDay},
           ])
-          console.log(setDataBieuDo[1]);
-          } catch (error) {
-            console.log(error);
-          }
-          
-        break;
+        
+            } catch (error) {
+              console.log(error);
+              
+            }
+            break;
       default:
         return;
     }
-
-
   }
 
 
@@ -1137,7 +1114,7 @@ export default function Dashboard() {
       <Card bordered={false}>
         <Title level={4} style={{ fontWeight: "bold", color: "#c29957" }}>Bộ lọc</Title>
         <div style={{ padding: "0 8px" }}>
-          {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'].map((type, index) => (
+          {['ngày', 'tuần', 'tháng', 'năm'].map((type, index) => (
             <Button
               key={type}
               style={{
@@ -1194,41 +1171,6 @@ export default function Dashboard() {
             <Card style={{ borderColor: "#c29957" }}>
               <ColumChartDashBoard data={dataBieuDo2} />
             </Card>
-            {/* <Table
-              dataSource={[dataForButton]}
-              columns={[
-                {
-                  title: (
-                    <div style={{ textAlign: 'center', fontWeight: 'bold' }}>
-                      Tổng đơn hàng
-                    </div>
-                  ),
-                  dataIndex: "total",
-                  key: "total",
-                  render: text => (
-                    <div style={{ textAlign: 'center' }}>
-                      {text}
-                    </div>
-                  )
-                },
-                
-                {
-                  title: (
-                    <div style={{ textAlign: 'center', fontWeight: 'bold'}}>
-                      Tổng thu nhập
-                    </div>
-                  ),
-                  dataIndex: "totalPrice",
-                  key: "totalPrice",
-                  render: text => (
-                    <div style={{ textAlign: 'center' }}>
-                     {parseFloat(text).toLocaleString()} VND
-                    </div>
-                  )
-                },
-              ]}
-              pagination={false}
-            /> */}
           </Col>
           <Col span={12}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
