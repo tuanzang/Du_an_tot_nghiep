@@ -130,8 +130,9 @@ const Checkout = () => {
       toast.error("Tạo lịch sử thất bại");
     }
   };
-  const discountedPrice = totalPrice - totalDiscount;
-  const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
+  
+const discountedPrice = totalPrice - totalDiscount;
+const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
 
   useEffect(() => {
     // Fetch mã giảm giá từ API
