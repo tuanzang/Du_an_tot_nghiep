@@ -2,28 +2,28 @@ import mongoose from "mongoose";
 const optionCategorios = new mongoose.Schema(
     {
         category:{
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref:"Category"
+        },
+        name:{
             type: String,
             required: true,
         },
-        nameoption:{
-            type: String,
-            required: true,
-        },
-        quantityoption:{
+        quantity:{
             type:Number,
             require:true
         },
-        priceoption:{
+        price:{
             type:Number,
             require:true
         },
        status: {
-      type: Number,
-      enum: [0, 1], // 0: ẩn, 1: hiện,
-      required: true,
-      default: 1,
-    },
-
+        type: Number,
+        enum: [0, 1], // 0: ẩn, 1: hiện,
+        required: true,
+        default: 1,
+        },
     },
     {
         timestamps: true,
