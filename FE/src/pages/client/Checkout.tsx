@@ -7,7 +7,6 @@ import OrderApi from "../../config/orderApi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { IHistoryBill } from "../../interface/HistoryBill";
-
 import { IUser } from "../../interface/Users";
 import { useDispatch, useSelector } from "react-redux";
 import { ICartItem } from "./Cart";
@@ -23,6 +22,7 @@ import { socket } from "../../socket";
 import { IVoucher } from "../../interface/Voucher";
 import dayjs from "dayjs";
 import axios from "axios";
+import "./checkout.css"
 const SHIPPING_COST = 30000; 
 // import { useLocation } from "react-router-dom";
 const { Text } = Typography;
@@ -152,8 +152,7 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
   const handleOk = () => {
     if (selectedDiscountCode) {
       const selectedCode = discountCodes.find((code) => code.code === selectedDiscountCode);
-      if (selectedCode) {
-        let discountAmount = 0;
+if (selectedCode && selectedCode.discountType === 'percentage') {        let discountAmount = 0;
         if (selectedCode.discountType === 'percentage') {
           discountAmount = (totalPrice * selectedCode.discountPercentage) / 100;
         } else if (selectedCode.discountType === 'amount') {
@@ -176,7 +175,7 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
   return (
     <div className="container mt-5">
       <div className="row">
-        <div className="col-md-6 mb-3">
+        <div className="col-md-5 mb-3">
           <h2>Thanh Toán Đơn Hàng</h2>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-3">
@@ -256,23 +255,23 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
               <a href=""> Giỏ hàng</a>
               <button
                 type="submit"
-                className="btn btn-primary bg-info px-4 py-3"
+                className="btn btn-primary bg-warning px-4 py-3"
               >
                 Hoàn tất đơn hàng
               </button>
             </div>
           </form>
         </div>
-        <div className="col-md-6 bg-light">
-          <h3 className="mt-5">Giỏ Hàng</h3>
+        <div className="col-md-7 bg-light">
+          <h3 className="mt-2">Giỏ Hàng</h3>
           <table className="table">
             <thead>
               <tr>
-                <th>Tên sản phẩm</th>
+                <th style={{ width: 250 }}>Tên sản phẩm</th>
                 {/* <th>ảnh</th> */}
                 <th>Giá</th>
                 <th>Số lượng</th>
-                <th>Tổng</th>
+                <th>Tổng tiền</th>
               </tr>
             </thead>
             <tbody>
@@ -289,100 +288,173 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
               ))}
             </tbody>
           </table>
-          
-          <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "10px 20px",
-                      borderTop: "1px solid gray",
-                      marginTop: "20px",
-                    }}
-                  >
-                    
-                    <span>Tổng tiền:</span>
-                    <Text style={{ fontWeight: 800, color: "red" }}>
-                        {formatPrice(totalPrice)}
-                    </Text>
-          </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "10px 20px",
-                      borderTop: "1px solid gray",
-                      marginTop: "20px",
-                    }}
-                  >
-                    
-                    <span>Phí ship:</span>
-                    <Text style={{ fontWeight: 800, color: "red" }}>
-                        {formatPrice(SHIPPING_COST)}
-                    </Text>
-                  </div>
-                  <span onClick={showDiscountModal} >Sử dụng mã giảm giá:</span>
-                  
-                 
-                      {/* <span style={{float:"right"}}>- 10.000 VNĐ</span> */}
-                      <Modal
-                        title="Mã giảm giá"
-                        visible={isModalVisible}
-                        onOk={handleOk}
-                        onCancel={handleCancel}
-                       
-                      >
-                        <Radio.Group onChange={handleDiscountCodeChange} value={selectedDiscountCode} >
-                          {discountCodes.map((code: IVoucher) => (
-                            <Card key={code._id}
-                              style={{
-                           
-                                backgroundColor:"#66FF66",
-                                marginBottom: 10,
-                                opacity: code.minPurchaseAmount !== undefined && totalPrice >= code.minPurchaseAmount ? 1 : 0.5,
-                                pointerEvents: code.minPurchaseAmount !== undefined && totalPrice >= code.minPurchaseAmount ? 'auto' : 'none'
-                              }}>
-                              <Radio value={code.code} className="discount-radio" disabled={totalPrice < !code.minPurchaseAmount}>
-                                <strong className="discount-code">{code.code}</strong>
-                                {code.discountType === 'percentage' ? (
-                                  <span className="discount-detail"> - Giảm {code.discountPercentage}%</span>
-                                ) : (
-                                  <span className="discount-detail"> - Giảm {code.discountAmount} VNĐ</span>
-                                )}
-                                <span style={{ paddingLeft: 1 }} className="discount-detail"> (Đơn tối thiểu {code.minPurchaseAmount}đ)</span><br />
-                                <span className="expiration-date">HSD: {dayjs(code.expirationDate).format('DD/MM/YYYY HH:mm:ss')}</span>
-                              </Radio>
-                            </Card>
-                          ))}
-                        </Radio.Group>
-                      </Modal>
 
-                      <div style={{  fontWeight: 800, color: "red" }}>
-                        {(selectedDiscountCode) ? (
-                          <div className="d-flex justify-content-between">
-                            <p>{selectedDiscountCode}</p>
-                            <p>-{totalDiscount > 0 ? formatPrice(totalDiscount) : null}</p>
-                          </div>
-                        ) : (
-                          null
-                        )}
-                      </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "10px 20px",
-                      borderTop: "1px solid gray",
-                      marginTop: "20px",
-                    }}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "10px 20px",
+              borderTop: "1px solid gray",
+              marginTop: "20px",
+            }}
+          >
+            <span>Tổng tiền:</span>
+            <Text
+              style={{
+                fontSize: "18px",
+                fontWeight: 800,
+                color: "red",
+                fontFamily: "SpaceGrotesk-Light",
+              }}
+            >
+              {formatPrice(totalPrice)}
+            </Text>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "10px 20px",
+              borderTop: "1px solid gray",
+              marginTop: "20px",
+            }}
+          >
+            <span>Phí ship:</span>
+            <Text
+              style={{
+                fontWeight: 800,
+                color: "red",
+                fontFamily: "SpaceGrotesk-Light",
+                fontSize: "18px",
+              }}
+            >
+              {formatPrice(SHIPPING_COST)}
+            </Text>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: "20px",
+            }}
+          >
+            <span
+              onClick={showDiscountModal}
+              style={{
+                cursor: "pointer",
+                color: "#BEAC83",
+                fontWeight: "bold",
+                fontSize: "15px",
+                border: "2px solid #BEAC83",
+                borderRadius: "5px",
+                padding: "5px 10px",
+                boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              Chọn mã giảm giá
+            </span>
+          </div>
+
+          {/* <span style={{float:"right"}}>- 10.000 VNĐ</span> */}
+          <Modal
+            title="Mã giảm giá"
+            visible={isModalVisible}
+            onOk={handleOk}
+            onCancel={handleCancel}
+          >
+            <Radio.Group
+              onChange={handleDiscountCodeChange}
+              value={selectedDiscountCode}
+            >
+              {discountCodes.map((code: IVoucher) => (
+                <Card
+                  key={code._id}
+                  style={{
+                    backgroundColor: "#66FF66",
+                    marginBottom: 10,
+                    opacity:
+                      code.minPurchaseAmount !== undefined &&
+                      totalPrice >= code.minPurchaseAmount
+                        ? 1
+                        : 0.5,
+                    pointerEvents:
+                      code.minPurchaseAmount !== undefined &&
+                      totalPrice >= code.minPurchaseAmount
+                        ? "auto"
+                        : "none",
+                  }}
+                >
+                  <Radio
+                    value={code.code}
+                    className="discount-radio"
+                    disabled={totalPrice < !code.minPurchaseAmount}
                   >
-                    
-                    
-                    
-                    <span>Tổng tiền bao gồm ship: </span>
-                    <Text style={{ fontWeight: 800, color: "red" }}>
-                        {formatPrice(totalPriceWithShipping)}
-                    </Text>
-                  </div>
+                    <strong className="discount-code">{code.code}</strong>
+                    {code.discountType === "percentage" ? (
+                      <span className="discount-detail">
+                        {" "}
+                        - Giảm {code.discountPercentage}%
+                      </span>
+                    ) : (
+                      <span className="discount-detail">
+                        {" "}
+                        - Giảm {code.discountAmount} VNĐ
+                      </span>
+                    )}
+                    <span
+                      style={{ paddingLeft: 1 }}
+                      className="discount-detail"
+                    >
+                      {" "}
+                      (Đơn tối thiểu {code.minPurchaseAmount}đ)
+                    </span>
+                    <br />
+                    <span className="expiration-date">
+                      HSD:{" "}
+                      {dayjs(code.expirationDate).format("DD/MM/YYYY HH:mm:ss")}
+                    </span>
+                  </Radio>
+                </Card>
+              ))}
+            </Radio.Group>
+          </Modal>
+
+          <div
+            style={{
+              fontWeight: 800,
+              color: "red",
+              fontFamily: "SpaceGrotesk-Light",
+            }}
+          >
+            {selectedDiscountCode ? (
+              <div className="d-flex justify-content-between">
+                <p>{selectedDiscountCode}</p>
+                <p>- {totalDiscount > 0 ? formatPrice(totalDiscount) : null}</p>
+              </div>
+            ) : null}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "10px 20px",
+              borderTop: "1px solid gray",
+              marginTop: "20px",
+            }}
+          >
+            <span>Tổng thanh toán: </span>
+            <Text
+              style={{
+                fontWeight: 800,
+                color: "red",
+                fontFamily: "SpaceGrotesk-Light",
+                fontSize: "18px",
+              }}
+            >
+              {formatPrice(totalPriceWithShipping)}
+            </Text>
+          </div>
         </div>
       </div>
     </div>

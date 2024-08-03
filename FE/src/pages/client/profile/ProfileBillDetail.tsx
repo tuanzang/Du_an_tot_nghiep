@@ -924,8 +924,8 @@ export default function ProfileBillDetail() {
                       dataIndex="imgae"
                       key="image"
                       width={"15%"}
-                      render={(text: string) => (
-                        <Image src={text} width={100} />
+                      render={(image: string) => (
+                        <Image src={image} width={100} />
                       )}
                     />
                     <Table.Column
