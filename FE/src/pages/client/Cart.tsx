@@ -8,11 +8,13 @@ import { formatPrice } from "../../services/common/formatCurrency";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
+  removeProduct,
   selectProductSelected,
   selectTotalPrice,
   updateProductSelected,
 } from "../../store/cartSlice";
 import { socket } from "../../socket";
+
 
 
 
@@ -47,6 +49,7 @@ export interface ICartItem {
     _id: string;
     price: number;
     sizeName: string;
+  
   };
 }
 
@@ -71,8 +74,9 @@ export default function Cart() {
       console.log("Socket client connect");
     };
 
-    const onHiddenProduct = () => {
+    const onHiddenProduct = (productId: string) => {
       refetch();
+      dispatch(removeProduct(productId))
     };
 
     socket.on("connect", onConnect);
@@ -84,11 +88,8 @@ export default function Cart() {
     };
   }, [refetch]);
 
-  const rowSelection = {
-    onChange: (_: any, selectedRows: ICartItem[]) => {
-      dispatch(updateProductSelected(selectedRows));
-    },
-  };
+ 
+  
 
   const productsFormatted = useMemo(() => {
     return data?.data?.products?.map((it) => ({
@@ -98,17 +99,33 @@ export default function Cart() {
     }));
   }, [data?.data]);
 
-  const handleUpdateQuantity = (
-    variantId: string,
-    quantity: number,
+  // const handleUpdateQuantity = (
+  //   variantId: string,
+  //   quantity: number,
    
-  ) => {
-  
-   
+  // ) => {
+  //   onUpdateQuantity({
+  //     variantId,
+  //     quantity: quantity,
+  //   });
+  // };
+ 
+  const handleUpdateQuantity = (variantId: string, quantity: number) => {
     onUpdateQuantity({
       variantId,
-      quantity: quantity,
+      quantity,
     });
+    // Cập nhật productSelected với số lượng mới
+    const updatedProductSelected = productSelected.map((item) =>
+      item.variant._id === variantId ? { ...item, quantity } : item
+    );
+    dispatch(updateProductSelected(updatedProductSelected));
+
+    // Cập nhật totalPrice
+    const newTotalPrice = updatedProductSelected.reduce((total, item) => {
+      return total + item.variant.price * item.quantity;
+    }, 0);
+    dispatch(totalPrice(newTotalPrice));
   };
   const handleDeleteProduct = (variantId: string) => {
     onDeleteProduct(variantId, {
@@ -255,6 +272,8 @@ export default function Cart() {
                           />
                         )}
                       />
+  
+
                       <Table.Column
                         title="Thành tiền"
                         dataIndex="totalPrice"

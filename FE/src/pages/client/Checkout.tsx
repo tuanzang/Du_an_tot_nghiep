@@ -13,7 +13,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { ICartItem } from "./Cart";
 import {
   removeProduct,
-  resetProductSelected,
   selectProductSelected,
   selectTotalPrice,
 } from "../../store/cartSlice";
@@ -132,8 +131,7 @@ const Checkout = () => {
   };
   const discountedPrice = totalPrice - totalDiscount;
 const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
-  // const totalPriceWithShipping =
-  // productSelected.length > 0 ? totalPrice + SHIPPING_COST : totalPrice;
+
   useEffect(() => {
     // Fetch mã giảm giá từ API
     axios.get("http://localhost:3001/api/discountCode/discountCodes")
@@ -281,6 +279,7 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
                   <td>
                     {item.product.name} (Size: {item.variant?.sizeName})
                   </td>
+    
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
                   <td>{formatPrice(item.variant.price * item.quantity)}</td>
