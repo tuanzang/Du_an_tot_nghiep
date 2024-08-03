@@ -92,3 +92,20 @@ export const deleteOption = async (req, res) => {
     });
   }
 };
+
+export const getOptionsByCategoryId = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+
+    const options = await Option.find({ category: categoryId }).exec();
+
+    res.json({
+      message: 'Get option successfully',
+      data: options
+    })
+  } catch (error) {
+    res.status(500).json({
+      message: 'Internal server error'
+    })
+  }
+}

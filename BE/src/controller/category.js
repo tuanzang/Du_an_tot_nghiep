@@ -1,4 +1,5 @@
 import category from "../models/category.js";
+import Option from "../models/option.js"
 
 export const getAllCategory = async (req, res) => {
   try {
@@ -23,7 +24,10 @@ export const getAllCategory = async (req, res) => {
 
 export const getDetailCategory = async (req, res) => {
   try {
-    const data = await category.findById(req.params.id);
+    const categoryId = req.params.id;
+    const data = await category.findById(categoryId);
+    const options = await Option.find({ category: categoryId }).exec();
+
     if (!data || data.length === 0) {
        return res.status(404).json({
         message: "Không tìm thấy danh muc !",
@@ -33,7 +37,10 @@ export const getDetailCategory = async (req, res) => {
 
     return res.status(200).json({
       message: "Đã tìm thấy danh muc",
-      data,
+      data: {
+        ...data.toJSON(),
+        options
+      },
     });
   } catch (error) {
     return res.status(500).json({
@@ -44,7 +51,15 @@ export const getDetailCategory = async (req, res) => {
 
 export const createCategory = async (req, res) => {
   try {
-    const data = await category.create(req.body);
+    const { loai, options } = req.body;
+
+    // create category
+    const data = await category.create({ loai });
+
+    // create options
+    const optionFormat = options.map(it => ({...it, category: data._id}));
+    const optionCreated = await Option.insertMany(optionFormat);
+
     if (!data || data.length === 0) {
       return res.status(404).json({
         message: "Tạo danh mục thất bại!",
@@ -54,7 +69,10 @@ export const createCategory = async (req, res) => {
 
     return res.status(200).json({
       message: "Tạo danh muc thành công ",
-      data,
+      data: {
+        category: data,
+        option: optionCreated
+      },
     });
   } catch (error) {
     return res.status(500).json({
@@ -65,9 +83,19 @@ export const createCategory = async (req, res) => {
 
 export const updateCategory = async (req, res) => {
   try {
-    const data = await category.findByIdAndUpdate(req.params.id, req.body, {
+    const categoryId = req.params.id;
+    const { options, ...rest } = req.body;
+    const data = await category.findByIdAndUpdate(categoryId, rest, {
       new: true,
     });
+
+    // remove old options
+    await Option.deleteMany({ category: categoryId }).exec()
+
+    // add new options
+    const optionFormat = options.map(it => ({...it, category: categoryId}));
+    const optionCreated = await Option.insertMany(optionFormat);
+
     if (!data || data.length === 0) {
        return res.status(404).json({
         message: "Update danh mục thất bại !",
@@ -77,7 +105,10 @@ export const updateCategory = async (req, res) => {
 
     return res.status(200).json({
       message: "Update danh mục thành công",
-      data,
+      data: {
+        ...data.toJSON(),
+        options: optionCreated
+      },
     });
   } catch (error) {
     return res.status(500).json({

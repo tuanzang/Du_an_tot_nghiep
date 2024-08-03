@@ -65,7 +65,7 @@ export const searchProducts = async (req, res) => {
 
 export const getDetailProduct = async (req, res) => {
   try {
-    const data = await product.findById(req.params.id);
+    const data = await product.findById(req.params.id).populate('options').exec();
     const productSizedata = await productSize.find({
       idProduct: req.params.id,
     });
