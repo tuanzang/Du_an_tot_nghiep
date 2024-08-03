@@ -73,7 +73,7 @@ export default function ProductDetailAndEdit() {
           `http://localhost:3001/api/products/${id}`
         );
         form.setFieldValue('categoryId', data.data.categoryId[0]);
-        form.setFieldValue('options', data.data.options);
+        form.setFieldValue('options', data.data.options?.map((it: any) => it._id));
         setProduct(data.data);
         setName(data.data.name);
         setPrice(data.data.price);

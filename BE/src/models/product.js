@@ -31,7 +31,7 @@ const productSchema = new mongoose.Schema(
     options: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'options',
+        ref: 'option',
         required: true
       }
     ]
