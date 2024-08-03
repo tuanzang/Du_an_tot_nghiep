@@ -7,6 +7,7 @@ export interface IBill {
     name: string;
     price: number;
     quantity: number;
+    image: string;
     size: string;
     variantId: string;
   }[];
@@ -18,6 +19,7 @@ export interface IBill {
   message: string;
   paymentMethod: string;
   shippingCost: number;
+  discouVoucher: number;
   statusShip: boolean;
   createdAt: string;
 }
@@ -27,6 +29,7 @@ export interface IProductBill {
   name: string;
   price: number;
   quantity: number;
+  image: string;
   size: string;
   variantId: string;
 }
