@@ -14,6 +14,7 @@ import {
   updateProductSelected,
 } from "../../store/cartSlice";
 import { socket } from "../../socket";
+import { IProduct } from "../../interface/Products";
 
 
 
@@ -221,16 +222,21 @@ export default function Cart() {
                         title="Hình ảnh"
                         dataIndex="image"
                         key="image"
-                        render={(images: string[]) => (
-                          <img
-                            src={images[0]}
-                            alt="Product"
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                            }}
-                          />
+                        render={(images: string[], record: any) => (
+                          <Link to={`/product/${record._id}`}>
+                            <img
+                              src={images[0]}
+                              alt="Product"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                              onError={(e) =>
+                                (e.currentTarget.src = "/images/default.jpg")
+                              }
+                            />
+                          </Link>
                         )}
                       />
                       <Table.Column
@@ -263,11 +269,7 @@ export default function Cart() {
                             min={1}
                             value={value}
                             onChange={(quantity) =>
-                              handleUpdateQuantity(
-                                record.variant._id,
-                                quantity,
-                               
-                              )
+                              handleUpdateQuantity(record.variant._id, quantity)
                             }
                           />
                         )}
@@ -384,11 +386,8 @@ export default function Cart() {
                           )}
                         />
                       </Table>
-
-
                     </div>
                   )}
-                
 
                   <div
                     style={{

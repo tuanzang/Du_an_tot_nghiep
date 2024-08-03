@@ -26,12 +26,12 @@ Table of content
 23. footer
 -------------------------------------------------------------------*/
 /*------ Typography Style Start ------*/
-body {
+body, html{
   color: #555555;
   line-height: 1.7;
   font-size: 15px;
   font-weight: 400;
-  font-family: "Playfair" !important;
+  font-family: 'Playfair Display', serif;
 }
 
 a {

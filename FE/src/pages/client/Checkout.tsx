@@ -7,7 +7,6 @@ import OrderApi from "../../config/orderApi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { IHistoryBill } from "../../interface/HistoryBill";
-
 import { IUser } from "../../interface/Users";
 import { useDispatch, useSelector } from "react-redux";
 import { ICartItem } from "./Cart";
@@ -22,9 +21,8 @@ import { socket } from "../../socket";
 import { IVoucher } from "../../interface/Voucher";
 import dayjs from "dayjs";
 import axios from "axios";
-
-const SHIPPING_COST = 30000;
-
+import "./checkout.css"
+const SHIPPING_COST = 30000; 
 // import { useLocation } from "react-router-dom";
 const { Text } = Typography;
 
@@ -179,7 +177,7 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
   return (
     <div className="container mt-5">
       <div className="row">
-        <div className="col-md-6 mb-3">
+        <div className="col-md-5 mb-3">
           <h2>Thanh Toán Đơn Hàng</h2>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-3">
@@ -259,23 +257,23 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
               <a href=""> Giỏ hàng</a>
               <button
                 type="submit"
-                className="btn btn-primary bg-info px-4 py-3"
+                className="btn btn-primary bg-warning px-4 py-3"
               >
                 Hoàn tất đơn hàng
               </button>
             </div>
           </form>
         </div>
-        <div className="col-md-6 bg-light">
-          <h3 className="mt-5">Giỏ Hàng</h3>
+        <div className="col-md-7 bg-light">
+          <h3 className="mt-2">Giỏ Hàng</h3>
           <table className="table">
             <thead>
               <tr>
-                <th>Tên sản phẩm</th>
+                <th style={{ width: 250 }}>Tên sản phẩm</th>
                 {/* <th>ảnh</th> */}
                 <th>Giá</th>
                 <th>Số lượng</th>
-                <th>Tổng</th>
+                <th>Tổng tiền</th>
               </tr>
             </thead>
             <tbody>
@@ -303,7 +301,14 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
             }}
           >
             <span>Tổng tiền:</span>
-            <Text style={{ fontWeight: 800, color: "red" }}>
+            <Text
+              style={{
+                fontSize: "18px",
+                fontWeight: 800,
+                color: "red",
+                fontFamily: "SpaceGrotesk-Light",
+              }}
+            >
               {formatPrice(totalPrice)}
             </Text>
           </div>
@@ -312,10 +317,19 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
               display: "flex",
               justifyContent: "space-between",
               padding: "10px 20px",
+              borderTop: "1px solid gray",
+              marginTop: "20px",
             }}
           >
             <span>Phí ship:</span>
-            <Text style={{ fontWeight: 800, color: "red" }}>
+            <Text
+              style={{
+                fontWeight: 800,
+                color: "red",
+                fontFamily: "SpaceGrotesk-Light",
+                fontSize: "18px",
+              }}
+            >
               {formatPrice(SHIPPING_COST)}
             </Text>
           </div>
@@ -323,24 +337,25 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
             style={{
               display: "flex",
               justifyContent: "space-between",
-              padding: "10px 20px",
+              alignItems: "center",
+              marginTop: "20px",
             }}
           >
-            <span>
-              Mã giảm giá:
-              <span
-                style={{ fontWeight: 800, color: "red", marginLeft: "20px" }}
-              >
-                {selectedDiscountCode}
-              </span>
+            <span
+              onClick={showDiscountModal}
+              style={{
+                cursor: "pointer",
+                color: "#BEAC83",
+                fontWeight: "bold",
+                fontSize: "15px",
+                border: "2px solid #BEAC83",
+                borderRadius: "5px",
+                padding: "5px 10px",
+                boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              Chọn mã giảm giá
             </span>
-            <div style={{ fontWeight: 800, color: "red" }}>
-              {selectedDiscountCode ? (
-                <div className="d-flex justify-content-between">
-                  <p>{totalDiscount > 0 ? formatPrice(totalDiscount) : null}</p>
-                </div>
-              ) : null}
-            </div>
           </div>
 
           {/* <span style={{float:"right"}}>- 10.000 VNĐ</span> */}
@@ -407,8 +422,19 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
             </Radio.Group>
           </Modal>
 
-          <div style={{ padding: "0px 20px" }}>
-            <Button onClick={showDiscountModal}>Chọn mã</Button>
+          <div
+            style={{
+              fontWeight: 800,
+              color: "red",
+              fontFamily: "SpaceGrotesk-Light",
+            }}
+          >
+            {selectedDiscountCode ? (
+              <div className="d-flex justify-content-between">
+                <p>{selectedDiscountCode}</p>
+                <p>- {totalDiscount > 0 ? formatPrice(totalDiscount) : null}</p>
+              </div>
+            ) : null}
           </div>
           <div
             style={{
@@ -419,8 +445,15 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
               marginTop: "20px",
             }}
           >
-            <span>Tổng tiền: </span>
-            <Text style={{ fontWeight: 800, color: "red" }}>
+            <span>Tổng thanh toán: </span>
+            <Text
+              style={{
+                fontWeight: 800,
+                color: "red",
+                fontFamily: "SpaceGrotesk-Light",
+                fontSize: "18px",
+              }}
+            >
               {formatPrice(totalPriceWithShipping)}
             </Text>
           </div>

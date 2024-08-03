@@ -225,7 +225,7 @@ export default function Product() {
       dataIndex: "loai",
       key: "loai",
       width: "15%",
-    },
+    }, 
     {
       title: "Số lượng",
       dataIndex: "quantity",
