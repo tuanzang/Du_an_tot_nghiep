@@ -18,11 +18,9 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
-  const [selectedSize, setSelectedSize] = useState<IProductSize | undefined>();
+  const [selectedSize, setSelectedSize] = useState<IProductSize | null>();
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
   const [optionSelected, setOptionSelected] = useState<IOption | null>()
-
-  console.log(123, product?.options);
 
   // product price
   const productPrice = useMemo(() => {
@@ -49,7 +47,8 @@ export default function ProductDetail() {
     onSuccess: () => {
       message.success("Đã thêm sản phẩm vào giỏ hàng");
       setQuantity(1);
-      setSelectedSize(undefined);
+      setSelectedSize(null);
+      setOptionSelected(null);
     },
   });
 
@@ -127,11 +126,15 @@ export default function ProductDetail() {
       return message.info("Vượt quá số lượng còn trong kho");
     }
 
-    const body = {
+    const body: any = {
       productId: product?._id,
       quantity,
       variantId: selectedSize._id,
     };
+
+    if (optionSelected) {
+      body.option = optionSelected._id;
+    }
 
     mutate(body);
   };

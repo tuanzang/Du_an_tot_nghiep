@@ -28,8 +28,13 @@ const CartApi = {
   updateQuantity: (data: any) => {
     return axiosInstance.put("/carts", data);
   },
-  deleteProduct: (productId: string) => {
-    return axiosInstance.delete(`/carts/${productId}`);
+  deleteProduct: ({variantId, option}: {variantId: string, option: string}) => {
+    return axiosInstance.delete('/carts', {
+      data: {
+        variantId,
+        option
+      }
+    });
   },
 };
 
