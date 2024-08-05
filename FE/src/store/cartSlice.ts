@@ -12,7 +12,13 @@ export const cartSlice = createSlice({
     updateProductSelected: (state, { payload }) => {
       state.productSelected = payload;
       state.totalPrice = (payload as ICartItem[]).reduce((res, curr) => {
-        return (res += curr.variant.price * curr.quantity);
+        let price = curr.variant.price * curr.quantity;
+
+        if (curr.option) {
+          price += curr.quantity * curr.option.price;
+        }
+
+        return res += price;
       }, 0);
     },
 
@@ -28,7 +34,13 @@ export const cartSlice = createSlice({
       state.productSelected = newProducts;
 
       state.totalPrice = (newProducts as ICartItem[]).reduce((res, curr) => {
-        return (res += curr.variant.price * curr.quantity);
+        let price = curr.variant.price * curr.quantity;
+
+        if (curr.option) {
+          price += curr.quantity * curr.option.price;
+        }
+
+        return res += price;
       }, 0);
     },
   },
