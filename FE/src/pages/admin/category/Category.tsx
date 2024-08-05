@@ -90,6 +90,13 @@ export default function Category() {
       width: "20%",
     },
     {
+      title: "Phụ kiện",
+      dataIndex: "",
+      key: "",
+      align: "center",
+      width: "20%",
+    },
+    {
       title: "Cập nhật",
       dataIndex: "key",
       key: "key",
