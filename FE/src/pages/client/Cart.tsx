@@ -14,14 +14,10 @@ import {
   updateProductSelected,
 } from "../../store/cartSlice";
 import { socket } from "../../socket";
-import { IProduct } from "../../interface/Products";
-
-
-
+// import { IProduct } from "../../interface/Products";
 
 const { Text } = Typography;
 // const SHIPPING_COST = 30000;
-
 
 export interface ICartItem {
   _id: string;
@@ -74,7 +70,6 @@ export default function Cart() {
   });
 
 
-  
   // initial socket
   useEffect(() => {
     const onConnect = () => {
@@ -86,18 +81,22 @@ export default function Cart() {
       dispatch(removeProduct(productId))
     };
 
+    const onProductUpdate = (productId: string) => {
+      console.log('client update', productId);
+    }
+
     socket.on("connect", onConnect);
     socket.on("hidden product", onHiddenProduct);
+    socket.on('update product', onProductUpdate)
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("hidden product", onHiddenProduct);
+      socket.off("hidden product", onProductUpdate);
     };
   }, [refetch]);
 
  
-  
-
   const productsFormatted = useMemo(() => {
     return data?.data?.products?.map((it) => ({
       ...it.product,
@@ -105,6 +104,7 @@ export default function Cart() {
       key: it._id,
     }));
   }, [data?.data]);
+
   
   
  
@@ -145,11 +145,6 @@ export default function Cart() {
 
   // Tính tổng tiền bao gồm phí ship nếu có sản phẩm đã chọn
  
-
- 
-
-
-
   return (
     <div>
       <main>
@@ -245,11 +240,14 @@ export default function Cart() {
                         dataIndex="name"
                         key="name"
                         render={(_, record: any) => {
+                          console.log(record)
                           return (
                             <div>
                               <Link to={`/product/${record.product._id}`}>{record.name}</Link>
                              
                               <p>Size: {record.variant.sizeName}</p>
+
+                              {!record.variant.status && <p>SP hết hàng</p>}
                             </div>
                           );
                         }}

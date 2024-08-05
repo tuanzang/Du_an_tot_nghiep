@@ -22,6 +22,8 @@ export const getMyCarts = async (req, res) => {
       return res.json({});
     }
 
+    console.log(data);
+
     const newProducts = data.products.filter((it) => it.product.status === 1);
     data.products = newProducts;
     const newCart = await data.save();
