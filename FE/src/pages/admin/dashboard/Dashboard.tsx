@@ -924,18 +924,9 @@ export default function Dashboard() {
         </div>
       ),
     },
-    {
-      title: "Mô tả",
-      dataIndex: "description",
-      key: "description",
-      render: (text) => (
-        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
-          {text.length > 0 ? text.substring(0, 20) + '...' : text}
-        </div>
-      )
-    },
+   
     { title: "Số lượng bán ", dataIndex: "totalQuantity", key: "totalQuantity", align: "center"},
-    { title: "Tổng tiền thu được ", dataIndex: "totalRevenue", key: "totalRevenue",
+    { title: "Doanh thu dự kiến ", dataIndex: "totalRevenue", key: "totalRevenue",
       render: text => (
         <div style={{ textAlign: 'center' }}>
          {parseFloat(text).toLocaleString()} 
@@ -964,16 +955,7 @@ export default function Dashboard() {
         </div>
       ),
     },
-    {
-      title: "Mô tả",
-      dataIndex: "description",
-      key: "description",
-      render: (text) => (
-        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
-          {text.length > 0 ? text.substring(0, 20) + '...' : text}
-        </div>
-      )
-    }
+  
   ];
 
 
@@ -1000,8 +982,8 @@ export default function Dashboard() {
           { label: "Đã thanh toán", value: paidOrdersDay },
         ]);
         setDataBieuDo2([
-          { label: "Lợi nhuận", value: totalPriceByDay },
-          { label: "Số tiền đơn hoàn", value: priceRefundByDay },
+          { label: "Dòng tiền về ", value: totalPriceByDay },
+          { label: "Chi phí hoàn đơn", value: priceRefundByDay },
           { label: "Số tiền đơn hủy", value: priceCancelByDay },
         ])
         break;

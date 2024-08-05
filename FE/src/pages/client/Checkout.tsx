@@ -10,6 +10,7 @@ import { IHistoryBill } from "../../interface/HistoryBill";
 import { IUser } from "../../interface/Users";
 import { useDispatch, useSelector } from "react-redux";
 import { ICartItem } from "./Cart";
+
 import {
   removeProduct,
   selectProductSelected,
@@ -69,7 +70,12 @@ const Checkout = () => {
     }
   }, [navigate, productSelected.length]);
 
-  const { register, handleSubmit } = useForm<Inputs>({
+  // const { register, handleSubmit } = useForm<Inputs>({
+  //   defaultValues: {
+  //     paymentMethod: "COD",
+  //   },
+  // });
+  const { register, handleSubmit, formState: { errors } } = useForm<Inputs>({
     defaultValues: {
       paymentMethod: "COD",
     },
@@ -178,7 +184,7 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
     <div className="container mt-5">
       <div className="row">
         <div className="col-md-5 mb-3">
-          <h2>Thanh Toán Đơn Hàng</h2>
+          <h2 >Thanh Toán Đơn Hàng</h2>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-3">
               <label htmlFor="email" className="form-label"></label>
@@ -193,16 +199,22 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
               />
             </div>
             <div className="mb-3">
-              <input
-                type="text"
-                className="form-control"
-                id="number"
-                placeholder="Số điện thoại"
-                {...register("phone", {
-                  required: true,
-                })}
-              />
-            </div>
+  <input
+    type="text"
+    className="form-control"
+    id="number"
+    placeholder="Số điện thoại"
+    {...register("phone", {
+      required: "Số điện thoại là bắt buộc",
+      pattern: {
+        value: /^0[3-9]\d{8}$/,
+        message: "Số điện thoại không hợp lệ"
+      }
+    })}
+  />
+  {errors.phone && <p className="error-message">{errors.phone.message}</p>}
+</div>
+
             <div className="mb-3">
               <input
                 type="text"
@@ -273,6 +285,7 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
                 {/* <th>ảnh</th> */}
                 <th>Giá</th>
                 <th>Số lượng</th>
+                <th>Option</th>
                 <th>Tổng tiền</th>
               </tr>
             </thead>
@@ -284,6 +297,9 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
                   </td>
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
+                  <td>{item.option.name}<br/>
+                    {item.option.price}
+                  </td>
                   <td>{formatPrice(item.variant.price * item.quantity)}</td>
                   {/* <td> {formatPrice(SHIPPING_COST)}</td> */}
                 </tr>

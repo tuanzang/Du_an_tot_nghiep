@@ -26,11 +26,16 @@ export const createOrder = async (req, res) => {
         path: "products.variant",
         model: "ProductSize",
       })
+      .populate({
+        path: "products.option",
+        model: "option",
+      })
       .exec();
 
     const cartProducts = cart.products?.filter((it) =>
       productSelectedIds.includes(it.variant._id.toString())
     );
+
     const products = cartProducts.map((item) => ({
       name: item.product.name,
       price: item.variant.price,
@@ -38,16 +43,23 @@ export const createOrder = async (req, res) => {
       image: item.product.image[0],
       size: item.variant.sizeName,
       variantId: item.variant._id,
+      optionName: item?.option?.name,
+      optionPrice: item?.option?.price
     }));
 
     const totalPrice =
       cartProducts.reduce((total, curr) => {
-        total += curr.variant.price * curr.quantity;
+        let priceTotal = curr.variant.price * curr.quantity;
 
-        return total;
+        if (curr.option) {
+          priceTotal += curr.option.price * curr.quantity;
+        }
+
+        return total += priceTotal;
       }, 0) -
       bodyData.discouVoucher +
       bodyData.shippingCost;
+
 
     const orders = await new Order({
       ...req.body,
