@@ -8,32 +8,21 @@ import {
   Button,
   DatePicker,
   Table,
-  Select,
-  Pagination,
-  // Pagination,
 } from "antd";
 
 
 import axios from "axios";
-import formatCurrency from "../../../services/common/formatCurrency";
-import { ColumnGroupType, ColumnType } from "antd/es/table";
-import { IProduct } from "../../../interface/Products";
-import { log } from "console";
-import { GiLogicGateAnd } from "react-icons/gi";
-import { start } from "repl";
 import PieChartDashBoard from "./PieChartDashBoard";
 import ColumChartDashBoard from "./ColumChartDashBoard";
-import { text } from "stream/consumers";
 import { ToastContainer, toast } from "react-toastify";
-// import { LineChart } from "./LineChartDashBoard"; // Assuming you have a LineChartDashBoard component
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 interface Filter {
   page: number;
   size: number;
-  createAtFrom?: string | null; // Thêm thuộc tính này
-  createAtTo?: string | null;   // Thêm thuộc tính này
+  createAtFrom?: string | null; 
+  createAtTo?: string | null;   
 }
 
 interface ProductDetails {
@@ -225,149 +214,151 @@ export default function Dashboard() {
   // tính số đơn hàng
   const getOrdersByCustomStatus = async () => {
     try {
-      const formatDate = (date) => new Date(date).toISOString().split('T')[0];
-      const [rawStartDate, rawEndDate] = customDateRange;
-      const startDate = formatDate(rawStartDate);
-      const endDate = formatDate(rawEndDate);
+      const [dateStart, dateEnd] = customDateRange;
 
-      const resCanceled = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "0",
+      const resCanceled = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "0",
+        }
       });
-      const resWaitConfirmed = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "1",
+      const resWaitConfirmed = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "1",
+        }
       })
-      const resConfirmed = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "2",
+      const resConfirmed = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "2",
+        }
       })
-      const resPacking = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "3",
+      const resPacking = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "3",
+        }
       })
-      const resShipping = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "4",
+      const resShipping = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "4",
+        }
       })
-      const resDelivered = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "5",
+      const resDelivered = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "5",
+        }
       })
-      const resPaid = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "6",
+      const resPaid = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "6",
+        }
       })
-      const resCompleted = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "7",
+      const resCompleted = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "7",
+        }
       });
-      const resReturned = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "8",
+      const resReturned = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "8",
+        }
       })
-      console.log(resCompleted.data.data);
-      console.log(resCanceled.data.data);
-      console.log(resWaitConfirmed.data.data);
-      console.log(resConfirmed.data.data);
-      console.log(resPacking.data.data);
-      console.log(resShipping.data.data);
-      console.log(resDelivered.data.data);
-      console.log(resPaid.data.data);
-
+      console.log(dateStart, dateEnd);
+      
       setDataBieuDo([
-        { label: "Thành công", value: resCompleted.data.data.length },
-        { label: "Đã hủy", value: resCanceled.data.data.length },
-        { label: "Hoàn trả", value: resReturned.data.data.length },
-        { label: "Chờ xác nhận", value: resWaitConfirmed.data.data.length },
-        { label: "Đã xác nhận", value: resConfirmed.data.data.length },
-        { label: "Đang đóng gói", value: resPacking.data.data.length },
-        { label: "Đang giao đơn", value: resShipping.data.data.length },
-        { label: "Đã giao đơn", value: resDelivered.data.data.length },
-        { label: "Đã thanh toán", value: resPaid.data.data.length },
+        { label: "Thành công", value: resCompleted.data.totalOrders },
+        { label: "Đã hủy", value: resCanceled.data.totalOrders },
+        { label: "Hoàn trả", value: resReturned.data.totalOrders },
+        { label: "Chờ xác nhận", value: resWaitConfirmed.data.totalOrders },
+        { label: "Đã xác nhận", value: resConfirmed.data.totalOrders },
+        { label: "Đang đóng gói", value: resPacking.data.totalOrders },
+        { label: "Đang giao đơn", value: resShipping.data.totalOrders },
+        { label: "Đã giao đơn", value: resDelivered.data.totalOrders },
+        { label: "Đã thanh toán", value: resPaid.data.totalOrders },
       ]);
     } catch (error) {
       console.error("Error fetching statistics:", error);
-      return {
-        totalOrdersByCustomDay: 0,
-        completedOrdersByCustomDay: 0,
-        canceledOrdersByCustomDay: 0,
-      };
+      
     }
   };
   const getOrdersByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
     try {
-      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
+      const resCanceledByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "0",
           dateNow: date,
         },
       });
-      const resWaitConfirmed = await axios.get(`http://localhost:3001/api/orders`, {
+      const resWaitConfirmedByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "1",
           dateNow: date,
         }
       });
-      const resConfirmed = await axios.get(`http://localhost:3001/api/orders`, {
+      const resConfirmedByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "2",
           dateNow: date,
         }
       });
-      const resPacking = await axios.get(`http://localhost:3001/api/orders`, {
+      const resPackingByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "3",
           dateNow: date,
         }
       });
-      const resShipping = await axios.get(`http://localhost:3001/api/orders`, {
+      const resShippingByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "4",
           dateNow: date,
         }
       });
-      const resDelivered = await axios.get(`http://localhost:3001/api/orders`, {
+      const resDeliveredByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "5",
           dateNow: date,
         }
       });
-      const resPaid = await axios.get(`http://localhost:3001/api/orders`, {
+      const resPaidByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "6",
           dateNow: date,
         }
       })
-      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
+      const resCompletedByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "7",
           dateNow: date,
         },
       });
-      const resReturned = await axios.get(`http://localhost:3001/api/orders`, {
+      const resReturnedByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "8",
           dateNow: date,
         }
       })
+      
       setDataBieuDo([
-        { label: "Thành công", value: resCompleted.data.data.length },
-        { label: "Đã hủy", value: resCanceled.data.data.length },
-        { label: "Hoàn trả", value: resReturned.data.data.length },
-        { label: "Chờ xác nhận", value: resWaitConfirmed.data.data.length },
-        { label: "Đã xác nhận", value: resConfirmed.data.data.length },
-        { label: "Đang đóng gói", value: resPacking.data.data.length },
-        { label: "Đang giao đơn", value: resShipping.data.data.length },
-        { label: "Đã giao đơn", value: resDelivered.data.data.length },
-        { label: "Đã thanh toán", value: resPaid.data.data.length },
+        { label: "Thành công", value: resCompletedByDay.data.totalOrders},
+        { label: "Đã hủy", value: resCanceledByDay.data.totalOrders },
+        { label: "Hoàn trả", value: resReturnedByDay.data.totalOrders },
+        { label: "Chờ xác nhận", value: resWaitConfirmedByDay.data.totalOrders },
+        { label: "Đã xác nhận", value: resConfirmedByDay.data.totalOrders },
+        { label: "Đang đóng gói", value: resPackingByDay.data.totalOrders },
+        { label: "Đang giao đơn", value: resShippingByDay.data.totalOrders },
+        { label: "Đã giao đơn", value: resDeliveredByDay.data.totalOrders },
+        { label: "Đã thanh toán", value: resPaidByDay.data.totalOrders },
       ]);
     } catch (error) {
       console.log(error);
-      return {
-        completed: 0,
-        canceled: 0,
-      };
+      
     }
   };
 
@@ -437,23 +428,21 @@ export default function Dashboard() {
           dateEnd: endDate,
         }
       })
+      
       setDataBieuDo([
-        { label: "Thành công", value: resCompleted.data.data.length },
-        { label: "Đã hủy", value: resCanceled.data.data.length },
-        { label: "Hoàn trả", value: resReturned.data.data.length },
-        { label: "Chờ xác nhận", value: resWaitConfirmed.data.data.length },
-        { label: "Đã xác nhận", value: resConfirmed.data.data.length },
-        { label: "Đang đóng gói", value: resPacking.data.data.length },
-        { label: "Đang giao đơn", value: resShipping.data.data.length },
-        { label: "Đã giao đơn", value: resDelivered.data.data.length },
-        { label: "Đã thanh toán", value: resPaid.data.data.length },
+        { label: "Thành công", value: resCompleted.data.totalOrders },
+        { label: "Đã hủy", value: resCanceled.data.totalOrders },
+        { label: "Hoàn trả", value: resReturned.data.totalOrders },
+        { label: "Chờ xác nhận", value: resWaitConfirmed.data.totalOrders },
+        { label: "Đã xác nhận", value: resConfirmed.data.totalOrders },
+        { label: "Đang đóng gói", value: resPacking.data.totalOrders },
+        { label: "Đang giao đơn", value: resShipping.data.totalOrders },
+        { label: "Đã giao đơn", value: resDelivered.data.totalOrders },
+        { label: "Đã thanh toán", value: resPaid.data.totalOrders },
       ]);
     } catch (error) {
       console.log(error);
-      return {
-        completed: 0,
-        canceled: 0,
-      };
+     
     }
   };
 
@@ -535,22 +524,19 @@ export default function Dashboard() {
         }
       })
       setDataBieuDo([
-        { label: "Thành công", value: resCompleted.data.data.length },
-        { label: "Đã hủy", value: resCanceled.data.data.length },
-        { label: "Hoàn trả", value: resReturned.data.data.length },
-        { label: "Chờ xác nhận", value: resWaitConfirmed.data.data.length },
-        { label: "Đã xác nhận", value: resConfirmed.data.data.length },
-        { label: "Đang đóng gói", value: resPacking.data.data.length },
-        { label: "Đang giao đơn", value: resShipping.data.data.length },
-        { label: "Đã giao đơn", value: resDelivered.data.data.length },
-        { label: "Đã thanh toán", value: resPaid.data.data.length },
+        { label: "Thành công", value: resCompleted.data.totalOrders },
+        { label: "Đã hủy", value: resCanceled.data.totalOrders },
+        { label: "Hoàn trả", value: resReturned.data.totalOrders },
+        { label: "Chờ xác nhận", value: resWaitConfirmed.data.totalOrders },
+        { label: "Đã xác nhận", value: resConfirmed.data.totalOrders },
+        { label: "Đang đóng gói", value: resPacking.data.totalOrders },
+        { label: "Đang giao đơn", value: resShipping.data.totalOrders },
+        { label: "Đã giao đơn", value: resDelivered.data.totalOrders },
+        { label: "Đã thanh toán", value: resPaid.data.totalOrders },
       ]);
     } catch (error) {
       console.log(error);
-      return {
-        completed: 0,
-        canceled: 0,
-      };
+      
     }
   };
 
@@ -632,22 +618,19 @@ export default function Dashboard() {
         }
       })
       setDataBieuDo([
-        { label: "Thành công", value: resCompleted.data.data.length },
-        { label: "Đã hủy", value: resCanceled.data.data.length },
-        { label: "Hoàn trả", value: resReturned.data.data.length },
-        { label: "Chờ xác nhận", value: resWaitConfirmed.data.data.length },
-        { label: "Đã xác nhận", value: resConfirmed.data.data.length },
-        { label: "Đang đóng gói", value: resPacking.data.data.length },
-        { label: "Đang giao đơn", value: resShipping.data.data.length },
-        { label: "Đã giao đơn", value: resDelivered.data.data.length },
-        { label: "Đã thanh toán", value: resPaid.data.data.length },
+        { label: "Thành công", value: resCompleted.data.totalOrders },
+        { label: "Đã hủy", value: resCanceled.data.totalOrders },
+        { label: "Hoàn trả", value: resReturned.data.totalOrders },
+        { label: "Chờ xác nhận", value: resWaitConfirmed.data.totalOrders },
+        { label: "Đã xác nhận", value: resConfirmed.data.totalOrders },
+        { label: "Đang đóng gói", value: resPacking.data.totalOrders },
+        { label: "Đang giao đơn", value: resShipping.data.totalOrders },
+        { label: "Đã giao đơn", value: resDelivered.data.totalOrders },
+        { label: "Đã thanh toán", value: resPaid.data.totalOrders },
       ]);
     } catch (error) {
       console.log(error);
-      return {
-        completed: 0,
-        canceled: 0,
-      };
+     
     }
   };
 
@@ -671,7 +654,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    handleChangeButton(indexButton, nameButton);
+    handleChangeButton(1, nameButton);
   }, []);
 
   // Sản phẩm được bán chạy nhất 
@@ -684,8 +667,6 @@ export default function Dashboard() {
       }
       );
       setListBestSellerByDay(allListBestSellerByDay.data.data);
-      console.log(allListBestSellerByDay.data.data);
-
     } catch (error) {
       console.log(error);
     }
@@ -942,8 +923,8 @@ export default function Dashboard() {
     switch (index) {
       case 1:
         await Promise.all([
-          getOrdersByDayStatus(new Date().toISOString().split('T')[0]),
-          getOrdersPriceByDayStatus(new Date().toISOString().split('T')[0]),
+          getOrdersByDayStatus(),
+          getOrdersPriceByDayStatus(),
           getListBestSellerByDay(),
           getListStockProductsByDay()
         ]);

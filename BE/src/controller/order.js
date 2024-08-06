@@ -142,6 +142,40 @@ export const detailOrder = async (req, res) => {
  * @returns
  */
 
+const getOrdersByDate = async (dateStart, dateEnd, status) => {
+  try {
+    const orders = await Order.aggregate([
+      {
+        $match: {
+          status,
+          createdAt: {
+            $gte: new Date(dateStart),
+            $lte: new Date(dateEnd),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalOrders: { $sum: 1 },
+        },
+      },
+    ]);
+    return orders[0] ? orders[0].totalOrders : 0;
+  } catch (error) {
+    throw new Error('Error getting orders by date');
+  }
+};
+export const getTotalOrdersByDate = async (req, res) => {
+  const { dateStart, dateEnd, status } = req.query;
+  try {
+    const totalOrders = await getOrdersByDate(dateStart, dateEnd, status);
+    res.status(200).json({ totalOrders });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const getAllOrders = async (req, res) => {
   const { status, code, createAtFrom, createAtTo, page = 1 } = req.body;
 
