@@ -23,8 +23,6 @@ export default function ProductDetail() {
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
   const [optionSelected, setOptionSelected] = useState<IOption | null>()
 
-  // console.log(123, product?.options);
-
   // product price
   const productPrice = useMemo(() => {
     if (selectedSize) {
@@ -141,12 +139,12 @@ export default function ProductDetail() {
     }
 
     if (quantity > selectedSize.quantity) {
-      return message.info("Vượt quá số lượng còn trong kho");
+      return message.info("Vượt quá số lượng sản phẩm còn trong kho");
     }
 
-    // if (product?.options.length < productSizes.length) {
-    //   return message.info("Không đủ số lượng option!");
-    // }
+    if (optionSelected && quantity > optionSelected.quantity) {
+      return message.info("Không đủ số lượng option!");
+    }
 
     const body = {
       productId: product?._id,
@@ -191,7 +189,7 @@ export default function ProductDetail() {
           setAvarageRate(0);
         }
       } catch (error) {
-        console.log("Khong co du lieu");
+        console.log("Không có dữ liệu");
       }
     }
   };
@@ -326,8 +324,8 @@ export default function ProductDetail() {
                         )}
 
                         <div>
-                          <div className="button-container mt-2">
-                            <p>Options:</p>
+                          <div className="button-container mt-4">
+                            <p>Phụ kiện:</p>
                             <Button onClick={() => onOptionClick()} className="mx-1" type={!optionSelected ? 'primary' : 'default'}>
                               Không chọn
                             </Button>
