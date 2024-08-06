@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import useCartMutation, { useMyCartQuery } from "../../hooks/useCart";
 import { formatPrice } from "../../services/common/formatCurrency";
-
 import { useDispatch, useSelector } from "react-redux";
 import {
   removeProduct,
@@ -47,9 +46,9 @@ export interface ICartItem {
     _id: string;
     price: number;
     sizeName: string;
-  
+
   };
-  option:{
+  option: {
     _id: string;
     name: string;
     price: number;
@@ -60,7 +59,6 @@ export default function Cart() {
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
   const totalPrice = useSelector(selectTotalPrice);
-  // const [totalOrderPrice, setTotalOrderPrice] = useState(0);
   const { data, refetch } = useMyCartQuery();
   const { mutate: onUpdateQuantity } = useCartMutation({
     action: "UPDATE",
@@ -96,7 +94,7 @@ export default function Cart() {
     };
   }, [refetch]);
 
- 
+
   const productsFormatted = useMemo(() => {
     return data?.data?.products?.map((it) => ({
       ...it.product,
@@ -105,9 +103,6 @@ export default function Cart() {
     }));
   }, [data?.data]);
 
-  
-  
- 
   const handleUpdateQuantity = (variantId: string, option: string, quantity: number) => {
     onUpdateQuantity({
       variantId,
@@ -116,16 +111,17 @@ export default function Cart() {
     });
     // Cập nhật productSelected với số lượng mới
     const updatedProductSelected = productSelected.map((item) =>
-      item.variant._id === variantId && item.option?._id===option ? { ...item, quantity } : item
+      item.variant._id === variantId && item.option?._id === option ? { ...item, quantity } : item
     );
     dispatch(updateProductSelected(updatedProductSelected));
 
     // Cập nhật totalPrice
     const newTotalPrice = updatedProductSelected.reduce((total, item) => {
-      return total + item.variant.price  * item.quantity;
+      return total + item.variant.price * item.quantity;
     }, 0);
     dispatch(totalPrice(newTotalPrice));
   };
+
   const handleDeleteProduct = (variantId: string, option: string) => {
     onDeleteProduct({ variantId, option }, {
       onSuccess: () => {
@@ -144,7 +140,7 @@ export default function Cart() {
   // const totalPriceWithShipping = totalPrice + SHIPPING_COST;
 
   // Tính tổng tiền bao gồm phí ship nếu có sản phẩm đã chọn
- 
+
   return (
     <div>
       <main>
@@ -182,7 +178,7 @@ export default function Cart() {
         >
           <div className="container">
             <div className="row">
-              <div className="col-lg-8">
+              <div className="">
                 <div className="sidebar-single">
                   <h5 className="sidebar-title">
                     <span>Sản phẩm của bạn</span>
@@ -212,6 +208,9 @@ export default function Cart() {
                           dispatch(updateProductSelected(selectedRows));
                         },
                         selectedRowKeys: productSelected.map((it) => it._id),
+                        getCheckboxProps: (record: any) => ({
+                          disabled: !record.variant.status,
+                        }),
                       }}
                     >
                       <Table.Column
@@ -221,11 +220,12 @@ export default function Cart() {
                         render={(images: string[], record: any) => (
                           <Link to={`/product/${record.product._id}`}>
                             <img
+                              className={record.variant.status ? "" : "out-of-stock"}
                               src={images[0]}
                               alt="Product"
                               style={{
-                                width: "100%",
-                                height: "100%",
+                                width: "60%",
+                                height: "60%",
                                 objectFit: "cover",
                               }}
                               onError={(e) =>
@@ -240,28 +240,31 @@ export default function Cart() {
                         dataIndex="name"
                         key="name"
                         render={(_, record: any) => {
-                          console.log(record)
+                          // console.log(record)
                           return (
-                            <div>
+                            <div className={record.variant.status ? "" : "out-of-stock"}>
                               <Link to={`/product/${record.product._id}`}>{record.name}</Link>
-                             
+
                               <p>Size: {record.variant.sizeName}</p>
 
-                              {!record.variant.status && <p>SP hết hàng</p>}
+                              {!record.variant.status && <p className="out-of-stock-text">Sản phẩm đang ngừng hoạt động</p>}
                             </div>
                           );
                         }}
-                        width={100}
+                        width={200}
                       />
-                   
+
                       <Table.Column
                         title="Giá"
                         key="price"
-                        render={(_, record: any) =>
-                          formatPrice(record.variant.price)
-                        }
+                        render={(_, record: any) => (
+                          <div className={record.variant.status ? "" : "out-of-stock"}>
+                            {formatPrice(record.variant.price)}
+                          </div>
+                        )}
+                        width={150}
                       />
-                         <Table.Column
+                      <Table.Column
                         title="Option"
                         dataIndex="option"
                         key="option"
@@ -276,7 +279,7 @@ export default function Cart() {
 
                           return;
                         }}
-                        width={100}
+                        width={150}
                       />
                       <Table.Column
                         title="Số lượng"
@@ -286,13 +289,15 @@ export default function Cart() {
                           <InputNumber
                             min={1}
                             value={value}
+                            disabled={!record.variant.status}
                             onChange={(quantity) =>
                               handleUpdateQuantity(record.variant._id, record?.option?._id, quantity)
                             }
                           />
                         )}
+                        width={150}
                       />
-  
+
 
                       <Table.Column
                         title="Thành tiền"
@@ -301,11 +306,16 @@ export default function Cart() {
                         render={(_, record: any) => {
                           let totalPrice = record.variant.price * record.quantity
                           if (record?.option) {
-                            totalPrice += record.option.price *record.quantity;
+                            totalPrice += record.option.price * record.quantity;
                           }
 
-                          return formatPrice(totalPrice);
+                          return (
+                            <div className={record.variant.status ? "" : "out-of-stock"}>
+                              {formatPrice(totalPrice)}
+                            </div>
+                          );
                         }}
+                        width={150}
                       />
                       <Table.Column
                         title="Hành động"
@@ -325,6 +335,7 @@ export default function Cart() {
                       />
                     </Table>
                   </div>
+
                   <div style={{ marginTop: "20px" }}>
                     <Link to="/product">
                       <Button icon={<ArrowLeftOutlined />}>
@@ -334,7 +345,8 @@ export default function Cart() {
                   </div>
                 </div>
               </div>
-              <div className="col-lg-4">
+
+              {/* <div className="col-lg-4">
                 <div className="sidebar-single">
                   <h5 className="sidebar-title">
                     <span>Thông tin đơn hàng</span>
@@ -403,9 +415,9 @@ export default function Cart() {
                           render={(_, record: any) => {
                             let totalPrice = record.variant.price * record.quantity
                             if (record?.option) {
-                              totalPrice += record.option.price *record.quantity;
+                              totalPrice += record.option.price * record.quantity;
                             }
-  
+
                             return formatPrice(totalPrice);
                           }}
                         />
@@ -413,35 +425,38 @@ export default function Cart() {
                     </div>
                   )}
 
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "10px 20px",
-                      borderTop: "1px solid gray",
-                      marginTop: "20px",
-                    }}
-                  >
-                    <span>Tổng tiền</span>
-                    <Text style={{ fontWeight: 800, color: "red" }}
 
-                    >
-                    
-                    {formatPrice(totalPrice)} 
-                      
-                    </Text>
-                  </div>
-                  <Link to="/checkout">
-                    <Button
-                      type="primary"
-                      style={{ float: "right" }}
-                      disabled={!productSelected.length}
-                    >
-                      Thanh toán
-                    </Button>
-                  </Link>
                 </div>
+              </div> */}
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "10px 20px",
+                  borderTop: "1px solid gray",
+                  marginTop: "20px",
+                }}
+              >
+                <span>Tổng tiền</span>
+                <Text style={{ fontWeight: 800, color: "red" }}
+
+                >
+
+                  {formatPrice(totalPrice)}
+
+                </Text>
               </div>
+              <Link to="/checkout">
+                <Button
+                  type="primary"
+                  style={{ float: "right" }}
+                  disabled={!productSelected.length}
+                >
+                  Thanh toán
+                </Button>
+              </Link>
+
             </div>
           </div>
         </div>
@@ -449,3 +464,4 @@ export default function Cart() {
     </div>
   );
 }
+
