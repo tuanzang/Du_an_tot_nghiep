@@ -80,7 +80,7 @@ export default function Cart() {
     };
 
     const onProductUpdate = (productId: string) => {
-      console.log('client update', productId);
+      refetch();
     }
 
     socket.on("connect", onConnect);
@@ -240,7 +240,6 @@ export default function Cart() {
                         dataIndex="name"
                         key="name"
                         render={(_, record: any) => {
-                          // console.log(record)
                           return (
                             <div className={record.variant.status ? "" : "out-of-stock"}>
                               <Link to={`/product/${record.product._id}`}>{record.name}</Link>
