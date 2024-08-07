@@ -15,7 +15,70 @@ dotenv.config();
  */
 export const createOrder = async (req, res) => {
   try {
-    const { productSelectedIds, paymentMethod, ...bodyData } = req.body;
+    const { productSelectedIds, ...bodyData } = req.body;
+    const { customerName, phone, address, paymentMethod } = bodyData;
+
+    // Xác thực các trường dữ liệu
+    if (!customerName) {
+      return res.status(200).json({
+        message: "Trường họ và tên không được để trống",
+        success: false,
+      });
+    }
+
+    if (!phone) {
+      return res.status(200).json({
+        message: "Trường số điện thoại không được để trống",
+        success: false,
+      });
+    }
+
+    if (!address) {
+      return res.status(200).json({
+        message: "Trường địa chỉ không được để trống",
+        success: false,
+      });
+    }
+
+    if (!paymentMethod) {
+      return res.status(200).json({
+        message: "Loại thanh toán không được để trống",
+        success: false,
+      });
+    }
+
+    if (paymentMethod !== "COD" && paymentMethod !== "VNPAY") {
+      return res.status(200).json({
+        message: "Loại thanh toán phải là COD hoặc VNPAY",
+        success: false,
+      });
+    }
+
+    // Xác thực không chứa ký tự đặc biệt cho name và address
+    if (customerName && !/^[\p{L}\p{N}\s.,!?-]+$/u.test(customerName)) {
+      return res.status(200).json({
+        message: "Họ và tên không được chứa ký tự đặc biệt.",
+        success: false,
+      });
+    }
+
+    if (address && !/^[\p{L}\p{N}\s.,!?-]+$/u.test(address)) {
+      return res.status(200).json({
+        message: "Địa chỉ không được chứa ký tự đặc biệt.",
+        success: false,
+      });
+    }
+
+    // Xác thực số điện thoại
+    const phonePattern = /^(?:\+84|0)(\d{9})$/;
+    if (!phonePattern.test(phone)) {
+      return res.status(200).json({
+        message:
+          "Số điện thoại phải là dịnh dạng +84 hoặc số 0 đầu tiên và gồm 10 chữ số",
+        success: false,
+      });
+    }
+
     const userId = req.profile._id;
     const cart = await Cart.findOne({ userId })
       .populate({
@@ -26,11 +89,16 @@ export const createOrder = async (req, res) => {
         path: "products.variant",
         model: "ProductSize",
       })
+      .populate({
+        path: "products.option",
+        model: "option",
+      })
       .exec();
 
     const cartProducts = cart.products?.filter((it) =>
       productSelectedIds.includes(it.variant._id.toString())
     );
+
     const products = cartProducts.map((item) => ({
       name: item.product.name,
       price: item.variant.price,
@@ -38,13 +106,19 @@ export const createOrder = async (req, res) => {
       image: item.product.image[0],
       size: item.variant.sizeName,
       variantId: item.variant._id,
+      optionName: item?.option?.name,
+      optionPrice: item?.option?.price,
     }));
 
     const totalPrice =
       cartProducts.reduce((total, curr) => {
-        total += curr.variant.price * curr.quantity;
+        let priceTotal = curr.variant.price * curr.quantity;
 
-        return total;
+        if (curr.option) {
+          priceTotal += curr.option.price * curr.quantity;
+        }
+
+        return (total += priceTotal);
       }, 0) -
       bodyData.discouVoucher +
       bodyData.shippingCost;
@@ -57,7 +131,6 @@ export const createOrder = async (req, res) => {
       totalPrice,
       quantity: cart.products.length,
       products,
-      paymentMethod,
       status: "1",
     }).save();
 
@@ -75,7 +148,7 @@ export const createOrder = async (req, res) => {
 
     let paymentUrl = "";
 
-    if (paymentMethod === "VNPAY") {
+    if (bodyData.paymentMethod === "VNPAY") {
       paymentUrl = createPaymentUrl(
         ipAddr,
         `FBEE_${orders._id}`,
@@ -316,7 +389,6 @@ export const getTotalPriceByDay = async (req, res) => {
         $lte: endOfDay,
       },
       status: "7",
-
     });
 
     const totalPrice = orders.reduce(
@@ -347,7 +419,6 @@ export const getPriceRefundByDay = async (req, res) => {
         $lte: endOfDay,
       },
       status: "8",
-
     });
 
     const totalPrice = orders.reduce(
@@ -378,7 +449,6 @@ export const getPriceCancelByDay = async (req, res) => {
         $lte: endOfDay,
       },
       status: "0",
-
     });
 
     const totalPrice = orders.reduce(
@@ -785,4 +855,3 @@ export const getPriceCancelByCustomDay = async (req, res) => {
     });
   }
 };
-
