@@ -29,7 +29,7 @@ const discountCodeSchema = new mongoose.Schema({
   usedCount: { type: Number, default: 0 },
   status: { type: String, enum: ['active', 'expired', 'disabled'], default: 'active' },
   minPurchaseAmount: { type: Number, min: 0, default: 0 },
-  userId: [
+  userIds: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -11,5 +11,6 @@ export interface IVoucher {
     usedCount?: number;
     status?: 'active' | 'expired' | 'disabled';
     minPurchaseAmount?: number;
+    userIds: string[]
   }
   

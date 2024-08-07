@@ -1,5 +1,6 @@
 import Order from "../models/order.js";
 import Cart from "../models/cart.js";
+import Discount from "../models/DiscountCode.js";
 import querystring from "qs";
 import crypto from "crypto";
 import dateFormat from "dayjs";
@@ -15,7 +16,7 @@ dotenv.config();
  */
 export const createOrder = async (req, res) => {
   try {
-    const { productSelectedIds, paymentMethod, ...bodyData } = req.body;
+    const { productSelectedIds, paymentMethod, discountCode, ...bodyData } = req.body;
     const userId = req.profile._id;
     const cart = await Cart.findOne({ userId })
       .populate({
@@ -44,7 +45,8 @@ export const createOrder = async (req, res) => {
       size: item.variant.sizeName,
       variantId: item.variant._id,
       optionName: item?.option?.name,
-      optionPrice: item?.option?.price
+      optionPrice: item?.option?.price,
+      optionId: item?.option?._id
     }));
 
     const totalPrice =
@@ -59,7 +61,9 @@ export const createOrder = async (req, res) => {
       }, 0) -
       bodyData.discouVoucher +
       bodyData.shippingCost;
-
+    
+    // add user id to voucher
+    await Discount.findOneAndUpdate({ code: discountCode }, { $push: { userIds: userId }, $inc: { usedCount: 1 } })
 
     const orders = await new Order({
       ...req.body,
