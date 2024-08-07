@@ -79,9 +79,9 @@ export default function Cart() {
       dispatch(removeProduct(productId));
     };
 
-    const onProductUpdate = (productId: string) => {
-      console.log("client update", productId);
-    };
+    const onProductUpdate = () => {
+      refetch();
+    }
 
     socket.on("connect", onConnect);
     socket.on("hidden product", onHiddenProduct);
@@ -242,7 +242,6 @@ export default function Cart() {
                         dataIndex="name"
                         key="name"
                         render={(_, record: any) => {
-                          console.log(record);
                           return (
                             <div>
                               <Link to={`/product/${record.product._id}`}>
@@ -269,7 +268,7 @@ export default function Cart() {
                         title="Option"
                         dataIndex="option"
                         key="option"
-                        render={(option, record: any) => {
+                        render={(option) => {
                           if (option) {
                             return (
                               <div>
