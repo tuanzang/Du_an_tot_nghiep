@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button, Col, Form, Input, InputNumber, Row } from "antd";
 import { ICategory } from "../../../interface/Categories";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { toast } from "react-toastify";
 
 const CategoryEdit = () => {
   const { id } = useParams();
@@ -24,7 +25,7 @@ const CategoryEdit = () => {
     console.log("Success:", values);
     try {
       await axios.put(`http://localhost:3001/api/categories/${id}`, values);
-      alert("Edit category success");
+      toast("Cập nhật thành công");
       navigate("/admin/category");
     } catch (err) {
       console.log(err);
