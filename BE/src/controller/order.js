@@ -196,13 +196,24 @@ export const detailOrder = async (req, res) => {
   }
 };
 
+const getOrdersByDate = async (dateStart, dateEnd, status) => {
+};
+export const getTotalOrdersByDate = async (req, res) => {
+  const { dateStart, dateEnd, status } = req.query;
+  try {
+    const totalOrders = await getOrdersByDate(dateStart, dateEnd, status);
+    res.status(200).json({ totalOrders });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 /**
  * API danh sách hóa đơn
  * @param {*} req
  * @param {*} res
  * @returns
  */
-
 export const getAllOrders = async (req, res) => {
   const { status, code, createAtFrom, createAtTo, page = 1 } = req.body;
 
