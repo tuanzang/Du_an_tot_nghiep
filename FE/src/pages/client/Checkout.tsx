@@ -293,7 +293,7 @@ const Checkout = () => {
               </tr>
             </thead>
             <tbody>
-              {productSelected?.map((item) => (
+              {productSelected?.map((item:ICartItem) => (
                 <tr key={item._id}>
                   <td>
                     {item.product.name} (Size: {item.variant?.sizeName})
@@ -301,12 +301,12 @@ const Checkout = () => {
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
                   <td>
-                    {item.option.name}
+                    {item.option?.name}
                     <br />
-                    {item.option.price}
+                    {item.option?.price}
                   </td>
                   <td>{formatPrice(item.variant.price * item.quantity)}</td>
-                  {/* <td> {formatPrice(SHIPPING_COST)}</td> */}
+                  <td> {formatPrice(SHIPPING_COST)}</td>
                 </tr>
               ))}
             </tbody>
