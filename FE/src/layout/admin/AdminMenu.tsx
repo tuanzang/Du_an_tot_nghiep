@@ -8,6 +8,9 @@ import {
   UserOutlined,
   BarcodeOutlined,
   CommentOutlined,
+  StockOutlined,
+  ProductOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
 
 type Props = {
@@ -42,7 +45,7 @@ export default function AdminMenu({ small }: Props) {
   const menuItems = [
     {
       key: "dashboard",
-      icon: <DashboardOutlined />,
+      icon: <StockOutlined />,
       label: <Link to="/admin/dashboard">Thống kê</Link>,
     },
     {
@@ -91,7 +94,7 @@ export default function AdminMenu({ small }: Props) {
     // },
     {
       key: "products",
-      icon: <BarcodeOutlined />,
+      icon: <ProductOutlined />,
       label: "Quản lý sản phẩm",
       children: [
         {
@@ -105,13 +108,12 @@ export default function AdminMenu({ small }: Props) {
         {
           key: "size",
           label: <Link to="/admin/size">Size</Link>,
-        }
-        ,
-        {
-          key: "voucher",
-          label: <Link to="/admin/voucher">Mã giảm giá</Link>,
-        }
+        },
       ],
+    },
+    {key: "voucher",
+      icon: <TagsOutlined />,
+      label: <Link to="/admin/voucher">Mã giảm giá</Link>,
     },
     {
       key: "users",

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMyCartQuery } from "../../hooks/useCart";
-import { Typography, Modal, Radio, Card, Button } from "antd";
+import { Typography, Modal, Radio, Card, Space } from "antd";
 import { formatPrice } from "../../services/common/formatCurrency";
-import { SubmitHandler, useForm } from "react-hook-form";
 import OrderApi from "../../config/orderApi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -10,6 +9,7 @@ import { IHistoryBill } from "../../interface/HistoryBill";
 import { IUser } from "../../interface/Users";
 import { useDispatch, useSelector } from "react-redux";
 import { ICartItem } from "./Cart";
+
 import {
   removeProduct,
   selectProductSelected,
@@ -21,23 +21,31 @@ import { socket } from "../../socket";
 import { IVoucher } from "../../interface/Voucher";
 import dayjs from "dayjs";
 import axios from "axios";
-import "./checkout.css"
-const SHIPPING_COST = 30000; 
+import "./checkout.css";
+const SHIPPING_COST = 30000;
 // import { useLocation } from "react-router-dom";
 const { Text } = Typography;
 
-type Inputs = {
+interface IDataBill {
   customerName: string;
-  address: string;
   phone: string;
+  address: string;
   message: string;
   paymentMethod: string;
-};
+}
 
 const Checkout = () => {
   // lấy thông tin user đăng nhập
   const isLogged = localStorage.getItem(USER_INFO_STORAGE_KEY);
   const user: IUser | null = isLogged ? JSON.parse(isLogged) : null;
+
+  const [dataBill, setDataBill] = useState<IDataBill>({
+    customerName: user ? user.name : "",
+    phone: user ? user.phoneNumber : "",
+    address: "",
+    message: "",
+    paymentMethod: "COD",
+  });
 
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
@@ -46,9 +54,9 @@ const Checkout = () => {
   const { refetch } = useMyCartQuery();
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [discountCodes, setDiscountCodes] = useState([]);
+  const [discountCodes, setDiscountCodes] = useState<IVoucher[]>([]);
   const [selectedDiscountCode, setSelectedDiscountCode] = useState(null);
-  const [totalDiscount, setTotalDiscount] = useState(0);
+  const [totalDiscount, setTotalDiscount] = useState<number>(0);
 
   // initial socket
   useEffect(() => {
@@ -69,29 +77,32 @@ const Checkout = () => {
     }
   }, [navigate, productSelected.length]);
 
-  const { register, handleSubmit } = useForm<Inputs>({
-    defaultValues: {
-      paymentMethod: "COD",
-    },
-  });
-
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+  const handleCreateBill = async (
+    dataBill: IDataBill,
+    productSelected: ICartItem[],
+    SHIPPING_COST: number,
+    totalDiscount: number
+  ) => {
     try {
       const productSelectedIds = productSelected.map((it) => it.variant._id);
       const res = await OrderApi.createOrder({
-        ...data,
+        ...dataBill,
         productSelectedIds,
         shippingCost: SHIPPING_COST,
         discouVoucher: totalDiscount,
       });
+      console.log(res);
 
-      if (data?.paymentMethod === "COD") {
-        createNewHistory(res.data.data._id, "1", user);
-        toast.success("Đặt hàng thành công!");
-        navigate("/");
-        refetch();
+      if (res.data.success === false) {
+        toast.error(res.data.message);
       } else {
-        window.location.href = res?.data?.paymentUrl;
+        if (dataBill?.paymentMethod === "COD") {
+          createNewHistory(res.data.data._id, "1", user);
+          navigate("/");
+          refetch();
+        } else {
+          window.location.href = res?.data?.paymentUrl;
+        }
       }
     } catch (error) {
       toast.error("Đặt hàng thất bại!");
@@ -124,13 +135,14 @@ const Checkout = () => {
         "http://localhost:3001/api//history-bill/add",
         dataHistoryBill
       );
+      toast.success("Đặt hàng thành công!");
     } catch (error) {
       toast.error("Tạo lịch sử thất bại");
     }
   };
-  
-const discountedPrice = totalPrice - totalDiscount;
-const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
+
+  const discountedPrice = totalPrice - totalDiscount;
+  const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
 
   useEffect(() => {
     // Fetch mã giảm giá từ API
@@ -156,9 +168,11 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
       if (selectedCode) {
         let discountAmount = 0;
         if (selectedCode.discountType === "percentage") {
-          discountAmount = (totalPrice * selectedCode.discountPercentage) / 100;
+          discountAmount = Number(
+            (totalPrice * Number(selectedCode.discountPercentage)) / 100
+          );
         } else if (selectedCode.discountType === "amount") {
-          discountAmount = selectedCode.discountAmount;
+          discountAmount = Number(selectedCode.discountAmount);
         }
         setTotalDiscount(discountAmount);
       }
@@ -179,90 +193,91 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
       <div className="row">
         <div className="col-md-5 mb-3">
           <h2>Thanh Toán Đơn Hàng</h2>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label"></label>
-              <input
-                type="text"
-                className="form-control"
-                id="name"
-                placeholder="Họ và tên"
-                {...register("customerName", {
-                  required: true,
-                })}
-              />
-            </div>
-            <div className="mb-3">
-              <input
-                type="text"
-                className="form-control"
-                id="number"
-                placeholder="Số điện thoại"
-                {...register("phone", {
-                  required: true,
-                })}
-              />
-            </div>
-            <div className="mb-3">
-              <input
-                type="text"
-                className="form-control"
-                id="address"
-                placeholder="Địa chỉ"
-                {...register("address", {
-                  required: true,
-                })}
-              />
-            </div>
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label"></label>
+            <input
+              type="text"
+              className="form-control"
+              id="customerName"
+              placeholder="Họ và tên"
+              value={dataBill.customerName}
+              onChange={(e) =>
+                setDataBill({ ...dataBill, customerName: e.target.value })
+              }
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              id="number"
+              placeholder="Số điện thoại"
+              value={dataBill.phone}
+              onChange={(e) =>
+                setDataBill({ ...dataBill, phone: e.target.value })
+              }
+            />
+          </div>
 
-            <div className="md-3 ">
-              <input
-                type="text"
-                className="form-control"
-                id="city"
-                placeholder="Ghi chú"
-                {...register("message", {
-                  required: true,
-                })}
-              />
-            </div>
-            <div className="fw-normal fs-5 mt-5">Phương thức thanh toán</div>
-            <div className="d-flex flex-column md-3">
-              <div className=" p-2 form-check ">
-                <input
-                  type="radio"
-                  className="form-check-input"
-                  value="COD"
-                  {...register("paymentMethod")}
-                />
-                <label className="form-check-label">
-                  Thanh toán sau khi nhận hàng
-                </label>
-              </div>
-              <div className="p-2 form-check">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  id="myCheckbox"
-                  value="VNPAY"
-                  {...register("paymentMethod")}
-                />
-                <label className="form-check-label" htmlFor="myCheckbox">
-                  Thanh toán ngay
-                </label>
-              </div>
-            </div>
-            <hr />
-            <div className="d-flex justify-content-between">
-              <a href=""> Giỏ hàng</a>
-              <button
-                type="submit"
-                className="btn btn-primary bg-warning px-4 py-3"
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              id="address"
+              placeholder="Địa chỉ"
+              value={dataBill.address}
+              onChange={(e) =>
+                setDataBill({ ...dataBill, address: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="md-3 ">
+            <input
+              type="text"
+              className="form-control"
+              id="city"
+              placeholder="Ghi chú"
+              value={dataBill.message}
+              onChange={(e) =>
+                setDataBill({ ...dataBill, message: e.target.value })
+              }
+            />
+          </div>
+          <div className="fw-normal fs-5 mt-5">Phương thức thanh toán</div>
+          <div className="d-flex flex-column md-3">
+            <div className=" p-2 form-check ">
+              <Radio.Group
+                onChange={(e) =>
+                  setDataBill({ ...dataBill, paymentMethod: e.target.value })
+                }
+                value={dataBill.paymentMethod}
               >
-                Hoàn tất đơn hàng
-              </button>
+                <Space direction="vertical">
+                  <Radio value={"COD"}>Thanh toán sau khi nhận hàng</Radio>
+                  <Radio value={"VNPAY"}>Thanh toán ngay</Radio>
+                </Space>
+              </Radio.Group>
             </div>
-          </form>
+          </div>
+          <hr />
+          <div className="d-flex justify-content-between">
+            <a href=""> Giỏ hàng</a>
+            <button
+              type="submit"
+              className="btn btn-primary bg-warning px-4 py-3"
+              onClick={() =>
+                handleCreateBill(
+                  dataBill,
+                  productSelected,
+                  SHIPPING_COST,
+                  totalDiscount
+                )
+              }
+            >
+              Hoàn tất đơn hàng
+            </button>
+          </div>
         </div>
         <div className="col-md-7 bg-light">
           <h3 className="mt-2">Giỏ Hàng</h3>
@@ -273,6 +288,7 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
                 {/* <th>ảnh</th> */}
                 <th>Giá</th>
                 <th>Số lượng</th>
+                <th>Option</th>
                 <th>Tổng tiền</th>
               </tr>
             </thead>
@@ -284,6 +300,11 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
                   </td>
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
+                  <td>
+                    {item.option.name}
+                    <br />
+                    {item.option.price}
+                  </td>.
                   <td>{formatPrice(item.variant.price * item.quantity)}</td>
                   {/* <td> {formatPrice(SHIPPING_COST)}</td> */}
                 </tr>

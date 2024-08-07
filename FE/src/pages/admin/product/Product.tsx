@@ -209,10 +209,10 @@ export default function Product() {
       width: "20%",
       render: (images: string[]) => (
         <div style={{ display: "flex", gap: "10px" }}>
-          {images.slice(0, 2).map((image, index) => (
+          {images.slice(0, 1).map((image, index) => (
             <img
               key={index}
-              style={{ height: "70px", width: "70px", objectFit: "cover" }}
+              style={{ height: "100px", width: "100px", objectFit: "cover", marginLeft: "50px" }}
               src={image}
               alt={`product-image-${index}`}
             />

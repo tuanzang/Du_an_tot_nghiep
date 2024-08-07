@@ -136,11 +136,11 @@ const ProductAdd = () => {
   const editorRef = useRef(null);
   const [isLayoutReady, setIsLayoutReady] = useState(false);
   const [description, setDescription] = useState<string>("");
-  const [options, setOptions] = useState<IOption[]>([])
+  const [options, setOptions] = useState<IOption[]>([]);
 
   const [form] = Form.useForm();
 
-  const categoryId = Form.useWatch('categoryId', form);
+  const categoryId = Form.useWatch("categoryId", form);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -163,16 +163,16 @@ const ProductAdd = () => {
 
   useEffect(() => {
     categoryId && fetchOptions(categoryId);
-  }, [categoryId])
+  }, [categoryId]);
 
   const fetchOptions = async (categoryId: string) => {
     try {
-      const {data} = await axiosInstance.get(`/options/${categoryId}`);
+      const { data } = await axiosInstance.get(`/options/${categoryId}`);
       setOptions(data.data);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const dataCates = cates.map((item: ICategory) => {
     return {
@@ -239,7 +239,7 @@ const ProductAdd = () => {
   };
 
   return (
-    <div className="">
+    <div className="container">
       <BreadcrumbsCustom nameHere={"Thêm sản phẩm"} listLink={[]} />
       <Form
         name="basic"
@@ -248,7 +248,7 @@ const ProductAdd = () => {
         autoComplete="off"
         form={form}
       >
-        <div className="d-flex flex-row px-5 py-3">
+        <div className="add d-flex flex-row px-8 py-3">
           <Card>
             <Form.Item<IProduct>
               label="Tên sản phẩm"
@@ -256,6 +256,7 @@ const ProductAdd = () => {
               rules={[
                 { required: true, message: "Vui lòng nhập tên sản phẩm!" },
               ]}
+              style={{ width: 320, fontFamily: "SpaceGrotesk-Light" }}
             >
               <Input />
             </Form.Item>
@@ -268,10 +269,24 @@ const ProductAdd = () => {
               <Select
                 defaultValue="Chọn danh mục"
                 style={{
-                  width: 150,
+                  width: 235,
+                  fontFamily: "SpaceGrotesk-Light",
                 }}
                 options={dataCates}
               />
+            </Form.Item>
+          </Card>
+          <Card
+            className="d-flex flex-row px-8"
+            style={{ width: 300, fontFamily: "SpaceGrotesk-Light" }}
+          >
+            <p>Phụ kiện</p>
+
+            <Form.Item
+              name="options"
+              style={{ fontFamily: "SpaceGrotesk-Light" }}
+            >
+              <OptionFormItem options={options} />
             </Form.Item>
           </Card>
 
@@ -302,7 +317,9 @@ const ProductAdd = () => {
               ))}
             </div>
           </Card>
+        </div>
 
+        <div className="py-3">
           <Card>
             <Form.Item
               label="Ảnh"
@@ -325,15 +342,6 @@ const ProductAdd = () => {
             </Form.Item>
           </Card>
         </div>
-
-        <Card className="mb-3">
-          <p>Phụ kiện</p>
-
-          <Form.Item name='options'>
-            <OptionFormItem options={options} />
-          </Form.Item>
-        </Card>
-
         <div>
           <Card>
             <div
