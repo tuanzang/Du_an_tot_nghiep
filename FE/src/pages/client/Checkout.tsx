@@ -304,7 +304,7 @@ const Checkout = () => {
                     {item.option.name}
                     <br />
                     {item.option.price}
-                  </td>.
+                  </td>
                   <td>{formatPrice(item.variant.price * item.quantity)}</td>
                   {/* <td> {formatPrice(SHIPPING_COST)}</td> */}
                 </tr>

@@ -8,31 +8,21 @@ import {
   Button,
   DatePicker,
   Table,
-  Select,
-  Pagination,
-  // Pagination,
 } from "antd";
 
 
 import axios from "axios";
-import formatCurrency from "../../../services/common/formatCurrency";
-import { ColumnGroupType, ColumnType } from "antd/es/table";
-import { IProduct } from "../../../interface/Products";
-import { log } from "console";
-import { GiLogicGateAnd } from "react-icons/gi";
-import { start } from "repl";
 import PieChartDashBoard from "./PieChartDashBoard";
 import ColumChartDashBoard from "./ColumChartDashBoard";
-import { text } from "stream/consumers";
-// import { LineChart } from "./LineChartDashBoard"; // Assuming you have a LineChartDashBoard component
+import { ToastContainer, toast } from "react-toastify";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
 interface Filter {
   page: number;
   size: number;
-  createAtFrom?: string | null; // Thêm thuộc tính này
-  createAtTo?: string | null;   // Thêm thuộc tính này
+  createAtFrom?: string | null; 
+  createAtTo?: string | null;   
 }
 
 interface ProductDetails {
@@ -47,29 +37,16 @@ interface BestSellerItem {
   categoryName: string;
   totalQuantity: number;
   price: number;
-  totalRevenue : number;
+  totalRevenue: number;
 }
+type ChartData = { label: string; value: number };
+
 
 export default function Dashboard() {
-  const [dataBieuDo, setDataBieuDo] = useState([]);
-  const [dataBieuDo2, setDataBieuDo2] = useState([]);
+  const [dataBieuDo, setDataBieuDo] = useState<ChartData[]>([]);
+  const [dataBieuDo2, setDataBieuDo2] = useState<ChartData[]>([]);
   const [indexButton, setIndexButton] = useState(1);
   const [nameButton, setNameButton] = useState("ngày");
-  const [totalPriceByDay, setTotalPriceByDay] = useState(0);
-  const [totalPriceByWeek, setTotalPriceByWeek] = useState(0);
-  const [totalPriceByMonth, setTotalPriceByMonth] = useState(0);
-  const [totalPriceByYear, setTotalPriceByYear] = useState(0);
-  const [totalPriceByCustomDay, setTotalPriceByCustomDay] = useState(0);
-  const [priceRefundByDay, setPriceRefundByDay] = useState(0);
-  const [priceRefundByWeek, setPriceRefundByWeek] = useState(0);
-  const [priceRefundByMonth, setPriceRefundByMonth] = useState(0);
-  const [priceRefundByYear, setPriceRefundByYear] = useState(0);
-  const [priceRefundByCustomDay, setPriceRefundByCustomDay] = useState(0);
-  const [priceCancelByDay, setPriceCancelByDay] = useState(0);
-  const [priceCancelByWeek, setPriceCancelByWeek] = useState(0);
-  const [priceCancelByMonth, setPriceCancelByMonth] = useState(0);
-  const [priceCancelByYear, setPriceCancelByYear] = useState(0);
-  const [priceCancelByCustomDay, setPriceCancelByCustomDay] = useState(0);
   const [listBestSellerByDay, setListBestSellerByDay] = useState([]);
   const [listBestSellerByWeek, setListBestSellerByWeek] = useState([]);
   const [listBestSellerByMonth, setListBestSellerByMonth] = useState([]);
@@ -82,58 +59,14 @@ export default function Dashboard() {
   const [listStockProductsByCustomDay, setListStockProductsByCustomDay] = useState([]);
   const [filter, setFilter] = useState<Filter>({ page: 1, size: 5, createAtFrom: null, createAtTo: null });
   const [customDateRange, setCustomDateRange] = useState([null, null]);
-  const [completedOrdersByCustomDay, setCompletedOrdersByCustomDay] = useState(0);
-  const [canceledOrdersByCustomDay, setCanceledOrdersByCustomDay] = useState(0);
-  const [returnedOrdersByCustomDay, setReturnedOrdersByCustomDay] = useState(0);
-  const [completedOrdersDay, setCompletedOrdersDay] = useState(0);
-  const [canceledOrdersDay, setCanceledOrdersDay] = useState(0);
-  const [returnedOrdersDay, setReturnedOrdersDay] = useState(0);
-  const [completedOrdersWeek, setCompletedOrdersWeek] = useState(0);
-  const [canceledOrdersWeek, setCanceledOrdersWeek] = useState(0);
-  const [returnedOrdersWeek, setReturnedOrdersWeek] = useState(0);
-  const [completedOrdersMonth, setCompletedOrdersMonth] = useState(0);
-  const [canceledOrdersMonth, setCanceledOrdersMonth] = useState(0);
-  const [returnedOrdersMonth, setReturnedOrdersMonth] = useState(0);
-  const [completedOrdersYear, setCompletedOrdersYear] = useState(0);
-  const [canceledOrdersYear, setCanceledOrdersYear] = useState(0);
-  const [returnedOrdersYear, setReturnedOrdersYear] = useState(0);
-  const [waitConfirmOrdersDay, setWaitConfirmOrdersDay] = useState(0);
-  const [waitConfirmOrdersWeek, setWaitConfirmOrdersWeek] = useState(0);
-  const [waitConfirmOrdersMonth, setWaitConfirmOrdersMonth] = useState(0);
-  const [waitConfirmOrdersYear, setWaitConfirmOrdersYear] = useState(0);
-  const [waitConfirmOrdersCustomDay, setWaitConfirmOrdersCustomDay] = useState(0);
-  const [confirmedOrdersDay, setConfirmedOrdersDay] = useState(0);
-  const [confirmedOrdersWeek, setConfirmedOrdersWeek] = useState(0);
-  const [confirmedOrdersMonth, setConfirmedOrdersMonth] = useState(0);
-  const [confirmedOrdersYear, setConfirmedOrdersYear] = useState(0);
-  const [confirmedOrdersCustomDay, setConfirmedOrdersCustomDay] = useState(0);
-  const [packingOrdersDay, setPackingOrdersDay] = useState(0);
-  const [packingOrdersWeek, setPackingOrdersWeek] = useState(0);
-  const [packingOrdersMonth, setPackingOrdersMonth] = useState(0);
-  const [packingOrdersYear, setPackingOrdersYear] = useState(0);
-  const [packingOrdersCustomDay, setPackingOrdersCustomDay] = useState(0);
-  const [shippingOrdersDay, setShippingOrdersDay] = useState(0);
-  const [shippingOrdersWeek, setShippingOrdersWeek] = useState(0);
-  const [shippingOrdersMonth, setShippingOrdersMonth] = useState(0);
-  const [shippingOrdersYear, setShippingOrdersYear] = useState(0);
-  const [shippingOrdersCustomDay, setShippingOrdersCustomDay] = useState(0);
-  const [deliveredOrdersDay, setDeliveredOrdersDay] = useState(0);
-  const [deliveredOrdersWeek, setDeliveredOrdersWeek] = useState(0);
-  const [deliveredOrdersMonth, setDeliveredOrdersMonth] = useState(0);
-  const [deliveredOrdersYear, setDeliveredOrdersYear] = useState(0);
-  const [deliveredOrdersCustomDay, setDeliveredOrdersCustomDay] = useState(0);
-  const [paidOrdersDay, setPaidOrdersDay] = useState(0);
-  const [paidOrdersWeek, setPaidOrdersWeek] = useState(0);
-  const [paidOrdersMonth, setPaidOrdersMonth] = useState(0);
-  const [paidOrdersYear, setPaidOrdersYear] = useState(0);
-  const [paidOrdersCustomDay, setPaidOrdersCustomDay] = useState(0);
+ 
   //tính tổng tiền 
   const getOrdersPriceByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
     try {
       const resTotalPriceByDay = await axios.get(`http://localhost:3001/api/orders/total-price/day`, {
-        params: { 
+        params: {
           dateNow: date,
-         }
+        }
       });
       const resPriceRefundByDay = await axios.get(`http://localhost:3001/api/orders/price-refund/day`, {
         params: {
@@ -145,10 +78,11 @@ export default function Dashboard() {
           dateNow: date,
         }
       })
-      
-      setTotalPriceByDay(resTotalPriceByDay.data.totalPrice);
-      setPriceRefundByDay(resPriceRefundByDay.data.totalPrice);
-      setPriceCancelByDay(resPriceCancelByDay.data.totalPrice);
+      setDataBieuDo2([
+        { label: "Lợi nhuận", value: resTotalPriceByDay.data.totalPrice },
+        { label: "Số tiền đơn hoàn", value: resPriceRefundByDay.data.totalPrice },
+        { label: "Số tiền đơn hủy", value: resPriceCancelByDay.data.totalPrice },
+      ])
     } catch (error) {
       console.log(error);
     }
@@ -175,10 +109,12 @@ export default function Dashboard() {
           dateEnd: endDate,
         }
       })
-      
-      setTotalPriceByWeek(resTotalPriceByWeek.data.totalPrice);
-      setPriceRefundByWeek(resPriceRefundByWeek.data.totalPrice);
-      setPriceCancelByWeek(resPriceCancelByWeek.data.totalPrice);
+
+      setDataBieuDo2([
+        { label: "Lợi nhuận", value: resTotalPriceByWeek.data.totalPrice },
+        { label: "Số tiền đơn hoàn", value: resPriceRefundByWeek.data.totalPrice },
+        { label: "Số tiền đơn hủy", value: resPriceCancelByWeek.data.totalPrice },
+      ])
     } catch (error) {
       console.log(error);
     }
@@ -205,9 +141,11 @@ export default function Dashboard() {
           dateEnd: endDate,
         }
       })
-      setTotalPriceByMonth(resTotalPriceByMonth.data.totalPrice);
-      setPriceRefundByMonth(resPriceRefundByMonth.data.totalPrice);
-      setPriceCancelByMonth(resPriceCancelByMonth.data.totalPrice);
+      setDataBieuDo2([
+        { label: "Lợi nhuận", value: resTotalPriceByMonth.data.totalPrice },
+        { label: "Số tiền đơn hoàn", value: resPriceRefundByMonth.data.totalPrice },
+        { label: "Số tiền đơn hủy", value: resPriceCancelByMonth.data.totalPrice },
+      ])
     } catch (error) {
       console.log(error);
     }
@@ -234,9 +172,11 @@ export default function Dashboard() {
           dateEnd: endDate,
         }
       })
-      setTotalPriceByYear(resTotalPriceByYear.data.totalPrice);
-      setPriceRefundByYear(resPriceRefundByYear.data.totalPrice);
-      setPriceCancelByYear(resPriceCancelByYear.data.totalPrice);
+      setDataBieuDo2([
+        { label: "Lợi nhuận", value: resTotalPriceByYear.data.totalPrice },
+        { label: "Số tiền đơn hoàn", value: resPriceRefundByYear.data.totalPrice },
+        { label: "Số tiền đơn hủy", value: resPriceCancelByYear.data.totalPrice },
+      ])
     } catch (error) {
       console.log(error);
     }
@@ -244,7 +184,7 @@ export default function Dashboard() {
 
   const getOrdersPriceByCustomDayStatus = async () => {
     try {
-      const [dateStart, dateEnd]  = customDateRange;
+      const [dateStart, dateEnd] = customDateRange;
       const resTotalPriceByCustomDay = await axios.get(`http://localhost:3001/api/orders/total-price/custom-day`, {
         params: {
           dateStart, dateEnd,
@@ -260,13 +200,11 @@ export default function Dashboard() {
           dateStart, dateEnd,
         }
       })
-      console.log(resTotalPriceByCustomDay.data.totalPrice);
-      console.log(resPriceRefundByCustomDay.data.totalPrice);
-      console.log(resPriceCancelByCustomDay.data.totalPrice);
-      
-      setTotalPriceByCustomDay(resTotalPriceByCustomDay.data.totalPrice);
-      setPriceRefundByCustomDay(resPriceRefundByCustomDay.data.totalPrice);
-      setPriceCancelByCustomDay(resPriceCancelByCustomDay.data.totalPrice);
+      setDataBieuDo2([
+        { label: "Lợi nhuận", value: resTotalPriceByCustomDay.data.totalPrice },
+        { label: "Số tiền đơn hoàn", value: resPriceRefundByCustomDay.data.totalPrice },
+        { label: "Số tiền đơn hủy", value: resPriceCancelByCustomDay.data.totalPrice },
+      ])
     } catch (error) {
       console.log(error);
     }
@@ -276,136 +214,151 @@ export default function Dashboard() {
   // tính số đơn hàng
   const getOrdersByCustomStatus = async () => {
     try {
-      const formatDate = (date) => new Date(date).toISOString().split('T')[0];
-      const [rawStartDate, rawEndDate] = customDateRange;
-      const startDate = formatDate(rawStartDate);
-      const endDate = formatDate(rawEndDate);
+      const [dateStart, dateEnd] = customDateRange;
+
+      const resCanceled = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "0",
+        }
+      });
+      const resWaitConfirmed = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "1",
+        }
+      })
+      const resConfirmed = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "2",
+        }
+      })
+      const resPacking = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "3",
+        }
+      })
+      const resShipping = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "4",
+        }
+      })
+      const resDelivered = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "5",
+        }
+      })
+      const resPaid = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "6",
+        }
+      })
+      const resCompleted = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "7",
+        }
+      });
+      const resReturned = await axios.get("http://localhost:3001/api/orders", {
+        params : {
+          dateStart, dateEnd,
+          status: "8",
+        }
+      })
+      console.log(dateStart, dateEnd);
       
-      const resCanceled = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "0",
-      });
-      const resWaitConfirmed = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "1",
-      })
-      const resConfirmed = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "2",
-      })
-      const resPacking = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "3",
-      })
-      const resShipping = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "4",
-      })
-      const resDelivered = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "5",
-      })
-      const resPaid = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "6",
-      })
-      const resCompleted = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "7",
-      });
-      const resReturned = await axios.post("http://localhost:3001/api/orders", {
-        startDate, endDate,
-        status: "8",
-      })
-      setWaitConfirmOrdersCustomDay(resWaitConfirmed.data.data.length);
-      setConfirmedOrdersCustomDay(resConfirmed.data.data.length);
-      setPackingOrdersCustomDay(resPacking.data.data.length);
-      setShippingOrdersCustomDay(resShipping.data.data.length);
-      setDeliveredOrdersCustomDay(resDelivered.data.data.length);
-      setPaidOrdersCustomDay(resPaid.data.data.length);
-      setCompletedOrdersByCustomDay(resCompleted.data.data.length);
-      setCanceledOrdersByCustomDay(resCanceled.data.data.length);
-      setReturnedOrdersByCustomDay(resReturned.data.data.length);
+      setDataBieuDo([
+        { label: "Thành công", value: resCompleted.data.totalOrders },
+        { label: "Đã hủy", value: resCanceled.data.totalOrders },
+        { label: "Hoàn trả", value: resReturned.data.totalOrders },
+        { label: "Chờ xác nhận", value: resWaitConfirmed.data.totalOrders },
+        { label: "Đã xác nhận", value: resConfirmed.data.totalOrders },
+        { label: "Đang đóng gói", value: resPacking.data.totalOrders },
+        { label: "Đang giao đơn", value: resShipping.data.totalOrders },
+        { label: "Đã giao đơn", value: resDelivered.data.totalOrders },
+        { label: "Đã thanh toán", value: resPaid.data.totalOrders },
+      ]);
     } catch (error) {
       console.error("Error fetching statistics:", error);
-      return {
-        totalOrdersByCustomDay: 0,
-        completedOrdersByCustomDay: 0,
-        canceledOrdersByCustomDay: 0,
-      };
+      
     }
   };
   const getOrdersByDayStatus = async (date = new Date().toISOString().split('T')[0]) => {
     try {
-      const resCanceled = await axios.get(`http://localhost:3001/api/orders`, {
+      const resCanceledByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "0",
           dateNow: date,
         },
       });
-      const resWaitConfirmed = await axios.get(`http://localhost:3001/api/orders`, {
+      const resWaitConfirmedByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "1",
           dateNow: date,
         }
       });
-      const resConfirmed = await axios.get(`http://localhost:3001/api/orders`, {
+      const resConfirmedByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "2",
           dateNow: date,
         }
       });
-      const resPacking = await axios.get(`http://localhost:3001/api/orders`, {
+      const resPackingByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "3",
           dateNow: date,
         }
       });
-      const resShipping = await axios.get(`http://localhost:3001/api/orders`, {
+      const resShippingByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "4",
           dateNow: date,
         }
       });
-      const resDelivered = await axios.get(`http://localhost:3001/api/orders`, {
+      const resDeliveredByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "5",
           dateNow: date,
         }
       });
-      const resPaid = await axios.get(`http://localhost:3001/api/orders`, {
+      const resPaidByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "6",
           dateNow: date,
         }
       })
-      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
+      const resCompletedByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "7",
           dateNow: date,
         },
       });
-      const resReturned = await axios.get(`http://localhost:3001/api/orders`, {
+      const resReturnedByDay = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "8",
           dateNow: date,
         }
       })
-      setWaitConfirmOrdersDay(resWaitConfirmed.data.data.length);
-      setConfirmedOrdersDay(resConfirmed.data.data.length);
-      setPackingOrdersDay(resPacking.data.data.length);
-      setShippingOrdersDay(resShipping.data.data.length);
-      setDeliveredOrdersDay(resDelivered.data.data.length);
-      setPaidOrdersDay(resPaid.data.data.length);
-      setCompletedOrdersDay(resCompleted.data.data.length);
-      setCanceledOrdersDay(resCanceled.data.data.length);
-      setReturnedOrdersDay(resReturned.data.data.length);
+      
+      setDataBieuDo([
+        { label: "Thành công", value: resCompletedByDay.data.totalOrders},
+        { label: "Đã hủy", value: resCanceledByDay.data.totalOrders },
+        { label: "Hoàn trả", value: resReturnedByDay.data.totalOrders },
+        { label: "Chờ xác nhận", value: resWaitConfirmedByDay.data.totalOrders },
+        { label: "Đã xác nhận", value: resConfirmedByDay.data.totalOrders },
+        { label: "Đang đóng gói", value: resPackingByDay.data.totalOrders },
+        { label: "Đang giao đơn", value: resShippingByDay.data.totalOrders },
+        { label: "Đã giao đơn", value: resDeliveredByDay.data.totalOrders },
+        { label: "Đã thanh toán", value: resPaidByDay.data.totalOrders },
+      ]);
     } catch (error) {
       console.log(error);
-      return {
-        completed: 0,
-        canceled: 0,
-      };
+      
     }
   };
 
@@ -475,21 +428,21 @@ export default function Dashboard() {
           dateEnd: endDate,
         }
       })
-      setWaitConfirmOrdersWeek(resWaitConfirmed.data.data.length);
-      setConfirmedOrdersWeek(resConfirmed.data.data.length);
-      setPackingOrdersWeek(resPacking.data.data.length);
-      setShippingOrdersWeek(resShipping.data.data.length);
-      setDeliveredOrdersWeek(resDelivered.data.data.length);
-      setPaidOrdersWeek(resPaid.data.data.length);
-      setCompletedOrdersWeek(resCompleted.data.data.length);
-      setCanceledOrdersWeek(resCanceled.data.data.length);
-      setReturnedOrdersWeek(resReturned.data.data.length);
+      
+      setDataBieuDo([
+        { label: "Thành công", value: resCompleted.data.totalOrders },
+        { label: "Đã hủy", value: resCanceled.data.totalOrders },
+        { label: "Hoàn trả", value: resReturned.data.totalOrders },
+        { label: "Chờ xác nhận", value: resWaitConfirmed.data.totalOrders },
+        { label: "Đã xác nhận", value: resConfirmed.data.totalOrders },
+        { label: "Đang đóng gói", value: resPacking.data.totalOrders },
+        { label: "Đang giao đơn", value: resShipping.data.totalOrders },
+        { label: "Đã giao đơn", value: resDelivered.data.totalOrders },
+        { label: "Đã thanh toán", value: resPaid.data.totalOrders },
+      ]);
     } catch (error) {
       console.log(error);
-      return {
-        completed: 0,
-        canceled: 0,
-      };
+     
     }
   };
 
@@ -570,21 +523,20 @@ export default function Dashboard() {
           dateEnd: endDate,
         }
       })
-      setWaitConfirmOrdersMonth(resWaitConfirmed.data.data.length);
-      setConfirmedOrdersMonth(resConfirmed.data.data.length);
-      setPackingOrdersMonth(resPacking.data.data.length);
-      setShippingOrdersMonth(resShipping.data.data.length);
-      setDeliveredOrdersMonth(resDelivered.data.data.length);
-      setPaidOrdersMonth(resPaid.data.data.length);
-      setCompletedOrdersMonth(resCompleted.data.data.length);
-      setCanceledOrdersMonth(resCanceled.data.data.length);
-      setReturnedOrdersMonth(resReturned.data.data.length);
+      setDataBieuDo([
+        { label: "Thành công", value: resCompleted.data.totalOrders },
+        { label: "Đã hủy", value: resCanceled.data.totalOrders },
+        { label: "Hoàn trả", value: resReturned.data.totalOrders },
+        { label: "Chờ xác nhận", value: resWaitConfirmed.data.totalOrders },
+        { label: "Đã xác nhận", value: resConfirmed.data.totalOrders },
+        { label: "Đang đóng gói", value: resPacking.data.totalOrders },
+        { label: "Đang giao đơn", value: resShipping.data.totalOrders },
+        { label: "Đã giao đơn", value: resDelivered.data.totalOrders },
+        { label: "Đã thanh toán", value: resPaid.data.totalOrders },
+      ]);
     } catch (error) {
       console.log(error);
-      return {
-        completed: 0,
-        canceled: 0,
-      };
+      
     }
   };
 
@@ -665,21 +617,20 @@ export default function Dashboard() {
           dateEnd: endDate,
         }
       })
-      setWaitConfirmOrdersYear(resWaitConfirmed.data.data.length);
-      setConfirmedOrdersYear(resConfirmed.data.data.length);
-      setPackingOrdersYear(resPacking.data.data.length);
-      setShippingOrdersYear(resShipping.data.data.length);
-      setDeliveredOrdersYear(resDelivered.data.data.length);
-      setPaidOrdersYear(resPaid.data.data.length);
-      setCompletedOrdersYear(resCompleted.data.data.length);
-      setCanceledOrdersYear(resCanceled.data.data.length);
-      setReturnedOrdersYear(resReturned.data.data.length);
+      setDataBieuDo([
+        { label: "Thành công", value: resCompleted.data.totalOrders },
+        { label: "Đã hủy", value: resCanceled.data.totalOrders },
+        { label: "Hoàn trả", value: resReturned.data.totalOrders },
+        { label: "Chờ xác nhận", value: resWaitConfirmed.data.totalOrders },
+        { label: "Đã xác nhận", value: resConfirmed.data.totalOrders },
+        { label: "Đang đóng gói", value: resPacking.data.totalOrders },
+        { label: "Đang giao đơn", value: resShipping.data.totalOrders },
+        { label: "Đã giao đơn", value: resDelivered.data.totalOrders },
+        { label: "Đã thanh toán", value: resPaid.data.totalOrders },
+      ]);
     } catch (error) {
       console.log(error);
-      return {
-        completed: 0,
-        canceled: 0,
-      };
+     
     }
   };
 
@@ -703,7 +654,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    handleChangeButton(indexButton, nameButton);
+    handleChangeButton(1, nameButton);
   }, []);
 
   // Sản phẩm được bán chạy nhất 
@@ -716,8 +667,6 @@ export default function Dashboard() {
       }
       );
       setListBestSellerByDay(allListBestSellerByDay.data.data);
-      console.log(allListBestSellerByDay.data.data);
-
     } catch (error) {
       console.log(error);
     }
@@ -811,11 +760,11 @@ export default function Dashboard() {
 
   };
   useEffect(() => {
-    
-      getListBestSellerCustom();
-      getListStockProductsCustom();
-      getOrdersPriceByCustomDayStatus();
-      getOrdersByCustomStatus();
+
+    getListBestSellerCustom();
+    getListStockProductsCustom();
+    getOrdersPriceByCustomDayStatus();
+    getOrdersByCustomStatus();
   }, [customDateRange]);
 
   const dataListBestSeller = {
@@ -837,7 +786,7 @@ export default function Dashboard() {
       totalQuantity: item.totalQuantity,
       totalRevenue: item.totalRevenue
     })),
-    3: listBestSellerByMonth.map((item: BestSellerItem , index) => ({
+    3: listBestSellerByMonth.map((item: BestSellerItem, index) => ({
       stt: index + 1,
       name: item.name,
       price: item.price,
@@ -858,7 +807,7 @@ export default function Dashboard() {
     5: listBestSellerByCustomDay.map((item: BestSellerItem, index) => ({
       stt: index + 1,
       name: item.name,
-      price: item.price  ,
+      price: item.price,
       image: item.productDetails.image,
       description: item.productDetails.description,
       totalQuantity: item.totalQuantity,
@@ -872,7 +821,7 @@ export default function Dashboard() {
       image: item.image,
       description: item.description,
     })),
-    2: listStockProductsByWeek.map((item : any, index) => ({
+    2: listStockProductsByWeek.map((item: any, index) => ({
       stt: index + 1,
       name: item.name,
       image: item.image,
@@ -884,13 +833,13 @@ export default function Dashboard() {
       image: item.image,
       description: item.description,
     })),
-    4: listStockProductsByYear.map((item: any , index) => ({
+    4: listStockProductsByYear.map((item: any, index) => ({
       stt: index + 1,
       name: item.name,
       image: item.image,
       description: item.description,
     })),
-    5: listStockProductsByCustomDay.map((item: any , index) => ({
+    5: listStockProductsByCustomDay.map((item: any, index) => ({
       stt: index + 1,
       name: item.name,
       image: item.image,
@@ -901,22 +850,23 @@ export default function Dashboard() {
   const BestSeller = [
     { title: "STT", dataIndex: "stt", key: "stt" },
     { title: "Tên sản phẩm", dataIndex: "name", key: "name", width: '35%' },
-    { title: "Giá bán", dataIndex: "price", key: "price", width: '10%',
+    {
+      title: "Giá bán", dataIndex: "price", key: "price", width: '10%',
       render: text => (
         <div style={{ textAlign: 'center' }}>
-         {parseFloat(text).toLocaleString()} 
+          {parseFloat(text).toLocaleString()}
         </div>)
-     },
+    },
     {
       title: "Ảnh",
       dataIndex: "image",
       key: "image",
       render: (images: string[]) => (
         <div style={{ display: "flex", gap: "10px" }}>
-          {images.slice(0,1).map((image, index) => (
+          {images.slice(0, 1).map((image, index) => (
             <img
               key={index}
-              style={{ width : "70px",  objectFit: "cover" }}
+              style={{ width: "70px", objectFit: "cover" }}
               src={image}
               alt={`product-image-${index}`}
             />
@@ -924,24 +874,16 @@ export default function Dashboard() {
         </div>
       ),
     },
+
+    { title: "Số lượng bán ", dataIndex: "totalQuantity", key: "totalQuantity", align: "center" },
     {
-      title: "Mô tả",
-      dataIndex: "description",
-      key: "description",
-      render: (text) => (
-        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
-          {text.length > 0 ? text.substring(0, 20) + '...' : text}
+      title: "Doanh thu dự kiến ", dataIndex: "totalRevenue", key: "totalRevenue",
+      render: text => (
+        <div style={{ textAlign: 'center' }}>
+          {parseFloat(text).toLocaleString()}
         </div>
       )
     },
-    { title: "Số lượng bán ", dataIndex: "totalQuantity", key: "totalQuantity", align: "center"},
-    { title: "Tổng tiền thu được ", dataIndex: "totalRevenue", key: "totalRevenue",
-      render: text => (
-        <div style={{ textAlign: 'center' }}>
-         {parseFloat(text).toLocaleString()} 
-        </div>
-      )
-     },
   ];
 
   const StockOrder = [
@@ -953,10 +895,10 @@ export default function Dashboard() {
       key: "image",
       render: (images: string[]) => (
         <div style={{ display: "flex", gap: "10px" }}>
-          {images.slice(0,1).map((image, index) => (
+          {images.slice(0, 1).map((image, index) => (
             <img
               key={index}
-              style={{ width : "70px",  objectFit: "cover" }}
+              style={{ width: "70px", objectFit: "cover" }}
               src={image}
               alt={`product-image-${index}`}
             />
@@ -964,141 +906,76 @@ export default function Dashboard() {
         </div>
       ),
     },
-    {
-      title: "Mô tả",
-      dataIndex: "description",
-      key: "description",
-      render: (text) => (
-        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
-          {text.length > 0 ? text.substring(0, 20) + '...' : text}
-        </div>
-      )
-    }
+
   ];
 
 
   const handleChangeButton = async (index: number, type: string) => {
     setIndexButton(index);
     setNameButton(type);
-    let data;
 
+    const resetData = () => {
+      setListBestSellerByCustomDay([]);
+      setListStockProductsByCustomDay([]);
+      setDataBieuDo([]);
+      setDataBieuDo2([])
+    }
     switch (index) {
       case 1:
-        data = await getOrdersByDayStatus(new Date().toISOString().split('T')[0]);
-        await getOrdersPriceByDayStatus(new Date().toISOString().split('T')[0]);
-        await getListBestSellerByDay();
-        await getListStockProductsByDay();
-        setDataBieuDo([
-          { label: "Thành công", value: completedOrdersDay },
-          { label: "Đã hủy", value: canceledOrdersDay },
-          { label: "Hoàn trả", value: returnedOrdersDay },
-          { label: "Chờ xác nhận", value: waitConfirmOrdersDay },
-          { label: "Đã xác nhận", value: confirmedOrdersDay },
-          { label: "Đang đóng gói", value: packingOrdersDay },
-          { label: "Đang giao đơn", value: shippingOrdersDay },
-          { label: "Đã giao đơn", value: deliveredOrdersDay },
-          { label: "Đã thanh toán", value: paidOrdersDay },
+        await Promise.all([
+          getOrdersByDayStatus(),
+          getOrdersPriceByDayStatus(),
+          getListBestSellerByDay(),
+          getListStockProductsByDay()
         ]);
-        setDataBieuDo2([
-          { label: "Lợi nhuận", value: totalPriceByDay },
-          { label: "Số tiền đơn hoàn", value: priceRefundByDay },
-          { label: "Số tiền đơn hủy", value: priceCancelByDay },
-        ])
         break;
       case 2:
-        data = await getOrdersByWeekStatus();
-        await getOrdersPriceByWeekStatus();
-        await getListBestSellerByWeek();
-        await getListStockProductsByWeek();
-        setDataBieuDo([
-          { label: "Thành công", value: completedOrdersWeek },
-          { label: "Đã hủy", value: canceledOrdersWeek },
-          { label: "Hoàn trả", value: returnedOrdersWeek },
-          { label: "Chờ xác nhận", value: waitConfirmOrdersWeek },
-          { label: "Đã xác nhận", value: confirmedOrdersWeek },
-          { label: "Đang đóng gói", value: packingOrdersWeek },
-          { label: "Đang giao đơn", value: shippingOrdersWeek },
-          { label: "Đã giao đơn", value: deliveredOrdersWeek },
-          { label: "Đã thanh toán", value: paidOrdersWeek },
+        await Promise.all([
+          getOrdersByWeekStatus(),
+          getOrdersPriceByWeekStatus(),
+          getListBestSellerByWeek(),
+          getListStockProductsByWeek()
         ]);
-        setDataBieuDo2([
-          { label: "Lợi nhuận", value: totalPriceByWeek },
-          { label: "Số tiền đơn hoàn", value: priceRefundByWeek },
-          { label: "Số tiền đơn hủy", value: priceCancelByWeek },
-        ])
         break;
       case 3:
-        data = await getOrdersByMonthStatus();
-        await getOrdersPriceByMonthStatus();
-        await getListBestSellerByMonth();
-        await getListStockProductsByMonth();
-        setDataBieuDo([
-          { label: "Thành công", value: completedOrdersMonth },
-          { label: "Đã hủy", value: canceledOrdersMonth },
-          { label: "Hoàn trả", value: returnedOrdersMonth },
-          { label: "Chờ xác nhận", value: waitConfirmOrdersMonth },
-          { label: "Đã xác nhận", value: confirmedOrdersMonth },
-          { label: "Đang đóng gói", value: packingOrdersMonth },
-          { label: "Đang giao đơn", value: shippingOrdersMonth },
-          { label: "Đã giao đơn", value: deliveredOrdersMonth },
-          { label: "Đã thanh toán", value: paidOrdersMonth },
+        await Promise.all([
+          getOrdersByMonthStatus(),
+          getOrdersPriceByMonthStatus(),
+          getListBestSellerByMonth(),
+          getListStockProductsByMonth()
         ]);
-        setDataBieuDo2([
-          { label: "Lợi nhuận", value: totalPriceByMonth },
-          { label: "Số tiền đơn hoàn", value: priceRefundByMonth },
-          { label: "Số tiền đơn hủy", value: priceCancelByMonth },
-        ])
+
         break;
       case 4:
-        data = await getOrdersByYearStatus();
-        await getOrdersPriceByYearStatus();
-        await getListBestSellerByYear();
-        await getListStockProductsByYear();
-        setDataBieuDo([
-          { label: "Thành công", value: completedOrdersYear },
-          { label: "Đã hủy", value: canceledOrdersYear },
-          { label: "Hoàn trả", value: returnedOrdersYear },
-          { label: "Chờ xác nhận", value: waitConfirmOrdersYear },
-          { label: "Đã xác nhận", value: confirmedOrdersYear },
-          { label: "Đang đóng gói", value: packingOrdersYear },
-          { label: "Đang giao đơn", value: shippingOrdersYear },
-          { label: "Đã giao đơn", value: deliveredOrdersYear },
-          { label: "Đã thanh toán", value: paidOrdersYear },
+        await Promise.all([
+          getOrdersByYearStatus(),
+          getOrdersPriceByYearStatus(),
+          getListBestSellerByYear(),
+          getListStockProductsByYear()
         ]);
-        setDataBieuDo2([
-          { label: "Lợi nhuận", value: totalPriceByYear },
-          { label: "Số tiền đơn hoàn", value: priceRefundByYear },
-          { label: "Số tiền đơn hủy", value: priceCancelByYear },
-        ])
         break;
-      // case 5: 
-            try {
-              await getOrdersByCustomStatus();
-            await getOrdersPriceByCustomDayStatus();
-          await getListBestSellerCustom();
-          await getListStockProductsCustom();
-          setDataBieuDo([
-            { label: "Thành công", value : completedOrdersByCustomDay},
-            { label: "Đã hủy", value: canceledOrdersByCustomDay},
-            { label: "Hoàn trả", value: returnedOrdersByCustomDay},
-            { label: "Chờ xác nhận", value: waitConfirmOrdersCustomDay},
-            { label: "Đã xác nhận", value: confirmedOrdersCustomDay},
-            { label: "Đang đóng gói", value: packingOrdersCustomDay},
-            { label: "Đang giao đơn", value: shippingOrdersCustomDay},
-            { label: "Đã giao đơn", value: deliveredOrdersCustomDay},
-            { label: "Đã thanh toán", value: paidOrdersCustomDay},
-          ])
-          setDataBieuDo2([
-            { label: "Lợi nhuận", value: totalPriceByCustomDay},
-            { label: "Số tiền đơn hoàn", value: priceRefundByCustomDay},
-            { label: "Số tiền đơn hủy", value: priceCancelByCustomDay},
-          ])
-        
-            } catch (error) {
-              console.log(error);
-              
-            }
-            break;
+      case 5:
+        if (filter.createAtFrom && filter.createAtTo) {
+        await Promise.all([
+          getOrdersByCustomStatus(),
+          getOrdersPriceByCustomDayStatus(),
+          getListBestSellerCustom(),
+          getListStockProductsCustom()
+        ]);
+        }
+        else{
+          resetData();
+          toast.info('Vui lòng chọn ngày bắt đầu và ngày kết thúc', {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+        }
+        break;
       default:
         return;
     }
@@ -1114,7 +991,7 @@ export default function Dashboard() {
       <Card bordered={false}>
         <Title level={4} style={{ fontWeight: "bold", color: "#c29957" }}>Bộ lọc</Title>
         <div style={{ padding: "0 8px" }}>
-          {['ngày', 'tuần', 'tháng', 'năm'].map((type, index) => (
+          {['ngày', 'tuần', 'tháng', 'năm', 'tùy chỉnh'].map((type, index) => (
             <Button
               key={type}
               style={{
@@ -1136,6 +1013,7 @@ export default function Dashboard() {
               style={{ borderColor: "#c29957" }}
             />
           )}
+          <ToastContainer />
         </div>
         <Row gutter={16} style={{ padding: "0 8px" }}>
 
@@ -1163,7 +1041,7 @@ export default function Dashboard() {
             />
 
           </Col>
-          
+
           <Col span={12}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
               Thống kê Doanh Thu theo {nameButton}

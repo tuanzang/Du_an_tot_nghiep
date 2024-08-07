@@ -1,4 +1,3 @@
-import React from 'react'
 import { IOption } from '../../../interface/Option';
 import { Checkbox } from 'antd';
 

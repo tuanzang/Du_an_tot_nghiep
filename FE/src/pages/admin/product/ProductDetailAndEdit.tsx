@@ -10,29 +10,9 @@ import { IProduct } from "../../../interface/Products";
 import { IProductSize } from "../../../interface/ProductSize";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import {
-  ClassicEditor,
-  AccessibilityHelp,
-  Alignment,
-  Autosave,
-  Bold,
-  Essentials,
-  GeneralHtmlSupport,
-  Highlight,
-  Italic,
-  Link,
-  Paragraph,
-  SelectAll,
-  SpecialCharacters,
-  Table,
-  TableCaption,
-  TableCellProperties,
-  TableColumnResize,
-  TableProperties,
-  TableToolbar,
-  TextPartLanguage,
-  Title,
-  Underline,
-  Undo,
+  ClassicEditor, AccessibilityHelp, Alignment, Autosave, Bold, Essentials, GeneralHtmlSupport, Highlight, Italic, Link,
+  Paragraph, SelectAll, SpecialCharacters, Table, TableCaption, TableCellProperties, TableColumnResize, TableProperties,
+  TableToolbar, TextPartLanguage, Title, Underline, Undo,
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 import { uploadImage } from "../../../services/upload/upload";
@@ -41,6 +21,7 @@ import OptionFormItem from "./OptionFormItem";
 import axiosInstance from "../../../config/axios";
 import { ICategory } from "../../../interface/Categories";
 import { IOption } from "../../../interface/Option";
+import { socket } from "../../../socket";
 
 export default function ProductDetailAndEdit() {
   const { id } = useParams<{ id: string }>(); // Lấy ID sản phẩm từ URL
@@ -102,8 +83,9 @@ export default function ProductDetailAndEdit() {
         setProductSizes(data.data);
 
         data?.data?.forEach((it) => {
-          productSizeForm.setFieldValue(`price-${it.idSize}`, it.price);
-          productSizeForm.setFieldValue(`quantity-${it.idSize}`, it.quantity);
+          productSizeForm.setFieldValue(`price-${it.idSize}-${it._id}`, it.price);
+          productSizeForm.setFieldValue(`quantity-${it.idSize}-${it._id}`, it.quantity);
+          productSizeForm.setFieldValue(`status-${it.idSize}-${it._id}`, !!it.status);
         });
       } catch (error) {
         console.error("Error fetching product sizes:", error);
@@ -124,7 +106,7 @@ export default function ProductDetailAndEdit() {
 
   const fetchOptions = async (categoryId: string) => {
     try {
-      const {data} = await axiosInstance.get(`/options/${categoryId}`);
+      const { data } = await axiosInstance.get(`/options/${categoryId}`);
       setOptions(data.data);
     } catch (error) {
       console.log(error)
@@ -199,6 +181,8 @@ export default function ProductDetailAndEdit() {
       );
       toast.success("Cập nhật sản phẩm thành công");
       navigate("/admin/product");
+
+      socket.emit('update product', id);
     } catch (error) {
       console.error("Error updating product sizes:", error);
       toast.error("Cập nhật sản phẩm thất bại");
@@ -207,7 +191,6 @@ export default function ProductDetailAndEdit() {
 
   const handleStatusChange = (checked, idSize) => {
     // Cập nhật trạng thái cho sản phẩm theo kích thước
-    // Ví dụ, bạn có thể cập nhật trạng thái trong `productSizes` hoặc gọi một API để cập nhật trạng thái trên server
     console.log(`Status changed for size ${idSize}: ${checked}`);
   };
 
@@ -240,29 +223,9 @@ export default function ProductDetailAndEdit() {
       ],
       shouldNotGroupWhenFull: false,
     },
-    plugins: [
-      AccessibilityHelp,
-      Alignment,
-      Autosave,
-      Bold,
-      Essentials,
-      GeneralHtmlSupport,
-      Highlight,
-      Italic,
-      Link,
-      Paragraph,
-      SelectAll,
-      SpecialCharacters,
-      Table,
-      TableCaption,
-      TableCellProperties,
-      TableColumnResize,
-      TableProperties,
-      TableToolbar,
-      TextPartLanguage,
-      Title,
-      Underline,
-      Undo,
+    plugins: [AccessibilityHelp, Alignment, Autosave, Bold, Essentials, GeneralHtmlSupport, Highlight, Italic, Link, Paragraph,
+      SelectAll, SpecialCharacters, Table, TableCaption, TableCellProperties, TableColumnResize, TableProperties, TableToolbar,
+      TextPartLanguage, Title, Underline, Undo,
     ],
     htmlSupport: {
       allow: [
@@ -306,7 +269,7 @@ export default function ProductDetailAndEdit() {
       toast.success("Cập nhật sản phẩm thành công");
       navigate("/admin/product");
     } catch (error) {
-      console.log(error)      
+      console.log(error)
     }
   }
 
@@ -372,34 +335,48 @@ export default function ProductDetailAndEdit() {
             onFinish={handleUpdateProductSize}
             onFieldsChange={onFieldsChange}
           >
-            {productSizes.map((it) => (
-              <Space
-                key={it._id}
-                style={{ display: "flex", marginBottom: 8 }}
-                align="baseline"
-              >
-                <p>{it.sizeName}</p>
-                <Form.Item
-                  name={"quantity" + "-" + it.idSize}
-                  rules={[
-                    { required: true, message: "Vui lòng nhập số lượng" },
-                  ]}
-                >
-                  <Input placeholder="Số lượng" type="number" />
-                </Form.Item>
-                <Form.Item
-                  name={"price" + "-" + it.idSize}
-                  rules={[{ required: true, message: "Vui lòng nhập giá" }]}
-                >
-                  <Input placeholder="Giá" type="number" />
-                </Form.Item>
-
-                <Switch
-                  checked={it.status === "active"}
-                  onChange={(checked) => handleStatusChange(checked, it.idSize)}
-                />
-              </Space>
-            ))}
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Size</th>
+                  <th scope="col">Số lượng</th>
+                  <th scope="col">Giá</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              {productSizes.map((it) => (
+                <tbody>
+                  <tr>
+                    <th scope="row"></th>
+                    <td>{it.sizeName}</td>
+                    <td>
+                      <Form.Item
+                        name={"quantity" + "-" + it.idSize + '-' + it._id}
+                        rules={[
+                          { required: true, message: "Vui lòng nhập số lượng" },
+                        ]}
+                      >
+                        <Input placeholder="Số lượng" type="number" />
+                      </Form.Item>
+                    </td>
+                    <td>
+                      <Form.Item
+                        name={"price" + "-" + it.idSize + '-' + it._id}
+                        rules={[{ required: true, message: "Vui lòng nhập giá" }]}
+                      >
+                        <Input placeholder="Giá" type="number" />
+                      </Form.Item>
+                    </td>
+                    <th scope="col">
+                      <Form.Item name={"status" + "-" + it.idSize + '-' + it._id} valuePropName="checked">
+                        <Switch />
+                      </Form.Item>
+                    </th>
+                  </tr>
+                </tbody>
+              ))}
+            </table>
 
             {isChanged1 && (
               <Button

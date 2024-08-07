@@ -22,15 +22,15 @@ import {
   getPriceCancelByYear,
   getPriceRefundByCustomDay,
   getPriceCancelByCustomDay,
+  getTotalOrdersByDate,
 
 } from "../controller/order.js";
 import { checkAuth } from "../middleware/checkAuth.js";
 const orderRouter = Router();
 
 orderRouter.post("/add-order", checkAuth, createOrder);
-
 orderRouter.post("/", getAllOrders);
-orderRouter.get("/", getAllOrders);
+orderRouter.get("/", getTotalOrdersByDate);
 // orderRouter.put("/:id", updateOrder);
 orderRouter.delete("/:id", deleteOrder);
 orderRouter.get("/:id", detailOrder);

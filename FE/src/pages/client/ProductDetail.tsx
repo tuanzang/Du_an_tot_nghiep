@@ -12,17 +12,16 @@ import { IProductSize } from "../../interface/ProductSize";
 import ProductItem from "../../components/ProductItem";
 import { formatPrice } from "../../utils";
 import { IOption } from "../../interface/Option";
+import { socket } from "../../socket";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
-  const [selectedSize, setSelectedSize] = useState<IProductSize | undefined>();
+  const [selectedSize, setSelectedSize] = useState<IProductSize | null>();
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
   const [optionSelected, setOptionSelected] = useState<IOption | null>()
-
-  console.log(123, product?.options);
 
   // product price
   const productPrice = useMemo(() => {
@@ -49,7 +48,8 @@ export default function ProductDetail() {
     onSuccess: () => {
       message.success("Đã thêm sản phẩm vào giỏ hàng");
       setQuantity(1);
-      setSelectedSize(undefined);
+      setSelectedSize(null);
+      setOptionSelected(null);
     },
   });
 
@@ -83,21 +83,36 @@ export default function ProductDetail() {
     }
   };
 
-  useEffect(() => {
-    // Gọi API để lấy số lượng sản phẩm theo kích cỡ
-    const fetchProductSizes = async () => {
-      try {
-        const { data } = await axios.get(
-          `http://localhost:3001/api/products/productSize/${id}`
-        );
-        setProductSizes(data.data);
-      } catch (error) {
-        console.error("Error fetching product sizes:", error);
-      }
-    };
+   // Gọi API để lấy số lượng sản phẩm theo kích cỡ
+   const fetchProductSizes = async () => {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:3001/api/products/productSize/${id}`
+      );
+      setProductSizes(data.data);
+    } catch (error) {
+      console.error("Error fetching product sizes:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchProductSizes();
   }, [id]);
+
+  // listen hidden product size
+  useEffect(() => {
+    const onProductUpdate = (productId: string) => {
+      if (productId === id) {
+        fetchProductSizes();
+      }
+    }
+
+    socket.on('update product', onProductUpdate);
+
+    return () => {
+      socket.off('update product', onProductUpdate);
+    }
+  }, []);
 
   const handleQuantityIncrease = () => {
     setQuantity(quantity + 1);
@@ -124,7 +139,11 @@ export default function ProductDetail() {
     }
 
     if (quantity > selectedSize.quantity) {
-      return message.info("Vượt quá số lượng còn trong kho");
+      return message.info("Vượt quá số lượng sản phẩm còn trong kho");
+    }
+
+    if (optionSelected && quantity > optionSelected.quantity) {
+      return message.info("Không đủ số lượng option!");
     }
 
     const body = {
@@ -132,6 +151,10 @@ export default function ProductDetail() {
       quantity,
       variantId: selectedSize._id,
     };
+
+    if (optionSelected) {
+      body.option = optionSelected._id;
+    }
 
     mutate(body);
   };
@@ -166,7 +189,7 @@ export default function ProductDetail() {
           setAvarageRate(0);
         }
       } catch (error) {
-        console.log("Khong co du lieu");
+        console.log("Không có dữ liệu");
       }
     }
   };
@@ -273,13 +296,14 @@ export default function ProductDetail() {
                               <Button
                                 key={size._id}
                                 className={`mx-1 ${selectedSize?._id === size._id
-                                    ? "selected"
-                                    : ""
+                                  ? "selected"
+                                  : ""
                                   }`}
+                                  disabled={!size.status}
                                 style={{
                                   padding: "10px 20px",
                                   fontSize: "16px",
-                                  opacity: size.quantity === 0 ? 0.5 : 1, // Làm mờ nếu số lượng là 0
+                                  opacity: size.quantity === 0 ? 0.5 : 1,
                                   cursor: size.quantity === 0 ? "not-allowed" : "pointer"
                                 }}
                                 onClick={() => size.quantity > 0 && handleSizeClick(size._id)}
@@ -289,18 +313,19 @@ export default function ProductDetail() {
                             ))}
                           </div>
                         </div>
+
                         {selectedSize && (
                           <div
                             className="mt-2"
                             style={{ color: "black", fontSize: "15px" }}
                           >
-                            <p>sản phẩm hiện có: {selectedSize?.quantity}</p>
+                            <p>Sản phẩm hiện có: {selectedSize?.quantity}</p>
                           </div>
                         )}
 
                         <div>
-                          <div className="button-container mt-2">
-                            <p>Options:</p>
+                          <div className="button-container mt-4">
+                            <p>Phụ kiện:</p>
                             <Button onClick={() => onOptionClick()} className="mx-1" type={!optionSelected ? 'primary' : 'default'}>
                               Không chọn
                             </Button>
@@ -313,14 +338,25 @@ export default function ProductDetail() {
                                 style={{
                                   padding: "10px 20px",
                                   fontSize: "16px",
+                                  opacity: item.quantity === 0 ? 0.5 : 1,
+                                  cursor: item.quantity === 0 ? "not-allowed" : "pointer"
                                 }}
-                                onClick={() => onOptionClick(item)}
+                                onClick={() => item.quantity > 0 && onOptionClick(item)}
                               >
                                 {item.name}
                               </Button>
                             ))}
                           </div>
                         </div>
+
+                        {optionSelected && (
+                          <div
+                            className="mt-2"
+                            style={{ color: "black", fontSize: "15px" }}
+                          >
+                            <p>Sản phẩm hiện có: {optionSelected?.quantity}</p>
+                          </div>
+                        )}
 
                         <div className="quantity-cart-box d-flex align-items-center pt-5">
                           <h6 className="option-title">Số lượng:</h6>

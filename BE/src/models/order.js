@@ -18,6 +18,8 @@ const orderSchema = new mongoose.Schema(
         image: String,
         size: String,
         variantId: String,
+        optionName: String,
+        optionPrice: Number,
       },
     ],
     totalPrice: {

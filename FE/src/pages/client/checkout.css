@@ -3,15 +3,13 @@
     font-size: 17px;
 }
 .form-control{
-    font-size: large;
+    font-size: larger;
 }
-.discount-detail{
-    font-size: large;
-    font-weight: 500;
-    font-family: "SpaceGrotesk-Light";
-}
-.discount-code, .voucher{
-    font-weight: 800;
-    font-family: "SpaceGrotesk-Light";
-
+h2{
+    font-family: 'Montserrat', sans-serif;
+    font-size: 28px;
+    font-weight: bold;
+    color: #333333; /* Màu đen đậm */
+    text-align: center;
+    margin-bottom: 20px;
 }

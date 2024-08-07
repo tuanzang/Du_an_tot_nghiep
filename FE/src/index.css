@@ -23,3 +23,19 @@
   font-size: 12px;
   color: #a2a1a1;
 }
+
+
+/* làm mờ sản phẩm khi tắt trạng thái */
+.out-of-stock {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.out-of-stock .ant-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.out-of-stock-text {
+  color: red;
+}

@@ -224,26 +224,29 @@ export const updateProductSizes = async (req, res) => {
   const requestData = req.body; // Lấy danh sách productSize từ req.body
 
   try {
-    await productSize.deleteMany({
-      idProduct,
-    });
+    // await productSize.deleteMany({
+    //   idProduct,
+    // });
 
     const transformData = Object.keys(requestData);
 
     const body = transformData.reduce((total, curr) => {
       if (curr.startsWith("price")) {
-        const [_, idSize] = curr.split("-");
+        const [_, idSize, id] = curr.split("-");
         const isExists = total.find((it) => it.idSize === idSize);
 
-        const quantity = requestData[`quantity-${idSize}`];
-        const price = requestData[`price-${idSize}`];
+        const quantity = requestData[`quantity-${idSize}-${id}`];
+        const price = requestData[`price-${idSize}-${id}`];
+        const status = requestData[`status-${idSize}-${id}`];
 
         if (!isExists) {
           total.push({
+            id,
             idProduct,
             idSize,
             quantity,
             price,
+            status
           });
         }
 
@@ -253,22 +256,18 @@ export const updateProductSizes = async (req, res) => {
       return total;
     }, []);
 
-    let transformBody = [];
-
     for await (const item of body) {
       const sizeData = await size.findById(item.idSize).exec();
-
-      transformBody.push({
+      await productSize.findByIdAndUpdate(item.id, {
         ...item,
         sizeName: sizeData.name,
-      });
+        status: item.status ? 1 : 0
+      })
     }
-
-    const productSizeUpdated = await productSize.insertMany(transformBody);
 
     return res.json({
       message: "Cập nhật thành công",
-      productSizeUpdated,
+      productSizeUpdated: body,
     });
   } catch (error) {
     return res.status(500).json({

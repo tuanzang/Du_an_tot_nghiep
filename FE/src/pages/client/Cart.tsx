@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, InputNumber, Popconfirm, Table, Typography, } from "antd";
+import { Button, InputNumber, Popconfirm, Table, Typography } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
@@ -14,14 +14,10 @@ import {
   updateProductSelected,
 } from "../../store/cartSlice";
 import { socket } from "../../socket";
-import { IProduct } from "../../interface/Products";
-
-
-
+// import { IProduct } from "../../interface/Products";
 
 const { Text } = Typography;
 // const SHIPPING_COST = 30000;
-
 
 export interface ICartItem {
   _id: string;
@@ -45,12 +41,17 @@ export interface ICartItem {
     createdAt: string;
     updatedAt: string;
   };
+
   key: string;
   variant: {
     _id: string;
     price: number;
     sizeName: string;
-  
+  };
+  option: {
+    _id: string;
+    name: string;
+    price: number;
   };
 }
 
@@ -58,7 +59,7 @@ export default function Cart() {
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
   const totalPrice = useSelector(selectTotalPrice);
-
+  // const [totalOrderPrice, setTotalOrderPrice] = useState(0);
   const { data, refetch } = useMyCartQuery();
   const { mutate: onUpdateQuantity } = useCartMutation({
     action: "UPDATE",
@@ -67,8 +68,6 @@ export default function Cart() {
     action: "DELETE",
   });
 
-
-  
   // initial socket
   useEffect(() => {
     const onConnect = () => {
@@ -77,20 +76,23 @@ export default function Cart() {
 
     const onHiddenProduct = (productId: string) => {
       refetch();
-      dispatch(removeProduct(productId))
+      dispatch(removeProduct(productId));
+    };
+
+    const onProductUpdate = (productId: string) => {
+      console.log("client update", productId);
     };
 
     socket.on("connect", onConnect);
     socket.on("hidden product", onHiddenProduct);
+    socket.on("update product", onProductUpdate);
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("hidden product", onHiddenProduct);
+      socket.off("hidden product", onProductUpdate);
     };
   }, [refetch]);
-
- 
-  
 
   const productsFormatted = useMemo(() => {
     return data?.data?.products?.map((it) => ({
@@ -100,25 +102,21 @@ export default function Cart() {
     }));
   }, [data?.data]);
 
-  // const handleUpdateQuantity = (
-  //   variantId: string,
-  //   quantity: number,
-   
-  // ) => {
-  //   onUpdateQuantity({
-  //     variantId,
-  //     quantity: quantity,
-  //   });
-  // };
- 
-  const handleUpdateQuantity = (variantId: string, quantity: number) => {
+  const handleUpdateQuantity = (
+    variantId: string,
+    option: string,
+    quantity: number
+  ) => {
     onUpdateQuantity({
       variantId,
       quantity,
+      option,
     });
     // Cập nhật productSelected với số lượng mới
     const updatedProductSelected = productSelected.map((item) =>
-      item.variant._id === variantId ? { ...item, quantity } : item
+      item.variant._id === variantId && item.option?._id === option
+        ? { ...item, quantity }
+        : item
     );
     dispatch(updateProductSelected(updatedProductSelected));
 
@@ -128,26 +126,26 @@ export default function Cart() {
     }, 0);
     dispatch(totalPrice(newTotalPrice));
   };
-  const handleDeleteProduct = (variantId: string) => {
-    onDeleteProduct(variantId, {
-      onSuccess: () => {
-        // Lọc ra các sản phẩm không bị xóa
-        const updatedProductSelected = productSelected.filter(
-          (item) => item.variant._id !== variantId
-        );
-        dispatch(updateProductSelected(updatedProductSelected));
-      },
-    });
+  const handleDeleteProduct = (variantId: string, option: string) => {
+    onDeleteProduct(
+      { variantId, option },
+      {
+        onSuccess: () => {
+          // Lọc ra các sản phẩm không bị xóa
+          const updatedProductSelected = productSelected.filter((item) => {
+            const status =
+              item.variant._id === variantId && item?.option?._id === option;
+            return !status;
+          });
+          dispatch(updateProductSelected(updatedProductSelected));
+        },
+      }
+    );
   };
 
   // const totalPriceWithShipping = totalPrice + SHIPPING_COST;
 
   // Tính tổng tiền bao gồm phí ship nếu có sản phẩm đã chọn
- 
-
- 
-
-
 
   return (
     <div>
@@ -223,7 +221,7 @@ export default function Cart() {
                         dataIndex="image"
                         key="image"
                         render={(images: string[], record: any) => (
-                          <Link to={`/product/${record._id}`}>
+                          <Link to={`/product/${record.product._id}`}>
                             <img
                               src={images[0]}
                               alt="Product"
@@ -244,21 +242,45 @@ export default function Cart() {
                         dataIndex="name"
                         key="name"
                         render={(_, record: any) => {
+                          console.log(record);
                           return (
                             <div>
-                              <p>{record.name}</p>
+                              <Link to={`/product/${record.product._id}`}>
+                                {record.name}
+                              </Link>
+
                               <p>Size: {record.variant.sizeName}</p>
+
+                              {!record.variant.status && <p>SP hết hàng</p>}
                             </div>
                           );
                         }}
                         width={100}
                       />
+
                       <Table.Column
                         title="Giá"
                         key="price"
                         render={(_, record: any) =>
                           formatPrice(record.variant.price)
                         }
+                      />
+                      <Table.Column
+                        title="Option"
+                        dataIndex="option"
+                        key="option"
+                        render={(option, record: any) => {
+                          if (option) {
+                            return (
+                              <div>
+                                <p>{option.name}</p>
+                              </div>
+                            );
+                          }
+
+                          return;
+                        }}
+                        width={100}
                       />
                       <Table.Column
                         title="Số lượng"
@@ -269,20 +291,29 @@ export default function Cart() {
                             min={1}
                             value={value}
                             onChange={(quantity) =>
-                              handleUpdateQuantity(record.variant._id, quantity)
+                              handleUpdateQuantity(
+                                record.variant._id,
+                                record?.option?._id,
+                                quantity
+                              )
                             }
                           />
                         )}
                       />
-  
 
                       <Table.Column
                         title="Thành tiền"
                         dataIndex="totalPrice"
                         key="totalPrice"
-                        render={(_, record: any) =>
-                          formatPrice(record.variant.price * record.quantity)
-                        }
+                        render={(_, record: any) => {
+                          let totalPrice =
+                            record.variant.price * record.quantity;
+                          if (record?.option) {
+                            totalPrice += record.option.price * record.quantity;
+                          }
+
+                          return formatPrice(totalPrice);
+                        }}
                       />
                       <Table.Column
                         title="Hành động"
@@ -293,7 +324,10 @@ export default function Cart() {
                             okText="Có"
                             cancelText="Không"
                             onConfirm={() =>
-                              handleDeleteProduct(record.variant._id)
+                              handleDeleteProduct(
+                                record.variant._id,
+                                record?.option?._id
+                              )
                             }
                           >
                             <Button danger>Xóa</Button>
@@ -377,13 +411,16 @@ export default function Cart() {
                           title="Thành tiền"
                           dataIndex="totalPrice"
                           key="totalPrice"
-                          render={(_, record: any) => (
-                            <span style={{ fontSize: "12px" }}>
-                              {formatPrice(
-                                record.variant.price * record.quantity
-                              )}
-                            </span>
-                          )}
+                          render={(_, record: any) => {
+                            let totalPrice =
+                              record.variant.price * record.quantity;
+                            if (record?.option) {
+                              totalPrice +=
+                                record.option.price * record.quantity;
+                            }
+
+                            return formatPrice(totalPrice);
+                          }}
                         />
                       </Table>
                     </div>
