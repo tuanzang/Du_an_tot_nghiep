@@ -20,6 +20,7 @@ const orderSchema = new mongoose.Schema(
         variantId: String,
         optionName: String,
         optionPrice: Number,
+        optionId: String
       },
     ],
     totalPrice: {
