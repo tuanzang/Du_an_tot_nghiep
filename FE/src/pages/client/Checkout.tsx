@@ -15,6 +15,7 @@ import {
   removeProduct,
   selectProductSelected,
   selectTotalPrice,
+  updateStatus,
 } from "../../store/cartSlice";
 import { USER_INFO_STORAGE_KEY } from "../../services/constants";
 import { useEffect, useState } from "react";
@@ -23,6 +24,7 @@ import { IVoucher } from "../../interface/Voucher";
 import dayjs from "dayjs";
 import axios from "axios";
 import "./checkout.css"
+import { it } from "node:test";
 const SHIPPING_COST = 30000; 
 // import { useLocation } from "react-router-dom";
 const { Text } = Typography;
@@ -40,8 +42,10 @@ const Checkout = () => {
   const isLogged = localStorage.getItem(USER_INFO_STORAGE_KEY);
   const user: IUser | null = isLogged ? JSON.parse(isLogged) : null;
 
+  const { data, refetch: refetchCart } = useMyCartQuery();
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
+  console.log(123, 'prod', productSelected)
   const totalPrice = useSelector(selectTotalPrice);
 
   const { refetch } = useMyCartQuery();
@@ -51,16 +55,30 @@ const Checkout = () => {
   const [selectedDiscountCode, setSelectedDiscountCode] = useState(null);
   const [totalDiscount, setTotalDiscount] = useState(0);
 
+  useEffect(() => {
+    dispatch(updateStatus({
+      prevData: productSelected,
+      newData: data?.data?.products
+    }))
+  }, [data])
+
   // initial socket
   useEffect(() => {
     const onHiddenProduct = (productId: string) => {
       dispatch(removeProduct(productId));
     };
 
+    const onProductUpdate = (productId: string) => {
+      refetchCart()
+      // console.log('client update', data);
+    }
+
     socket.on("hidden product", onHiddenProduct);
+    socket.on('update product', onProductUpdate)
 
     return () => {
       socket.off("hidden product", onHiddenProduct);
+      socket.off("hidden product", onProductUpdate);
     };
   }, [dispatch, navigate, productSelected.length]);
 
@@ -294,6 +312,7 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
                 <tr key={item._id}>
                   <td>
                     {item.product.name} (Size: {item.variant?.sizeName})
+                    {item.variant.status}
                   </td>
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
