@@ -89,12 +89,12 @@ export const updateCategory = async (req, res) => {
       new: true,
     });
 
-    // remove old options
-    await Option.deleteMany({ category: categoryId }).exec()
+    const updateOptionPromise = options.map(async it => {
+      const optionUpdated = await Option.findByIdAndUpdate(it._id, it, { new: true });
+      return optionUpdated;
+    })
 
-    // add new options
-    const optionFormat = options.map(it => ({...it, category: categoryId}));
-    const optionCreated = await Option.insertMany(optionFormat);
+    const optionUpdated = await Promise.all(updateOptionPromise);
 
     if (!data || data.length === 0) {
        return res.status(404).json({
@@ -107,7 +107,7 @@ export const updateCategory = async (req, res) => {
       message: "Update danh mục thành công",
       data: {
         ...data.toJSON(),
-        options: optionCreated
+        options: optionUpdated
       },
     });
   } catch (error) {
