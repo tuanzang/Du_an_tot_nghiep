@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, InputNumber, Popconfirm, Table, Typography, } from "antd";
+import { Button, InputNumber, message, Popconfirm, Table, Typography, } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
@@ -62,6 +62,9 @@ export default function Cart() {
   const { data, refetch } = useMyCartQuery();
   const { mutate: onUpdateQuantity } = useCartMutation({
     action: "UPDATE",
+    onError: (error) => {
+      message.error(error?.response?.data?.message || 'Đã có lỗi xảy ra, vui lòng thử lại')
+    }
   });
   const { mutate: onDeleteProduct } = useCartMutation({
     action: "DELETE",
