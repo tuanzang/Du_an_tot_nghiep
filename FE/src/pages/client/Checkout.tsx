@@ -23,7 +23,7 @@ import { IVoucher } from "../../interface/Voucher";
 import dayjs from "dayjs";
 import axios from "axios";
 import "./checkout.css"
-const SHIPPING_COST = 30000; 
+const SHIPPING_COST = 30000;
 // import { useLocation } from "react-router-dom";
 const { Text } = Typography;
 
@@ -313,6 +313,10 @@ const Checkout = () => {
                   totalDiscount
                 )
               }
+              disabled={!productSelected.every((item) => item.variant.status)}
+              style={{
+                opacity: productSelected.every((item) => item.variant.status) ? 1 : 0.5,
+              }}
             >
               Hoàn tất đơn hàng
             </button>
@@ -323,7 +327,7 @@ const Checkout = () => {
           <table className="table">
             <thead>
               <tr>
-                <th style={{ width: 250 }}>Tên sản phẩm</th>
+                <th style={{ width: 180 }}>Tên sản phẩm</th>
                 {/* <th>ảnh</th> */}
                 <th>Giá</th>
                 <th>Số lượng</th>
@@ -332,21 +336,22 @@ const Checkout = () => {
               </tr>
             </thead>
             <tbody>
-              {productSelected?.map((item:ICartItem) => (
-                <tr key={item._id}>
+              {productSelected?.map((item: ICartItem) => (
+                <tr key={item._id} style={{ opacity: item.variant.status ? 1 : 0.5 }}>
                   <td>
                     {item.product.name} (Size: {item.variant?.sizeName})
-                    {item.variant.status}
+                    {/* {item.variant.status} */}
+                    {!item.variant.status && <p className="out-of-stock-text">Sản phẩm đang ngừng hoạt động</p>}
                   </td>
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
 
-                  <td>{item.option?.name}<br/>
+                  <td>{item.option?.name}<br />
 
                     {item.option?.price}
                   </td>
                   <td>{formatPrice(item.variant.price * item.quantity)}</td>
-                  <td> {formatPrice(SHIPPING_COST)}</td>
+                  {/* <td> {formatPrice(SHIPPING_COST)}</td> */}
                 </tr>
               ))}
             </tbody>
@@ -399,7 +404,7 @@ const Checkout = () => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              marginTop: "20px",
+              marginTop: "10px",
             }}
           >
             <span
@@ -413,13 +418,15 @@ const Checkout = () => {
                 borderRadius: "5px",
                 padding: "5px 10px",
                 boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+                margin: "0 0 5px 5px",
+                opacity: productSelected.every((item) => item.variant.status) ? 1 : 0.5,
+                pointerEvents: productSelected.every((item) => item.variant.status) ? 'auto' : 'none',
               }}
             >
               Chọn mã giảm giá
             </span>
           </div>
 
-          {/* <span style={{float:"right"}}>- 10.000 VNĐ</span> */}
           <Modal
             title="Mã giảm giá"
             visible={isModalVisible}
@@ -487,7 +494,7 @@ const Checkout = () => {
             }}
           >
             {selectedDiscountCode ? (
-              <div className="d-flex justify-content-between">
+              <div className="d-flex justify-content-between px-3">
                 <p>{selectedDiscountCode}</p>
                 <p>- {totalDiscount > 0 ? formatPrice(totalDiscount) : null}</p>
               </div>

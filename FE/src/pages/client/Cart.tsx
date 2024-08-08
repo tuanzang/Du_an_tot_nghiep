@@ -207,7 +207,9 @@ export default function Cart() {
                         onChange: (_: any, selectedRows: ICartItem[]) => {
                           dispatch(updateProductSelected(selectedRows));
                         },
-                        selectedRowKeys: productSelected.map((it) => it._id),
+                        selectedRowKeys: productSelected
+                          .filter((item) => item.variant.status) 
+                          .map((it) => it._id),
                         getCheckboxProps: (record: any) => ({
                           disabled: !record.variant.status,
                         }),
@@ -270,7 +272,7 @@ export default function Cart() {
                         render={(option, record: any) => {
                           if (option) {
                             return (
-                              <div>
+                              <div className={record.variant.status ? "" : "out-of-stock"}>
                                 <p>{option.name}</p>
                               </div>
                             );
@@ -344,89 +346,6 @@ export default function Cart() {
                   </div>
                 </div>
               </div>
-
-              {/* <div className="col-lg-4">
-                <div className="sidebar-single">
-                  <h5 className="sidebar-title">
-                    <span>Thông tin đơn hàng</span>
-                  </h5>
-                  {productSelected.length > 0 && (
-                    <div style={{ marginTop: "20px" }}>
-                      <h5>Sản phẩm đã chọn:</h5>
-                      <Table
-                        dataSource={productSelected}
-                        rowKey="key"
-                        pagination={false}
-                        className="selected-products-table"
-                        size="small"
-                      >
-                        <Table.Column
-                          title="Hình ảnh"
-                          dataIndex="image"
-                          key="image"
-                          render={(images: string[]) => (
-                            <img
-                              src={images[0]}
-                              alt="Product"
-                              style={{
-                                width: "70%",
-                                height: "70%",
-                                objectFit: "cover",
-                              }}
-                            />
-                          )}
-                        />
-                        <Table.Column
-                          title="Tên sản phẩm"
-                          dataIndex="name"
-                          key="name"
-                          render={(name, record: any) => (
-                            <>
-                              <p style={{ fontSize: "12px" }}>{name}</p>
-                              <p style={{ fontSize: "12px" }}>
-                                Size: {record.variant.sizeName}
-                              </p>
-                            </>
-                          )}
-                          width={100}
-                        />
-                        <Table.Column
-                          title="Giá"
-                          key="price"
-                          render={(_, record: any) => (
-                            <span style={{ fontSize: "12px" }}>
-                              {formatPrice(record.variant.price)}
-                            </span>
-                          )}
-                        />
-                        <Table.Column
-                          title="Số lượng"
-                          dataIndex="quantity"
-                          key="quantity"
-                          render={(quantity) => (
-                            <span style={{ fontSize: "12px" }}>{quantity}</span>
-                          )}
-                        />
-                        <Table.Column
-                          title="Thành tiền"
-                          dataIndex="totalPrice"
-                          key="totalPrice"
-                          render={(_, record: any) => {
-                            let totalPrice = record.variant.price * record.quantity
-                            if (record?.option) {
-                              totalPrice += record.option.price * record.quantity;
-                            }
-
-                            return formatPrice(totalPrice);
-                          }}
-                        />
-                      </Table>
-                    </div>
-                  )}
-
-
-                </div>
-              </div> */}
 
               <div
                 style={{
