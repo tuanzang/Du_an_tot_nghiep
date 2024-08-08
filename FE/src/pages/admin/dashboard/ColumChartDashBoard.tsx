@@ -68,7 +68,7 @@ export default function ColumChartDashBoard({
     let legend = chart.children.push(am5.Legend.new(root, {}));
     legend.data.setAll(chart.series.values);
     legend.labels.template.setAll({
-      fontSize: "12px" 
+      fontSize: "12px",
     });
     series.appear(1000);
 
@@ -76,7 +76,6 @@ export default function ColumChartDashBoard({
       root.dispose();
     };
   }, [data]);
-  
 
   return <div id="chartdiv" style={{ width: "100%", height: "400px" }}></div>;
 }

@@ -10,7 +10,7 @@ interface Props {
 
 const AdBillTransaction = ({ listTransaction }: Props) => {
   return (
-    <Table 
+    <Table
       dataSource={listTransaction}
       rowKey="id"
       pagination={false}
@@ -29,6 +29,15 @@ const AdBillTransaction = ({ listTransaction }: Props) => {
           align: "center",
           render: (text: number | 0) => (
             <span>{formatCurrency({ money: String(text) })}</span>
+          ),
+        },
+        {
+          title: "Loại thanh toán",
+          dataIndex: "type",
+          key: "type",
+          align: "center",
+          render: (text: boolean) => (
+            <span>{text === true ? "Tiền mặt" : "Chuyển khoản"}</span>
           ),
         },
         {

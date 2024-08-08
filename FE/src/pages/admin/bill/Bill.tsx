@@ -150,7 +150,7 @@ export default function Bill() {
     },
   ];
 
-  const listSttHD = ["1", "2", "3", "4", "5", "6", "7", "8", "0"];
+  const listSttHD = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
 
   return (
     <div className="bill-container">
@@ -230,7 +230,7 @@ export default function Bill() {
           </Col>
         </Row>
       </Card>
-      <Card style={{ marginTop: "12px" }} >
+      <Card style={{ marginTop: "12px" }}>
         <Tabs activeKey={valueTabHD} onChange={handleChangeTab}>
           <TabPane tab="Tất cả" key="" />
           {listSttHD.map((row) => (

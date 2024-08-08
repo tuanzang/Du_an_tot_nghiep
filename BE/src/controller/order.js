@@ -17,7 +17,8 @@ dotenv.config();
 export const createOrder = async (req, res) => {
   try {
     const { productSelectedIds, ...bodyData } = req.body;
-    const { customerName, phone, address, paymentMethod, discountCode } = bodyData;
+    const { customerName, phone, address, paymentMethod, discountCode } =
+      bodyData;
 
     // Xác thực các trường dữ liệu
     if (!customerName) {
@@ -110,8 +111,7 @@ export const createOrder = async (req, res) => {
       optionName: item?.option?.name,
       optionPrice: item?.option?.price,
 
-      optionId: item?.option?._id
-
+      optionId: item?.option?._id,
     }));
 
     const totalPrice =
@@ -127,10 +127,11 @@ export const createOrder = async (req, res) => {
       bodyData.discouVoucher +
       bodyData.shippingCost;
 
-    
     // add user id to voucher
-    await Discount.findOneAndUpdate({ code: discountCode }, { $push: { userIds: userId }, $inc: { usedCount: 1 } })
-
+    await Discount.findOneAndUpdate(
+      { code: discountCode },
+      { $push: { userIds: userId }, $inc: { usedCount: 1 } }
+    );
 
     const orders = await new Order({
       ...req.body,
@@ -205,8 +206,7 @@ export const detailOrder = async (req, res) => {
   }
 };
 
-const getOrdersByDate = async (dateStart, dateEnd, status) => {
-};
+const getOrdersByDate = async (dateStart, dateEnd, status) => {};
 export const getTotalOrdersByDate = async (req, res) => {
   const { dateStart, dateEnd, status } = req.query;
   try {

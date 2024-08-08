@@ -290,67 +290,24 @@ export default function ProfileBillDetail() {
   const [openModelRecieve, setOpenModelRecieve] = useState(false);
   function ModalRecieve() {
     const [ghiChu, setGhiChu] = useState("");
-    const [transCode, setTransCode] = useState("");
-    const [errorTransCode, setErrorTransCode] = useState("");
 
     // xác nhận nhận hàng hóa đơn
-    const handleConfirmPayment = async () => {
-      setLoadingTransBill(true);
-      if (!billDetail || !user) {
-        toast.error("Không thể nhận hàng");
-        return;
-      }
-
-      if (listTransaction.filter((trans) => trans.status === true).length > 0) {
-        // cập nhật trạng thái
-        handleUpdateStatusBill(billDetail._id, "5", user, ghiChu);
-        toast.success("nhận hàng thành công");
-        setOpenModelRecieve(false);
-      } else {
-        if (transCode === "") {
-          setErrorTransCode("Bạn cần nhập mã giao dịch");
-          return;
-        }
-
-        const confirmPaymentRequest: ITransaction = {
-          _id: null,
-          idUser: user._id,
-          idBill: billDetail._id,
-          transCode: transCode,
-          totalMoney: billDetail.totalPrice,
-          note: ghiChu,
-          status: true,
-          createdAt: "",
-        };
-
-        // xác nhận nhận hàng
-        try {
-          await axios.post(
-            "http://localhost:3001/api/trans/add",
-            confirmPaymentRequest
-          );
-          getTransBillByIdBill(billDetail._id);
-          // cập nhật trạng thái
+    const handleConfirmComplete = () => {
+      confirmStatus({
+        title: "Xác nhận",
+        text: "Xác nhận đã nhận hàng ?",
+      }).then((result) => {
+        if (result) {
           handleUpdateStatusBill(
-            billDetail._id,
-            "5",
-            user,
-            confirmPaymentRequest.note
+            id ? id : null,
+            "8",
+            user ? user : null,
+            ghiChu
           );
-          handleUpdateStatusBill(
-            billDetail._id,
-            "6",
-            user,
-            confirmPaymentRequest.note
-          );
-          toast.success("nhận hàng thành công");
-          setOpenModelRecieve(false);
-        } catch (error) {
-          toast.error("nhận hàng thất bại");
+          toast.success("Xác nhận đã nhận hàng thành công!");
           setOpenModelRecieve(false);
         }
-      }
-      setLoadingTransBill(false);
+      });
     };
 
     return (
@@ -365,74 +322,13 @@ export default function ProfileBillDetail() {
               textTransform: "none",
               borderRadius: "8px",
             }}
-            onClick={handleConfirmPayment}
+            onClick={handleConfirmComplete}
           >
             Lưu
           </Button>
         }
       >
         <div>
-          {listTransaction.filter((trans) => trans.status === true).length <
-            1 && (
-            <div>
-              <Typography.Text strong>
-                Tổng tiền hóa đơn <span style={{ color: "red" }}>*</span>
-              </Typography.Text>
-              <Input
-                size="small"
-                value={
-                  billDetail
-                    ? formatCurrency({ money: String(billDetail.totalPrice) })
-                    : formatCurrency({ money: "0" })
-                }
-                disabled
-                style={{ marginTop: "5px", marginBottom: "10px" }}
-              />
-
-              <Typography.Text strong>
-                Tiền khách trả <span style={{ color: "red" }}>*</span>
-              </Typography.Text>
-              <Input
-                size="small"
-                value={
-                  billDetail
-                    ? formatCurrency({ money: String(billDetail.totalPrice) })
-                    : formatCurrency({ money: "0" })
-                }
-                disabled
-                style={{ marginTop: "5px", marginBottom: "10px" }}
-              />
-              <Typography.Text strong>
-                Mã giao dịch <span style={{ color: "red" }}>*</span>
-              </Typography.Text>
-              <Input
-                size="small"
-                value={transCode}
-                onChange={(e) => {
-                  setTransCode(e.target.value);
-                  setErrorTransCode("");
-                }}
-                style={{
-                  marginTop: errorTransCode === "" ? "5px" : "",
-                  marginBottom: errorTransCode === "" ? "10px" : "",
-                }}
-                required
-              />
-              <div>
-                {errorTransCode !== "" && (
-                  <span
-                    style={{
-                      color: "red",
-                      marginTop: "5px",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    {errorTransCode}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
           <Typography.Text strong>Ghi chú</Typography.Text>
           <Input
             size="small"
@@ -463,7 +359,7 @@ export default function ProfileBillDetail() {
               </Button>
             </div>
           );
-        case "4":
+        case "7":
           return (
             <div>
               <Button

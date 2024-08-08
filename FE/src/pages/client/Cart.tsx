@@ -1,6 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Button, InputNumber, message, Popconfirm, Table, Typography, } from "antd";
-import { useEffect, useMemo, useState } from "react";
+import {
+  Button,
+  InputNumber,
+  message,
+  Popconfirm,
+  Table,
+  Typography,
+} from "antd";
+import { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import useCartMutation, { useMyCartQuery } from "../../hooks/useCart";
@@ -46,13 +53,12 @@ export interface ICartItem {
     _id: string;
     price: number;
     sizeName: string;
-
   };
   option: {
     _id: string;
     name: string;
     price: number;
-  }
+  };
 }
 
 export default function Cart() {
@@ -63,13 +69,14 @@ export default function Cart() {
   const { mutate: onUpdateQuantity } = useCartMutation({
     action: "UPDATE",
     onError: (error) => {
-      message.error(error?.response?.data?.message || 'Đã có lỗi xảy ra, vui lòng thử lại')
-    }
+      message.error(
+        error?.response?.data?.message || "Đã có lỗi xảy ra, vui lòng thử lại"
+      );
+    },
   });
   const { mutate: onDeleteProduct } = useCartMutation({
     action: "DELETE",
   });
-
 
   // initial socket
   useEffect(() => {
@@ -79,16 +86,16 @@ export default function Cart() {
 
     const onHiddenProduct = (productId: string) => {
       refetch();
-      dispatch(removeProduct(productId))
+      dispatch(removeProduct(productId));
     };
 
     const onProductUpdate = (productId: string) => {
       refetch();
-    }
+    };
 
     socket.on("connect", onConnect);
     socket.on("hidden product", onHiddenProduct);
-    socket.on('update product', onProductUpdate)
+    socket.on("update product", onProductUpdate);
 
     return () => {
       socket.off("connect", onConnect);
@@ -96,7 +103,6 @@ export default function Cart() {
       socket.off("hidden product", onProductUpdate);
     };
   }, [refetch]);
-
 
   const productsFormatted = useMemo(() => {
     return data?.data?.products?.map((it) => ({
@@ -106,7 +112,11 @@ export default function Cart() {
     }));
   }, [data?.data]);
 
-  const handleUpdateQuantity = (variantId: string, option: string, quantity: number) => {
+  const handleUpdateQuantity = (
+    variantId: string,
+    option: string,
+    quantity: number
+  ) => {
     onUpdateQuantity({
       variantId,
       quantity,
@@ -114,7 +124,9 @@ export default function Cart() {
     });
     // Cập nhật productSelected với số lượng mới
     const updatedProductSelected = productSelected.map((item) =>
-      item.variant._id === variantId && item.option?._id === option ? { ...item, quantity } : item
+      item.variant._id === variantId && item.option?._id === option
+        ? { ...item, quantity }
+        : item
     );
     dispatch(updateProductSelected(updatedProductSelected));
 
@@ -126,18 +138,20 @@ export default function Cart() {
   };
 
   const handleDeleteProduct = (variantId: string, option: string) => {
-    onDeleteProduct({ variantId, option }, {
-      onSuccess: () => {
-        // Lọc ra các sản phẩm không bị xóa
-        const updatedProductSelected = productSelected.filter(
-          (item) => {
-            const status = item.variant._id === variantId && item?.option?._id === option
+    onDeleteProduct(
+      { variantId, option },
+      {
+        onSuccess: () => {
+          // Lọc ra các sản phẩm không bị xóa
+          const updatedProductSelected = productSelected.filter((item) => {
+            const status =
+              item.variant._id === variantId && item?.option?._id === option;
             return !status;
-          }
-        );
-        dispatch(updateProductSelected(updatedProductSelected));
-      },
-    });
+          });
+          dispatch(updateProductSelected(updatedProductSelected));
+        },
+      }
+    );
   };
 
   // const totalPriceWithShipping = totalPrice + SHIPPING_COST;
@@ -211,7 +225,7 @@ export default function Cart() {
                           dispatch(updateProductSelected(selectedRows));
                         },
                         selectedRowKeys: productSelected
-                          .filter((item) => item.variant.status) 
+                          .filter((item) => item.variant.status)
                           .map((it) => it._id),
                         getCheckboxProps: (record: any) => ({
                           disabled: !record.variant.status,
@@ -225,7 +239,9 @@ export default function Cart() {
                         render={(images: string[], record: any) => (
                           <Link to={`/product/${record.product._id}`}>
                             <img
-                              className={record.variant.status ? "" : "out-of-stock"}
+                              className={
+                                record.variant.status ? "" : "out-of-stock"
+                              }
                               src={images[0]}
                               alt="Product"
                               style={{
@@ -246,12 +262,22 @@ export default function Cart() {
                         key="name"
                         render={(_, record: any) => {
                           return (
-                            <div className={record.variant.status ? "" : "out-of-stock"}>
-                              <Link to={`/product/${record.product._id}`}>{record.name}</Link>
+                            <div
+                              className={
+                                record.variant.status ? "" : "out-of-stock"
+                              }
+                            >
+                              <Link to={`/product/${record.product._id}`}>
+                                {record.name}
+                              </Link>
 
                               <p>Size: {record.variant.sizeName}</p>
 
-                              {!record.variant.status && <p className="out-of-stock-text">Sản phẩm đang ngừng hoạt động</p>}
+                              {!record.variant.status && (
+                                <p className="out-of-stock-text">
+                                  Sản phẩm đang ngừng hoạt động
+                                </p>
+                              )}
                             </div>
                           );
                         }}
@@ -262,7 +288,11 @@ export default function Cart() {
                         title="Giá"
                         key="price"
                         render={(_, record: any) => (
-                          <div className={record.variant.status ? "" : "out-of-stock"}>
+                          <div
+                            className={
+                              record.variant.status ? "" : "out-of-stock"
+                            }
+                          >
                             {formatPrice(record.variant.price)}
                           </div>
                         )}
@@ -275,7 +305,11 @@ export default function Cart() {
                         render={(option, record: any) => {
                           if (option) {
                             return (
-                              <div className={record.variant.status ? "" : "out-of-stock"}>
+                              <div
+                                className={
+                                  record.variant.status ? "" : "out-of-stock"
+                                }
+                              >
                                 <p>{option.name}</p>
                               </div>
                             );
@@ -295,26 +329,34 @@ export default function Cart() {
                             value={value}
                             disabled={!record.variant.status}
                             onChange={(quantity) =>
-                              handleUpdateQuantity(record.variant._id, record?.option?._id, quantity)
+                              handleUpdateQuantity(
+                                record.variant._id,
+                                record?.option?._id,
+                                quantity
+                              )
                             }
                           />
                         )}
                         width={150}
                       />
 
-
                       <Table.Column
                         title="Thành tiền"
                         dataIndex="totalPrice"
                         key="totalPrice"
                         render={(_, record: any) => {
-                          let totalPrice = record.variant.price * record.quantity
+                          let totalPrice =
+                            record.variant.price * record.quantity;
                           if (record?.option) {
                             totalPrice += record.option.price * record.quantity;
                           }
 
                           return (
-                            <div className={record.variant.status ? "" : "out-of-stock"}>
+                            <div
+                              className={
+                                record.variant.status ? "" : "out-of-stock"
+                              }
+                            >
                               {formatPrice(totalPrice)}
                             </div>
                           );
@@ -330,7 +372,10 @@ export default function Cart() {
                             okText="Có"
                             cancelText="Không"
                             onConfirm={() =>
-                              handleDeleteProduct(record.variant._id, record?.option?._id)
+                              handleDeleteProduct(
+                                record.variant._id,
+                                record?.option?._id
+                              )
                             }
                           >
                             <Button danger>Xóa</Button>
@@ -360,12 +405,8 @@ export default function Cart() {
                 }}
               >
                 <span>Tổng tiền</span>
-                <Text style={{ fontWeight: 800, color: "red" }}
-
-                >
-
+                <Text style={{ fontWeight: 800, color: "red" }}>
                   {formatPrice(totalPrice)}
-
                 </Text>
               </div>
               <Link to="/checkout">
@@ -377,7 +418,6 @@ export default function Cart() {
                   Thanh toán
                 </Button>
               </Link>
-
             </div>
           </div>
         </div>

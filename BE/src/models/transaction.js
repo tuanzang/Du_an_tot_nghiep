@@ -14,6 +14,9 @@ const transactionSchema = new mongoose.Schema(
     },
     transCode: {
       type: String,
+    },
+    type: {
+      type: Boolean,
       required: true,
     },
     totalMoney: {

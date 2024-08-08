@@ -1,7 +1,7 @@
 import type { FormProps } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Button, Form, Input, Select, Upload, Card, Space } from "antd";
+import { Button, Form, Input, Select, Upload, Card } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { IProduct } from "../../../interface/Products";
 import { useEffect, useState, useRef } from "react";
@@ -127,6 +127,7 @@ const editorConfig = {
   },
 };
 
+const listHis = [{ link: "/admin/product", name: "Sản phẩm" }];
 const ProductAdd = () => {
   const navigate = useNavigate();
   const [cates, setCates] = useState([]);
@@ -145,13 +146,15 @@ const ProductAdd = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3001/api/categories"
+        const response = await axios.post(
+          "http://localhost:3001/api/categories",
+          { status: "1" }
         );
         setCates(response.data?.data);
 
-        const responseSizes = await axios.get(
-          "http://localhost:3001/api/sizes"
+        const responseSizes = await axios.post(
+          "http://localhost:3001/api/sizes",
+          { status: "1" }
         );
         setSizes(responseSizes.data?.data);
       } catch (error) {
@@ -239,8 +242,8 @@ const ProductAdd = () => {
   };
 
   return (
-    <div className="container">
-      <BreadcrumbsCustom nameHere={"Thêm sản phẩm"} listLink={[]} />
+    <div className="">
+      <BreadcrumbsCustom nameHere={"Thêm sản phẩm"} listLink={listHis} />
       <Form
         name="basic"
         onFinish={onFinish}
@@ -248,8 +251,8 @@ const ProductAdd = () => {
         autoComplete="off"
         form={form}
       >
-        <div className="add d-flex flex-row px-8 py-3">
-          <Card>
+        <div className="w-50 mx-auto">
+          <Card style={{ marginBottom: "10px" }}>
             <Form.Item<IProduct>
               label="Tên sản phẩm"
               name="name"
@@ -261,66 +264,6 @@ const ProductAdd = () => {
               <Input />
             </Form.Item>
 
-            <Form.Item<IProduct>
-              label="Danh mục"
-              name="categoryId"
-              rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
-            >
-              <Select
-                defaultValue="Chọn danh mục"
-                style={{
-                  width: 235,
-                  fontFamily: "SpaceGrotesk-Light",
-                }}
-                options={dataCates}
-              />
-            </Form.Item>
-          </Card>
-          <Card
-            className="d-flex flex-row px-8"
-            style={{ width: 300, fontFamily: "SpaceGrotesk-Light" }}
-          >
-            <p>Phụ kiện</p>
-
-            <Form.Item
-              name="options"
-              style={{ fontFamily: "SpaceGrotesk-Light" }}
-            >
-              <OptionFormItem options={options} />
-            </Form.Item>
-          </Card>
-
-          <Card>
-            <div>
-              {sizes.map((it: any) => (
-                <Space
-                  key={it._id}
-                  style={{ display: "flex", marginBottom: 8 }}
-                  align="baseline"
-                >
-                  <p>{it.name}</p>
-                  <Form.Item
-                    name={"quantity" + "-" + it._id}
-                    rules={[
-                      { required: true, message: "Vui lòng nhập số lượng" },
-                    ]}
-                  >
-                    <Input placeholder="Số lượng" type="number" />
-                  </Form.Item>
-                  <Form.Item
-                    name={"price" + "-" + it._id}
-                    rules={[{ required: true, message: "Vui lòng nhập giá" }]}
-                  >
-                    <Input placeholder="Giá" type="number" />
-                  </Form.Item>
-                </Space>
-              ))}
-            </div>
-          </Card>
-        </div>
-
-        <div className="py-3">
-          <Card>
             <Form.Item
               label="Ảnh"
               name="image"
@@ -341,13 +284,72 @@ const ProductAdd = () => {
               </Upload>
             </Form.Item>
           </Card>
-        </div>
-        <div>
-          <Card>
-            <div
-              className="editor-container editor-container_classic-editor"
-              ref={editorContainerRef}
+
+          <Card style={{ marginBottom: "10px" }}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Size</th>
+                  <th scope="col">Số lượng</th>
+                  <th scope="col">Giá</th>
+                </tr>
+              </thead>
+              {sizes.map((it: any) => (
+                <tbody>
+                  <tr>
+                    <th scope="row"></th>
+                    <td>{it.name}</td>
+                    <td>
+                      <Form.Item
+                        name={"quantity" + "-" + it._id}
+                        rules={[
+                          { required: true, message: "Vui lòng nhập số lượng" },
+                        ]}
+                      >
+                        <Input placeholder="Số lượng" type="number" />
+                      </Form.Item>
+                    </td>
+                    <td>
+                      <Form.Item
+                        name={"price" + "-" + it._id}
+                        rules={[
+                          { required: true, message: "Vui lòng nhập giá" },
+                        ]}
+                      >
+                        <Input placeholder="Giá" type="number" />
+                      </Form.Item>
+                    </td>
+                  </tr>
+                </tbody>
+              ))}
+            </table>
+          </Card>
+          <Card style={{ marginBottom: "10px" }}>
+            <Form.Item<IProduct>
+              label="Danh mục"
+              name="categoryId"
+              rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
             >
+              <Select
+                defaultValue="Chọn danh mục"
+                style={{
+                  width: 150,
+                }}
+                options={dataCates}
+              />
+            </Form.Item>
+            <p>Phụ kiện</p>
+
+            <Form.Item name="options">
+              <OptionFormItem options={options} />
+            </Form.Item>
+          </Card>
+        </div>
+
+        <div className="w-50 mx-auto">
+          <Card>
+            <div ref={editorContainerRef}>
               <div className="editor-container__editor">
                 <div ref={editorRef}>
                   {isLayoutReady && (
@@ -361,18 +363,20 @@ const ProductAdd = () => {
                 </div>
               </div>
             </div>
-          </Card>
-        </div>
 
-        <div className="mt-5">
-          <Form.Item
-            wrapperCol={{ offset: 8, span: 16 }}
-            style={{ float: "right", paddingRight: "25px" }}
-          >
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
+            <Form.Item
+              wrapperCol={{ offset: 8, span: 16 }}
+              style={{
+                float: "right",
+                paddingRight: "25px",
+                marginTop: "10px",
+              }}
+            >
+              <Button type="primary" htmlType="submit">
+                Thêm mới
+              </Button>
+            </Form.Item>
+          </Card>
         </div>
       </Form>
     </div>
