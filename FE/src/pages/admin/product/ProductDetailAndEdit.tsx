@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useRef } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Button, Card, Form, Input, Space, Switch, Upload } from "antd";
+import { Button, Card, Form, Input, Select, Space, Switch, Upload } from "antd";
 import { EditOutlined, UploadOutlined } from "@ant-design/icons";
 import { UploadFile } from "antd/lib";
 import { IProduct } from "../../../interface/Products";
@@ -37,6 +37,11 @@ import {
 import "ckeditor5/ckeditor5.css";
 import { uploadImage } from "../../../services/upload/upload";
 import { toast } from "react-toastify";
+import OptionFormItem from "./OptionFormItem";
+import axiosInstance from "../../../config/axios";
+import { ICategory } from "../../../interface/Categories";
+import { IOption } from "../../../interface/Option";
+import { socket } from "../../../socket";
 
 export default function ProductDetailAndEdit() {
   const { id } = useParams<{ id: string }>(); // Lấy ID sản phẩm từ URL
@@ -55,6 +60,11 @@ export default function ProductDetailAndEdit() {
   const [isChanged1, setIsChanged1] = useState(false);
   const [isChanged2, setIsChanged2] = useState(false);
   const [productSizeForm] = Form.useForm();
+  const [form] = Form.useForm();
+  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [options, setOptions] = useState<IOption[]>([]);
+
+  const categoryId = Form.useWatch("categoryId", form);
 
   useEffect(() => {
     // Gọi API để lấy chi tiết sản phẩm
@@ -62,6 +72,11 @@ export default function ProductDetailAndEdit() {
       try {
         const { data } = await axios.get(
           `http://localhost:3001/api/products/${id}`
+        );
+        form.setFieldValue("categoryId", data.data.categoryId[0]);
+        form.setFieldValue(
+          "options",
+          data.data.options?.map((it: any) => it._id)
         );
         setProduct(data.data);
         setName(data.data.name);
@@ -91,8 +106,18 @@ export default function ProductDetailAndEdit() {
         setProductSizes(data.data);
 
         data?.data?.forEach((it) => {
-          productSizeForm.setFieldValue(`price-${it.idSize}`, it.price);
-          productSizeForm.setFieldValue(`quantity-${it.idSize}`, it.quantity);
+          productSizeForm.setFieldValue(
+            `price-${it.idSize}-${it._id}`,
+            it.price
+          );
+          productSizeForm.setFieldValue(
+            `quantity-${it.idSize}-${it._id}`,
+            it.quantity
+          );
+          productSizeForm.setFieldValue(
+            `status-${it.idSize}-${it._id}`,
+            !!it.status
+          );
         });
       } catch (error) {
         console.error("Error fetching product sizes:", error);
@@ -102,6 +127,32 @@ export default function ProductDetailAndEdit() {
     fetchProductDetails();
     fetchProductSizes();
   }, [id]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    categoryId && fetchOptions(categoryId);
+  }, [categoryId]);
+
+  const fetchOptions = async (categoryId: string) => {
+    try {
+      const { data } = await axiosInstance.get(`/options/${categoryId}`);
+      setOptions(data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axiosInstance.get("/categories");
+      setCategories(data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const onFieldsChange = () => {
     setIsChanged1(true);
@@ -162,6 +213,8 @@ export default function ProductDetailAndEdit() {
       );
       toast.success("Cập nhật sản phẩm thành công");
       navigate("/admin/product");
+
+      socket.emit("update product", id);
     } catch (error) {
       console.error("Error updating product sizes:", error);
       toast.error("Cập nhật sản phẩm thất bại");
@@ -170,7 +223,6 @@ export default function ProductDetailAndEdit() {
 
   const handleStatusChange = (checked, idSize) => {
     // Cập nhật trạng thái cho sản phẩm theo kích thước
-    // Ví dụ, bạn có thể cập nhật trạng thái trong `productSizes` hoặc gọi một API để cập nhật trạng thái trên server
     console.log(`Status changed for size ${idSize}: ${checked}`);
   };
 
@@ -263,6 +315,16 @@ export default function ProductDetailAndEdit() {
     },
   };
 
+  const onFinish = async (values: any) => {
+    try {
+      await axiosInstance.put(`/products/${id}`, values);
+      toast.success("Cập nhật sản phẩm thành công");
+      navigate("/admin/product");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div>
       <BreadcrumbsCustom
@@ -325,34 +387,53 @@ export default function ProductDetailAndEdit() {
             onFinish={handleUpdateProductSize}
             onFieldsChange={onFieldsChange}
           >
-            {productSizes.map((it) => (
-              <Space
-                key={it._id}
-                style={{ display: "flex", marginBottom: 8 }}
-                align="baseline"
-              >
-                <p>{it.sizeName}</p>
-                <Form.Item
-                  name={"quantity" + "-" + it.idSize}
-                  rules={[
-                    { required: true, message: "Vui lòng nhập số lượng" },
-                  ]}
-                >
-                  <Input placeholder="Số lượng" type="number" />
-                </Form.Item>
-                <Form.Item
-                  name={"price" + "-" + it.idSize}
-                  rules={[{ required: true, message: "Vui lòng nhập giá" }]}
-                >
-                  <Input placeholder="Giá" type="number" />
-                </Form.Item>
-
-                <Switch
-                  checked={it.status === "active"}
-                  onChange={(checked) => handleStatusChange(checked, it.idSize)}
-                />
-              </Space>
-            ))}
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Size</th>
+                  <th scope="col">Số lượng</th>
+                  <th scope="col">Giá</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              {productSizes.map((it) => (
+                <tbody>
+                  <tr>
+                    <th scope="row"></th>
+                    <td>{it.sizeName}</td>
+                    <td>
+                      <Form.Item
+                        name={"quantity" + "-" + it.idSize + "-" + it._id}
+                        rules={[
+                          { required: true, message: "Vui lòng nhập số lượng" },
+                        ]}
+                      >
+                        <Input placeholder="Số lượng" type="number" />
+                      </Form.Item>
+                    </td>
+                    <td>
+                      <Form.Item
+                        name={"price" + "-" + it.idSize + "-" + it._id}
+                        rules={[
+                          { required: true, message: "Vui lòng nhập giá" },
+                        ]}
+                      >
+                        <Input placeholder="Giá" type="number" />
+                      </Form.Item>
+                    </td>
+                    <th scope="col">
+                      <Form.Item
+                        name={"status" + "-" + it.idSize + "-" + it._id}
+                        valuePropName="checked"
+                      >
+                        <Switch />
+                      </Form.Item>
+                    </th>
+                  </tr>
+                </tbody>
+              ))}
+            </table>
 
             {isChanged1 && (
               <Button
@@ -367,14 +448,33 @@ export default function ProductDetailAndEdit() {
           </Form>
         </Card>
 
+        <Card className="my-3">
+          <Form form={form} layout="vertical" onFinish={onFinish}>
+            <Form.Item name="categoryId" label="Danh mục SP">
+              <Select
+                onChange={() => form.setFieldValue("options", [])}
+                options={categories.map((it) => ({
+                  label: it.loai,
+                  value: it._id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item name="options">
+              <OptionFormItem options={options} />
+            </Form.Item>
+
+            <Button type="primary" htmlType="submit">
+              Update
+            </Button>
+          </Form>
+        </Card>
+
         <Card style={{ padding: "10px", marginBottom: "10px" }}>
           <label style={{ fontSize: "20px" }} className="mb-2">
             Mô tả sản phẩm
           </label>
-          <div
-            className="editor-container editor-container_classic-editor"
-            ref={editorContainerRef}
-          >
+          <div ref={editorContainerRef}>
             <div className="editor-container__editor">
               <div ref={editorRef}>
                 {isLayoutReady && (

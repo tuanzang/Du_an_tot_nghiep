@@ -90,7 +90,11 @@ export default function ProfileBill() {
   const [pageSize, setPageSize] = useState<number>(10);
   const [listBill, setListBill] = useState<IBill[]>([]);
 
-  const fetchOrder = async (status: string, currentPage: number) => {
+  const fetchOrder = async (
+    status: string,
+    currentPage: number,
+    user: IUser | null
+  ) => {
     if (user === null) {
       return;
     } else {
@@ -113,8 +117,8 @@ export default function ProfileBill() {
   };
 
   useEffect(() => {
-    fetchOrder(valueTabHD, currentPage);
-  }, [valueTabHD, currentPage]);
+    fetchOrder(valueTabHD, currentPage, user);
+  }, [valueTabHD, currentPage, user]);
 
   const handleChangeTab = (newValue: string) => {
     setValueTabHD(newValue);

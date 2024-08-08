@@ -1,18 +1,8 @@
 import type { FormProps } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-  Upload,
-  Card,
-  Space,
-} from "antd";
-import {
-  UploadOutlined,
-} from "@ant-design/icons";
+import { Button, Form, Input, Select, Upload, Card } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import { IProduct } from "../../../interface/Products";
 import { useEffect, useState, useRef } from "react";
 import { ICategory } from "../../../interface/Categories";
@@ -24,12 +14,120 @@ import { UploadFile } from "antd/lib";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import {
-  ClassicEditor,AccessibilityHelp,Alignment,Autosave,Bold,Essentials,GeneralHtmlSupport,Highlight,Italic,
-  Link,Paragraph,SelectAll,SpecialCharacters,Table,TableCaption,TableCellProperties,TableColumnResize,
-  TableProperties,TableToolbar,TextPartLanguage,Title,Underline,Undo,
+  ClassicEditor,
+  AccessibilityHelp,
+  Alignment,
+  Autosave,
+  Bold,
+  Essentials,
+  GeneralHtmlSupport,
+  Highlight,
+  Italic,
+  Link,
+  Paragraph,
+  SelectAll,
+  SpecialCharacters,
+  Table,
+  TableCaption,
+  TableCellProperties,
+  TableColumnResize,
+  TableProperties,
+  TableToolbar,
+  TextPartLanguage,
+  Title,
+  Underline,
+  Undo,
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
+import OptionFormItem from "./OptionFormItem";
+import axiosInstance from "../../../config/axios";
+import { IOption } from "../../../interface/Option";
 
+const editorConfig = {
+  toolbar: {
+    items: [
+      "undo",
+      "redo",
+      "|",
+      "selectAll",
+      "textPartLanguage",
+      "|",
+      "bold",
+      "italic",
+      "underline",
+      "|",
+      "specialCharacters",
+      "link",
+      "insertTable",
+      "highlight",
+      "|",
+      "alignment",
+      "|",
+      "accessibilityHelp",
+    ],
+    shouldNotGroupWhenFull: false,
+  },
+  plugins: [
+    AccessibilityHelp,
+    Alignment,
+    Autosave,
+    Bold,
+    Essentials,
+    GeneralHtmlSupport,
+    Highlight,
+    Italic,
+    Link,
+    Paragraph,
+    SelectAll,
+    SpecialCharacters,
+    Table,
+    TableCaption,
+    TableCellProperties,
+    TableColumnResize,
+    TableProperties,
+    TableToolbar,
+    TextPartLanguage,
+    Title,
+    Underline,
+    Undo,
+  ],
+  htmlSupport: {
+    allow: [
+      {
+        name: /^.*$/,
+        styles: true,
+        attributes: true,
+        classes: true,
+      },
+    ],
+  },
+  initialData: "",
+  link: {
+    addTargetToExternalLinks: true,
+    defaultProtocol: "https://",
+    decorators: {
+      toggleDownloadable: {
+        mode: "manual",
+        label: "Downloadable",
+        attributes: {
+          download: "file",
+        },
+      },
+    },
+  },
+  placeholder: "Type or paste your content here!",
+  table: {
+    contentToolbar: [
+      "tableColumn",
+      "tableRow",
+      "mergeTableCells",
+      "tableProperties",
+      "tableCellProperties",
+    ],
+  },
+};
+
+const listHis = [{ link: "/admin/product", name: "Sản phẩm" }];
 const ProductAdd = () => {
   const navigate = useNavigate();
   const [cates, setCates] = useState([]);
@@ -39,17 +137,24 @@ const ProductAdd = () => {
   const editorRef = useRef(null);
   const [isLayoutReady, setIsLayoutReady] = useState(false);
   const [description, setDescription] = useState<string>("");
+  const [options, setOptions] = useState<IOption[]>([]);
+
+  const [form] = Form.useForm();
+
+  const categoryId = Form.useWatch("categoryId", form);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3001/api/categories"
+        const response = await axios.post(
+          "http://localhost:3001/api/categories",
+          { status: "1" }
         );
         setCates(response.data?.data);
 
-        const responseSizes = await axios.get(
-          "http://localhost:3001/api/sizes"
+        const responseSizes = await axios.post(
+          "http://localhost:3001/api/sizes",
+          { status: "1" }
         );
         setSizes(responseSizes.data?.data);
       } catch (error) {
@@ -58,6 +163,19 @@ const ProductAdd = () => {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    categoryId && fetchOptions(categoryId);
+  }, [categoryId]);
+
+  const fetchOptions = async (categoryId: string) => {
+    try {
+      const { data } = await axiosInstance.get(`/options/${categoryId}`);
+      setOptions(data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const dataCates = cates.map((item: ICategory) => {
     return {
@@ -68,8 +186,6 @@ const ProductAdd = () => {
 
   // const [quantity, setQuantity] = useState<Number>(0)
   const onFinish: FormProps<IProduct>["onFinish"] = async (values: any) => {
-    console.log(values);
-
     try {
       // Upload images
       // Lấy danh sách các file từ fileList
@@ -86,13 +202,14 @@ const ProductAdd = () => {
         image,
         description: desc,
         categoryId,
+        options,
         ...rest
       } = { ...values, image: uploadedImageUrls, description } as any;
 
       // Send product data to server
       const dataProduct = await axios.post(
         `http://localhost:3001/api/products/add`,
-        { name, image, description, categoryId }
+        { name, image, description, categoryId, options }
       );
 
       await axios.post(
@@ -119,54 +236,6 @@ const ProductAdd = () => {
     return () => setIsLayoutReady(false);
   }, []);
 
-  const editorConfig = {
-    toolbar: {
-      items: ["undo","redo","|","selectAll","textPartLanguage","|","bold","italic","underline","|","specialCharacters","link",
-        "insertTable","highlight","|","alignment","|","accessibilityHelp",
-      ],
-      shouldNotGroupWhenFull: false,
-    },
-    plugins: [
-      AccessibilityHelp,Alignment,Autosave,Bold,Essentials,GeneralHtmlSupport,Highlight,Italic,Link,Paragraph,
-      SelectAll,SpecialCharacters,Table,TableCaption,TableCellProperties,TableColumnResize,TableProperties,
-      TableToolbar,TextPartLanguage,Title,Underline,Undo,
-    ],
-    htmlSupport: {
-      allow: [
-        {
-          name: /^.*$/,
-          styles: true,
-          attributes: true,
-          classes: true,
-        },
-      ],
-    },
-    initialData: "",
-    link: {
-      addTargetToExternalLinks: true,
-      defaultProtocol: "https://",
-      decorators: {
-        toggleDownloadable: {
-          mode: "manual",
-          label: "Downloadable",
-          attributes: {
-            download: "file",
-          },
-        },
-      },
-    },
-    placeholder: "Type or paste your content here!",
-    table: {
-      contentToolbar: [
-        "tableColumn",
-        "tableRow",
-        "mergeTableCells",
-        "tableProperties",
-        "tableCellProperties",
-      ],
-    },
-  };
-
   const onDescriptionChange = (_event: any, editor: any) => {
     const data = editor.getData();
     setDescription(data);
@@ -174,15 +243,16 @@ const ProductAdd = () => {
 
   return (
     <div className="">
-      <BreadcrumbsCustom nameHere={"Thêm sản phẩm"} listLink={[]} />
+      <BreadcrumbsCustom nameHere={"Thêm sản phẩm"} listLink={listHis} />
       <Form
         name="basic"
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
         autoComplete="off"
+        form={form}
       >
-        <div className="d-flex flex-row px-5 py-3">
-          <Card>
+        <div className="w-50 mx-auto">
+          <Card style={{ marginBottom: "10px" }}>
             <Form.Item<IProduct>
               label="Tên sản phẩm"
               name="name"
@@ -193,50 +263,6 @@ const ProductAdd = () => {
               <Input />
             </Form.Item>
 
-            <Form.Item<IProduct>
-              label="Danh mục"
-              name="categoryId"
-              rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
-            >
-              <Select
-                defaultValue="Chọn danh mục"
-                style={{
-                  width: 150,
-                }}
-                options={dataCates}
-              />
-            </Form.Item>
-          </Card>
-
-          <Card>
-            <div>
-              {sizes.map((it:any) => (
-                <Space
-                  key={it._id}
-                  style={{ display: "flex", marginBottom: 8 }}
-                  align="baseline"
-                >
-                  <p>{it.name}</p>
-                  <Form.Item
-                    name={"quantity" + "-" + it._id}
-                    rules={[
-                      { required: true, message: "Vui lòng nhập số lượng" },
-                    ]}
-                  >
-                    <Input placeholder="Số lượng" type="number" />
-                  </Form.Item>
-                  <Form.Item
-                    name={"price" + "-" + it._id}
-                    rules={[{ required: true, message: "Vui lòng nhập giá" }]}
-                  >
-                    <Input placeholder="Giá" type="number" />
-                  </Form.Item>
-                </Space>
-              ))}
-            </div>
-          </Card>
-
-          <Card>
             <Form.Item
               label="Ảnh"
               name="image"
@@ -257,40 +283,99 @@ const ProductAdd = () => {
               </Upload>
             </Form.Item>
           </Card>
+
+          <Card style={{ marginBottom: "10px" }}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Size</th>
+                  <th scope="col">Số lượng</th>
+                  <th scope="col">Giá</th>
+                </tr>
+              </thead>
+              {sizes.map((it: any) => (
+                <tbody>
+                  <tr>
+                    <th scope="row"></th>
+                    <td>{it.name}</td>
+                    <td>
+                      <Form.Item
+                        name={"quantity" + "-" + it._id}
+                        rules={[
+                          { required: true, message: "Vui lòng nhập số lượng" },
+                        ]}
+                      >
+                        <Input placeholder="Số lượng" type="number" />
+                      </Form.Item>
+                    </td>
+                    <td>
+                      <Form.Item
+                        name={"price" + "-" + it._id}
+                        rules={[
+                          { required: true, message: "Vui lòng nhập giá" },
+                        ]}
+                      >
+                        <Input placeholder="Giá" type="number" />
+                      </Form.Item>
+                    </td>
+                  </tr>
+                </tbody>
+              ))}
+            </table>
+          </Card>
+          <Card style={{ marginBottom: "10px" }}>
+            <Form.Item<IProduct>
+              label="Danh mục"
+              name="categoryId"
+              rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
+            >
+              <Select
+                defaultValue="Chọn danh mục"
+                style={{
+                  width: 150,
+                }}
+                options={dataCates}
+              />
+            </Form.Item>
+            <p>Phụ kiện</p>
+
+            <Form.Item name="options">
+              <OptionFormItem options={options} />
+            </Form.Item>
+          </Card>
         </div>
 
-        <div>
+        <div className="w-50 mx-auto">
           <Card>
-            <div
-              className="editor-container editor-container_classic-editor"
-              ref={editorContainerRef}
-            >
+            <div ref={editorContainerRef}>
               <div className="editor-container__editor">
                 <div ref={editorRef}>
                   {isLayoutReady && (
                     <CKEditor
                       editor={ClassicEditor}
-                      config={editorConfig}
+                      config={editorConfig as any}
                       data={description}
                       onChange={onDescriptionChange}
-                      name="description"
                     />
                   )}
                 </div>
               </div>
             </div>
-          </Card>
-        </div>
 
-        <div className="mt-5">
-          <Form.Item
-            wrapperCol={{ offset: 8, span: 16 }}
-            style={{ float: "right", paddingRight: "25px" }}
-          >
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
+            <Form.Item
+              wrapperCol={{ offset: 8, span: 16 }}
+              style={{
+                float: "right",
+                paddingRight: "25px",
+                marginTop: "10px",
+              }}
+            >
+              <Button type="primary" htmlType="submit">
+                Thêm mới
+              </Button>
+            </Form.Item>
+          </Card>
         </div>
       </Form>
     </div>

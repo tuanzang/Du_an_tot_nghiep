@@ -1,6 +1,6 @@
-
 export interface ICategory {
-    _id: number;
-    loai: string;
-    products: string[];
+  _id: string;
+  loai: string;
+  status: string;
+  products: string[];
 }

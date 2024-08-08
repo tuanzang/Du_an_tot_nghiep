@@ -1,9 +1,17 @@
 import { Router } from "express";
-import { createSize, deleteSize, getAllSize } from "../controller/size";
+import {
+  createSize,
+  updateSize,
+  deleteSize,
+  findSizeById,
+  getAllSize,
+} from "../controller/size";
 
 const sizeRouter = Router();
-sizeRouter.get('/', getAllSize) ;
+sizeRouter.post("/", getAllSize);
 sizeRouter.post("/add", createSize);
-sizeRouter.delete('/:id', deleteSize);
+sizeRouter.post("/update", updateSize);
+sizeRouter.post("/delete", deleteSize);
+sizeRouter.post("/findOne", findSizeById);
 
-export default sizeRouter
+export default sizeRouter;

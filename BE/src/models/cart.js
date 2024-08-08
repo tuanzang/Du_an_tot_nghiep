@@ -6,6 +6,7 @@ const cartSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "users",
     },
+    
     products: [
       {
         product: String,
@@ -14,6 +15,10 @@ const cartSchema = new mongoose.Schema(
           type: mongoose.Types.ObjectId,
           ref: "ProductSize",
         },
+        option:{
+          type: mongoose.Types.ObjectId,
+          ref: "option",
+        }
       },
     ],
   },

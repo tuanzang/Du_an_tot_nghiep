@@ -18,6 +18,9 @@ const orderSchema = new mongoose.Schema(
         image: String,
         size: String,
         variantId: String,
+        optionName: String,
+        optionPrice: Number,
+        optionId: String
       },
     ],
     totalPrice: {
@@ -45,7 +48,6 @@ const orderSchema = new mongoose.Schema(
     // },
     message: {
       type: String,
-      required: true,
     },
     paymentMethod: {
       type: String,

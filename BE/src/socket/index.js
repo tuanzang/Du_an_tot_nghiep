@@ -19,6 +19,16 @@ const initialSocket = (server) => {
     socket.on("hidden product", (productId) => {
       io.emit("hidden product", productId);
     });
+
+    // listen admin update product: size
+    socket.on('update product', productId => {
+      io.emit('update product', productId);
+    })
+
+    // listen user use voucher checkout
+    socket.on('update voucher quantity', code => {
+      io.emit('update voucher quantity', code);
+    })
   });
 
   io.listen(4000);

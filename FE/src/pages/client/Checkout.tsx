@@ -7,14 +7,15 @@ import OrderApi from "../../config/orderApi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { IHistoryBill } from "../../interface/HistoryBill";
-
 import { IUser } from "../../interface/Users";
 import { useDispatch, useSelector } from "react-redux";
 import { ICartItem } from "./Cart";
+
 import {
   removeProduct,
   selectProductSelected,
   selectTotalPrice,
+  updateStatus,
 } from "../../store/cartSlice";
 import { USER_INFO_STORAGE_KEY } from "../../services/constants";
 import { useEffect, useState } from "react";
@@ -22,9 +23,9 @@ import { socket } from "../../socket";
 import { IVoucher } from "../../interface/Voucher";
 import dayjs from "dayjs";
 import axios from "axios";
-
+import "./checkout.css";
+import { it } from "node:test";
 const SHIPPING_COST = 30000;
-
 // import { useLocation } from "react-router-dom";
 const { Text } = Typography;
 
@@ -41,6 +42,7 @@ const Checkout = () => {
   const isLogged = localStorage.getItem(USER_INFO_STORAGE_KEY);
   const user: IUser | null = isLogged ? JSON.parse(isLogged) : null;
 
+  const { data, refetch: refetchCart } = useMyCartQuery();
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
   const totalPrice = useSelector(selectTotalPrice);
@@ -52,16 +54,39 @@ const Checkout = () => {
   const [selectedDiscountCode, setSelectedDiscountCode] = useState(null);
   const [totalDiscount, setTotalDiscount] = useState(0);
 
+  useEffect(() => {
+    dispatch(
+      updateStatus({
+        prevData: productSelected,
+        newData: data?.data?.products,
+      })
+    );
+  }, [data]);
+
   // initial socket
   useEffect(() => {
     const onHiddenProduct = (productId: string) => {
       dispatch(removeProduct(productId));
     };
 
+    const onProductUpdate = (productId: string) => {
+      refetchCart();
+      // console.log('client update', data);
+    };
+
+    const onUpdateVoucherQnt = (code: string) => {
+      console.log("client update", code);
+      fetchDiscountCode();
+    };
+
     socket.on("hidden product", onHiddenProduct);
+    socket.on("update product", onProductUpdate);
+    socket.on("update voucher quantity", onUpdateVoucherQnt);
 
     return () => {
       socket.off("hidden product", onHiddenProduct);
+      socket.off("update product", onProductUpdate);
+      socket.off("update voucher quantity", onUpdateVoucherQnt);
     };
   }, [dispatch, navigate, productSelected.length]);
 
@@ -71,7 +96,16 @@ const Checkout = () => {
     }
   }, [navigate, productSelected.length]);
 
-  const { register, handleSubmit } = useForm<Inputs>({
+  // const { register, handleSubmit } = useForm<Inputs>({
+  //   defaultValues: {
+  //     paymentMethod: "COD",
+  //   },
+  // });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Inputs>({
     defaultValues: {
       paymentMethod: "COD",
     },
@@ -85,7 +119,12 @@ const Checkout = () => {
         productSelectedIds,
         shippingCost: SHIPPING_COST,
         discouVoucher: totalDiscount,
+        discountCode: selectedDiscountCode,
       });
+
+      if (selectedDiscountCode) {
+        socket.emit("update voucher quantity", selectedDiscountCode);
+      }
 
       if (data?.paymentMethod === "COD") {
         createNewHistory(res.data.data._id, "1", user);
@@ -130,11 +169,15 @@ const Checkout = () => {
       toast.error("Tạo lịch sử thất bại");
     }
   };
+
   const discountedPrice = totalPrice - totalDiscount;
   const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
 
   useEffect(() => {
-    // Fetch mã giảm giá từ API
+    fetchDiscountCode();
+  }, []);
+
+  const fetchDiscountCode = () => {
     axios
       .get("http://localhost:3001/api/discountCode/discountCodes")
       .then((response) => {
@@ -143,7 +186,7 @@ const Checkout = () => {
       .catch((error) => {
         console.error("Error fetching discount codes:", error);
       });
-  }, []);
+  };
 
   const showDiscountModal = () => {
     setIsModalVisible(true);
@@ -178,7 +221,7 @@ const Checkout = () => {
   return (
     <div className="container mt-5">
       <div className="row">
-        <div className="col-md-6 mb-3">
+        <div className="col-md-5 mb-3">
           <h2>Thanh Toán Đơn Hàng</h2>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-3">
@@ -200,10 +243,18 @@ const Checkout = () => {
                 id="number"
                 placeholder="Số điện thoại"
                 {...register("phone", {
-                  required: true,
+                  required: "Số điện thoại là bắt buộc",
+                  pattern: {
+                    value: /^0[3-9]\d{8}$/,
+                    message: "Số điện thoại không hợp lệ",
+                  },
                 })}
               />
+              {errors.phone && (
+                <p className="error-message">{errors.phone.message}</p>
+              )}
             </div>
+
             <div className="mb-3">
               <input
                 type="text"
@@ -258,23 +309,24 @@ const Checkout = () => {
               <a href=""> Giỏ hàng</a>
               <button
                 type="submit"
-                className="btn btn-primary bg-info px-4 py-3"
+                className="btn btn-primary bg-warning px-4 py-3"
               >
                 Hoàn tất đơn hàng
               </button>
             </div>
           </form>
         </div>
-        <div className="col-md-6 bg-light">
-          <h3 className="mt-5">Giỏ Hàng</h3>
+        <div className="col-md-7 bg-light">
+          <h3 className="mt-2">Giỏ Hàng</h3>
           <table className="table">
             <thead>
               <tr>
-                <th>Tên sản phẩm</th>
+                <th style={{ width: 250 }}>Tên sản phẩm</th>
                 {/* <th>ảnh</th> */}
                 <th>Giá</th>
                 <th>Số lượng</th>
-                <th>Tổng</th>
+                <th>Option</th>
+                <th>Tổng tiền</th>
               </tr>
             </thead>
             <tbody>
@@ -282,9 +334,15 @@ const Checkout = () => {
                 <tr key={item._id}>
                   <td>
                     {item.product.name} (Size: {item.variant?.sizeName})
+                    {item.variant.status}
                   </td>
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
+                  <td>
+                    {item.option?.name}
+                    <br />
+                    {item.option?.price}
+                  </td>
                   <td>{formatPrice(item.variant.price * item.quantity)}</td>
                   {/* <td> {formatPrice(SHIPPING_COST)}</td> */}
                 </tr>
@@ -302,7 +360,14 @@ const Checkout = () => {
             }}
           >
             <span>Tổng tiền:</span>
-            <Text style={{ fontWeight: 800, color: "red" }}>
+            <Text
+              style={{
+                fontSize: "18px",
+                fontWeight: 800,
+                color: "red",
+                fontFamily: "SpaceGrotesk-Light",
+              }}
+            >
               {formatPrice(totalPrice)}
             </Text>
           </div>
@@ -311,10 +376,19 @@ const Checkout = () => {
               display: "flex",
               justifyContent: "space-between",
               padding: "10px 20px",
+              borderTop: "1px solid gray",
+              marginTop: "20px",
             }}
           >
             <span>Phí ship:</span>
-            <Text style={{ fontWeight: 800, color: "red" }}>
+            <Text
+              style={{
+                fontWeight: 800,
+                color: "red",
+                fontFamily: "SpaceGrotesk-Light",
+                fontSize: "18px",
+              }}
+            >
               {formatPrice(SHIPPING_COST)}
             </Text>
           </div>
@@ -322,24 +396,25 @@ const Checkout = () => {
             style={{
               display: "flex",
               justifyContent: "space-between",
-              padding: "10px 20px",
+              alignItems: "center",
+              marginTop: "20px",
             }}
           >
-            <span>
-              Mã giảm giá:
-              <span
-                style={{ fontWeight: 800, color: "red", marginLeft: "20px" }}
-              >
-                {selectedDiscountCode}
-              </span>
+            <span
+              onClick={showDiscountModal}
+              style={{
+                cursor: "pointer",
+                color: "#BEAC83",
+                fontWeight: "bold",
+                fontSize: "15px",
+                border: "2px solid #BEAC83",
+                borderRadius: "5px",
+                padding: "5px 10px",
+                boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              Chọn mã giảm giá
             </span>
-            <div style={{ fontWeight: 800, color: "red" }}>
-              {selectedDiscountCode ? (
-                <div className="d-flex justify-content-between">
-                  <p>{totalDiscount > 0 ? formatPrice(totalDiscount) : null}</p>
-                </div>
-              ) : null}
-            </div>
           </div>
 
           {/* <span style={{float:"right"}}>- 10.000 VNĐ</span> */}
@@ -353,61 +428,74 @@ const Checkout = () => {
               onChange={handleDiscountCodeChange}
               value={selectedDiscountCode}
             >
-              {discountCodes.map((code: IVoucher) => (
-                <Card
-                  key={code._id}
-                  style={{
-                    backgroundColor: "#66FF66",
-                    marginBottom: 10,
-                    opacity:
-                      code.minPurchaseAmount !== undefined &&
-                      totalPrice >= code.minPurchaseAmount
-                        ? 1
-                        : 0.5,
-                    pointerEvents:
-                      code.minPurchaseAmount !== undefined &&
-                      totalPrice >= code.minPurchaseAmount
-                        ? "auto"
-                        : "none",
-                  }}
-                >
-                  <Radio
-                    value={code.code}
-                    className="discount-radio"
-                    disabled={totalPrice < !code.minPurchaseAmount}
+              {discountCodes.map((code: IVoucher) => {
+                const isDisable =
+                  !code.minPurchaseAmount ||
+                  totalPrice < code.minPurchaseAmount ||
+                  (user && code.userIds.includes(user?._id)) ||
+                  code.quantity === code.usedCount;
+
+                return (
+                  <Card
+                    key={code._id}
+                    style={{
+                      backgroundColor: "#66FF66",
+                      marginBottom: 10,
+                      opacity: isDisable ? 0.5 : 1,
+                      pointerEvents: isDisable ? "none" : "auto",
+                    }}
                   >
-                    <strong className="discount-code">{code.code}</strong>
-                    {code.discountType === "percentage" ? (
-                      <span className="discount-detail">
-                        {" "}
-                        - Giảm {code.discountPercentage}%
-                      </span>
-                    ) : (
-                      <span className="discount-detail">
-                        {" "}
-                        - Giảm {code.discountAmount} VNĐ
-                      </span>
-                    )}
-                    <span
-                      style={{ paddingLeft: 1 }}
-                      className="discount-detail"
+                    <Radio
+                      value={code.code}
+                      className="discount-radio"
+                      disabled={totalPrice < !code.minPurchaseAmount}
                     >
-                      {" "}
-                      (Đơn tối thiểu {code.minPurchaseAmount}đ)
-                    </span>
-                    <br />
-                    <span className="expiration-date">
-                      HSD:{" "}
-                      {dayjs(code.expirationDate).format("DD/MM/YYYY HH:mm:ss")}
-                    </span>
-                  </Radio>
-                </Card>
-              ))}
+                      <strong className="discount-code">{code.code}</strong>
+                      {code.discountType === "percentage" ? (
+                        <span className="discount-detail">
+                          {" "}
+                          - Giảm {code.discountPercentage}%
+                        </span>
+                      ) : (
+                        <span className="discount-detail">
+                          {" "}
+                          - Giảm {code.discountAmount} VNĐ
+                        </span>
+                      )}
+                      <span
+                        style={{ paddingLeft: 1 }}
+                        className="discount-detail"
+                      >
+                        {" "}
+                        (Đơn tối thiểu {code.minPurchaseAmount}đ)
+                      </span>
+                      <br />
+                      <span className="expiration-date">
+                        HSD:{" "}
+                        {dayjs(code.expirationDate).format(
+                          "DD/MM/YYYY HH:mm:ss"
+                        )}
+                      </span>
+                    </Radio>
+                  </Card>
+                );
+              })}
             </Radio.Group>
           </Modal>
 
-          <div style={{ padding: "0px 20px" }}>
-            <Button onClick={showDiscountModal}>Chọn mã</Button>
+          <div
+            style={{
+              fontWeight: 800,
+              color: "red",
+              fontFamily: "SpaceGrotesk-Light",
+            }}
+          >
+            {selectedDiscountCode ? (
+              <div className="d-flex justify-content-between">
+                <p>{selectedDiscountCode}</p>
+                <p>- {totalDiscount > 0 ? formatPrice(totalDiscount) : null}</p>
+              </div>
+            ) : null}
           </div>
           <div
             style={{
@@ -418,8 +506,15 @@ const Checkout = () => {
               marginTop: "20px",
             }}
           >
-            <span>Tổng tiền: </span>
-            <Text style={{ fontWeight: 800, color: "red" }}>
+            <span>Tổng thanh toán: </span>
+            <Text
+              style={{
+                fontWeight: 800,
+                color: "red",
+                fontFamily: "SpaceGrotesk-Light",
+                fontSize: "18px",
+              }}
+            >
               {formatPrice(totalPriceWithShipping)}
             </Text>
           </div>

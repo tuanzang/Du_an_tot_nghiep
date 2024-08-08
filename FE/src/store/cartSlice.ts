@@ -12,7 +12,13 @@ export const cartSlice = createSlice({
     updateProductSelected: (state, { payload }) => {
       state.productSelected = payload;
       state.totalPrice = (payload as ICartItem[]).reduce((res, curr) => {
-        return (res += curr.variant.price * curr.quantity);
+        let price = curr.variant.price * curr.quantity;
+
+        if (curr.option) {
+          price += curr.quantity * curr.option.price;
+        }
+
+        return res += price;
       }, 0);
     },
 
@@ -28,13 +34,37 @@ export const cartSlice = createSlice({
       state.productSelected = newProducts;
 
       state.totalPrice = (newProducts as ICartItem[]).reduce((res, curr) => {
-        return (res += curr.variant.price * curr.quantity);
+        let price = curr.variant.price * curr.quantity;
+
+        if (curr.option) {
+          price += curr.quantity * curr.option.price;
+        }
+
+        return res += price;
       }, 0);
     },
+
+    updateStatus: (state, { payload }) => {
+      state.productSelected = payload.prevData.map((it: any) => {
+        if (it?.variant) {
+          const findOption = payload.newData.find((x: any) => x?.variant?._id === it.variant._id);
+
+          return {
+            ...it, 
+            variant: {
+              ...it.variant,
+              status: findOption?.variant?.status
+            }
+          }
+        }
+
+        return it;
+      }) as any;
+    }
   },
 });
 
-export const { updateProductSelected, resetProductSelected, removeProduct } =
+export const { updateProductSelected, resetProductSelected, removeProduct, updateStatus } =
   cartSlice.actions;
 export const selectProductSelected = (state: any) => state.cart.productSelected;
 export const selectTotalPrice = (state: any) => state.cart.totalPrice;

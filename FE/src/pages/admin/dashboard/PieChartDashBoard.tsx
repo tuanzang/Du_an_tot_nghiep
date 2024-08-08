@@ -3,9 +3,21 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 
-export default function PieChartDashBoard({ data }) {
+interface ChartData {
+  label: string;
+  value: number;
+}
+
+interface PieChartDashBoardProps {
+  data: ChartData[];
+}
+
+export default function PieChartDashBoard({ data } : PieChartDashBoardProps) {
   useLayoutEffect(() => {
-    let root = am5.Root.new("chartdiv");
+    // Filter out data with value 0%
+    const filteredData = data.filter(item => item.value > 0);
+
+    let root = am5.Root.new("chartdiv1");
 
     root.setThemes([am5themes_Animated.new(root)]);
 
@@ -22,7 +34,7 @@ export default function PieChartDashBoard({ data }) {
       })
     );
 
-    series.data.setAll(data);
+    series.data.setAll(filteredData);
 
     series.labels.template.setAll({
       textType: "circular",
@@ -50,6 +62,6 @@ export default function PieChartDashBoard({ data }) {
       root.dispose();
     };
   }, [data]);
-
-  return <div id="chartdiv" style={{ width: "100%", height: "400px" }}></div>;
+  
+  return <div id="chartdiv1" style={{ width: "100%", height: "400px" }}></div>;
 }

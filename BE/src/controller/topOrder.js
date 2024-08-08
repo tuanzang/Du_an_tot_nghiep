@@ -38,6 +38,8 @@ export const getTopOrderedProducts = async (req, res) => {
         $group: {
           _id: "$products.name",
           totalQuantity: { $sum: "$products.quantity" },
+          price: { $sum: "$products.price" },
+          totalRevenue: { $sum: { $multiply: ['$products.quantity', '$products.price'] } }
         },
       },
       {
@@ -50,22 +52,25 @@ export const getTopOrderedProducts = async (req, res) => {
       },
       { $unwind: "$productDetails" },
       { $sort: { totalQuantity: -1 } }, // Sắp xếp theo tổng số lượng từ cao đến thấp
-      { $limit: parseInt(limit, 10) }, // Giới hạn số lượng sản phẩm trả về
+      { $limit: parseInt(limit, 3) }, // Giới hạn số lượng sản phẩm trả về
       {
         $project: {
           _id: 0,
           name: "$_id",
           totalQuantity: 1,
+          price: 1,
+          totalRevenue: 1,
           productDetails: {
-            price: 1,
             description: 1,
             image: 1,
             categoryId: 1,
           },
+          
         },
+        
       },
     ]);
-
+    console.log("topProducts:", topProducts);
     if (!topProducts || topProducts.length === 0) {
       return res.status(200).json({
         message: "Không tìm thấy sản phẩm nào!",

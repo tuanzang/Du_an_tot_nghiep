@@ -1,3 +1,4 @@
+import option from "../models/option.js";
 import Order from "../models/order.js";
 import productSize from "../models/productSize.js";
 
@@ -71,6 +72,7 @@ export const getAllBill = async (req, res) => {
         message: "Không tìm thấy đơn hàng!",
         data: [],
         total: 0,
+        size: pageSize,
       });
     }
 
@@ -178,12 +180,12 @@ export const updateStatusBill = async (req, res) => {
 };
 
 /**
- * API giảm số lượng product size
+ * API giảm số lượng product size và option
  * @param req
  * @param res
  * @returns
  */
-export const decreaseProductSize = async (req, res) => {
+export const decreaseProductSizeAndOption = async (req, res) => {
   try {
     const { listProductSize } = req.body;
 
@@ -193,12 +195,10 @@ export const decreaseProductSize = async (req, res) => {
       });
     }
 
-    const updatedProducts = [];
-
     for (const product of listProductSize) {
-      const { variantId, quantity } = product;
+      const { variantId, quantity, optionId } = product;
 
-      if (!variantId || quantity === undefined) {
+      if (!variantId || !optionId || quantity === undefined) {
         return res.status(400).json({
           message: "Thông tin sản phẩm không đầy đủ",
         });
@@ -220,20 +220,49 @@ export const decreaseProductSize = async (req, res) => {
         });
       }
 
+      const currentOption = await option.findById({ _id: optionId }).exec();
+
+      if (!currentOption) {
+        return res.status(404).json({
+          message: `Không tìm thấy phụ kiện với ID: ${optionId}`,
+        });
+      }
+
+      if (currentOption.quantity < quantity) {
+        return res.status(400).json({
+          message: `Số lượng của phụ kiện không đủ`,
+        });
+      }
+    }
+
+    for (const product of listProductSize) {
+      const { variantId, quantity, optionId } = product;
+
+      const currentProduct = await productSize
+        .findById({ _id: variantId })
+        .exec();
+
+      const currentOption = await option.findById({ _id: optionId }).exec();
+
       currentProduct.quantity -= quantity;
+      currentOption.quantity -= quantity;
 
       // Cập nhật trạng thái nếu số lượng bằng 0
       if (currentProduct.quantity === 0) {
         currentProduct.status = false;
       }
 
+      // Cập nhật trạng thái nếu số lượng bằng 0
+      if (currentOption.quantity === 0) {
+        currentOption.status = false;
+      }
+
       await currentProduct.save();
-      updatedProducts.push(currentProduct);
+      await currentOption.save();
     }
 
     return res.status(200).json({
       message: "Cập nhật thành công",
-      data: updatedProducts,
     });
   } catch (error) {
     res.status(500).json({
@@ -248,7 +277,7 @@ export const decreaseProductSize = async (req, res) => {
  * @param res
  * @returns
  */
-export const increaseProductSize = async (req, res) => {
+export const increaseProductSizeAndOption = async (req, res) => {
   try {
     const { listProductSize } = req.body;
 
@@ -258,12 +287,10 @@ export const increaseProductSize = async (req, res) => {
       });
     }
 
-    const updatedProducts = [];
-
     for (const product of listProductSize) {
-      const { variantId, quantity } = product;
+      const { variantId, quantity, optionId } = product;
 
-      if (!variantId || quantity === undefined) {
+      if (!variantId || !optionId || quantity === undefined) {
         return res.status(400).json({
           message: "Thông tin sản phẩm không đầy đủ",
         });
@@ -279,20 +306,43 @@ export const increaseProductSize = async (req, res) => {
         });
       }
 
+      const currentOption = await option.findById({ _id: optionId }).exec();
+
+      if (!currentOption) {
+        return res.status(404).json({
+          message: `Không tìm thấy phụ kiện với ID: ${optionId}`,
+        });
+      }
+    }
+
+    for (const product of listProductSize) {
+      const { variantId, quantity, optionId } = product;
+
+      const currentProduct = await productSize
+        .findById({ _id: variantId })
+        .exec();
+
+      const currentOption = await option.findById({ _id: optionId }).exec();
+
       currentProduct.quantity += quantity;
+      currentOption.quantity += quantity;
 
       // Cập nhật trạng thái nếu số lượng > 0
       if (currentProduct.quantity > 0) {
         currentProduct.status = true;
       }
 
+      // Cập nhật trạng thái nếu số lượng > 0
+      if (currentOption.quantity > 0) {
+        currentOption.status = true;
+      }
+
       await currentProduct.save();
-      updatedProducts.push(currentProduct);
+      await currentOption.save();
     }
 
     return res.status(200).json({
       message: "Cập nhật thành công",
-      data: updatedProducts,
     });
   } catch (error) {
     res.status(500).json({

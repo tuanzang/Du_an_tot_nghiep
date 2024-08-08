@@ -11,28 +11,35 @@ import "react-toastify/dist/ReactToastify.css";
 import { IProductSize } from "../../interface/ProductSize";
 import ProductItem from "../../components/ProductItem";
 import { formatPrice } from "../../utils";
+import { IOption } from "../../interface/Option";
+import { socket } from "../../socket";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Lấy ID sản phẩm từ URL params
   const [product, setProduct] = useState<IProduct>();
   const [relatedProducts, setRelatedProducts] = useState<IProduct[]>([]);
   const [quantity, setQuantity] = useState(1); // State for quantity
-  const [selectedSize, setSelectedSize] = useState<IProductSize | undefined>();
+  const [selectedSize, setSelectedSize] = useState<IProductSize | null>();
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
+  const [optionSelected, setOptionSelected] = useState<IOption | null>()
 
   // product price
   const productPrice = useMemo(() => {
     if (selectedSize) {
+      if (optionSelected?.price) {
+        return formatPrice(selectedSize?.price + optionSelected.price)
+      }
       return formatPrice(selectedSize?.price);
     }
 
-    const productSizePrice =
-      product?.productSizedata?.map((it) => it.price) || [];
-    const minPrice = Math.min(...productSizePrice);
-    const maxPrice = Math.max(...productSizePrice);
+    const productSizePrices = product?.productSizedata?.map((it) => it.price) || [];
 
-    return `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`;
-  }, [selectedSize, product]);
+    const nonZeroPrices = productSizePrices.filter(price => price > 0).sort((a, b) => a - b);
+    const minPrice = nonZeroPrices[0];
+    const secondMinPrice = nonZeroPrices[1] || minPrice;
+
+    return `${formatPrice(minPrice === 0 ? secondMinPrice : minPrice)} - ${formatPrice(Math.max(...productSizePrices))}`;
+  }, [selectedSize, product, optionSelected]);
 
   // lấy token đăng nhập
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
@@ -41,7 +48,8 @@ export default function ProductDetail() {
     onSuccess: () => {
       message.success("Đã thêm sản phẩm vào giỏ hàng");
       setQuantity(1);
-      setSelectedSize(undefined);
+      setSelectedSize(null);
+      setOptionSelected(null);
     },
   });
 
@@ -75,21 +83,36 @@ export default function ProductDetail() {
     }
   };
 
-  useEffect(() => {
-    // Gọi API để lấy số lượng sản phẩm theo kích cỡ
-    const fetchProductSizes = async () => {
-      try {
-        const { data } = await axios.get(
-          `http://localhost:3001/api/products/productSize/${id}`
-        );
-        setProductSizes(data.data);
-      } catch (error) {
-        console.error("Error fetching product sizes:", error);
-      }
-    };
+   // Gọi API để lấy số lượng sản phẩm theo kích cỡ
+   const fetchProductSizes = async () => {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:3001/api/products/productSize/${id}`
+      );
+      setProductSizes(data.data);
+    } catch (error) {
+      console.error("Error fetching product sizes:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchProductSizes();
   }, [id]);
+
+  // listen hidden product size
+  useEffect(() => {
+    const onProductUpdate = (productId: string) => {
+      if (productId === id) {
+        fetchProductSizes();
+      }
+    }
+
+    socket.on('update product', onProductUpdate);
+
+    return () => {
+      socket.off('update product', onProductUpdate);
+    }
+  }, []);
 
   const handleQuantityIncrease = () => {
     setQuantity(quantity + 1);
@@ -116,7 +139,11 @@ export default function ProductDetail() {
     }
 
     if (quantity > selectedSize.quantity) {
-      return message.info("Vượt quá số lượng còn trong kho");
+      return message.info("Vượt quá số lượng sản phẩm còn trong kho");
+    }
+
+    if (optionSelected && quantity > optionSelected.quantity) {
+      return message.info("Không đủ số lượng option!");
     }
 
     const body = {
@@ -124,6 +151,10 @@ export default function ProductDetail() {
       quantity,
       variantId: selectedSize._id,
     };
+
+    if (optionSelected) {
+      body.option = optionSelected._id;
+    }
 
     mutate(body);
   };
@@ -158,15 +189,19 @@ export default function ProductDetail() {
           setAvarageRate(0);
         }
       } catch (error) {
-        console.log("Khong co du lieu");
+        console.log("Không có dữ liệu");
       }
     }
   };
 
-  const handleSizeClick = (sizeId: string  | null) => {
+  const handleSizeClick = (sizeId: string | null) => {
     const findSize = productSizes.find((it) => it._id === sizeId);
     setSelectedSize(findSize);
   };
+
+  const onOptionClick = (option?: IOption) => {
+    setOptionSelected(option)
+  }
 
   return (
     <div>
@@ -256,57 +291,70 @@ export default function ProductDetail() {
                         </div>
                         <div>
                           <div className="button-container mt-2">
-                            {/* <div>
-                              <p
-                                className="price-regular"
-                                style={{ color: "black", fontSize: "20px" }}
-                              >
-                                Kích cỡ:
-                              </p>
-                              {productSizes.map((size) => (
-                                <Button
-                                  key={size._id}
-                                  className={`mx-1 ${
-                                    selectedSize?._id === size._id
-                                      ? "selected"
-                                      : ""
-                                  }`}
-                                  style={{
-                                    padding: "10px 20px",
-                                    fontSize: "16px",
-                                  }}
-                                  onClick={() => handleSizeClick(size._id)}
-                                >
-                                  {size.sizeName}
-                                </Button>
-                              ))}
-                            </div> */}
                             <p>Kích cỡ:</p>
                             {productSizes.map((size) => (
                               <Button
                                 key={size._id}
-                                className={`mx-1 ${
-                                  selectedSize?._id === size._id
-                                    ? "selected"
-                                    : ""
-                                }`}
+                                className={`mx-1 ${selectedSize?._id === size._id
+                                  ? "selected"
+                                  : ""
+                                  }`}
+                                  disabled={!size.status}
                                 style={{
                                   padding: "10px 20px",
                                   fontSize: "16px",
+                                  opacity: size.quantity === 0 ? 0.5 : 1,
+                                  cursor: size.quantity === 0 ? "not-allowed" : "pointer"
                                 }}
-                                onClick={() => handleSizeClick(size._id)}
+                                onClick={() => size.quantity > 0 && handleSizeClick(size._id)}
                               >
                                 {size.sizeName}
                               </Button>
                             ))}
                           </div>
                         </div>
+
                         {selectedSize && (
                           <div
                             className="mt-2"
                             style={{ color: "black", fontSize: "15px" }}
                           >
-                            <p>sản phẩm hiện có: {selectedSize?.quantity}</p>
+                            <p>Sản phẩm hiện có: {selectedSize?.quantity}</p>
+                          </div>
+                        )}
+
+                        <div>
+                          <div className="button-container mt-4">
+                            <p>Phụ kiện:</p>
+                            <Button onClick={() => onOptionClick()} className="mx-1" type={!optionSelected ? 'primary' : 'default'}>
+                              Không chọn
+                            </Button>
+
+                            {product?.options.map((item) => (
+                              <Button
+                                key={item._id}
+                                className={`mx-1`}
+                                type={optionSelected?._id === item._id ? 'primary' : 'default'}
+                                style={{
+                                  padding: "10px 20px",
+                                  fontSize: "16px",
+                                  opacity: item.quantity === 0 ? 0.5 : 1,
+                                  cursor: item.quantity === 0 ? "not-allowed" : "pointer"
+                                }}
+                                onClick={() => item.quantity > 0 && onOptionClick(item)}
+                              >
+                                {item.name}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {optionSelected && (
+                          <div
+                            className="mt-2"
+                            style={{ color: "black", fontSize: "15px" }}
+                          >
+                            <p>Sản phẩm hiện có: {optionSelected?.quantity}</p>
                           </div>
                         )}
 
@@ -537,46 +585,6 @@ export default function ProductDetail() {
                                           </div>
                                         </div>
                                       </div>
-                                      // <div className="review-content">
-                                      //   <hr />
-                                      //   <div
-                                      //     className="row"
-                                      //     key={comment._id}
-                                      //   >
-                                      //     <div className="col-lg-3">
-                                      //       <div className="rev-author">
-                                      //         <img
-                                      //           src={comment.avatar}
-                                      //           alt="avatar"
-                                      //           style={{
-                                      //             marginRight: "10px",
-                                      //           }}
-                                      //         />
-                                      //         <span>{comment.fullName}</span>
-                                      //         <span
-                                      //           style={{ float: "right" }}
-                                      //         >
-                                      //           {dayjs(
-                                      //             comment.createdAt
-                                      //           ).format(
-                                      //             "DD/MM/YYYY HH:mm:ss"
-                                      //           )}
-                                      //         </span>
-                                      //       </div>
-                                      //     </div>
-                                      //     <div className="col-lg-12">
-                                      //       <div className="rev-content">
-                                      //         <p
-                                      //           style={{
-                                      //             paddingLeft: "20px",
-                                      //           }}
-                                      //         >
-                                      //           {comment.comment}
-                                      //         </p>
-                                      //       </div>
-                                      //     </div>
-                                      //   </div>
-                                      // </div>
                                     ))
                                   ) : (
                                     <div className="form-group row">

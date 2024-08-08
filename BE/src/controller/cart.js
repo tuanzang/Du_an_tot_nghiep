@@ -12,11 +12,17 @@ export const getMyCarts = async (req, res) => {
         path: "products.variant",
         model: "ProductSize",
       })
+      .populate({
+        path: "products.option",
+        model: "option",
+      })
       .exec();
 
     if (!data) {
       return res.json({});
     }
+
+    console.log(data);
 
     const newProducts = data.products.filter((it) => it.product.status === 1);
     data.products = newProducts;
@@ -42,23 +48,26 @@ export const getMyCarts = async (req, res) => {
 export const addCart = async (req, res) => {
   try {
     const userId = req.profile._id;
-    const { productId, quantity, variantId } = req.body;
+    const { productId, quantity, variantId, option } = req.body;
 
     let foundCart = await Cart.findOne({ userId }).exec();
 
     let response;
     if (foundCart) {
       const foundProduct = foundCart.products.find(
-        (it) =>
-          it.product.toString() === productId &&
-          it.variant.toString() === variantId
+        (it) => {
+          return it.product.toString() === productId &&
+            it.variant.toString() === variantId && it?.option?.toString() === option
+        }
       );
+
       if (foundProduct) {
         foundProduct.quantity += quantity;
 
         const newProducts = foundCart.products.map((it) =>
           it.product.toString() === foundProduct.product.toString() &&
-            it.variant.toString() === foundProduct.product.toString()
+            it.variant.toString() === foundProduct.variant.toString() &&
+            it?.option?.toString() === foundProduct?.option?.toString()
             ? foundProduct
             : it
         );
@@ -68,6 +77,7 @@ export const addCart = async (req, res) => {
           product: productId,
           quantity,
           variant: variantId,
+          option
         });
       }
 
@@ -79,6 +89,7 @@ export const addCart = async (req, res) => {
             product: productId,
             quantity,
             variant: variantId,
+            option
           },
         ],
         userId,
@@ -92,6 +103,7 @@ export const addCart = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Internal server error",
+      error: error.message
     });
   }
 };
@@ -99,7 +111,7 @@ export const addCart = async (req, res) => {
 export const updateQuantity = async (req, res) => {
   try {
     const userId = req.profile._id;
-    const { variantId, quantity } = req.body;
+    const { variantId, quantity, option } = req.body;
     const cart = await Cart.findOne({ userId }).exec();
     if (!cart) {
       return res.status(404).json({
@@ -108,7 +120,7 @@ export const updateQuantity = async (req, res) => {
     }
 
     const newProducts = cart.products.map((it) =>
-      it.variant.toString() === variantId ? { ...it, quantity } : it
+      it.variant.toString() === variantId && it.option?.toString() === option ? { ...it, quantity } : it
     );
     cart.products = newProducts;
     await cart.save();
@@ -126,11 +138,15 @@ export const updateQuantity = async (req, res) => {
 export const removeProduct = async (req, res) => {
   try {
     const userId = req.profile._id;
-    const { variantId } = req.params;
+    const { variantId, option } = req.body;
 
     const cart = await Cart.findOne({ userId }).exec();
     const newProducts = cart.products.filter(
-      (it) => it.variant.toString() !== variantId
+      (it) => {
+        const status = it.variant.toString() === variantId && it?.option?.toString() === option;
+
+        return !status;
+      }
     );
 
     cart.products = newProducts;

@@ -1,5 +1,7 @@
+import { IOption } from "./Option";
+
 export interface IProduct {
-  _id: string | number;
+  _id: string;
   name: string;
   price: number;
   // priceOld: number;
@@ -9,12 +11,15 @@ export interface IProduct {
   quantity: number;
   description: string;
   categoryId: string;
-  status: number|boolean;
+  status: number | boolean;
   createdAt: string;
-  productSizedata: {
-    price: number;
-    quantity: number;
-    _id: string;
-  }[];
+  productSizedata: IProductSizedata[];
   variants: { price: number }[];
+  options: IOption[];
+}
+
+export interface IProductSizedata {
+  price: number;
+  quantity: number;
+  _id: string;
 }
