@@ -1,28 +1,12 @@
-import {
-  EditOutlined,
-  PlusSquareOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import {
-  Button,
-  Card,
-  Col,
-  Input,
-  Modal,
-  Radio,
-  Row,
-  Switch,
-  Table,
-  Tooltip,
-} from "antd";
+import { PlusSquareOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Card, Col, Input, Radio, Row, Table } from "antd";
 import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import { ICategory } from "../../../interface/Categories";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
 
-const customTableHeaderCellStyle: React.CSSProperties = {
+const customTableHeaderCellStyle = {
   backgroundColor: "#c29957",
   color: "white",
   fontWeight: "bold",
@@ -30,131 +14,119 @@ const customTableHeaderCellStyle: React.CSSProperties = {
   height: "10px",
 };
 
-type CustomTableHeaderCellProps = React.ComponentProps<"th">;
-
-const CustomHeaderCell: React.FC<CustomTableHeaderCellProps> = (props) => (
-  <th {...props} style={customTableHeaderCellStyle} />
-);
-
-interface ISearchCategory {
-  loai: string;
-  status: string | null;
-  page: number;
-}
-
 export default function Category() {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [filter, setFilter] = useState<ISearchCategory>({
-    loai: "",
-    status: null,
-    page: currentPage,
-  });
-  const pageSize = 5;
+  const [value, setValue] = useState(1);
   const [cates, setCates] = useState<ICategory[]>([]);
-  const [totalCategory, setTotalCategory] = useState<number>(0);
-
-  const fetchCate = async (filter: ISearchCategory, currentPage: number) => {
-    try {
-      const response = await axios.post(
-        "http://localhost:3001/api/categories",
-        { ...filter, page: currentPage }
-      );
-
-      setCates(response.data?.data);
-      setTotalCategory(response.data?.total);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  // Xử lý thay đổi trạng thái
-  const handleStatusChange = (
-    checked: boolean,
-    categoryId: string | null,
-    filter: ISearchCategory
-  ) => {
-    if (categoryId === null) {
-      toast.error("Không xác định được danh mục");
-    } else {
-      const newStatus = checked ? "1" : "0";
-      Modal.confirm({
-        title: "Xác nhận thay đổi trạng thái",
-        content: "Bạn có chắc chắn muốn thay đổi trạng thái của danh mục này ?",
-        okText: "Xác nhận",
-        cancelText: "Hủy",
-        onOk: async () => {
-          try {
-            await axios.post("http://localhost:3001/api/categories/delete", {
-              _id: categoryId,
-              status: newStatus,
-            });
-            toast.success("Cập nhật trạng thái thành công");
-            fetchCate(filter, currentPage);
-          } catch (error) {
-            toast.error("Cập nhật trạng thái thất bại");
-          }
-        },
-        onCancel() {
-          // Không làm gì khi người dùng hủy
-        },
-      });
-    }
-  };
+  const [filteredCates, setFilteredCates] = useState<ICategory[]>([]);
+  const [searchText, setSearchText] = useState<string>("");
 
   useEffect(() => {
-    fetchCate(filter, currentPage);
-  }, [filter, currentPage]);
+    const fetchCate = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3001/api/categories"
+        );
+        setCates(response.data?.data);
+        setFilteredCates(response.data?.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchCate();
+  }, []);
+
+  const deleteCategory = async (id: number) => {
+    try {
+      const confirm = window.confirm("Bạn muốn xóa danh mục này?");
+      if (confirm) {
+        const response = await axios.delete(
+          `http://localhost:3001/api/categories/${id}`
+        );
+        if (response.status === 200) {
+          const newArr = cates.filter((item) => item["_id"] !== id);
+          setCates(newArr);
+          setFilteredCates(newArr);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchText(value);
+    if (value) {
+      setFilteredCates(
+        cates.filter((category) =>
+          category.loai.toLowerCase().includes(value.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredCates(cates);
+    }
+  };
+
+  const onChangeRadio = (e) => {
+    console.log("radio checked", e.target.value);
+    setValue(e.target.value);
+    // Implement your logic to filter categories based on radio button value
+  };
 
   const columns = [
     {
       title: "STT",
       dataIndex: "stt",
       key: "stt",
-      align: "center" as const,
+      align: "center",
       width: "5%",
-      render: (_: string, __: ICategory, index: number) =>
-        (currentPage - 1) * pageSize + index + 1,
     },
     {
       title: "Tên danh mục",
       dataIndex: "loai",
       key: "loai",
-      align: "left" as const,
+      align: "center",
       width: "20%",
     },
     {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      align: "center" as const,
-      width: "10%",
-      render: (status: string, record: ICategory) => (
-        <Switch
-          checked={status === "1"}
-          onChange={(checked) =>
-            handleStatusChange(checked, record._id ? record._id : null, filter)
-          }
-          style={{
-            backgroundColor: status === "1" ? "#87d068" : "#f50",
-            borderColor: status === "1" ? "#87d068" : "#f50",
-          }}
-        />
-      ),
+      title: "Phụ kiện",
+      dataIndex: "",
+      key: "",
+      align: "center",
+      width: "20%",
     },
     {
-      title: "Hành động",
-      key: "action",
-      align: "center" as const,
-      width: "10%",
-      render: (record: ICategory) => (
-        <Tooltip title={"Cập nhật"}>
-          <Link to={`/admin/category/${record._id}`}>
-            <EditOutlined />
-          </Link>
-        </Tooltip>
+      title: "Cập nhật",
+      dataIndex: "key",
+      key: "key",
+      align: "center",
+      width: "2%",
+      render: (value: any) => (
+        <Button>
+          <Link to={`/admin/category/${value}`}>Sửa</Link>
+        </Button>
       ),
     },
+    // {
+    //   title: "Xóa",
+    //   dataIndex: "key",
+    //   key: "key",
+    //   align: "center",
+    //   width: "2%",
+    //   render: (value: any) => (
+    //     <Button onClick={() => deleteCategory(value!)}>Xóa</Button>
+    //   ),
+    // },
   ];
+
+  const data = filteredCates.map((item: ICategory, index: number) => {
+    return {
+      stt: index + 1,
+      key: item._id,
+      loai: item.loai,
+    };
+  });
 
   return (
     <div>
@@ -168,21 +140,11 @@ export default function Category() {
               size="middle"
               placeholder="Tìm kiếm danh mục"
               prefix={<SearchOutlined style={{ color: "#1890ff" }} />}
-              onChange={(e) => setFilter({ ...filter, loai: e.target.value })}
+              value={searchText}
+              onChange={onSearch}
             />
           </Col>
-          <Col span={9}>
-            <span>Trạng thái: </span>
-            <Radio.Group
-              onChange={(e) => setFilter({ ...filter, status: e.target.value })}
-              value={filter.status}
-            >
-              <Radio value={null}>Tất cả</Radio>
-              <Radio value={"1"}>Hoạt động</Radio>
-              <Radio value={"0"}>Ngưng hoạt động</Radio>
-            </Radio.Group>
-          </Col>
-          <Col span={3}>
+          <Col span={12}>
             <Button
               type="link"
               icon={<PlusSquareOutlined />}
@@ -196,22 +158,28 @@ export default function Category() {
             </Button>
           </Col>
         </Row>
+        <Row gutter={16} style={{ marginTop: "12px" }}>
+          {/* <Col span={12}>
+            <span>Trạng thái: </span>
+            <Radio.Group onChange={onChangeRadio} value={value}>
+              <Radio value={1}>Tất cả</Radio>
+              <Radio value={2}>Hoạt động</Radio>
+              <Radio value={3}>Ngưng hoạt động</Radio>
+            </Radio.Group>
+          </Col> */}
+        </Row>
       </Card>
       <Card style={{ marginTop: "12px" }}>
         <Table
           components={{
             header: {
-              cell: CustomHeaderCell,
+              cell: (props) => (
+                <th {...props} style={customTableHeaderCellStyle} />
+              ),
             },
           }}
-          dataSource={cates}
+          dataSource={data}
           columns={columns}
-          pagination={{
-            current: currentPage,
-            pageSize: 5,
-            total: totalCategory,
-            onChange: (page) => setCurrentPage(page),
-          }}
         />
       </Card>
     </div>

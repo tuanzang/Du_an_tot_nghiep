@@ -8,6 +8,7 @@ import { ACCESS_TOKEN_STORAGE_KEY } from "../../services/constants";
 import useCartMutation from "../../hooks/useCart";
 import { ISize } from "../../interface/Size";
 import ProductItem from "../../components/ProductItem";
+import { socket } from "../../socket";
 
 export default function Product() {
   const [product, setProduct] = useState<IProduct[]>([]);
@@ -20,6 +21,18 @@ export default function Product() {
   const [filteredProducts, setFilteredProducts] = useState<IProduct[]>([]);
 
   const location = useLocation();
+
+  useEffect(() => {
+    const onHiddenProduct = () => {
+      fetchProducts()
+    };
+
+    socket.on("hidden product", onHiddenProduct);
+
+    return () => {
+      socket.off("hidden product", onHiddenProduct);
+    };
+  }, []);
 
   const { mutate } = useCartMutation({
     action: "ADD",
@@ -63,22 +76,22 @@ export default function Product() {
     }
     console.log(searchQuery);
 
-    const fetchProducts = async () => {
-      try {
-        let url = `http://localhost:3001/api/products`;
-        const response = await axios.get(url, {
-          params: { search: searchTerm },
-        });
-        console.log(response);
-
-        setProduct(response.data?.data);
-      } catch (error) {
-        console.log("Không có dữ liệu");
-      }
-    };
-
-    fetchProducts();
+    fetchProducts(searchQuery);
   }, [location.search]);
+
+  const fetchProducts = async (searchTerm?: string | null) => {
+    try {
+      const url = `http://localhost:3001/api/products`;
+      const response = await axios.get(url, {
+        params: { search: searchTerm },
+      });
+      console.log(response);
+
+      setProduct(response.data?.data);
+    } catch (error) {
+      console.log("Không có dữ liệu");
+    }
+  };
 
   useEffect(() => {
     const results = product.filter((products) =>

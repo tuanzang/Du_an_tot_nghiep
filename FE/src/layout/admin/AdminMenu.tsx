@@ -11,6 +11,7 @@ import {
   UnorderedListOutlined,
   FontSizeOutlined,
   GiftOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
 
 type Props = {
@@ -72,6 +73,11 @@ export default function AdminMenu({ small }: Props) {
     {
       key: "voucher",
       icon: <GiftOutlined />,
+      label: <Link to="/admin/voucher">Mã giảm giá</Link>,
+    },
+    {
+      key: "voucher",
+      icon: <TagsOutlined />,
       label: <Link to="/admin/voucher">Mã giảm giá</Link>,
     },
     {

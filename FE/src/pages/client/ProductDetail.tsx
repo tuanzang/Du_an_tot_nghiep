@@ -51,6 +51,9 @@ export default function ProductDetail() {
       setSelectedSize(null);
       setOptionSelected(null);
     },
+    onError: (error) => {
+      message.error(error?.response?.data?.message || 'Đã có lỗi xảy ra, vui lòng thử lại')
+    }
   });
 
   useEffect(() => {
@@ -107,12 +110,29 @@ export default function ProductDetail() {
       }
     }
 
+<<<<<<< HEAD
     socket.on('update product', onProductUpdate);
 
     return () => {
       socket.off('update product', onProductUpdate);
     }
   }, []);
+=======
+    const onHiddenProduct = (productId: string) => {
+      productId === id && fetchProduct(id)
+    }
+
+    socket.on('update product', onProductUpdate);
+
+    // listen hidden product
+    socket.on('hidden product', onHiddenProduct)
+
+    return () => {
+      socket.off('update product', onProductUpdate);
+      socket.off('hidden product', onHiddenProduct);
+    }
+  }, [id]);
+>>>>>>> 88ab4daef5c2a36e2b9c042cdfe0b5fc1be55ffc
 
   const handleQuantityIncrease = () => {
     setQuantity(quantity + 1);
@@ -281,6 +301,8 @@ export default function ProductDetail() {
                             disabled
                           />
                         </h3>
+
+                        {!product?.status && 'Tạm ngừng kinh doanh'}
                         <div className="price-box">
                           <span
                             className="price-regular"

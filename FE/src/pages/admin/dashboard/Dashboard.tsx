@@ -360,6 +360,7 @@ export default function Dashboard() {
         },
       });
       console.log(dateStart, dateEnd);
+
       setDataBieuDo([
         { label: "Thành công", value: resCompleted.data.totalOrders },
         { label: "Đã hủy", value: resCanceled.data.totalOrders },

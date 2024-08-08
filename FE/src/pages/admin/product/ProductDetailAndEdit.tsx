@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useRef } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Button, Card, Form, Input, Select, Space, Switch, Upload } from "antd";
+import { Button, Card, Form, Input, Select, Switch, Upload } from "antd";
 import { EditOutlined, UploadOutlined } from "@ant-design/icons";
 import { UploadFile } from "antd/lib";
 import { IProduct } from "../../../interface/Products";
@@ -213,7 +213,6 @@ export default function ProductDetailAndEdit() {
       );
       toast.success("Cập nhật sản phẩm thành công");
       navigate("/admin/product");
-
       socket.emit("update product", id);
     } catch (error) {
       console.error("Error updating product sizes:", error);
@@ -331,7 +330,7 @@ export default function ProductDetailAndEdit() {
         listLink={[{ link: "/admin/product", name: "Sản phẩm" }]}
         nameHere={`${name}`}
       />
-      <div className="w-50 mx-auto">
+      <div className="container mx-auto">
         <Card style={{ padding: "10px", marginBottom: "10px" }}>
           <form>
             <div className="form-group">
@@ -471,7 +470,7 @@ export default function ProductDetailAndEdit() {
         </Card>
 
         <Card style={{ padding: "10px", marginBottom: "10px" }}>
-          <label style={{ fontSize: "20px" }} className="mb-2">
+          <label style={{ fontSize: "18px" }} className="mb-2">
             Mô tả sản phẩm
           </label>
           <div ref={editorContainerRef}>

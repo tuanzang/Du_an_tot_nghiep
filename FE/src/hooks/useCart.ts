@@ -14,9 +14,10 @@ export const useMyCartQuery = () => {
 interface IUseCartMutation {
   action: "ADD" | "DELETE" | "UPDATE";
   onSuccess?: () => void;
+  onError?: (error?: any) => void;
 }
 
-const useCartMutation = ({ action, onSuccess }: IUseCartMutation) => {
+const useCartMutation = ({ action, onSuccess, onError }: IUseCartMutation) => {
   const queryClient = useQueryClient();
 
   const data = useMutation({
@@ -39,6 +40,9 @@ const useCartMutation = ({ action, onSuccess }: IUseCartMutation) => {
       queryClient.invalidateQueries({ queryKey: ["MY_CART"] });
       onSuccess && onSuccess();
     },
+    onError: (error) => {
+      onError && onError(error)
+    }
   });
 
   return data;

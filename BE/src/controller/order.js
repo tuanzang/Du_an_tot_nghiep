@@ -16,8 +16,9 @@ dotenv.config();
  */
 export const createOrder = async (req, res) => {
   try {
-    const { productSelectedIds, discountCode, ...bodyData } = req.body;
-    const { customerName, phone, address, paymentMethod } = bodyData;
+    const { productSelectedIds, ...bodyData } = req.body;
+    const { customerName, phone, address, paymentMethod, discountCode } =
+      bodyData;
 
     // Xác thực các trường dữ liệu
     if (!customerName) {
@@ -109,6 +110,7 @@ export const createOrder = async (req, res) => {
       variantId: item.variant._id,
       optionName: item?.option?.name,
       optionPrice: item?.option?.price,
+
       optionId: item?.option?._id,
     }));
 
@@ -204,37 +206,7 @@ export const detailOrder = async (req, res) => {
   }
 };
 
-/**
- * API danh sách hóa đơn
- * @param {*} req
- * @param {*} res
- * @returns
- */
-
-const getOrdersByDate = async (dateStart, dateEnd, status) => {
-  try {
-    const orders = await Order.aggregate([
-      {
-        $match: {
-          status,
-          createdAt: {
-            $gte: new Date(dateStart),
-            $lte: new Date(dateEnd),
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalOrders: { $sum: 1 },
-        },
-      },
-    ]);
-    return orders[0] ? orders[0].totalOrders : 0;
-  } catch (error) {
-    throw new Error("Error getting orders by date");
-  }
-};
+const getOrdersByDate = async (dateStart, dateEnd, status) => {};
 export const getTotalOrdersByDate = async (req, res) => {
   const { dateStart, dateEnd, status } = req.query;
   try {
@@ -245,6 +217,12 @@ export const getTotalOrdersByDate = async (req, res) => {
   }
 };
 
+/**
+ * API danh sách hóa đơn
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
 export const getAllOrders = async (req, res) => {
   const { status, code, createAtFrom, createAtTo, page = 1 } = req.body;
 

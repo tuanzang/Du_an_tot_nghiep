@@ -259,6 +259,7 @@ const ProductAdd = () => {
               rules={[
                 { required: true, message: "Vui lòng nhập tên sản phẩm!" },
               ]}
+              style={{ width: 320, fontFamily: "SpaceGrotesk-Light" }}
             >
               <Input />
             </Form.Item>
