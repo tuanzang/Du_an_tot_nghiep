@@ -118,10 +118,6 @@ export default function Product() {
 
   const onChangeSwitch = async (checked: boolean, productId: string) => {
     updateStatusProduct(productId, checked ? 1 : 0);
-
-    if (!checked) {
-      socket.emit("hidden product", productId);
-    }
   };
 
   const updateStatusProduct = async (productId: string, status: number) => {
@@ -131,6 +127,7 @@ export default function Product() {
       });
 
       fetchData();
+      socket.emit("hidden product", productId);
     } catch (error) {
       toast.error("Có lỗi xảy ra, vui lòng thử lại");
     }

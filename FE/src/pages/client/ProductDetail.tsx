@@ -110,12 +110,20 @@ export default function ProductDetail() {
       }
     }
 
+    const onHiddenProduct = (productId: string) => {
+      productId === id && fetchProduct(id)
+    }
+
     socket.on('update product', onProductUpdate);
+
+    // listen hidden product
+    socket.on('hidden product', onHiddenProduct)
 
     return () => {
       socket.off('update product', onProductUpdate);
+      socket.off('hidden product', onHiddenProduct);
     }
-  }, []);
+  }, [id]);
 
   const handleQuantityIncrease = () => {
     setQuantity(quantity + 1);
@@ -284,6 +292,8 @@ export default function ProductDetail() {
                             disabled
                           />
                         </h3>
+
+                        {!product?.status && 'Tạm ngừng kinh doanh'}
                         <div className="price-box">
                           <span
                             className="price-regular"
