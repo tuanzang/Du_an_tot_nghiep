@@ -52,7 +52,6 @@ const Checkout = () => {
   const { data, refetch: refetchCart } = useMyCartQuery();
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
-  console.log(123, 'prod', productSelected)
   const totalPrice = useSelector(selectTotalPrice);
 
   const { refetch } = useMyCartQuery();
@@ -80,12 +79,19 @@ const Checkout = () => {
       // console.log('client update', data);
     }
 
+    const onUpdateVoucherQnt = (code: string) => {
+      console.log('client update', code)
+      fetchDiscountCode();
+    }
+
     socket.on("hidden product", onHiddenProduct);
-    socket.on('update product', onProductUpdate)
+    socket.on('update product', onProductUpdate);
+    socket.on('update voucher quantity', onUpdateVoucherQnt)
 
     return () => {
       socket.off("hidden product", onHiddenProduct);
-      socket.off("hidden product", onProductUpdate);
+      socket.off("update product", onProductUpdate);
+      socket.off("update voucher quantity", onUpdateVoucherQnt);
     };
   }, [dispatch, navigate, productSelected.length]);
 
@@ -108,11 +114,23 @@ const Checkout = () => {
         productSelectedIds,
         shippingCost: SHIPPING_COST,
         discouVoucher: totalDiscount,
+        discountCode: selectedDiscountCode
       });
       console.log(res);
 
       if (res.data.success === false) {
         toast.error(res.data.message);
+      }
+
+      if (selectedDiscountCode) {
+        socket.emit('update voucher quantity', selectedDiscountCode)
+      }
+
+      if (data?.paymentMethod === "COD") {
+        createNewHistory(res.data.data._id, "1", user);
+        toast.success("Đặt hàng thành công!");
+        navigate("/");
+        refetch();
       } else {
         if (dataBill?.paymentMethod === "COD") {
           createNewHistory(res.data.data._id, "1", user);
@@ -163,7 +181,10 @@ const Checkout = () => {
   const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
 
   useEffect(() => {
-    // Fetch mã giảm giá từ API
+    fetchDiscountCode();
+  }, []);
+
+  const fetchDiscountCode = () => {
     axios
       .get("http://localhost:3001/api/discountCode/discountCodes")
       .then((response) => {
@@ -172,7 +193,7 @@ const Checkout = () => {
       .catch((error) => {
         console.error("Error fetching discount codes:", error);
       });
-  }, []);
+  }
 
   const showDiscountModal = () => {
     setIsModalVisible(true);
@@ -319,9 +340,9 @@ const Checkout = () => {
                   </td>
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
-                  <td>
-                    {item.option?.name}
-                    <br />
+
+                  <td>{item.option?.name}<br/>
+
                     {item.option?.price}
                   </td>
                   <td>{formatPrice(item.variant.price * item.quantity)}</td>
@@ -409,22 +430,18 @@ const Checkout = () => {
               onChange={handleDiscountCodeChange}
               value={selectedDiscountCode}
             >
-              {discountCodes.map((code: IVoucher) => (
-                <Card
+              {discountCodes.map((code: IVoucher) => {
+                const isDisable = !code.minPurchaseAmount || totalPrice < code.minPurchaseAmount || (user && code.userIds.includes(user?._id)) || code.quantity === code.usedCount;
+
+                return <Card
                   key={code._id}
                   style={{
                     backgroundColor: "#66FF66",
                     marginBottom: 10,
                     opacity:
-                      code.minPurchaseAmount !== undefined &&
-                      totalPrice >= code.minPurchaseAmount
-                        ? 1
-                        : 0.5,
+                      isDisable ? 0.5 : 1,
                     pointerEvents:
-                      code.minPurchaseAmount !== undefined &&
-                      totalPrice >= code.minPurchaseAmount
-                        ? "auto"
-                        : "none",
+                      isDisable ? 'none' : 'auto',
                   }}
                 >
                   <Radio
@@ -458,7 +475,7 @@ const Checkout = () => {
                     </span>
                   </Radio>
                 </Card>
-              ))}
+              })}
             </Radio.Group>
           </Modal>
 

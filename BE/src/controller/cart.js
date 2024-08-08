@@ -60,13 +60,14 @@ export const addCart = async (req, res) => {
             it.variant.toString() === variantId && it?.option?.toString() === option
         }
       );
+
       if (foundProduct) {
         foundProduct.quantity += quantity;
 
         const newProducts = foundCart.products.map((it) =>
           it.product.toString() === foundProduct.product.toString() &&
             it.variant.toString() === foundProduct.variant.toString() &&
-            it.option.toString() === foundProduct.option.toString()
+            it?.option?.toString() === foundProduct?.option?.toString()
             ? foundProduct
             : it
         );
@@ -102,6 +103,7 @@ export const addCart = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Internal server error",
+      error: error.message
     });
   }
 };
