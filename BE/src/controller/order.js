@@ -16,7 +16,70 @@ dotenv.config();
  */
 export const createOrder = async (req, res) => {
   try {
-    const { productSelectedIds, paymentMethod, discountCode, ...bodyData } = req.body;
+    const { productSelectedIds, ...bodyData } = req.body;
+    const { customerName, phone, address, paymentMethod, discountCode } = bodyData;
+
+    // Xác thực các trường dữ liệu
+    if (!customerName) {
+      return res.status(200).json({
+        message: "Trường họ và tên không được để trống",
+        success: false,
+      });
+    }
+
+    if (!phone) {
+      return res.status(200).json({
+        message: "Trường số điện thoại không được để trống",
+        success: false,
+      });
+    }
+
+    if (!address) {
+      return res.status(200).json({
+        message: "Trường địa chỉ không được để trống",
+        success: false,
+      });
+    }
+
+    if (!paymentMethod) {
+      return res.status(200).json({
+        message: "Loại thanh toán không được để trống",
+        success: false,
+      });
+    }
+
+    if (paymentMethod !== "COD" && paymentMethod !== "VNPAY") {
+      return res.status(200).json({
+        message: "Loại thanh toán phải là COD hoặc VNPAY",
+        success: false,
+      });
+    }
+
+    // Xác thực không chứa ký tự đặc biệt cho name và address
+    if (customerName && !/^[\p{L}\p{N}\s.,!?-]+$/u.test(customerName)) {
+      return res.status(200).json({
+        message: "Họ và tên không được chứa ký tự đặc biệt.",
+        success: false,
+      });
+    }
+
+    if (address && !/^[\p{L}\p{N}\s.,!?-]+$/u.test(address)) {
+      return res.status(200).json({
+        message: "Địa chỉ không được chứa ký tự đặc biệt.",
+        success: false,
+      });
+    }
+
+    // Xác thực số điện thoại
+    const phonePattern = /^(?:\+84|0)(\d{9})$/;
+    if (!phonePattern.test(phone)) {
+      return res.status(200).json({
+        message:
+          "Số điện thoại phải là dịnh dạng +84 hoặc số 0 đầu tiên và gồm 10 chữ số",
+        success: false,
+      });
+    }
+
     const userId = req.profile._id;
     const cart = await Cart.findOne({ userId })
       .populate({
@@ -46,7 +109,9 @@ export const createOrder = async (req, res) => {
       variantId: item.variant._id,
       optionName: item?.option?.name,
       optionPrice: item?.option?.price,
+
       optionId: item?.option?._id
+
     }));
 
     const totalPrice =
@@ -57,13 +122,15 @@ export const createOrder = async (req, res) => {
           priceTotal += curr.option.price * curr.quantity;
         }
 
-        return total += priceTotal;
+        return (total += priceTotal);
       }, 0) -
       bodyData.discouVoucher +
       bodyData.shippingCost;
+
     
     // add user id to voucher
     await Discount.findOneAndUpdate({ code: discountCode }, { $push: { userIds: userId }, $inc: { usedCount: 1 } })
+
 
     const orders = await new Order({
       ...req.body,
@@ -73,7 +140,6 @@ export const createOrder = async (req, res) => {
       totalPrice,
       quantity: cart.products.length,
       products,
-      paymentMethod,
       status: "1",
     }).save();
 
@@ -91,7 +157,7 @@ export const createOrder = async (req, res) => {
 
     let paymentUrl = "";
 
-    if (paymentMethod === "VNPAY") {
+    if (bodyData.paymentMethod === "VNPAY") {
       paymentUrl = createPaymentUrl(
         ipAddr,
         `FBEE_${orders._id}`,
@@ -139,36 +205,7 @@ export const detailOrder = async (req, res) => {
   }
 };
 
-/**
- * API danh sách hóa đơn
- * @param {*} req
- * @param {*} res
- * @returns
- */
-
 const getOrdersByDate = async (dateStart, dateEnd, status) => {
-  try {
-    const orders = await Order.aggregate([
-      {
-        $match: {
-          status,
-          createdAt: {
-            $gte: new Date(dateStart),
-            $lte: new Date(dateEnd),
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalOrders: { $sum: 1 },
-        },
-      },
-    ]);
-    return orders[0] ? orders[0].totalOrders : 0;
-  } catch (error) {
-    throw new Error('Error getting orders by date');
-  }
 };
 export const getTotalOrdersByDate = async (req, res) => {
   const { dateStart, dateEnd, status } = req.query;
@@ -180,6 +217,12 @@ export const getTotalOrdersByDate = async (req, res) => {
   }
 };
 
+/**
+ * API danh sách hóa đơn
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
 export const getAllOrders = async (req, res) => {
   const { status, code, createAtFrom, createAtTo, page = 1 } = req.body;
 
@@ -366,7 +409,6 @@ export const getTotalPriceByDay = async (req, res) => {
         $lte: endOfDay,
       },
       status: "7",
-
     });
 
     const totalPrice = orders.reduce(
@@ -397,7 +439,6 @@ export const getPriceRefundByDay = async (req, res) => {
         $lte: endOfDay,
       },
       status: "8",
-
     });
 
     const totalPrice = orders.reduce(
@@ -428,7 +469,6 @@ export const getPriceCancelByDay = async (req, res) => {
         $lte: endOfDay,
       },
       status: "0",
-
     });
 
     const totalPrice = orders.reduce(
@@ -835,4 +875,3 @@ export const getPriceCancelByCustomDay = async (req, res) => {
     });
   }
 };
-

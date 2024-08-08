@@ -279,7 +279,7 @@ export default function ProductDetailAndEdit() {
         listLink={[{ link: "/admin/product", name: "Sản phẩm" }]}
         nameHere={`${name}`}
       />
-      <div className="w-50 mx-auto">
+      <div className="container mx-auto">
         <Card style={{ padding: "10px", marginBottom: "10px" }}>
           <form>
             <div className="form-group">
@@ -393,7 +393,7 @@ export default function ProductDetailAndEdit() {
 
         <Card className="my-3">
           <Form form={form} layout='vertical' onFinish={onFinish}>
-            <Form.Item name='categoryId' label="Danh mục SP">
+            <Form.Item name='categoryId' label="Danh mục Sản Phẩm">
               <Select onChange={() => form.setFieldValue('options', [])} options={categories.map(it => ({ label: it.loai, value: it._id }))} />
             </Form.Item>
 
@@ -406,7 +406,7 @@ export default function ProductDetailAndEdit() {
         </Card>
 
         <Card style={{ padding: "10px", marginBottom: "10px" }}>
-          <label style={{ fontSize: "20px" }} className="mb-2">
+          <label style={{ fontSize: "18px" }} className="mb-2">
             Mô tả sản phẩm
           </label>
           <div
