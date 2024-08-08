@@ -51,6 +51,9 @@ export default function ProductDetail() {
       setSelectedSize(null);
       setOptionSelected(null);
     },
+    onError: (error) => {
+      message.error(error?.response?.data?.message || 'Đã có lỗi xảy ra, vui lòng thử lại')
+    }
   });
 
   useEffect(() => {

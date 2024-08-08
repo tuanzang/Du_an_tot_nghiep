@@ -1,4 +1,6 @@
 import Cart from "../models/cart.js";
+import ProductVariant from "../models/productSize.js";
+import Option from "../models/option.js";
 
 export const getMyCarts = async (req, res) => {
   const userId = req.profile._id;
@@ -61,9 +63,38 @@ export const addCart = async (req, res) => {
         }
       );
 
+      // check variant quantity
+      const allProductVariantQnt = foundCart.products
+      .filter(it => it.variant.toString() === variantId)
+      .reduce((total, curr) => {
+        return total += curr.quantity
+      }, 0);
+
+      const productVariant = await ProductVariant.findById(variantId);
+      if (allProductVariantQnt + quantity > productVariant.quantity) {
+        return res.status(400).json({
+          message: 'Số lượng sản phẩm vượt quá cho phép'
+        })
+      }
+
+      // check option quantity
+      if (option) {
+        const allProductVariantQnt = foundCart.products
+        .filter(it => it.option?.toString() === option)
+        .reduce((total, curr) => {
+          return total += curr.quantity
+        }, 0);
+
+        const findOption = await Option.findById(option);
+        if (allProductVariantQnt + quantity > findOption.quantity) {
+          return res.status(400).json({
+            message: 'Số lượng option vượt quá cho phép'
+          })
+        }
+      }
+
       if (foundProduct) {
         foundProduct.quantity += quantity;
-
         const newProducts = foundCart.products.map((it) =>
           it.product.toString() === foundProduct.product.toString() &&
             it.variant.toString() === foundProduct.variant.toString() &&
@@ -117,6 +148,40 @@ export const updateQuantity = async (req, res) => {
       return res.status(404).json({
         message: "Cart not found",
       });
+    }
+
+    // check variant quantity
+    const allProductVariantQnt = cart.products
+    .filter(it => it.variant.toString() === variantId)
+    .filter(it => it?.option?.toString() !== option)
+    .reduce((total, curr) => {
+      return total += curr.quantity
+    }, 0);
+
+    const productVariant = await ProductVariant.findById(variantId);
+    if (allProductVariantQnt + quantity > productVariant.quantity) {
+      return res.status(400).json({
+        message: 'Số lượng sản phẩm vượt quá cho phép'
+      });
+    }
+
+    // check option quantity
+    if (option) {
+      const allProductOptionQnt = cart.products
+      .filter(it => it?.option?.toString() === option)
+      .filter(it => it?.variant?.toString() !== variantId)
+      .reduce((total, curr) => {
+        return total += curr.quantity
+      }, 0);
+
+      console.log(allProductOptionQnt)
+
+      const findOption = await Option.findById(option);
+      if (allProductOptionQnt + quantity > findOption.quantity) {
+        return res.status(400).json({
+          message: 'Số lượng option vượt quá cho phép'
+        })
+      }
     }
 
     const newProducts = cart.products.map((it) =>
