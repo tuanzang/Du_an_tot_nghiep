@@ -86,12 +86,12 @@ const Checkout = () => {
 
     socket.on("hidden product", onHiddenProduct);
     socket.on('update product', onProductUpdate);
-    socket.on('update voucher quantity', onUpdateVoucherQnt)
+    socket.on('update voucher', onUpdateVoucherQnt)
 
     return () => {
       socket.off("hidden product", onHiddenProduct);
       socket.off("update product", onProductUpdate);
-      socket.off("update voucher quantity", onUpdateVoucherQnt);
+      socket.off("update voucher", onUpdateVoucherQnt);
     };
   }, [dispatch, navigate, productSelected.length]);
 
@@ -123,7 +123,7 @@ const Checkout = () => {
       }
 
       if (selectedDiscountCode) {
-        socket.emit('update voucher quantity', selectedDiscountCode)
+        socket.emit('update voucher', selectedDiscountCode)
       }
 
       if (data?.paymentMethod === "COD") {
@@ -438,7 +438,12 @@ const Checkout = () => {
               value={selectedDiscountCode}
             >
               {discountCodes.map((code: IVoucher) => {
-                const isDisable = !code.minPurchaseAmount || totalPrice < code.minPurchaseAmount || (user && code.userIds.includes(user?._id)) || code.quantity === code.usedCount;
+                const isDisable = !code.minPurchaseAmount ||
+                totalPrice < code.minPurchaseAmount ||
+                (user && code.userIds.includes(user?._id)) ||
+                code.quantity === code.usedCount ||
+                code.status === 'inactive'
+                ;
 
                 return <Card
                   key={code._id}

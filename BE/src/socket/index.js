@@ -26,8 +26,8 @@ const initialSocket = (server) => {
     })
 
     // listen user use voucher checkout
-    socket.on('update voucher quantity', code => {
-      io.emit('update voucher quantity', code);
+    socket.on('update voucher', code => {
+      io.emit('update voucher', code);
     })
   });
 

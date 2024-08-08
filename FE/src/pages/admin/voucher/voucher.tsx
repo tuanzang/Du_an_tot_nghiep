@@ -1,10 +1,12 @@
 import { PlusSquareOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Card, Col, Input, Radio, Row, Table, Switch } from "antd";
+import { Button, Card, Col, Input, Radio, Row, Table, Switch, message } from "antd";
 import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
+import axiosInstance from "../../../config/axios";
+import { socket } from "../../../socket";
 
 const customTableHeaderCellStyle = {
   backgroundColor: "#c29957",
@@ -23,9 +25,22 @@ export default function Voucher() {
     setValue(e.target.value);
   };
 
-  const onChange = (checked: boolean) => {
-    console.log(`switch to ${checked}`);
+  const onChangeStatus = (checked: boolean, record: any) => {
+    onUpdateStatus(record._id, checked ? 'active' : 'inactive')
   };
+
+  const onUpdateStatus = async (id: string, status: string) => {
+    try {
+      await axiosInstance.put(`/discountCode/discountCodes/${id}`, {
+        status
+      })
+      message.success('Cập nhật trạng thái thành công');
+      socket.emit('update voucher')
+      fetchVouchers()
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const fetchVouchers = async () => {
     try {
@@ -119,8 +134,8 @@ export default function Voucher() {
       width: "10%",
       render: (status: string, record: any) => (
         <Switch
-          defaultChecked={status === "active"}
-          onChange={(checked) => onChange(checked, record)}
+          checked={status === 'active'}
+          onChange={(checked) => onChangeStatus(checked, record)}
         />
       ),
     },
