@@ -36,18 +36,62 @@ export const getTransBillByIdBill = async (req, res) => {
  * @returns
  */
 export const createTransBill = async (req, res) => {
+  const { idUser, idBill, transCode, type, totalMoney } = req.body;
+
+  // Các điều kiện xác thực
+  if (!idUser) {
+    return res.status(200).json({
+      message: "Thiếu thông tin người thực hiện!",
+      success: false,
+    });
+  }
+
+  if (!idBill) {
+    return res.status(200).json({
+      message: "Thiếu thông tin hóa đơn!",
+      success: false,
+    });
+  }
+
+  if (type !== true && type !== false) {
+    return res.status(200).json({
+      message: "Thiếu loại giao dịch!",
+      success: false,
+    });
+  }
+
+  if (
+    type === false &&
+    !transCode &&
+    !/^[\p{L}\p{N}\s.,!?-]+$/u.test(transCode)
+  ) {
+    return res.status(200).json({
+      message: "Thiếu mã giao dịch!",
+      success: false,
+    });
+  }
+
+  if (!totalMoney) {
+    return res.status(200).json({
+      message: "Thiếu thông tin số tiền cần thanh toán!",
+      success: false,
+    });
+  }
+
   try {
     const data = await transaction.create(req.body);
-    if (!data || data.length === 0) {
+    if (!data) {
       return res.status(404).json({
         message: "Tạo thanh toán thất bại!",
-        data: [],
+        data: null,
+        success: false,
       });
     }
 
     return res.status(200).json({
       message: "Tạo thanh toán thành công",
-      data,
+      data: data,
+      success: true,
     });
   } catch (error) {
     return res.status(500).json({

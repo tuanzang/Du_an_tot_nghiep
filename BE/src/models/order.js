@@ -48,7 +48,6 @@ const orderSchema = new mongoose.Schema(
     // },
     message: {
       type: String,
-      required: true,
     },
     paymentMethod: {
       type: String,

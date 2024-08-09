@@ -36,6 +36,58 @@ export const getHistoryBillByIdBill = async (req, res) => {
  * @returns
  */
 export const createHistoryBill = async (req, res) => {
+  const { idUser, idBill, creator, role, statusBill } = req.body;
+
+  // Các điều kiện xác thực
+  if (!idUser) {
+    return res.status(200).json({
+      message: "Thiếu thông tin người thực hiện!",
+      success: false,
+    });
+  }
+
+  if (!idBill) {
+    return res.status(200).json({
+      message: "Thiếu thông tin hóa đơn!",
+      success: false,
+    });
+  }
+
+  if (!creator) {
+    return res.status(200).json({
+      message: "Thiếu tên người thực hiện!",
+      success: false,
+    });
+  }
+
+  if (creator && !/^[\p{L}\p{N}\s.,!?-]+$/u.test(creator)) {
+    return res.status(200).json({
+      message: "Tên người thực hiện không được chứa ký tự đặc biệt.",
+      success: false,
+    });
+  }
+
+  if (!statusBill) {
+    return res.status(200).json({
+      message: "Thiếu thông tin trạng thái hóa đơn!",
+      success: false,
+    });
+  }
+
+  if (!role) {
+    return res.status(200).json({
+      message: "Thiếu thông tin vai trò người thực hiện!",
+      success: false,
+    });
+  }
+
+  if (role && !/^[\p{L}\p{N}\s.,!?-]+$/u.test(role)) {
+    return res.status(200).json({
+      message: "Vai trò người thực hiện không được chứa ký tự đặc biệt.",
+      success: false,
+    });
+  }
+
   try {
     const data = await historyBill.create(req.body);
     if (!data || data.length === 0) {

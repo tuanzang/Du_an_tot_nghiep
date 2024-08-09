@@ -22,7 +22,7 @@ import { socket } from "../../socket";
 import { IVoucher } from "../../interface/Voucher";
 import dayjs from "dayjs";
 import axios from "axios";
-import "./checkout.css"
+import "./checkout.css";
 const SHIPPING_COST = 30000;
 // import { useLocation } from "react-router-dom";
 const { Text } = Typography;
@@ -48,7 +48,6 @@ const Checkout = () => {
     paymentMethod: "COD",
   });
 
-
   const { data, refetch: refetchCart } = useMyCartQuery();
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
@@ -62,11 +61,22 @@ const Checkout = () => {
   const [totalDiscount, setTotalDiscount] = useState<number>(0);
 
   useEffect(() => {
-    dispatch(updateStatus({
-      prevData: productSelected,
-      newData: data?.data?.products
-    }))
-  }, [data])
+    dispatch(
+      updateStatus({
+        prevData: productSelected,
+        newData: data?.data?.products,
+      })
+    );
+  }, [data]);
+
+  useEffect(() => {
+    dispatch(
+      updateStatus({
+        prevData: productSelected,
+        newData: data?.data?.products,
+      })
+    );
+  }, [data]);
 
   // initial socket
   useEffect(() => {
@@ -75,18 +85,18 @@ const Checkout = () => {
     };
 
     const onProductUpdate = () => {
-      refetchCart()
+      refetchCart();
       // console.log('client update', data);
-    }
+    };
 
     const onUpdateVoucherQnt = (code: string) => {
-      console.log('client update', code)
+      console.log("client update", code);
       fetchDiscountCode();
-    }
+    };
 
     socket.on("hidden product", onHiddenProduct);
-    socket.on('update product', onProductUpdate);
-    socket.on('update voucher', onUpdateVoucherQnt)
+    socket.on("update product", onProductUpdate);
+    socket.on("update voucher", onUpdateVoucherQnt);
 
     return () => {
       socket.off("hidden product", onHiddenProduct);
@@ -114,7 +124,7 @@ const Checkout = () => {
         productSelectedIds,
         shippingCost: SHIPPING_COST,
         discouVoucher: totalDiscount,
-        discountCode: selectedDiscountCode
+        discountCode: selectedDiscountCode,
       });
       console.log(res);
 
@@ -123,7 +133,11 @@ const Checkout = () => {
       }
 
       if (selectedDiscountCode) {
-        socket.emit('update voucher', selectedDiscountCode)
+        socket.emit("update voucher", selectedDiscountCode);
+      }
+
+      if (selectedDiscountCode) {
+        socket.emit("update voucher quantity", selectedDiscountCode);
       }
 
       if (data?.paymentMethod === "COD") {
@@ -193,7 +207,7 @@ const Checkout = () => {
       .catch((error) => {
         console.error("Error fetching discount codes:", error);
       });
-  }
+  };
 
   const showDiscountModal = () => {
     setIsModalVisible(true);
@@ -315,7 +329,9 @@ const Checkout = () => {
               }
               disabled={!productSelected.every((item) => item.variant.status)}
               style={{
-                opacity: productSelected.every((item) => item.variant.status) ? 1 : 0.5,
+                opacity: productSelected.every((item) => item.variant.status)
+                  ? 1
+                  : 0.5,
               }}
             >
               Hoàn tất đơn hàng
@@ -337,17 +353,25 @@ const Checkout = () => {
             </thead>
             <tbody>
               {productSelected?.map((item: ICartItem) => (
-                <tr key={item._id} style={{ opacity: item.variant.status ? 1 : 0.5 }}>
+                <tr
+                  key={item._id}
+                  style={{ opacity: item.variant.status ? 1 : 0.5 }}
+                >
                   <td>
                     {item.product.name} (Size: {item.variant?.sizeName})
                     {/* {item.variant.status} */}
-                    {!item.variant.status && <p className="out-of-stock-text">Sản phẩm đang ngừng hoạt động</p>}
+                    {!item.variant.status && (
+                      <p className="out-of-stock-text">
+                        Sản phẩm đang ngừng hoạt động
+                      </p>
+                    )}
                   </td>
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
 
-                  <td>{item.option?.name}<br />
-
+                  <td>
+                    {item.option?.name}
+                    <br />
                     {item.option?.price}
                   </td>
                   <td>{formatPrice(item.variant.price * item.quantity)}</td>
@@ -419,8 +443,14 @@ const Checkout = () => {
                 padding: "5px 10px",
                 boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
                 margin: "0 0 5px 5px",
-                opacity: productSelected.every((item) => item.variant.status) ? 1 : 0.5,
-                pointerEvents: productSelected.every((item) => item.variant.status) ? 'auto' : 'none',
+                opacity: productSelected.every((item) => item.variant.status)
+                  ? 1
+                  : 0.5,
+                pointerEvents: productSelected.every(
+                  (item) => item.variant.status
+                )
+                  ? "auto"
+                  : "none",
               }}
             >
               Chọn mã giảm giá
@@ -438,55 +468,38 @@ const Checkout = () => {
               value={selectedDiscountCode}
             >
               {discountCodes.map((code: IVoucher) => {
-                const isDisable = !code.minPurchaseAmount ||
-                totalPrice < code.minPurchaseAmount ||
-                (user && code.userIds.includes(user?._id)) ||
-                code.quantity === code.usedCount ||
-                code.status === 'inactive'
-                ;
-
-                return <Card
-                  key={code._id}
-                  style={{
-                    backgroundColor: "#66FF66",
-                    marginBottom: 10,
-                    opacity:
-                      isDisable ? 0.5 : 1,
-                    pointerEvents:
-                      isDisable ? 'none' : 'auto',
-                  }}
-                >
-                  <Radio
-                    value={code.code}
-                    className="discount-radio"
-                    disabled={totalPrice < !code.minPurchaseAmount}
+                const isDisable =
+                  !code.minPurchaseAmount ||
+                  totalPrice < code.minPurchaseAmount ||
+                  (user && code.userIds.includes(user?._id)) ||
+                  code.quantity === code.usedCount ||
+                  code.status === "inactive";
+                return (
+                  <Card
+                    key={code._id}
+                    style={{
+                      backgroundColor: "#66FF66",
+                      marginBottom: 10,
+                      opacity: isDisable ? 0.5 : 1,
+                      pointerEvents: isDisable ? "none" : "auto",
+                    }}
                   >
-                    <strong className="discount-code">{code.code}</strong>
-                    {code.discountType === "percentage" ? (
-                      <span className="discount-detail">
-                        {" "}
-                        - Giảm {code.discountPercentage}%
-                      </span>
-                    ) : (
-                      <span className="discount-detail">
-                        {" "}
-                        - Giảm {code.discountAmount} VNĐ
-                      </span>
-                    )}
-                    <span
-                      style={{ paddingLeft: 1 }}
-                      className="discount-detail"
+                    <Radio
+                      value={code.code}
+                      className="discount-radio"
+                      disabled={totalPrice < !code.minPurchaseAmount}
                     >
-                      {" "}
-                      (Đơn tối thiểu {code.minPurchaseAmount}đ)
-                    </span>
-                    <br />
-                    <span className="expiration-date">
-                      HSD:{" "}
-                      {dayjs(code.expirationDate).format("DD/MM/YYYY HH:mm:ss")}
-                    </span>
-                  </Radio>
-                </Card>
+                      <span>(Đơn tối thiểu {code.minPurchaseAmount}đ)</span>
+                      <br />
+                      <span className="expiration-date">
+                        HSD:{" "}
+                        {dayjs(code.expirationDate).format(
+                          "DD/MM/YYYY HH:mm:ss"
+                        )}
+                      </span>
+                    </Radio>
+                  </Card>
+                );
               })}
             </Radio.Group>
           </Modal>
