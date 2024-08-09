@@ -33,7 +33,6 @@ import "./BillStyle.css";
 import { IBill, IProductBill } from "../../../interface/Bill";
 import { USER_INFO_STORAGE_KEY } from "../../../services/constants";
 import dayjs from "dayjs";
-import { socket } from "../../../socket";
 
 interface IProductSizeBill {
   variantId: string;
@@ -327,32 +326,6 @@ export default function BillDetail() {
     }
   };
 
-  // cập nhật trạng thái hóa đơn
-  const handleUpdateStatusBill = async (
-    id: string | null,
-    status: string,
-    user: IUser | null,
-    note: string,
-    statusShip: boolean | null
-  ) => {
-    setLoadingBill(true);
-    if (id === null || user === null || statusShip === null) {
-      toast.error("Không tìm thấy hóa đơn");
-    } else {
-      try {
-        const response = await axios.post(
-          "http://localhost:3001/api/bills/update-status",
-          { id: id, status: status, statusShip: statusShip }
-        );
-        createNewHistory(response.data.data, user, note);
-        setStatusBill(status);
-
-        if (status === '0') {
-          socket.emit('update voucher');
-        }
-      } catch (error) {
-        toast.error("Không tìm thấy hóa đơn");
-
   // hoàn đơn hàng
   function ModalReturnBill() {
     const [ghiChu, setGhiChu] = useState("");
@@ -365,7 +338,6 @@ export default function BillDetail() {
       if (ghiChu === "") {
         setErrorGhiChu("Bạn cần nhập lý do");
         return;
-
       }
       if (statusShip !== true && statusShip !== false) {
         setErrorStatusShip("Bạn chọn loại phí ship");

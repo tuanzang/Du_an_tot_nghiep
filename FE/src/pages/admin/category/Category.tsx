@@ -1,5 +1,5 @@
 import { PlusSquareOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Card, Col, Input, Radio, Row, Table } from "antd";
+import { Button, Card, Col, Input, Row, Table } from "antd";
 import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import { ICategory } from "../../../interface/Categories";
@@ -15,7 +15,7 @@ const customTableHeaderCellStyle = {
 };
 
 export default function Category() {
-  const [value, setValue] = useState(1);
+  // const [value, setValue] = useState(1);
   const [cates, setCates] = useState<ICategory[]>([]);
   const [filteredCates, setFilteredCates] = useState<ICategory[]>([]);
   const [searchText, setSearchText] = useState<string>("");
@@ -36,23 +36,23 @@ export default function Category() {
     fetchCate();
   }, []);
 
-  const deleteCategory = async (id: number) => {
-    try {
-      const confirm = window.confirm("Bạn muốn xóa danh mục này?");
-      if (confirm) {
-        const response = await axios.delete(
-          `http://localhost:3001/api/categories/${id}`
-        );
-        if (response.status === 200) {
-          const newArr = cates.filter((item) => item["_id"] !== id);
-          setCates(newArr);
-          setFilteredCates(newArr);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // const deleteCategory = async (id: number) => {
+  //   try {
+  //     const confirm = window.confirm("Bạn muốn xóa danh mục này?");
+  //     if (confirm) {
+  //       const response = await axios.delete(
+  //         `http://localhost:3001/api/categories/${id}`
+  //       );
+  //       if (response.status === 200) {
+  //         const newArr = cates.filter((item) => item["_id"] !== id);
+  //         setCates(newArr);
+  //         setFilteredCates(newArr);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   const onSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -68,11 +68,11 @@ export default function Category() {
     }
   };
 
-  const onChangeRadio = (e) => {
-    console.log("radio checked", e.target.value);
-    setValue(e.target.value);
-    // Implement your logic to filter categories based on radio button value
-  };
+  // const onChangeRadio = (e) => {
+  //   console.log("radio checked", e.target.value);
+  //   setValue(e.target.value);
+  //   // Implement your logic to filter categories based on radio button value
+  // };
 
   const columns = [
     {
@@ -173,7 +173,7 @@ export default function Category() {
         <Table
           components={{
             header: {
-              cell: (props) => (
+              cell: (props:any) => (
                 <th {...props} style={customTableHeaderCellStyle} />
               ),
             },

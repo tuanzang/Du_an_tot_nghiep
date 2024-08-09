@@ -110,14 +110,6 @@ export default function ProductDetail() {
       }
     }
 
-<<<<<<< HEAD
-    socket.on('update product', onProductUpdate);
-
-    return () => {
-      socket.off('update product', onProductUpdate);
-    }
-  }, []);
-=======
     const onHiddenProduct = (productId: string) => {
       productId === id && fetchProduct(id)
     }
@@ -132,7 +124,6 @@ export default function ProductDetail() {
       socket.off('hidden product', onHiddenProduct);
     }
   }, [id]);
->>>>>>> 88ab4daef5c2a36e2b9c042cdfe0b5fc1be55ffc
 
   const handleQuantityIncrease = () => {
     setQuantity(quantity + 1);

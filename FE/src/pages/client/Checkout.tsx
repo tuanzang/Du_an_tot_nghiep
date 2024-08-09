@@ -374,7 +374,7 @@ const Checkout = () => {
                     <br />
                     {item.option?.price}
                   </td>
-                  <td>{formatPrice(item.variant.price * item.quantity)}</td>
+                  <td>{formatPrice(totalPrice)}</td>
                   {/* <td> {formatPrice(SHIPPING_COST)}</td> */}
                 </tr>
               ))}
@@ -468,38 +468,55 @@ const Checkout = () => {
               value={selectedDiscountCode}
             >
               {discountCodes.map((code: IVoucher) => {
-                const isDisable =
-                  !code.minPurchaseAmount ||
-                  totalPrice < code.minPurchaseAmount ||
-                  (user && code.userIds.includes(user?._id)) ||
-                  code.quantity === code.usedCount ||
-                  code.status === "inactive";
-                return (
-                  <Card
-                    key={code._id}
-                    style={{
-                      backgroundColor: "#66FF66",
-                      marginBottom: 10,
-                      opacity: isDisable ? 0.5 : 1,
-                      pointerEvents: isDisable ? "none" : "auto",
-                    }}
+                const isDisable = !code.minPurchaseAmount ||
+                totalPrice < code.minPurchaseAmount ||
+                (user && code.userIds.includes(user?._id)) ||
+                code.quantity === code.usedCount ||
+                code.status === 'inactive'
+                ;
+
+                return <Card
+                  key={code._id}
+                  style={{
+                    backgroundColor: "#66FF66",
+                    marginBottom: 10,
+                    opacity:
+                      isDisable ? 0.5 : 1,
+                    pointerEvents:
+                      isDisable ? 'none' : 'auto',
+                  }}
+                >
+                  <Radio
+                    value={code.code}
+                    className="discount-radio"
+                    disabled={totalPrice < !code.minPurchaseAmount}
                   >
-                    <Radio
-                      value={code.code}
-                      className="discount-radio"
-                      disabled={totalPrice < !code.minPurchaseAmount}
-                    >
-                      <span>(Đơn tối thiểu {code.minPurchaseAmount}đ)</span>
-                      <br />
-                      <span className="expiration-date">
-                        HSD:{" "}
-                        {dayjs(code.expirationDate).format(
-                          "DD/MM/YYYY HH:mm:ss"
-                        )}
+                    <strong className="discount-code">{code.code}</strong>
+                    {code.discountType === "percentage" ? (
+                      <span className="discount-detail">
+                        {" "}
+                        - Giảm {code.discountPercentage}%
                       </span>
-                    </Radio>
-                  </Card>
-                );
+                    ) : (
+                      <span className="discount-detail">
+                        {" "}
+                        - Giảm {code.discountAmount} VNĐ
+                      </span>
+                    )}
+                    <span
+                      style={{ paddingLeft: 1 }}
+                      className="discount-detail"
+                    >
+                      {" "}
+                      (Đơn tối thiểu {code.minPurchaseAmount}đ)
+                    </span>
+                    <br />
+                    <span className="expiration-date">
+                      HSD:{" "}
+                      {dayjs(code.expirationDate).format("DD/MM/YYYY HH:mm:ss")}
+                    </span>
+                  </Radio>
+                </Card>
               })}
             </Radio.Group>
           </Modal>
@@ -513,7 +530,11 @@ const Checkout = () => {
           >
             {selectedDiscountCode ? (
               <div className="d-flex justify-content-between px-3">
-                <p>{selectedDiscountCode}</p>
+                <p style={{
+                  opacity: productSelected.every((item) => item.variant.status)
+                    ? 1
+                    : 0.5,
+                }}>{selectedDiscountCode}</p>
                 <p>- {totalDiscount > 0 ? formatPrice(totalDiscount) : null}</p>
               </div>
             ) : null}
