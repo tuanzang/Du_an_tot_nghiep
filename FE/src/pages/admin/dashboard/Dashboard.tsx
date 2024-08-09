@@ -1016,7 +1016,22 @@ export default function Dashboard() {
           <ToastContainer />
         </div>
         <Row gutter={16} style={{ padding: "0 8px" }}>
-
+        <Col span={12}>
+            <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
+              Thống kê Doanh Thu theo {nameButton}
+            </Title>
+            <Card style={{ borderColor: "#c29957" }}>
+              <ColumChartDashBoard data={dataBieuDo2} />
+            </Card>
+          </Col>
+          <Col span={12}>
+            <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
+              Biểu đồ trạng thái, số lượng đơn theo {nameButton}
+            </Title>
+            <Card style={{ borderColor: "#c29957" }}>
+              <PieChartDashBoard data={dataBieuDo} />
+            </Card>
+          </Col>
           <Col span={24}>
             <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
               Danh sách sản phẩm bán chạy theo {nameButton}
@@ -1042,22 +1057,7 @@ export default function Dashboard() {
 
           </Col>
 
-          <Col span={12}>
-            <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-              Thống kê Doanh Thu theo {nameButton}
-            </Title>
-            <Card style={{ borderColor: "#c29957" }}>
-              <ColumChartDashBoard data={dataBieuDo2} />
-            </Card>
-          </Col>
-          <Col span={12}>
-            <Title level={4} style={{ fontWeight: "bold", margin: "16px 0", color: "#c29957" }}>
-              Biểu đồ trạng thái, số lượng đơn theo {nameButton}
-            </Title>
-            <Card style={{ borderColor: "#c29957" }}>
-              <PieChartDashBoard data={dataBieuDo} />
-            </Card>
-          </Col>
+          
         </Row>
 
       </Card>
