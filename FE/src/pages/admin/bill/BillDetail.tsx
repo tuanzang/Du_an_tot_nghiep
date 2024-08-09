@@ -35,6 +35,7 @@ import { IProduct } from "../../../interface/Products";
 import { IBill, IProductBill } from "../../../interface/Bill";
 import { USER_INFO_STORAGE_KEY } from "../../../services/constants";
 import dayjs from "dayjs";
+import { socket } from "../../../socket";
 
 interface IProductSizeBill {
   variantId: string;
@@ -310,6 +311,10 @@ export default function BillDetail() {
         );
         createNewHistory(response.data.data, user, note);
         setStatusBill(status);
+
+        if (status === '0') {
+          socket.emit('update voucher');
+        }
       } catch (error) {
         toast.error("Không tìm thấy hóa đơn");
       }

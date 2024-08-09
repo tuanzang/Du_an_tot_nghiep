@@ -35,6 +35,7 @@ import confirmStatus from "../../admin/bill/confirmStatus";
 import { IProductSize } from "../../../interface/ProductSize";
 import { IComment } from "../../../interface/Comments";
 import { CommentOutlined } from "@ant-design/icons";
+import { socket } from "../../../socket";
 
 const { TextArea } = Input;
 
@@ -279,6 +280,10 @@ export default function ProfileBillDetail() {
         createNewHistory(response.data.data, user, note);
         getBillHistoryByIdBill(id);
         setStatusBill(status);
+
+        if (status === '0') {
+          socket.emit('update voucher');
+        }
       } catch (error) {
         toast.error("Không tìm thấy hóa đơn");
       }

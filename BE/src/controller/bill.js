@@ -1,3 +1,4 @@
+import DiscountCode from "../models/DiscountCode.js";
 import Order from "../models/order.js";
 import productSize from "../models/productSize.js";
 
@@ -164,6 +165,11 @@ export const updateStatusBill = async (req, res) => {
       return res.status(404).json({
         message: "Không tìm thấy hóa đơn",
       });
+    }
+
+    // hủy đơn hàng
+    if (status === '0' && updatedOrder.discountCode) {
+      await DiscountCode.findOneAndUpdate({ code: updatedOrder.discountCode }, {  $inc: { usedCount: -1 }})
     }
 
     return res.status(200).json({

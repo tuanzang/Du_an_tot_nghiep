@@ -6,6 +6,7 @@ import crypto from "crypto";
 import dateFormat from "dayjs";
 import dotenv from "dotenv";
 import dayjs from "dayjs";
+import DiscountCode from "../models/DiscountCode.js";
 
 dotenv.config();
 
@@ -141,6 +142,7 @@ export const createOrder = async (req, res) => {
       quantity: cart.products.length,
       products,
       status: "1",
+      discountCode
     }).save();
 
     cart.products = cart.products.filter(
@@ -331,6 +333,11 @@ export const updateOrderStatus = async (req, res) => {
       { $set: { status: status } },
       { new: true }
     ).exec();
+
+    // hủy đơn hàng
+    if (status === '0' && updatedOrder.discountCode) {
+      await DiscountCode.findOneAndUpdate({ code: updatedOrder.discountCode }, {  $inc: { usedCount: -1 }})
+    }
 
     if (!updatedOrder) {
       return res.status(404).json({
