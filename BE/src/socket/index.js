@@ -29,6 +29,11 @@ const initialSocket = (server) => {
     socket.on("update voucher", (code) => {
       io.emit("update voucher", code);
     });
+
+    // listen option update
+    socket.on('option update', (productId) => {
+      io.emit('option update', productId)
+    });
   });
 
   io.listen(4000);

@@ -1,6 +1,7 @@
 import Cart from "../models/cart.js";
 import ProductVariant from "../models/productSize.js";
 import Option from "../models/option.js";
+import Product from "../models/product.js"
 
 export const getMyCarts = async (req, res) => {
   const userId = req.profile._id;
@@ -24,11 +25,27 @@ export const getMyCarts = async (req, res) => {
       return res.json({});
     }
 
-    // console.log(data);
-
-    const newProducts = data.products.filter((it) => it.product.status === 1);
+    let newProducts = data.products.filter((it) => it.product.status === 1);
     data.products = newProducts;
     const newCart = await data.save();
+
+    // check product option status
+    const tempProducts = [];
+    for await (let product of newProducts) {
+      const findProduct = await Product.findById(product.product._id);
+      console.log(findProduct.options);
+      if (product.option && !findProduct.options.includes(product.option._id.toJSON())) {
+        tempProducts.push({
+          ...product.toJSON(),
+          option: {
+            ...product.option.toJSON(),
+            status: 0
+          }
+        })
+      } else {
+        tempProducts.push(product);
+      }
+    }
 
     const totalPrice = newCart?.products.reduce((res, curr) => {
       res += curr.variant.price * curr.quantity;
@@ -38,6 +55,7 @@ export const getMyCarts = async (req, res) => {
 
     return res.json({
       ...newCart?._doc,
+      products: tempProducts,
       totalPrice,
     });
   } catch (error) {

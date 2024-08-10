@@ -114,14 +114,22 @@ export default function ProductDetail() {
       productId === id && fetchProduct(id)
     }
 
+    const onOptionUpdate = (productId: string) => {
+      id === productId && fetchProduct(id);
+    }
+
     socket.on('update product', onProductUpdate);
 
     // listen hidden product
     socket.on('hidden product', onHiddenProduct)
 
+    // listen update product option
+    socket.on('option update', onOptionUpdate)
+
     return () => {
       socket.off('update product', onProductUpdate);
       socket.off('hidden product', onHiddenProduct);
+      socket.off('option update', onOptionUpdate);
     }
   }, [id]);
 
@@ -343,22 +351,24 @@ export default function ProductDetail() {
                               Không chọn
                             </Button>
 
-                            {product?.options.map((item) => (
-                              <Button
+                            {product?.options.map((item) => {
+                              const isDisable = item.quantity === 0 || !item.status;
+
+                              return <Button
                                 key={item._id}
                                 className={`mx-1`}
                                 type={optionSelected?._id === item._id ? 'primary' : 'default'}
                                 style={{
                                   padding: "10px 20px",
                                   fontSize: "16px",
-                                  opacity: item.quantity === 0 ? 0.5 : 1,
-                                  cursor: item.quantity === 0 ? "not-allowed" : "pointer"
+                                  opacity: isDisable ? 0.5 : 1,
+                                  cursor: isDisable ? "not-allowed" : "pointer"
                                 }}
-                                onClick={() => item.quantity > 0 && onOptionClick(item)}
+                                onClick={() => !isDisable && onOptionClick(item)}
                               >
                                 {item.name}
                               </Button>
-                            ))}
+                            })}
                           </div>
                         </div>
 

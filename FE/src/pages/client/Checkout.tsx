@@ -94,14 +94,20 @@ const Checkout = () => {
       fetchDiscountCode();
     };
 
+    const onOptionUpdate = () => {
+      navigate(-1);
+    }
+
     socket.on("hidden product", onHiddenProduct);
     socket.on("update product", onProductUpdate);
     socket.on("update voucher", onUpdateVoucherQnt);
+    socket.on('option update', onOptionUpdate);
 
     return () => {
       socket.off("hidden product", onHiddenProduct);
       socket.off("update product", onProductUpdate);
       socket.off("update voucher", onUpdateVoucherQnt);
+      socket.off('option update', onOptionUpdate);
     };
   }, [dispatch, navigate, productSelected.length]);
 
