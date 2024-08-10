@@ -41,6 +41,14 @@ export default function ProductDetail() {
     return `${formatPrice(minPrice === 0 ? secondMinPrice : minPrice)} - ${formatPrice(Math.max(...productSizePrices))}`;
   }, [selectedSize, product, optionSelected]);
 
+  const productImage = useMemo(() => {
+    if (!optionSelected) {
+      return product?.image?.[0];
+    }
+
+    return optionSelected?.image;
+  }, [optionSelected, product?.image]);
+
   // lấy token đăng nhập
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const { mutate } = useCartMutation({
@@ -275,7 +283,7 @@ export default function ProductDetail() {
                       >
                         <Image
                           width={"100%"}
-                          src={product?.image?.[0]}
+                          src={productImage}
                           alt="product-details"
                         />
                       </div>
