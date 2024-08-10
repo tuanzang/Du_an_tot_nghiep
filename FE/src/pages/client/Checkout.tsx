@@ -17,7 +17,7 @@ import {
   updateStatus,
 } from "../../store/cartSlice";
 import { USER_INFO_STORAGE_KEY } from "../../services/constants";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { socket } from "../../socket";
 import { IVoucher } from "../../interface/Voucher";
 import dayjs from "dayjs";
@@ -197,7 +197,11 @@ const Checkout = () => {
     }
   };
 
-  const discountedPrice = totalPrice - totalDiscount;
+  const discountedPrice = useMemo(() => {
+    const discountedPrice = totalPrice - totalDiscount;
+    return discountedPrice < 0 ? 0 : discountedPrice;
+  }, [totalPrice, totalDiscount]);
+
   const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
 
   useEffect(() => {
