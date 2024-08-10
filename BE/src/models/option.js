@@ -24,6 +24,10 @@ const optionCategorios = new mongoose.Schema(
       required: true,
       default: 1,
     },
+    image:{
+      type:String,
+      require:true
+    }
   },
   {
     timestamps: true,

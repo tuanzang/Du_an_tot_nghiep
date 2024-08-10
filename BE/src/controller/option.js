@@ -3,7 +3,7 @@ import Option from '../models/option';
 // Thêm một tùy chọn mới
 export const addOption = async (req, res) => {
   try {
-    const { category, nameoption, quantityoption, priceoption, status } = req.body;
+    const { category, nameoption, quantityoption, priceoption, status ,image} = req.body;
 
     // Tạo một đối tượng tùy chọn mới
     const newOption = new Option({
@@ -11,7 +11,8 @@ export const addOption = async (req, res) => {
       nameoption,
       quantityoption,
       priceoption,
-      status
+      status,
+      image,
     });
 
     // Lưu đối tượng tùy chọn mới vào cơ sở dữ liệu
@@ -35,12 +36,12 @@ export const addOption = async (req, res) => {
 export const updateOption = async (req, res) => {
   try {
     const { id } = req.params;
-    const { category, nameoption, quantityoption, priceoption, status } = req.body;
+    const { category, nameoption, quantityoption, priceoption, status,image } = req.body;
 
     // Tìm tùy chọn theo ID và cập nhật
     const updatedOption = await Option.findByIdAndUpdate(
       id,
-      { category, nameoption, quantityoption, priceoption, status },
+      { category, nameoption, quantityoption, priceoption, status ,image},
       { new: true }
     );
 

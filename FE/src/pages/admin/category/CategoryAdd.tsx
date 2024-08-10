@@ -106,6 +106,7 @@ const CategoryAdd = () => {
                             <InputNumber placeholder="Số lượng phụ kiện" />
                           </Form.Item>
                         </Col>
+                        
 
                         <Col>
                           <MinusCircleOutlined onClick={() => remove(name)} />

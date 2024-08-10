@@ -71,7 +71,7 @@ export default function Size() {
 
   const fetchSizes = async (filter: ISearchSize, currentPage: number) => {
     try {
-      const response = await axios.post("http://localhost:3001/api/sizes", {
+      const response = await axios.get("http://localhost:3001/api/sizes", {
         ...filter,
         page: currentPage,
       });
@@ -103,7 +103,7 @@ export default function Size() {
         cancelText: "Hủy",
         onOk: async () => {
           try {
-            await axios.post("http://localhost:3001/api/sizes/delete", {
+            await axios.put("http://localhost:3001/api/sizes/put", {
               _id: sizeId,
               status: newStatus,
             });

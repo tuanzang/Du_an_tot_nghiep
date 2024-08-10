@@ -272,7 +272,7 @@ export default function BillDetail() {
         }
       );
     };
-  
+
     return (
       <DialogAddUpdate
         open={openModalCancelBill}
