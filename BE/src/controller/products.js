@@ -2,6 +2,7 @@ import product from "../models/product.js";
 import productSize from "../models/productSize.js";
 import size from "../models/size.js";
 import category from "../models/category.js";
+import Option from "../models/option.js"
 
 export const getAllProduct = async (req, res) => {
   try {
@@ -64,6 +65,52 @@ export const searchProducts = async (req, res) => {
 };
 
 export const getDetailProduct = async (req, res) => {
+  try {
+    const data = await product.findById(req.params.id).exec();
+    const productSizedata = await productSize.find({
+      idProduct: req.params.id,
+    });
+
+    let options = await Option.find({ category: data.categoryId }).exec();
+    options = options.map(it => {
+      if (data.options.includes(it._id)) {
+        return {
+          ...it.toJSON(),
+          status: 1
+        }
+      }
+
+      return {
+        ...it.toJSON(),
+        status: 0
+      }
+    })
+
+    if (!data || data.length === 0) {
+      return res.status(404).json({
+        message: "Không tìm thấy sản phẩm !",
+        data: [],
+      });
+    }
+
+    data.productSize = productSizedata;
+
+    return res.status(200).json({
+      message: "Đã tìm thấy sản phẩm",
+      data: {
+        ...data.toJSON(),
+        productSizedata,
+        options
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const adminGetDetailProduct = async (req, res) => {
   try {
     const data = await product.findById(req.params.id).populate('options').exec();
     const productSizedata = await productSize.find({

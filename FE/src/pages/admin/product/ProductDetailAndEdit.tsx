@@ -71,7 +71,7 @@ export default function ProductDetailAndEdit() {
     const fetchProductDetails = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:3001/api/products/${id}`
+          `http://localhost:3001/api/products/${id}/admin`
         );
         form.setFieldValue("categoryId", data.data.categoryId[0]);
         form.setFieldValue(
@@ -199,6 +199,8 @@ export default function ProductDetailAndEdit() {
       });
       toast.success("Cập nhật sản phẩm thành công");
       navigate("/admin/product");
+
+      socket.emit('option update', id);
     } catch (error) {
       console.error("Error updating product:", error);
       toast.error("Cập nhật sản phẩm thất bại");
@@ -319,6 +321,7 @@ export default function ProductDetailAndEdit() {
       await axiosInstance.put(`/products/${id}`, values);
       toast.success("Cập nhật sản phẩm thành công");
       navigate("/admin/product");
+      socket.emit('option update', id);
     } catch (error) {
       console.log(error);
     }
