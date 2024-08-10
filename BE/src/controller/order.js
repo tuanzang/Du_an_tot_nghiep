@@ -115,7 +115,7 @@ export const createOrder = async (req, res) => {
       optionId: item?.option?._id,
     }));
 
-    const totalPrice =
+    let totalPrice =
       cartProducts.reduce((total, curr) => {
         let priceTotal = curr.variant.price * curr.quantity;
 
@@ -124,9 +124,15 @@ export const createOrder = async (req, res) => {
         }
 
         return (total += priceTotal);
-      }, 0) -
-      bodyData.discouVoucher +
-      bodyData.shippingCost;
+      }, 0);
+      
+    const totalPriceWithDiscount = totalPrice - bodyData.discouVoucher;
+
+    if (totalPriceWithDiscount < 0) {
+      totalPrice = 0;
+    }
+
+    totalPrice += bodyData.shippingCost;
 
     // add user id to voucher
     await Discount.findOneAndUpdate(

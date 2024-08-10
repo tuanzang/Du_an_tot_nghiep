@@ -146,7 +146,7 @@ const ProductAdd = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.post(
+        const response = await axios.get(
           "http://localhost:3001/api/categories",
           { status: "1" }
         );
