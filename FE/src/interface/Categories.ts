@@ -3,4 +3,5 @@ export interface ICategory {
   loai: string;
   status: string;
   products: string[];
+  options: { image: File | string }[];
 }
