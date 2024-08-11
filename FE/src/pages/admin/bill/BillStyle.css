@@ -46,18 +46,18 @@
   border-color: orange !important;
 }
 
-.chip-giao-hang {
-  border: 1px solid blue !important;
-  color: blue !important;
-  background: rgb(223, 223, 244) !important;
-  border-color: blue !important;
-}
-
 .chip-dang-van-chuyen {
   border: 1px solid #ff4500 !important;
   color: #ff4500 !important;
   background: #f6dbd2 !important;
   border-color: #ff4500 !important;
+}
+
+.chip-giao-hang {
+  border: 1px solid blue !important;
+  color: blue !important;
+  background: rgb(223, 223, 244) !important;
+  border-color: blue !important;
 }
 
 .chip-da-giao-hang {

@@ -147,14 +147,12 @@ const ProductAdd = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3001/api/categories",
-          { status: "1" }
+          "http://localhost:3001/api/categories"
         );
         setCates(response.data?.data);
 
-        const responseSizes = await axios.post(
-          "http://localhost:3001/api/sizes",
-          { status: "1" }
+        const responseSizes = await axios.get(
+          "http://localhost:3001/api/sizes"
         );
         setSizes(responseSizes.data?.data);
       } catch (error) {
@@ -251,7 +249,7 @@ const ProductAdd = () => {
         autoComplete="off"
         form={form}
       >
-        <div className="w-50 mx-auto">
+        <div className="w-75 mx-auto">
           <Card style={{ marginBottom: "10px" }}>
             <Form.Item<IProduct>
               label="Tên sản phẩm"
@@ -347,7 +345,7 @@ const ProductAdd = () => {
           </Card>
         </div>
 
-        <div className="w-50 mx-auto">
+        <div className="w-75 mx-auto">
           <Card>
             <div ref={editorContainerRef}>
               <div className="editor-container__editor">
