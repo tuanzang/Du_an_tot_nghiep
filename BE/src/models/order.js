@@ -58,6 +58,9 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    discountCode: {
+      type: String,
+    },
     statusShip: {
       type: Boolean,
       default: false,
