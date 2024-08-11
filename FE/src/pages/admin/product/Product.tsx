@@ -46,7 +46,7 @@ export default function Product() {
     try {
       const [productResponse, categoryResponse] = await Promise.all([
         axios.get("http://localhost:3001/api/products"),
-        axios.post("http://localhost:3001/api/categories"),
+        axios.get("http://localhost:3001/api/categories"),
       ]);
       setProducts(productResponse.data?.data);
       setCates(categoryResponse.data?.data);
@@ -216,10 +216,10 @@ export default function Product() {
       key: "status",
       align: "center",
       width: "10%",
-      render: (record: IProduct) => (
+      render: (status: any, record: any) => (
         <Switch
-          checked={record.status === 1}
-          onChange={(checked) => onChangeSwitch(checked, record._id)}
+          checked={status === 1}
+          onChange={(checked) => onChangeSwitch(checked, record.key)}
         />
       ),
     },

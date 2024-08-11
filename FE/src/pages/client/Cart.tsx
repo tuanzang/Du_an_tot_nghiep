@@ -96,11 +96,13 @@ export default function Cart() {
     socket.on("connect", onConnect);
     socket.on("hidden product", onHiddenProduct);
     socket.on("update product", onProductUpdate);
+    socket.on("option update", onProductUpdate);
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("hidden product", onHiddenProduct);
-      socket.off("hidden product", onProductUpdate);
+      socket.off("update product", onProductUpdate);
+      socket.off("option update", onProductUpdate);
     };
   }, [refetch]);
 
@@ -311,6 +313,7 @@ export default function Cart() {
                                 }
                               >
                                 <p>{option.name}</p>
+                                <p>{!option.status && 'Ẩn SP'}</p>
                               </div>
                             );
                           }

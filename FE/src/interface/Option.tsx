@@ -4,4 +4,5 @@ export interface IOption {
     price: number;
     quantity: number;
     status: number;
+    image: string;
 }

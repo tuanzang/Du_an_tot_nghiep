@@ -17,7 +17,7 @@ const transactionSchema = new mongoose.Schema(
     },
     type: {
       type: Boolean,
-      required: true,
+      required: true, // true - tiền mặt | false - chuyển khoản
     },
     totalMoney: {
       type: String,

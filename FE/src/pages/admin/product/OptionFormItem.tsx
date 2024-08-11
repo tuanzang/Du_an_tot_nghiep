@@ -7,7 +7,7 @@ interface IOptionFormItemProps {
   options: IOption[]
 }
 
-const OptionFormItem = ({value, onChange, options}: IOptionFormItemProps) => {
+const OptionFormItem = ({ value, onChange, options }: IOptionFormItemProps) => {
   if (!options.length) {
     return <p>Chưa chọn danh mục!</p>
   }
@@ -17,9 +17,14 @@ const OptionFormItem = ({value, onChange, options}: IOptionFormItemProps) => {
       value={value}
       onChange={onChange}
       style={{
-        flexDirection: 'column'
+        // flexDirection: 'column'
+        padding: "0 20px 0 20px"
       }}
-      options={options.map(it => ({ label: it.name, value: it._id }))}
+      options={options.map(it => ({
+        label: <p style={{
+          fontSize: 20,
+        }}>{it.name}</p>, value: it._id
+      }))}
     />
   )
 }

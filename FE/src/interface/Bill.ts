@@ -24,6 +24,7 @@ export interface IProductBill {
   image: string;
   size: string;
   variantId: string;
+  optionId: string;
   optionName: string;
   optionPrice: number;
 }

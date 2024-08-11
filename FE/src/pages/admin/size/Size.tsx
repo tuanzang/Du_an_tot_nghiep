@@ -9,9 +9,7 @@ import {
   Col,
   Input,
   Modal,
-  Radio,
   Row,
-  Switch,
   Table,
   Tooltip,
   Typography,
@@ -38,14 +36,12 @@ const CustomHeaderCell: React.FC<CustomTableHeaderCellProps> = (props) => (
 
 interface ISearchSize {
   name: string;
-  status: string | null;
   page: number;
 }
 export default function Size() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [filter, setFilter] = useState<ISearchSize>({
     name: "",
-    status: null,
     page: currentPage,
   });
   const pageSize = 5;
@@ -58,7 +54,6 @@ export default function Size() {
     _id: null,
     sizeCode: "",
     name: "",
-    status: "1",
   });
 
   const [openUpdateSize, setOpenUpdateSize] = useState(false);
@@ -66,15 +61,17 @@ export default function Size() {
     _id: null,
     sizeCode: "",
     name: "",
-    status: "1",
   });
 
   const fetchSizes = async (filter: ISearchSize, currentPage: number) => {
     try {
-      const response = await axios.post("http://localhost:3001/api/sizes", {
-        ...filter,
-        page: currentPage,
-      });
+      const response = await axios.post(
+        "http://localhost:3001/api/sizes/page",
+        {
+          ...filter,
+          page: currentPage,
+        }
+      );
       setSizes(response.data?.data);
       setTotalSize(response.data?.total);
     } catch (error) {
@@ -85,40 +82,6 @@ export default function Size() {
   useEffect(() => {
     fetchSizes(filter, currentPage);
   }, [filter, currentPage]);
-
-  // Xử lý thay đổi trạng thái
-  const handleStatusChange = (
-    checked: boolean,
-    sizeId: string | null,
-    filter: ISearchSize
-  ) => {
-    if (sizeId === null) {
-      toast.error("Không xác định được kích cỡ");
-    } else {
-      const newStatus = checked ? "1" : "0";
-      Modal.confirm({
-        title: "Xác nhận thay đổi trạng thái",
-        content: "Bạn có chắc chắn muốn thay đổi trạng thái của kích cỡ này ?",
-        okText: "Xác nhận",
-        cancelText: "Hủy",
-        onOk: async () => {
-          try {
-            await axios.post("http://localhost:3001/api/sizes/delete", {
-              _id: sizeId,
-              status: newStatus,
-            });
-            toast.success("Cập nhật trạng thái thành công");
-            fetchSizes(filter, currentPage);
-          } catch (error) {
-            toast.error("Cập nhật trạng thái thất bại");
-          }
-        },
-        onCancel() {
-          // Không làm gì khi người dùng hủy
-        },
-      });
-    }
-  };
 
   // api add size
   const handleAddSize = async (
@@ -158,7 +121,6 @@ export default function Size() {
           _id: data._id,
           sizeCode: data.sizeCode,
           name: data.name,
-          status: data.status,
         });
       } else {
         setOpenUpdateSize(false);
@@ -218,25 +180,6 @@ export default function Size() {
       width: "20%",
     },
     {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      align: "center" as const,
-      width: "10%",
-      render: (status: string, record: ISize) => (
-        <Switch
-          checked={status === "1"}
-          onChange={(checked) =>
-            handleStatusChange(checked, record._id ? record._id : null, filter)
-          }
-          style={{
-            backgroundColor: status === "1" ? "#87d068" : "#f50",
-            borderColor: status === "1" ? "#87d068" : "#f50",
-          }}
-        />
-      ),
-    },
-    {
       title: "Hành động",
       key: "action",
       align: "center" as const,
@@ -264,18 +207,7 @@ export default function Size() {
               onChange={(e) => setFilter({ ...filter, name: e.target.value })}
             />
           </Col>
-          <Col span={9}>
-            <span>Trạng thái: </span>
-            <Radio.Group
-              onChange={(e) => setFilter({ ...filter, status: e.target.value })}
-              value={filter.status}
-            >
-              <Radio value={null}>Tất cả</Radio>
-              <Radio value={"1"}>Hoạt động</Radio>
-              <Radio value={"0"}>Ngưng hoạt động</Radio>
-            </Radio.Group>
-          </Col>
-          <Col span={3}>
+          <Col span={12}>
             <Button
               type="link"
               icon={<PlusSquareOutlined />}

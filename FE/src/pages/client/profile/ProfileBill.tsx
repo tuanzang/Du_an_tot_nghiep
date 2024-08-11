@@ -82,7 +82,7 @@ export default function ProfileBill() {
     },
   ];
 
-  const listSttHD = ["1", "2", "3", "4", "5", "6", "7", "8", "0"];
+  const listSttHD = ["1", "2", "3", "4", "5", "6", "7", "0"];
 
   const [valueTabHD, setValueTabHD] = useState<string>("");
   const [totalBill, setTotalBill] = useState<number>(0);

@@ -26,7 +26,6 @@ import styleHoaDon from "../../../services/constants/styleHoaDon";
 import statusHoaDon from "../../../services/constants/statusHoaDon";
 import AdBillTransaction from "../../admin/bill/AdBillTransaction";
 import formatCurrency from "../../../services/common/formatCurrency";
-import { IProduct } from "../../../interface/Products";
 import dayjs from "dayjs";
 import ProfileMenu from "./ProfileMenu";
 import DialogAddUpdate from "../../admin/bill/DialogAddUpdateProps ";
@@ -35,6 +34,7 @@ import confirmStatus from "../../admin/bill/confirmStatus";
 import { IProductSize } from "../../../interface/ProductSize";
 import { IComment } from "../../../interface/Comments";
 import { CommentOutlined } from "@ant-design/icons";
+import { socket } from "../../../socket";
 
 const { TextArea } = Input;
 
@@ -75,19 +75,15 @@ export default function ProfileBillDetail() {
           setBillDetail(billData);
           setIdCustomer(billData.userId);
           setStatusBill(billData.status);
-
-          // Trích xuất variantId và quantity từ products
-          const productSizes = billData.products.map(
-            (product: IProductSizeBill) => ({
-              variantId: product.variantId,
-              quantity: product.quantity,
-            })
-          );
-          setListProductSize(productSizes);
+          setListProductSize(billData.products);
           // lấy ra tổng tiền hàng
           const totalProductPrice = billData.products.reduce(
-            (total: number, product: IProductBill) =>
-              total + product.price * product.quantity,
+            (
+              total: number,
+              product: { price: number; quantity: number; optionPrice?: number }
+            ) =>
+              total +
+              (product.price + (product.optionPrice || 0)) * product.quantity,
             0
           );
           setTotalProductPrice(totalProductPrice);
@@ -191,6 +187,36 @@ export default function ProfileBillDetail() {
     }
   };
 
+  // cập nhật trạng thái hóa đơn
+  const handleUpdateStatusBill = async (
+    id: string | null,
+    status: string,
+    user: IUser | null,
+    note: string
+  ) => {
+    setLoadingBill(true);
+    if (id === null || user === null) {
+      toast.error("Không tìm thấy hóa đơn");
+    } else {
+      try {
+        const response = await axios.post(
+          "http://localhost:3001/api/orders/update-status",
+          { id: id, status: status, statusShip: true }
+        );
+        createNewHistory(response.data.data, user, note);
+        getBillHistoryByIdBill(id);
+        setStatusBill(status);
+
+        if (status === "0") {
+          socket.emit("update voucher");
+        }
+      } catch (error) {
+        toast.error("Không tìm thấy hóa đơn");
+      }
+    }
+    setLoadingBill(false);
+  };
+
   // hủy hóa đơn
   const [openModalCancelBill, setOpenModalCancelBill] = useState(false);
   // hủy đơn hàng
@@ -260,60 +286,51 @@ export default function ProfileBillDetail() {
     );
   }
 
-  // cập nhật trạng thái hóa đơn
-  const handleUpdateStatusBill = async (
-    id: string | null,
-    status: string,
-    user: IUser | null,
-    note: string
-  ) => {
-    setLoadingBill(true);
-    if (id === null || user === null) {
-      toast.error("Không tìm thấy hóa đơn");
-    } else {
-      try {
-        const response = await axios.post(
-          "http://localhost:3001/api/orders/update-status",
-          { id: id, status: status, statusShip: true }
-        );
-        createNewHistory(response.data.data, user, note);
-        getBillHistoryByIdBill(id);
-        setStatusBill(status);
-      } catch (error) {
-        toast.error("Không tìm thấy hóa đơn");
-      }
-    }
-    setLoadingBill(false);
-  };
-
   // nhận hàng
-  const [openModelRecieve, setOpenModelRecieve] = useState(false);
-  function ModalRecieve() {
+  const [openModalReceived, setOpenModalReceived] = useState(false);
+  function ModalReceived() {
     const [ghiChu, setGhiChu] = useState("");
 
     // xác nhận nhận hàng hóa đơn
-    const handleConfirmComplete = () => {
-      confirmStatus({
-        title: "Xác nhận",
-        text: "Xác nhận đã nhận hàng ?",
-      }).then((result) => {
-        if (result) {
-          handleUpdateStatusBill(
-            id ? id : null,
-            "8",
-            user ? user : null,
-            ghiChu
+    const handleConfirmReceived = async () => {
+      if (!billDetail || !user) {
+        toast.error("Không thể nhận hàng");
+        return;
+      }
+      if (listTransaction.filter((trans) => trans.status === true).length < 1) {
+        const confirmPaymentRequest: ITransaction = {
+          _id: null,
+          idUser: user._id,
+          idBill: billDetail._id,
+          transCode: "",
+          type: true, // tiền mặt
+          totalMoney: billDetail.totalPrice,
+          note: ghiChu,
+          status: true,
+          createdAt: "",
+        };
+
+        // xác nhận nhận hàng
+        try {
+          await axios.post(
+            "http://localhost:3001/api/trans/add",
+            confirmPaymentRequest
           );
-          toast.success("Xác nhận đã nhận hàng thành công!");
-          setOpenModelRecieve(false);
+          getTransBillByIdBill(billDetail._id);
+          // cập nhật trạng thái
+          toast.success("nhận hàng thành công");
+        } catch (error) {
+          toast.error("nhận hàng thất bại");
         }
-      });
+      }
+      handleUpdateStatusBill(id ? id : null, "5", user ? user : null, ghiChu);
+      setOpenModalReceived(false);
     };
 
     return (
       <DialogAddUpdate
-        open={openModelRecieve}
-        setOpen={setOpenModelRecieve}
+        open={openModalReceived}
+        setOpen={setOpenModalReceived}
         title={"Xác nhận nhận hàng"}
         buttonSubmit={
           <Button
@@ -322,7 +339,7 @@ export default function ProfileBillDetail() {
               textTransform: "none",
               borderRadius: "8px",
             }}
-            onClick={handleConfirmComplete}
+            onClick={handleConfirmReceived}
           >
             Lưu
           </Button>
@@ -359,14 +376,14 @@ export default function ProfileBillDetail() {
               </Button>
             </div>
           );
-        case "7":
+        case "4":
           return (
             <div>
               <Button
                 className="them-moi"
                 color="cam"
                 style={{ marginRight: "5px" }}
-                onClick={() => setOpenModelRecieve(true)}
+                onClick={() => setOpenModalReceived(true)}
               >
                 Xác nhận nhận hàng
               </Button>
@@ -616,8 +633,11 @@ export default function ProfileBillDetail() {
             <ProfileMenu small={false} />
           </Col>
           <Col span={18}>
-            {openModelRecieve && <ModalRecieve />}
+            {/*đã giao hàng */}
+            {openModalReceived && <ModalReceived />}
+            {/*hủy đơn */}
             {openModalCancelBill && <ModalCancelBill />}
+            {/* comment */}
             {openModelComment && <ModalCommentProductSize />}
 
             {/* lịch sử đơn hàng */}
@@ -844,11 +864,12 @@ export default function ProfileBillDetail() {
                       dataIndex="name"
                       key="name"
                       width={"25%"}
-                      render={(name: string, record: IProductBill) => {
+                      render={(name, record: IProductBill) => {
                         return (
                           <>
                             <p>Tên: {name}</p>
-                            <p>Size: {record?.size}</p>
+                            <p>kích cỡ: {record?.size}</p>
+                            <p>Phụ kiện: {record?.optionName}</p>
                           </>
                         );
                       }}
@@ -857,7 +878,7 @@ export default function ProfileBillDetail() {
                       title="Số lượng"
                       dataIndex="quantity"
                       key="quantity"
-                      width={statusBill === "7" ? "15%" : "25%"}
+                      width={"15%"}
                       render={(value: number) => (
                         <div
                           style={{
@@ -877,7 +898,7 @@ export default function ProfileBillDetail() {
                       )}
                     />
                     <Table.Column
-                      title="Giá tiền"
+                      title="Giá sản phẩm"
                       dataIndex="price"
                       key="price"
                       width={"15%"}
@@ -888,18 +909,31 @@ export default function ProfileBillDetail() {
                       }
                     />
                     <Table.Column
+                      title="Giá phụ kiện"
+                      key="priceOption"
+                      width={"15%"}
+                      render={(record: IProductBill) =>
+                        formatCurrency({
+                          money: String(record.optionPrice || 0),
+                        })
+                      }
+                    />
+                    <Table.Column
                       title="Thành tiền"
                       key="totalPrice"
-                      width={"15%"}
-                      render={(row: IProduct) => (
+                      width={"20%"}
+                      render={(row: IProductBill) => (
                         <span style={{ fontWeight: "bold", color: "red" }}>
                           {formatCurrency({
-                            money: String((row.price || 0) * row.quantity),
+                            money: String(
+                              (row.price + (row.optionPrice || 0)) *
+                                row.quantity
+                            ),
                           })}
                         </span>
                       )}
                     />
-                    {statusBill === "7" && (
+                    {statusBill === "6" && (
                       <Table.Column
                         title=""
                         key="comment"

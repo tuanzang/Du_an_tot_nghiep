@@ -1,9 +1,10 @@
-import Option from '../models/option';
+import Option from "../models/option.js";
 
 // Thêm một tùy chọn mới
 export const addOption = async (req, res) => {
   try {
-    const { category, nameoption, quantityoption, priceoption, status } = req.body;
+    const { category, nameoption, quantityoption, priceoption, status, image } =
+      req.body;
 
     // Tạo một đối tượng tùy chọn mới
     const newOption = new Option({
@@ -11,7 +12,8 @@ export const addOption = async (req, res) => {
       nameoption,
       quantityoption,
       priceoption,
-      status
+      status,
+      image,
     });
 
     // Lưu đối tượng tùy chọn mới vào cơ sở dữ liệu
@@ -19,14 +21,14 @@ export const addOption = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'Tùy chọn đã được tạo thành công',
-      data: newOption
+      message: "Tùy chọn đã được tạo thành công",
+      data: newOption,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: 'Lỗi máy chủ',
-      error: error.message
+      message: "Lỗi máy chủ",
+      error: error.message,
     });
   }
 };
@@ -35,7 +37,8 @@ export const addOption = async (req, res) => {
 export const updateOption = async (req, res) => {
   try {
     const { id } = req.params;
-    const { category, nameoption, quantityoption, priceoption, status } = req.body;
+    const { category, nameoption, quantityoption, priceoption, status } =
+      req.body;
 
     // Tìm tùy chọn theo ID và cập nhật
     const updatedOption = await Option.findByIdAndUpdate(
@@ -47,20 +50,20 @@ export const updateOption = async (req, res) => {
     if (!updatedOption) {
       return res.status(404).json({
         success: false,
-        message: 'Không tìm thấy tùy chọn'
+        message: "Không tìm thấy tùy chọn",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Tùy chọn đã được cập nhật thành công',
-      data: updatedOption
+      message: "Tùy chọn đã được cập nhật thành công",
+      data: updatedOption,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: 'Lỗi máy chủ',
-      error: error.message
+      message: "Lỗi máy chủ",
+      error: error.message,
     });
   }
 };
@@ -76,19 +79,19 @@ export const deleteOption = async (req, res) => {
     if (!deletedOption) {
       return res.status(404).json({
         success: false,
-        message: 'Không tìm thấy tùy chọn'
+        message: "Không tìm thấy tùy chọn",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Tùy chọn đã được xóa thành công'
+      message: "Tùy chọn đã được xóa thành công",
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: 'Lỗi máy chủ',
-      error: error.message
+      message: "Lỗi máy chủ",
+      error: error.message,
     });
   }
 };
@@ -100,12 +103,12 @@ export const getOptionsByCategoryId = async (req, res) => {
     const options = await Option.find({ category: categoryId }).exec();
 
     res.json({
-      message: 'Get option successfully',
-      data: options
-    })
+      message: "Get option successfully",
+      data: options,
+    });
   } catch (error) {
     res.status(500).json({
-      message: 'Internal server error'
-    })
+      message: "Internal server error",
+    });
   }
-}
+};

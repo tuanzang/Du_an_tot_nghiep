@@ -7,11 +7,6 @@ const categorySchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    status: {
-      type: String,
-      required: true,
-      default: "1",
-    },
   },
   {
     timestamps: true,

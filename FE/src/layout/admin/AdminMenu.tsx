@@ -75,11 +75,7 @@ export default function AdminMenu({ small }: Props) {
       icon: <GiftOutlined />,
       label: <Link to="/admin/voucher">Mã giảm giá</Link>,
     },
-    {
-      key: "voucher",
-      icon: <TagsOutlined />,
-      label: <Link to="/admin/voucher">Mã giảm giá</Link>,
-    },
+ 
     {
       key: "users",
       icon: <UserOutlined />,
