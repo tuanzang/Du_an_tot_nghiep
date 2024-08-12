@@ -39,3 +39,27 @@
   color: red;
   font-size: 12px;
 }
+
+.option-images {
+  display: flex;
+  gap: 12px;
+}
+
+.option-image {
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.25s linear;
+}
+
+.option-image.selected,
+.option-image:hover {
+  border: 1px solid #c29958;
+}
+
+.option-image img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}

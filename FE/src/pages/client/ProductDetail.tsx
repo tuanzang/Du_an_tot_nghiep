@@ -21,7 +21,9 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1); // State for quantity
   const [selectedSize, setSelectedSize] = useState<IProductSize | null>();
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
-  const [optionSelected, setOptionSelected] = useState<IOption | null>()
+  const [optionSelected, setOptionSelected] = useState<IOption | null>();
+  const [optionImageSelected, setOptionImageSelected] = useState<IOption | null>();
+  const [productImage, setProductImage] = useState<string>();
 
   // product price
   const productPrice = useMemo(() => {
@@ -40,14 +42,6 @@ export default function ProductDetail() {
 
     return `${formatPrice(minPrice === 0 ? secondMinPrice : minPrice)} - ${formatPrice(Math.max(...productSizePrices))}`;
   }, [selectedSize, product, optionSelected]);
-
-  const productImage = useMemo(() => {
-    if (!optionSelected) {
-      return product?.image?.[0];
-    }
-
-    return optionSelected?.image;
-  }, [optionSelected, product?.image]);
 
   // lấy token đăng nhập
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
@@ -78,6 +72,7 @@ export default function ProductDetail() {
         );
         const productData = response.data.data;
         setProduct(productData);
+        setProductImage(productData?.image?.[0])
       }
     } catch (error) {
       console.error("Error fetching product:", error);
@@ -227,8 +222,14 @@ export default function ProductDetail() {
   };
 
   const onOptionClick = (option?: IOption) => {
-    setOptionSelected(option)
-  }
+    setOptionSelected(option);
+
+    if (option) {
+      setProductImage(option?.image);
+    } else {
+      setProductImage(product?.image?.[0]);
+    }
+  };
 
   return (
     <div>
@@ -286,6 +287,21 @@ export default function ProductDetail() {
                           src={productImage}
                           alt="product-details"
                         />
+                      </div>
+
+                      <div className="option-images">
+                        {product?.options?.map(it => (
+                          <div
+                            key={`option-image-${it._id}`}
+                            className={`option-image ${optionImageSelected?._id === it._id && 'selected'}`}
+                            onClick={() => {
+                              setOptionImageSelected(it);
+                              setProductImage(it?.image);
+                            }}
+                          >
+                            <img src={it.image} alt="Option img" />
+                          </div>
+                        ))}
                       </div>
                       <div className="tab-content"></div>
                     </div>
