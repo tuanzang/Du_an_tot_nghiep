@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMyCartQuery } from "../../hooks/useCart";
-import { Typography, Modal, Radio, Card, Button } from "antd";
+import { Typography, Modal, Radio, Card, Space } from "antd";
 import { formatPrice } from "../../services/common/formatCurrency";
-import { SubmitHandler, useForm } from "react-hook-form";
 import OrderApi from "../../config/orderApi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -15,31 +14,41 @@ import {
   removeProduct,
   selectProductSelected,
   selectTotalPrice,
+  updateStatus,
 } from "../../store/cartSlice";
 import { USER_INFO_STORAGE_KEY } from "../../services/constants";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { socket } from "../../socket";
 import { IVoucher } from "../../interface/Voucher";
 import dayjs from "dayjs";
 import axios from "axios";
-import "./checkout.css"
-const SHIPPING_COST = 30000; 
+import "./checkout.css";
+const SHIPPING_COST = 30000;
 // import { useLocation } from "react-router-dom";
 const { Text } = Typography;
 
-type Inputs = {
+interface IDataBill {
   customerName: string;
-  address: string;
   phone: string;
+  address: string;
   message: string;
   paymentMethod: string;
-};
+}
 
 const Checkout = () => {
   // lấy thông tin user đăng nhập
   const isLogged = localStorage.getItem(USER_INFO_STORAGE_KEY);
   const user: IUser | null = isLogged ? JSON.parse(isLogged) : null;
 
+  const [dataBill, setDataBill] = useState<IDataBill>({
+    customerName: user ? user.name : "",
+    phone: user ? user.phoneNumber : "",
+    address: "",
+    message: "",
+    paymentMethod: "COD",
+  });
+
+  const { data, refetch: refetchCart } = useMyCartQuery();
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
   const totalPrice = useSelector(selectTotalPrice);
@@ -47,9 +56,27 @@ const Checkout = () => {
   const { refetch } = useMyCartQuery();
   const navigate = useNavigate();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [discountCodes, setDiscountCodes] = useState([]);
+  const [discountCodes, setDiscountCodes] = useState<IVoucher[]>([]);
   const [selectedDiscountCode, setSelectedDiscountCode] = useState(null);
-  const [totalDiscount, setTotalDiscount] = useState(0);
+  const [totalDiscount, setTotalDiscount] = useState<number>(0);
+
+  useEffect(() => {
+    dispatch(
+      updateStatus({
+        prevData: productSelected,
+        newData: data?.data?.products,
+      })
+    );
+  }, [data]);
+
+  useEffect(() => {
+    dispatch(
+      updateStatus({
+        prevData: productSelected,
+        newData: data?.data?.products,
+      })
+    );
+  }, [data]);
 
   // initial socket
   useEffect(() => {
@@ -57,10 +84,30 @@ const Checkout = () => {
       dispatch(removeProduct(productId));
     };
 
+    const onProductUpdate = () => {
+      refetchCart();
+      // console.log('client update', data);
+    };
+
+    const onUpdateVoucherQnt = (code: string) => {
+      console.log("client update", code);
+      fetchDiscountCode();
+    };
+
+    const onOptionUpdate = () => {
+      navigate(-1);
+    }
+
     socket.on("hidden product", onHiddenProduct);
+    socket.on("update product", onProductUpdate);
+    socket.on("update voucher", onUpdateVoucherQnt);
+    socket.on('option update', onOptionUpdate);
 
     return () => {
       socket.off("hidden product", onHiddenProduct);
+      socket.off("update product", onProductUpdate);
+      socket.off("update voucher", onUpdateVoucherQnt);
+      socket.off('option update', onOptionUpdate);
     };
   }, [dispatch, navigate, productSelected.length]);
 
@@ -70,26 +117,34 @@ const Checkout = () => {
     }
   }, [navigate, productSelected.length]);
 
-  // const { register, handleSubmit } = useForm<Inputs>({
-  //   defaultValues: {
-  //     paymentMethod: "COD",
-  //   },
-  // });
-  const { register, handleSubmit, formState: { errors } } = useForm<Inputs>({
-    defaultValues: {
-      paymentMethod: "COD",
-    },
-  });
-
-  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+  const handleCreateBill = async (
+    dataBill: IDataBill,
+    productSelected: ICartItem[],
+    SHIPPING_COST: number,
+    totalDiscount: number
+  ) => {
     try {
       const productSelectedIds = productSelected.map((it) => it.variant._id);
       const res = await OrderApi.createOrder({
-        ...data,
+        ...dataBill,
         productSelectedIds,
         shippingCost: SHIPPING_COST,
         discouVoucher: totalDiscount,
+        discountCode: selectedDiscountCode,
       });
+      console.log(res);
+
+      if (res.data.success === false) {
+        toast.error(res.data.message);
+      }
+
+      if (selectedDiscountCode) {
+        socket.emit("update voucher", selectedDiscountCode);
+      }
+
+      if (selectedDiscountCode) {
+        socket.emit("update voucher quantity", selectedDiscountCode);
+      }
 
       if (data?.paymentMethod === "COD") {
         createNewHistory(res.data.data._id, "1", user);
@@ -97,7 +152,13 @@ const Checkout = () => {
         navigate("/");
         refetch();
       } else {
-        window.location.href = res?.data?.paymentUrl;
+        if (dataBill?.paymentMethod === "COD") {
+          createNewHistory(res.data.data._id, "1", user);
+          navigate("/");
+          refetch();
+        } else {
+          window.location.href = res?.data?.paymentUrl;
+        }
       }
     } catch (error) {
       toast.error("Đặt hàng thất bại!");
@@ -130,16 +191,24 @@ const Checkout = () => {
         "http://localhost:3001/api//history-bill/add",
         dataHistoryBill
       );
+      toast.success("Đặt hàng thành công!");
     } catch (error) {
       toast.error("Tạo lịch sử thất bại");
     }
   };
-  
-const discountedPrice = totalPrice - totalDiscount;
-const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
+
+  const discountedPrice = useMemo(() => {
+    const discountedPrice = totalPrice - totalDiscount;
+    return discountedPrice < 0 ? 0 : discountedPrice;
+  }, [totalPrice, totalDiscount]);
+
+  const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
 
   useEffect(() => {
-    // Fetch mã giảm giá từ API
+    fetchDiscountCode();
+  }, []);
+
+  const fetchDiscountCode = () => {
     axios
       .get("http://localhost:3001/api/discountCode/discountCodes")
       .then((response) => {
@@ -148,7 +217,7 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
       .catch((error) => {
         console.error("Error fetching discount codes:", error);
       });
-  }, []);
+  };
 
   const showDiscountModal = () => {
     setIsModalVisible(true);
@@ -162,9 +231,11 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
       if (selectedCode) {
         let discountAmount = 0;
         if (selectedCode.discountType === "percentage") {
-          discountAmount = (totalPrice * selectedCode.discountPercentage) / 100;
+          discountAmount = Number(
+            (totalPrice * Number(selectedCode.discountPercentage)) / 100
+          );
         } else if (selectedCode.discountType === "amount") {
-          discountAmount = selectedCode.discountAmount;
+          discountAmount = Number(selectedCode.discountAmount);
         }
         setTotalDiscount(discountAmount);
       }
@@ -184,104 +255,105 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
     <div className="container mt-5">
       <div className="row">
         <div className="col-md-5 mb-3">
-          <h2 >Thanh Toán Đơn Hàng</h2>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label"></label>
-              <input
-                type="text"
-                className="form-control"
-                id="name"
-                placeholder="Họ và tên"
-                {...register("customerName", {
-                  required: true,
-                })}
-              />
-            </div>
-            <div className="mb-3">
-  <input
-    type="text"
-    className="form-control"
-    id="number"
-    placeholder="Số điện thoại"
-    {...register("phone", {
-      required: "Số điện thoại là bắt buộc",
-      pattern: {
-        value: /^0[3-9]\d{8}$/,
-        message: "Số điện thoại không hợp lệ"
-      }
-    })}
-  />
-  {errors.phone && <p className="error-message">{errors.phone.message}</p>}
-</div>
+          <h2>Thanh Toán Đơn Hàng</h2>
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label"></label>
+            <input
+              type="text"
+              className="form-control"
+              id="customerName"
+              placeholder="Họ và tên"
+              value={dataBill.customerName}
+              onChange={(e) =>
+                setDataBill({ ...dataBill, customerName: e.target.value })
+              }
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              id="number"
+              placeholder="Số điện thoại"
+              value={dataBill.phone}
+              onChange={(e) =>
+                setDataBill({ ...dataBill, phone: e.target.value })
+              }
+            />
+          </div>
 
-            <div className="mb-3">
-              <input
-                type="text"
-                className="form-control"
-                id="address"
-                placeholder="Địa chỉ"
-                {...register("address", {
-                  required: true,
-                })}
-              />
-            </div>
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              id="address"
+              placeholder="Địa chỉ"
+              value={dataBill.address}
+              onChange={(e) =>
+                setDataBill({ ...dataBill, address: e.target.value })
+              }
+            />
+          </div>
 
-            <div className="md-3 ">
-              <input
-                type="text"
-                className="form-control"
-                id="city"
-                placeholder="Ghi chú"
-                {...register("message", {
-                  required: true,
-                })}
-              />
-            </div>
-            <div className="fw-normal fs-5 mt-5">Phương thức thanh toán</div>
-            <div className="d-flex flex-column md-3">
-              <div className=" p-2 form-check ">
-                <input
-                  type="radio"
-                  className="form-check-input"
-                  value="COD"
-                  {...register("paymentMethod")}
-                />
-                <label className="form-check-label">
-                  Thanh toán sau khi nhận hàng
-                </label>
-              </div>
-              <div className="p-2 form-check">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  id="myCheckbox"
-                  value="VNPAY"
-                  {...register("paymentMethod")}
-                />
-                <label className="form-check-label" htmlFor="myCheckbox">
-                  Thanh toán ngay
-                </label>
-              </div>
-            </div>
-            <hr />
-            <div className="d-flex justify-content-between">
-              <a href=""> Giỏ hàng</a>
-              <button
-                type="submit"
-                className="btn btn-primary bg-warning px-4 py-3"
+          <div className="md-3 ">
+            <input
+              type="text"
+              className="form-control"
+              id="city"
+              placeholder="Ghi chú"
+              value={dataBill.message}
+              onChange={(e) =>
+                setDataBill({ ...dataBill, message: e.target.value })
+              }
+            />
+          </div>
+          <div className="fw-normal fs-5 mt-5">Phương thức thanh toán</div>
+          <div className="d-flex flex-column md-3">
+            <div className=" p-2 form-check ">
+              <Radio.Group
+                onChange={(e) =>
+                  setDataBill({ ...dataBill, paymentMethod: e.target.value })
+                }
+                value={dataBill.paymentMethod}
               >
-                Hoàn tất đơn hàng
-              </button>
+                <Space direction="vertical">
+                  <Radio value={"COD"}>Thanh toán sau khi nhận hàng</Radio>
+                  <Radio value={"VNPAY"}>Thanh toán ngay</Radio>
+                </Space>
+              </Radio.Group>
             </div>
-          </form>
+          </div>
+          <hr />
+          <div className="d-flex justify-content-between">
+            <a href=""> Giỏ hàng</a>
+            <button
+              type="submit"
+              className="btn btn-primary bg-warning px-4 py-3"
+              onClick={() =>
+                handleCreateBill(
+                  dataBill,
+                  productSelected,
+                  SHIPPING_COST,
+                  totalDiscount
+                )
+              }
+              disabled={!productSelected.every((item) => item.variant.status)}
+              style={{
+                opacity: productSelected.every((item) => item.variant.status)
+                  ? 1
+                  : 0.5,
+              }}
+            >
+              Hoàn tất đơn hàng
+            </button>
+          </div>
         </div>
         <div className="col-md-7 bg-light">
           <h3 className="mt-2">Giỏ Hàng</h3>
           <table className="table">
             <thead>
               <tr>
-                <th style={{ width: 250 }}>Tên sản phẩm</th>
+                <th style={{ width: 180 }}>Tên sản phẩm</th>
                 {/* <th>ảnh</th> */}
                 <th>Giá</th>
                 <th>Số lượng</th>
@@ -290,17 +362,29 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
               </tr>
             </thead>
             <tbody>
-              {productSelected?.map((item) => (
-                <tr key={item._id}>
+              {productSelected?.map((item: ICartItem) => (
+                <tr
+                  key={item._id}
+                  style={{ opacity: item.variant.status ? 1 : 0.5 }}
+                >
                   <td>
                     {item.product.name} (Size: {item.variant?.sizeName})
+                    {/* {item.variant.status} */}
+                    {!item.variant.status && (
+                      <p className="out-of-stock-text">
+                        Sản phẩm đang ngừng hoạt động
+                      </p>
+                    )}
                   </td>
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
-                  <td>{item.option.name}<br/>
-                    {item.option.price}
+
+                  <td>
+                    {item.option?.name}
+                    <br />
+                    {item.option?.price}
                   </td>
-                  <td>{formatPrice(item.variant.price * item.quantity)}</td>
+                  <td>{formatPrice(totalPrice)}</td>
                   {/* <td> {formatPrice(SHIPPING_COST)}</td> */}
                 </tr>
               ))}
@@ -354,7 +438,7 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              marginTop: "20px",
+              marginTop: "10px",
             }}
           >
             <span
@@ -368,13 +452,21 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
                 borderRadius: "5px",
                 padding: "5px 10px",
                 boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+                margin: "0 0 5px 5px",
+                opacity: productSelected.every((item) => item.variant.status)
+                  ? 1
+                  : 0.5,
+                pointerEvents: productSelected.every(
+                  (item) => item.variant.status
+                )
+                  ? "auto"
+                  : "none",
               }}
             >
               Chọn mã giảm giá
             </span>
           </div>
 
-          {/* <span style={{float:"right"}}>- 10.000 VNĐ</span> */}
           <Modal
             title="Mã giảm giá"
             visible={isModalVisible}
@@ -385,22 +477,23 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
               onChange={handleDiscountCodeChange}
               value={selectedDiscountCode}
             >
-              {discountCodes.map((code: IVoucher) => (
-                <Card
+              {discountCodes.map((code: IVoucher) => {
+                const isDisable = !code.minPurchaseAmount ||
+                totalPrice < code.minPurchaseAmount ||
+                (user && code.userIds.includes(user?._id)) ||
+                code.quantity === code.usedCount ||
+                code.status === 'inactive'
+                ;
+
+                return <Card
                   key={code._id}
                   style={{
                     backgroundColor: "#66FF66",
                     marginBottom: 10,
                     opacity:
-                      code.minPurchaseAmount !== undefined &&
-                      totalPrice >= code.minPurchaseAmount
-                        ? 1
-                        : 0.5,
+                      isDisable ? 0.5 : 1,
                     pointerEvents:
-                      code.minPurchaseAmount !== undefined &&
-                      totalPrice >= code.minPurchaseAmount
-                        ? "auto"
-                        : "none",
+                      isDisable ? 'none' : 'auto',
                   }}
                 >
                   <Radio
@@ -434,7 +527,7 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
                     </span>
                   </Radio>
                 </Card>
-              ))}
+              })}
             </Radio.Group>
           </Modal>
 
@@ -446,8 +539,12 @@ const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
             }}
           >
             {selectedDiscountCode ? (
-              <div className="d-flex justify-content-between">
-                <p>{selectedDiscountCode}</p>
+              <div className="d-flex justify-content-between px-3">
+                <p style={{
+                  opacity: productSelected.every((item) => item.variant.status)
+                    ? 1
+                    : 0.5,
+                }}>{selectedDiscountCode}</p>
                 <p>- {totalDiscount > 0 ? formatPrice(totalDiscount) : null}</p>
               </div>
             ) : null}

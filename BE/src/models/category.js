@@ -5,11 +5,7 @@ const categorySchema = new mongoose.Schema(
     loai: {
       type: String,
       required: true,
-    },
-    status: {
-      type: Boolean,
-      required: true,
-      default: true,
+      unique: true,
     },
   },
   {

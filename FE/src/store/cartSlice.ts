@@ -43,10 +43,28 @@ export const cartSlice = createSlice({
         return res += price;
       }, 0);
     },
+
+    updateStatus: (state, { payload }) => {
+      state.productSelected = payload.prevData.map((it: any) => {
+        if (it?.variant) {
+          const findOption = payload.newData.find((x: any) => x?.variant?._id === it.variant._id);
+
+          return {
+            ...it, 
+            variant: {
+              ...it.variant,
+              status: findOption?.variant?.status
+            }
+          }
+        }
+
+        return it;
+      }) as any;
+    }
   },
 });
 
-export const { updateProductSelected, resetProductSelected, removeProduct } =
+export const { updateProductSelected, resetProductSelected, removeProduct, updateStatus } =
   cartSlice.actions;
 export const selectProductSelected = (state: any) => state.cart.productSelected;
 export const selectTotalPrice = (state: any) => state.cart.totalPrice;

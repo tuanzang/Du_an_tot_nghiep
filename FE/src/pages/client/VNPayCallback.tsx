@@ -95,6 +95,7 @@ const VNPayCallback = () => {
       idUser: user._id,
       idBill: bill._id,
       transCode: transCode,
+      type: false,
       totalMoney: bill.totalPrice,
       note: "",
       status: true,

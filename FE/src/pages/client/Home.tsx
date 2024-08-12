@@ -4,6 +4,7 @@ import "./Home.css";
 import axios from "axios";
 import { IProduct } from "../../interface/Products";
 import ProductItem from "../../components/ProductItem";
+import { socket } from "../../socket";
 
 const contentStyle: React.CSSProperties = {
   height: "530px",
@@ -24,15 +25,27 @@ export default function Home() {
   // });
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3001/api/products`);
-        setProduct(response.data?.data);
-      } catch (error) {
-        console.log("Khong co du lieu");
-      }
+    const onHiddenProduct = () => {
+      fetchProducts()
     };
 
+    socket.on("hidden product", onHiddenProduct);
+
+    return () => {
+      socket.off("hidden product", onHiddenProduct);
+    };
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/products`);
+      setProduct(response.data?.data);
+    } catch (error) {
+      console.log("Khong co du lieu");
+    }
+  };
+
+  useEffect(() => {
     fetchProducts();
   }, []);
 

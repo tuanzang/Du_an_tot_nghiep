@@ -1,4 +1,5 @@
 import Order from "../models/order.js";
+import optionCategorios from "../models/option.js";
 import productSize from "../models/productSize.js";
 
 /**
@@ -71,6 +72,7 @@ export const getAllBill = async (req, res) => {
         message: "Không tìm thấy đơn hàng!",
         data: [],
         total: 0,
+        size: pageSize,
       });
     }
 
@@ -167,7 +169,7 @@ export const updateStatusBill = async (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Success",
+      message: "Cập nhật trạng thái thành công",
       data: updatedOrder,
     });
   } catch (error) {
@@ -178,12 +180,12 @@ export const updateStatusBill = async (req, res) => {
 };
 
 /**
- * API giảm số lượng product size
+ * API giảm số lượng product size và Option
  * @param req
  * @param res
  * @returns
  */
-export const decreaseProductSize = async (req, res) => {
+export const decreaseProductSizeAndOption = async (req, res) => {
   try {
     const { listProductSize } = req.body;
 
@@ -193,51 +195,93 @@ export const decreaseProductSize = async (req, res) => {
       });
     }
 
-    const updatedProducts = [];
-
     for (const product of listProductSize) {
-      const { variantId, quantity } = product;
+      const { variantId, quantity, optionId } = product;
 
-      if (!variantId || quantity === undefined) {
+      if (
+        quantity === undefined ||
+        quantity === null ||
+        isNaN(quantity) ||
+        quantity <= -1
+      ) {
         return res.status(400).json({
           message: "Thông tin sản phẩm không đầy đủ",
         });
       }
 
-      const currentProduct = await productSize
-        .findById({ _id: variantId })
-        .exec();
+      // kiểm tra nếu varianId xác định thì valdiate
+      if (variantId) {
+        const currentProduct = await productSize
+          .findById({ _id: variantId })
+          .exec();
 
-      if (!currentProduct) {
-        return res.status(404).json({
-          message: `Không tìm thấy sản phẩm với ID: ${variantId}`,
-        });
+        if (!currentProduct) {
+          return res.status(404).json({
+            message: `Không tìm thấy sản phẩm với ID: ${variantId}`,
+          });
+        }
+
+        if (currentProduct.quantity < quantity) {
+          return res.status(400).json({
+            message: `Số lượng của sản phẩm không đủ`,
+          });
+        }
+
+        await productSize.findByIdAndUpdate(
+          { _id: variantId },
+          {
+            $inc: { quantity: -quantity }, // Giảm số lượng
+            $set: {
+              // Cập nhật trạng thái nếu cần
+              status:
+                currentProduct.quantity - quantity === 0
+                  ? 0
+                  : currentProduct.status,
+            },
+          }
+        );
       }
 
-      if (currentProduct.quantity < quantity) {
-        return res.status(400).json({
-          message: `Số lượng của sản phẩm không đủ`,
-        });
+      // kiểm tra nếu optionId xác định thì valdiate
+      if (optionId) {
+        const currentOption = await optionCategorios
+          .findById({ _id: optionId })
+          .exec();
+
+        if (!currentOption) {
+          return res.status(404).json({
+            message: `Không tìm thấy phụ kiện với ID: ${optionId}`,
+          });
+        }
+
+        if (currentOption.quantity < quantity) {
+          return res.status(400).json({
+            message: `Số lượng của phụ kiện không đủ`,
+          });
+        }
+
+        await optionCategorios.findByIdAndUpdate(
+          { _id: optionId },
+          {
+            $inc: { quantity: -quantity }, // Giảm số lượng
+            $set: {
+              // Cập nhật trạng thái nếu cần
+              status:
+                currentOption.quantity - quantity === 0
+                  ? 0
+                  : currentOption.status,
+            },
+          }
+        );
       }
-
-      currentProduct.quantity -= quantity;
-
-      // Cập nhật trạng thái nếu số lượng bằng 0
-      if (currentProduct.quantity === 0) {
-        currentProduct.status = false;
-      }
-
-      await currentProduct.save();
-      updatedProducts.push(currentProduct);
     }
 
     return res.status(200).json({
       message: "Cập nhật thành công",
-      data: updatedProducts,
     });
   } catch (error) {
     res.status(500).json({
-      message: "Internal server error",
+      message: error,
     });
   }
 };
@@ -248,51 +292,86 @@ export const decreaseProductSize = async (req, res) => {
  * @param res
  * @returns
  */
-export const increaseProductSize = async (req, res) => {
+export const increaseProductSizeAndOption = async (req, res) => {
+  const { listProductSize } = req.body;
+
+  if (!Array.isArray(listProductSize) || listProductSize.length === 0) {
+    return res.status(400).json({
+      message: "Danh sách sản phẩm không hợp lệ",
+    });
+  }
   try {
-    const { listProductSize } = req.body;
-
-    if (!Array.isArray(listProductSize) || listProductSize.length === 0) {
-      return res.status(400).json({
-        message: "Danh sách sản phẩm không hợp lệ",
-      });
-    }
-
-    const updatedProducts = [];
-
     for (const product of listProductSize) {
-      const { variantId, quantity } = product;
+      const { variantId, quantity, optionId } = product;
 
-      if (!variantId || quantity === undefined) {
+      if (
+        quantity === undefined ||
+        quantity === null ||
+        isNaN(quantity) ||
+        quantity <= -1
+      ) {
         return res.status(400).json({
           message: "Thông tin sản phẩm không đầy đủ",
         });
       }
 
-      const currentProduct = await productSize
-        .findById({ _id: variantId })
-        .exec();
+      // kiểm tra nếu varianId xác định thì valdiate
+      if (variantId) {
+        const currentProduct = await productSize
+          .findById({ _id: variantId })
+          .exec();
 
-      if (!currentProduct) {
-        return res.status(404).json({
-          message: `Không tìm thấy sản phẩm với ID: ${variantId}`,
-        });
+        if (!currentProduct) {
+          return res.status(404).json({
+            message: `Không tìm thấy sản phẩm với ID: ${variantId}`,
+          });
+        }
+
+        await productSize.findByIdAndUpdate(
+          { _id: variantId },
+          {
+            $inc: { quantity: quantity }, // tăng số lượng
+            $set: {
+              // Cập nhật trạng thái nếu cần
+              status:
+                currentProduct.quantity + quantity > 0
+                  ? 1
+                  : currentProduct.status,
+            },
+          }
+        );
       }
 
-      currentProduct.quantity += quantity;
+      // kiểm tra nếu optionId xác định thì valdiate
+      if (optionId) {
+        const currentOption = await optionCategorios
+          .findById({ _id: optionId })
+          .exec();
 
-      // Cập nhật trạng thái nếu số lượng > 0
-      if (currentProduct.quantity > 0) {
-        currentProduct.status = true;
+        if (!currentOption) {
+          return res.status(404).json({
+            message: `Không tìm thấy phụ kiện với ID: ${optionId}`,
+          });
+        }
+
+        await optionCategorios.findByIdAndUpdate(
+          { _id: optionId },
+          {
+            $inc: { quantity: quantity }, // tăng số lượng
+            $set: {
+              // Cập nhật trạng thái nếu cần
+              status:
+                currentOption.quantity + quantity > 0
+                  ? 1
+                  : currentOption.status,
+            },
+          }
+        );
       }
-
-      await currentProduct.save();
-      updatedProducts.push(currentProduct);
     }
 
     return res.status(200).json({
       message: "Cập nhật thành công",
-      data: updatedProducts,
     });
   } catch (error) {
     res.status(500).json({

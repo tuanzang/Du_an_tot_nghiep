@@ -20,6 +20,7 @@ const orderSchema = new mongoose.Schema(
         variantId: String,
         optionName: String,
         optionPrice: Number,
+        optionId: String,
       },
     ],
     totalPrice: {
@@ -41,13 +42,8 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // email: {
-    //   type: String,
-    //   required: true,
-    // },
     message: {
       type: String,
-      required: true,
     },
     paymentMethod: {
       type: String,
@@ -61,6 +57,9 @@ const orderSchema = new mongoose.Schema(
     discouVoucher: {
       type: Number,
       required: true,
+    },
+    discountCode: {
+      type: String,
     },
     statusShip: {
       type: Boolean,

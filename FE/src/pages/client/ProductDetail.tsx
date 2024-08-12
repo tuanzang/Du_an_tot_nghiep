@@ -23,8 +23,6 @@ export default function ProductDetail() {
   const [productSizes, setProductSizes] = useState<IProductSize[]>([]);
   const [optionSelected, setOptionSelected] = useState<IOption | null>()
 
-  // console.log(123, product?.options);
-
   // product price
   const productPrice = useMemo(() => {
     if (selectedSize) {
@@ -43,6 +41,14 @@ export default function ProductDetail() {
     return `${formatPrice(minPrice === 0 ? secondMinPrice : minPrice)} - ${formatPrice(Math.max(...productSizePrices))}`;
   }, [selectedSize, product, optionSelected]);
 
+  const productImage = useMemo(() => {
+    if (!optionSelected) {
+      return product?.image?.[0];
+    }
+
+    return optionSelected?.image;
+  }, [optionSelected, product?.image]);
+
   // lấy token đăng nhập
   const isLogged = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   const { mutate } = useCartMutation({
@@ -53,6 +59,9 @@ export default function ProductDetail() {
       setSelectedSize(null);
       setOptionSelected(null);
     },
+    onError: (error) => {
+      message.error(error?.response?.data?.message || 'Đã có lỗi xảy ra, vui lòng thử lại')
+    }
   });
 
   useEffect(() => {
@@ -109,12 +118,28 @@ export default function ProductDetail() {
       }
     }
 
+    const onHiddenProduct = (productId: string) => {
+      productId === id && fetchProduct(id)
+    }
+
+    const onOptionUpdate = (productId: string) => {
+      id === productId && fetchProduct(id);
+    }
+
     socket.on('update product', onProductUpdate);
+
+    // listen hidden product
+    socket.on('hidden product', onHiddenProduct)
+
+    // listen update product option
+    socket.on('option update', onOptionUpdate)
 
     return () => {
       socket.off('update product', onProductUpdate);
+      socket.off('hidden product', onHiddenProduct);
+      socket.off('option update', onOptionUpdate);
     }
-  }, []);
+  }, [id]);
 
   const handleQuantityIncrease = () => {
     setQuantity(quantity + 1);
@@ -141,12 +166,12 @@ export default function ProductDetail() {
     }
 
     if (quantity > selectedSize.quantity) {
-      return message.info("Vượt quá số lượng còn trong kho");
+      return message.info("Vượt quá số lượng sản phẩm còn trong kho");
     }
 
-    // if (product?.options.length < productSizes.length) {
-    //   return message.info("Không đủ số lượng option!");
-    // }
+    if (optionSelected && quantity > optionSelected.quantity) {
+      return message.info("Không đủ số lượng option!");
+    }
 
     const body = {
       productId: product?._id,
@@ -191,7 +216,7 @@ export default function ProductDetail() {
           setAvarageRate(0);
         }
       } catch (error) {
-        console.log("Khong co du lieu");
+        console.log("Không có dữ liệu");
       }
     }
   };
@@ -258,7 +283,7 @@ export default function ProductDetail() {
                       >
                         <Image
                           width={"100%"}
-                          src={product?.image?.[0]}
+                          src={productImage}
                           alt="product-details"
                         />
                       </div>
@@ -283,6 +308,8 @@ export default function ProductDetail() {
                             disabled
                           />
                         </h3>
+
+                        {!product?.status && 'Tạm ngừng kinh doanh'}
                         <div className="price-box">
                           <span
                             className="price-regular"
@@ -326,28 +353,30 @@ export default function ProductDetail() {
                         )}
 
                         <div>
-                          <div className="button-container mt-2">
-                            <p>Options:</p>
+                          <div className="button-container mt-4">
+                            <p>Phụ kiện:</p>
                             <Button onClick={() => onOptionClick()} className="mx-1" type={!optionSelected ? 'primary' : 'default'}>
                               Không chọn
                             </Button>
 
-                            {product?.options.map((item) => (
-                              <Button
+                            {product?.options.map((item) => {
+                              const isDisable = item.quantity === 0 || !item.status;
+
+                              return <Button
                                 key={item._id}
                                 className={`mx-1`}
                                 type={optionSelected?._id === item._id ? 'primary' : 'default'}
                                 style={{
                                   padding: "10px 20px",
                                   fontSize: "16px",
-                                  opacity: item.quantity === 0 ? 0.5 : 1,
-                                  cursor: item.quantity === 0 ? "not-allowed" : "pointer"
+                                  opacity: isDisable ? 0.5 : 1,
+                                  cursor: isDisable ? "not-allowed" : "pointer"
                                 }}
-                                onClick={() => item.quantity > 0 && onOptionClick(item)}
+                                onClick={() => !isDisable && onOptionClick(item)}
                               >
                                 {item.name}
                               </Button>
-                            ))}
+                            })}
                           </div>
                         </div>
 

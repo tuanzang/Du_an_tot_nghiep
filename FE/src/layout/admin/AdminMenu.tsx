@@ -6,8 +6,12 @@ import {
   DashboardOutlined,
   FileDoneOutlined,
   UserOutlined,
-  BarcodeOutlined,
   CommentOutlined,
+  ProductOutlined,
+  UnorderedListOutlined,
+  FontSizeOutlined,
+  GiftOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
 
 type Props = {
@@ -50,69 +54,28 @@ export default function AdminMenu({ small }: Props) {
       icon: <FileDoneOutlined />,
       label: <Link to="/admin/bill">Đơn hàng</Link>,
     },
-    // {
-    //   key: "bill",
-    //   icon: <FileDoneOutlined />,
-    //   label: "Quản lý đơn hàng",
-    //   children: [
-    //     {
-    //       key: "all",
-    //       label: <Link to="/admin/order/all">Tất cả</Link>,
-    //     },
-    //     {
-    //       key: "wait-for-confirmation",
-    //       label: (
-    //         <Link to="/admin/order/wait-for-confirmation">Chờ xác nhận</Link>
-    //       ),
-    //     },
-    //     {
-    //       key: "waiting-for-delivery",
-    //       label: (
-    //         <Link to="/admin/order/waiting-for-delivery">Chờ giao hàng</Link>
-    //       ),
-    //     },
-    //     {
-    //       key: "being-shipped",
-    //       label: <Link to="/admin/order/being-shipped">Đang vận chuyển</Link>,
-    //     },
-    //     {
-    //       key: "delivered",
-    //       label: <Link to="/admin/order/delivered">Đã giao hàng</Link>,
-    //     },
-    //     {
-    //       key: "paid",
-    //       label: <Link to="/admin/order/paid">Đã thanh toán</Link>,
-    //     },
-    //     {
-    //       key: "complete",
-    //       label: <Link to="/admin/order/complete">Hoàn thành</Link>,
-    //     },
-    //   ],
-    // },
+
     {
-      key: "products",
-      icon: <BarcodeOutlined />,
-      label: "Quản lý sản phẩm",
-      children: [
-        {
-          key: "product",
-          label: <Link to="/admin/product">Sản phẩm</Link>,
-        },
-        {
-          key: "category",
-          label: <Link to="/admin/category">Danh mục</Link>,
-        },
-        {
-          key: "size",
-          label: <Link to="/admin/size">Size</Link>,
-        }
-        ,
-        {
-          key: "voucher",
-          label: <Link to="/admin/voucher">Mã giảm giá</Link>,
-        }
-      ],
+      key: "product",
+      icon: <ProductOutlined />,
+      label: <Link to="/admin/product">Sản phẩm</Link>,
     },
+    {
+      key: "category",
+      icon: <UnorderedListOutlined />,
+      label: <Link to="/admin/category">Danh mục</Link>,
+    },
+    {
+      key: "size",
+      icon: <FontSizeOutlined />,
+      label: <Link to="/admin/size">Kích cỡ</Link>,
+    },
+    {
+      key: "voucher",
+      icon: <GiftOutlined />,
+      label: <Link to="/admin/voucher">Mã giảm giá</Link>,
+    },
+ 
     {
       key: "users",
       icon: <UserOutlined />,
@@ -126,7 +89,8 @@ export default function AdminMenu({ small }: Props) {
   ];
 
   return (
-    <Menu className="admin-menu"
+    <Menu
+      className="admin-menu"
       mode="inline"
       defaultOpenKeys={openKeys}
       selectedKeys={[]}

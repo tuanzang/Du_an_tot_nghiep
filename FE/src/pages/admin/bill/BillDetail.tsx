@@ -5,7 +5,6 @@ import {
   Card,
   Col,
   Divider,
-  Image,
   Input,
   Radio,
   Row,
@@ -31,15 +30,9 @@ import { IHistoryBill } from "../../../interface/HistoryBill";
 import { ITransaction } from "../../../interface/Transaction";
 import styleHoaDon from "../../../services/constants/styleHoaDon";
 import "./BillStyle.css";
-import { IProduct } from "../../../interface/Products";
 import { IBill, IProductBill } from "../../../interface/Bill";
 import { USER_INFO_STORAGE_KEY } from "../../../services/constants";
 import dayjs from "dayjs";
-
-interface IProductSizeBill {
-  variantId: string;
-  quantity: number;
-}
 
 const listHis = [{ link: "/admin/bill", name: "Quản lý đơn hàng" }];
 export default function BillDetail() {
@@ -56,9 +49,7 @@ export default function BillDetail() {
   // lấy ra hóa đơn
   const [totalProductPrice, setTotalProductPrice] = useState<number>(0);
   const [loadingBill, setLoadingBill] = useState(true);
-  const [listProductSize, setListProductSize] = useState<IProductSizeBill[]>(
-    []
-  );
+  const [listProductSize, setListProductSize] = useState<IProductBill[]>([]);
   const [billDetail, setBillDetail] = useState<IBill>();
   const fetchDetailBill = async (id: string | null) => {
     setLoadingBill(true);
@@ -76,18 +67,15 @@ export default function BillDetail() {
           setIdCustomer(billData.userId);
           setStatusBill(billData.status);
           setStatusShip(billData.statusShip);
-          // Trích xuất variantId và quantity từ products
-          const productSizes = billData.products.map(
-            (product: IProductSizeBill) => ({
-              variantId: product.variantId,
-              quantity: product.quantity,
-            })
-          );
-          setListProductSize(productSizes);
+          setListProductSize(billData.products);
           // lấy ra tổng tiền hàng
           const totalProductPrice = billData.products.reduce(
-            (total: number, product: IProductBill) =>
-              total + product.price * product.quantity,
+            (
+              total: number,
+              product: { price: number; quantity: number; optionPrice?: number }
+            ) =>
+              total +
+              (product.price + (product.optionPrice || 0)) * product.quantity,
             0
           );
           setTotalProductPrice(totalProductPrice);
@@ -202,6 +190,42 @@ export default function BillDetail() {
     getTransBillByIdBill(id ? id : null);
   }, [id, idCustomer]);
 
+  // cập nhật trạng thái hóa đơn
+  const handleUpdateStatusBill = async (
+    id: string | null,
+    status: string,
+    user: IUser | null,
+    note: string,
+    statusShip: boolean | null
+  ) => {
+    setLoadingBill(true);
+    if (id === null || user === null || statusShip === null) {
+      toast.error("Không tìm thấy hóa đơn");
+    } else {
+      try {
+        const response = await axios.post(
+          "http://localhost:3001/api/bills/update-status",
+          { id: id, status: status, statusShip: statusShip }
+        );
+        createNewHistory(response.data.data, user, note);
+        setStatusBill(status);
+        toast.success(response.data.message);
+      } catch (error) {
+        toast.error("Không tìm thấy hóa đơn");
+      }
+    }
+    setLoadingBill(false);
+  };
+
+  // State variables for controlling modal visibility
+  const [openModalCancelBill, setOpenModalCancelBill] = useState(false); // hủy đơn
+  const [openModalReturnBill, setOpenModalReturnBill] = useState(false); // hoàn đơn
+  const [openModalConfirm, setOpenModalConfirm] = useState(false); // xác nhận đơn
+  const [openModalPendingShip, setOpenModalPendingShip] = useState(false); // đóng gói chờ vận chuyển
+  const [openModalDelive, setOpenModalDelive] = useState(false); // đang giao hàng
+  const [openModalReceived, setOpenModalReceived] = useState(false); // đã giao hàng
+  const [openModalComplete, setOpenModalComplete] = useState(false); // hoàn thành
+
   // hủy đơn hàng
   function ModalCancelBill() {
     const [ghiChu, setGhiChu] = useState("");
@@ -221,23 +245,30 @@ export default function BillDetail() {
             } else {
               // cập nhật trạng thái
               if (statusBill === "2" || statusBill === "3") {
-                handleIncreaseProductSize(listProductSize);
+                handleIncreaseProductSizeAndOption(
+                  listProductSize,
+                  id ? id : null,
+                  "0",
+                  user,
+                  ghiChu,
+                  statusShip
+                );
+              } else {
+                handleUpdateStatusBill(
+                  id ? id : null,
+                  "0",
+                  user ? user : null,
+                  ghiChu,
+                  statusShip
+                );
               }
-              handleUpdateStatusBill(
-                id ? id : null,
-                "0",
-                user ? user : null,
-                ghiChu,
-                statusShip
-              );
-              toast.success("Hủy đơn hàng thành công!");
               setOpenModalCancelBill(false);
             }
           }
         }
       );
     };
-  
+
     return (
       <DialogAddUpdate
         open={openModalCancelBill}
@@ -273,373 +304,35 @@ export default function BillDetail() {
     );
   }
 
-  // tăng số lượng product size
-  const handleIncreaseProductSize = async (
-    listProductSize: IProductSizeBill[]
+  // tăng số lượng product size và option
+  const handleIncreaseProductSizeAndOption = async (
+    listProductSize: IProductBill[],
+    id: string | null,
+    status: string,
+    user: IUser | null,
+    ghiChu: string,
+    statusShip: boolean | null
   ) => {
     if (listProductSize.length < 1) {
       toast.error("Không thể hủy đơn hàng");
     } else {
       try {
-        await axios.post(
-          "http://localhost:3001/api/bills/increase-product-size",
-          { listProductSize: listProductSize }
+        await axios.post("http://localhost:3001/api/bills/increase-data", {
+          listProductSize: listProductSize,
+        });
+
+        handleUpdateStatusBill(
+          id ? id : null,
+          status,
+          user ? user : null,
+          ghiChu,
+          statusShip
         );
       } catch (error) {
         toast.error("Không thể hủy đơn hàng");
       }
     }
   };
-
-  // cập nhật trạng thái hóa đơn
-  const handleUpdateStatusBill = async (
-    id: string | null,
-    status: string,
-    user: IUser | null,
-    note: string,
-    statusShip: boolean | null
-  ) => {
-    setLoadingBill(true);
-    if (id === null || user === null || statusShip === null) {
-      toast.error("Không tìm thấy hóa đơn");
-    } else {
-      try {
-        const response = await axios.post(
-          "http://localhost:3001/api/bills/update-status",
-          { id: id, status: status, statusShip: statusShip }
-        );
-        createNewHistory(response.data.data, user, note);
-        setStatusBill(status);
-      } catch (error) {
-        toast.error("Không tìm thấy hóa đơn");
-      }
-    }
-    setLoadingBill(false);
-  };
-
-  // State variables for controlling modal visibility
-  const [openModalCancelBill, setOpenModalCancelBill] = useState(false);
-  const [openModalReturnBill, setOpenModalReturnBill] = useState(false);
-  const [openModalConfirm, setOpenModalConfirm] = useState(false);
-  const [openModalConfirmDelive, setOpenModalConfirmDelive] = useState(false);
-  const [openModalConfirmComplete, setOpenModalConfirmComplete] =
-    useState(false);
-  const [openCodalConfirmReceived, setOpenCodalConfirmReceived] =
-    useState(false);
-  // const [openmodalReturnStt, setOpenModalReturnStt] = useState(false);
-
-  // xác nhận đơn hàng
-  function ModalConfirmBill() {
-    const [ghiChu, setGhiChu] = useState("");
-
-    const handleConfirmOrder = () => {
-      confirmStatus({ title: "Xác nhận", text: "Xác nhận hoá đơn?" }).then(
-        (result) => {
-          if (result) {
-            if (listProductSize.length < 1) {
-              toast.error("Không thể xác nhận đơn hàng!");
-            } else {
-              handleUpdateStatusBill(
-                id ? id : null,
-                "2",
-                user ? user : null,
-                ghiChu,
-                statusShip
-              );
-              handleDecreaseProductSize(listProductSize);
-              toast.success("Xác nhận đơn hàng thành công!");
-              setOpenModalConfirm(false);
-            }
-          }
-        }
-      );
-    };
-
-    return (
-      <DialogAddUpdate
-        open={openModalConfirm}
-        setOpen={setOpenModalConfirm}
-        title={"Xác nhận hoá đơn"}
-        buttonSubmit={
-          <Button
-            style={{
-              boxShadow: "none",
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-            onClick={handleConfirmOrder}
-          >
-            Lưu
-          </Button>
-        }
-      >
-        <div>
-          <Input
-            size="small"
-            placeholder="Ghi chú"
-            value={ghiChu}
-            onChange={(e) => setGhiChu(e.target.value)}
-          />
-        </div>
-      </DialogAddUpdate>
-    );
-  }
-
-  // giảm số lượng product size
-  const handleDecreaseProductSize = async (
-    listProductSize: IProductSizeBill[]
-  ) => {
-    if (listProductSize.length < 1) {
-      toast.error("Không thể xác nhận đơn hàng");
-    } else {
-      try {
-        await axios.post(
-          "http://localhost:3001/api/bills/decrease-product-size",
-          { listProductSize: listProductSize }
-        );
-      } catch (error) {
-        toast.error("Không thể xác nhận đơn hàng");
-      }
-    }
-  };
-
-  // xác nhận đóng gói & vận chuyển
-  function ModalConfirmDeliver() {
-    const [ghiChu, setGhiChu] = useState("");
-    const handleConfirmDelever = () => {
-      confirmStatus({
-        title: "Xác nhận",
-        text: "Xác nhận đóng gói & vận chuyển?",
-      }).then((result) => {
-        if (result) {
-          handleUpdateStatusBill(
-            id ? id : null,
-            "3",
-            user ? user : null,
-            ghiChu,
-            statusShip
-          );
-          toast.success("Xác nhận đóng gói & vận chuyển thành công!");
-          setOpenModalConfirmDelive(false);
-        }
-      });
-    };
-    return (
-      <DialogAddUpdate
-        open={openModalConfirmDelive}
-        setOpen={setOpenModalConfirmDelive}
-        title={"Xác nhận đóng gói & vận chuyển"}
-        buttonSubmit={
-          <Button
-            style={{
-              boxShadow: "none",
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-            onClick={handleConfirmDelever}
-          >
-            Lưu
-          </Button>
-        }
-      >
-        <div>
-          <Input
-            size="small"
-            placeholder="Ghi chú"
-            value={ghiChu}
-            onChange={(e) => setGhiChu(e.target.value)}
-          />
-        </div>
-      </DialogAddUpdate>
-    );
-  }
-
-  // xác nhận đang giao hàng
-  function ModalConfirmReceived() {
-    const [ghiChu, setGhiChu] = useState("");
-    const handleConfirmReceived = () => {
-      confirmStatus({
-        title: "Xác nhận",
-        text: "Xác nhận đang giao hàng?",
-      }).then((result) => {
-        if (result) {
-          handleUpdateStatusBill(
-            id ? id : null,
-            "4",
-            user ? user : null,
-            ghiChu,
-            statusShip
-          );
-          toast.success("Xác nhận đang giao hàng!");
-          setOpenCodalConfirmReceived(false);
-        }
-      });
-    };
-
-    return (
-      <DialogAddUpdate
-        open={openCodalConfirmReceived}
-        setOpen={setOpenCodalConfirmReceived}
-        title={"Xác nhận đang giao hàng"}
-        buttonSubmit={
-          <Button
-            style={{
-              boxShadow: "none",
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-            onClick={handleConfirmReceived}
-          >
-            Lưu
-          </Button>
-        }
-      >
-        <div>
-          <Input
-            size="small"
-            placeholder="Ghi chú"
-            value={ghiChu}
-            onChange={(e) => setGhiChu(e.target.value)}
-          />
-        </div>
-      </DialogAddUpdate>
-    );
-  }
-
-  // hoàn thành
-  function ModalConfirmComplete() {
-    const [ghiChu, setGhiChu] = useState("");
-    const handleConfirmComplete = () => {
-      confirmStatus({
-        title: "Xác nhận",
-        text: "Xác nhận hoàn thành đơn hàng ?",
-      }).then((result) => {
-        if (result) {
-          handleUpdateStatusBill(
-            id ? id : null,
-            "7",
-            user ? user : null,
-            ghiChu,
-            statusShip
-          );
-          toast.success("Xác nhận hoàn thành đơn hàng thành công!");
-          setOpenModalConfirmComplete(false);
-        }
-      });
-    };
-
-    return (
-      <DialogAddUpdate
-        open={openModalConfirmComplete}
-        setOpen={setOpenModalConfirmComplete}
-        title={"Xác nhận hoàn thành đơn hàng"}
-        buttonSubmit={
-          <Button
-            style={{
-              boxShadow: "none",
-              textTransform: "none",
-              borderRadius: "8px",
-            }}
-            onClick={handleConfirmComplete}
-          >
-            Lưu
-          </Button>
-        }
-      >
-        <div>
-          <Input
-            size="small"
-            placeholder="Ghi chú"
-            value={ghiChu}
-            onChange={(e) => setGhiChu(e.target.value)}
-          />
-        </div>
-      </DialogAddUpdate>
-    );
-  }
-
-  // return trạng thái đơn hàng
-  // function ModalReturnSttBill() {
-  //   const [ghiChu, setGhiChu] = useState("");
-  //   const [errorGhiChu, setErrorGhiChu] = useState("");
-
-  //   // api quay lại trạng thái trước
-  //   const handleReturnStt = async () => {
-  //     if (ghiChu === "") {
-  //       setErrorGhiChu("Bạn cần nhập lý do");
-  //       return;
-  //     }
-  //     if (statusBill === "6") {
-  //       try {
-  //         await axios.post("http://localhost:3001/api/trans/update");
-  //         getTransBillByIdBill(id ? id : null);
-  //       } catch (error) {
-  //         toast.error("Thanh toán thất bại");
-  //       }
-  //       handleUpdateStatusBill(
-  //         id ? id : null,
-  //         String(Number(statusBill) - 2),
-  //         user ? user : null,
-  //         ghiChu
-  //       );
-  //       setOpenModalReturnStt(false);
-  //     } else {
-  //       if (statusBill === "2" && listProductSize.length > 0) {
-  //         try {
-  //           await axios.post(
-  //             "http://localhost:3001/api/bills/increase-product-size",
-  //             { listProductSize: listProductSize }
-  //           );
-  //         } catch (error) {
-  //           toast.error("Không thể quay về trạng thái trước");
-  //         }
-  //       }
-  //       // cập nhật trạng thái
-  //       handleUpdateStatusBill(
-  //         id ? id : null,
-  //         String(Number(statusBill) - 1),
-  //         user ? user : null,
-  //         ghiChu
-  //       );
-  //       setOpenModalReturnStt(false);
-  //     }
-  //     toast.success("Xác nhận quay trở lại trạng thái thành công!");
-  //   };
-
-  //   return (
-  //     <DialogAddUpdate
-  //       open={openmodalReturnStt}
-  //       setOpen={setOpenModalReturnStt}
-  //       title={"Quay lại trạng thái trước"}
-  //       buttonSubmit={
-  //         <Button
-  //           style={{
-  //             boxShadow: "none",
-  //             textTransform: "none",
-  //             borderRadius: "8px",
-  //           }}
-  //           onClick={handleReturnStt}
-  //         >
-  //           Lưu
-  //         </Button>
-  //       }
-  //     >
-  //       <div>
-  //         <Input
-  //           size="small"
-  //           placeholder={"Ghi chú"}
-  //           value={ghiChu}
-  //           onChange={(e) => setGhiChu(e.target.value)}
-  //         />
-  //       </div>
-  //       <div>
-  //         {errorGhiChu !== "" && (
-  //           <span style={{ color: "red" }}>{errorGhiChu}</span>
-  //         )}
-  //       </div>
-  //     </DialogAddUpdate>
-  //   );
-  // }
 
   // hoàn đơn hàng
   function ModalReturnBill() {
@@ -658,15 +351,25 @@ export default function BillDetail() {
         setErrorStatusShip("Bạn chọn loại phí ship");
         return;
       }
-      // cập nhật trạng thái
-      handleUpdateStatusBill(
-        id ? id : null,
-        "8",
-        user ? user : null,
-        ghiChu,
-        statusShip
+      confirmStatus({ title: "Xác nhận", text: "Xác nhận hoàn hoá đơn?" }).then(
+        (result) => {
+          if (result) {
+            if (listProductSize.length < 1) {
+              toast.error("Không thể hoàn hoá đơn!");
+            } else {
+              handleIncreaseProductSizeAndOption(
+                listProductSize,
+                id ? id : null,
+                "7",
+                user,
+                ghiChu,
+                statusShip
+              );
+              setOpenModalReturnBill(false);
+            }
+          }
+        }
       );
-      setOpenModalReturnBill(false);
     };
 
     return (
@@ -725,17 +428,310 @@ export default function BillDetail() {
     );
   }
 
+  // xác nhận đơn hàng
+  function ModalConfirmBill() {
+    const [ghiChu, setGhiChu] = useState("");
+
+    const handleConfirmOrder = () => {
+      if (listProductSize.length < 1) {
+        toast.error("Không thể xác nhận đơn hàng!");
+      } else {
+        handleDecreaseProductSizeAndOption(
+          listProductSize,
+          id ? id : null,
+          "2",
+          user,
+          ghiChu,
+          statusShip
+        );
+        setOpenModalConfirm(false);
+      }
+    };
+
+    return (
+      <DialogAddUpdate
+        open={openModalConfirm}
+        setOpen={setOpenModalConfirm}
+        title={"Xác nhận hoá đơn"}
+        buttonSubmit={
+          <Button
+            style={{
+              boxShadow: "none",
+              textTransform: "none",
+              borderRadius: "8px",
+            }}
+            onClick={handleConfirmOrder}
+          >
+            Lưu
+          </Button>
+        }
+      >
+        <div>
+          <Input
+            size="small"
+            placeholder="Ghi chú"
+            value={ghiChu}
+            onChange={(e) => setGhiChu(e.target.value)}
+          />
+        </div>
+      </DialogAddUpdate>
+    );
+  }
+
+  // giảm số lượng product size và option
+  const handleDecreaseProductSizeAndOption = async (
+    listProductSize: IProductBill[],
+    id: string | null,
+    status: string,
+    user: IUser | null,
+    ghiChu: string,
+    statusShip: boolean | null
+  ) => {
+    if (listProductSize.length < 1) {
+      toast.error("Không thể xác nhận đơn hàng");
+    } else {
+      try {
+        await axios.post("http://localhost:3001/api/bills/decrease-data", {
+          listProductSize: listProductSize,
+        });
+        handleUpdateStatusBill(
+          id ? id : null,
+          status,
+          user ? user : null,
+          ghiChu,
+          statusShip
+        );
+      } catch (error) {
+        toast.error("Không thể xác nhận đơn hàng");
+      }
+    }
+  };
+
+  // xác nhận đóng gói & vận chuyển
+  function ModalPendingShip() {
+    const [ghiChu, setGhiChu] = useState("");
+    const handleConfirmDelever = () => {
+      handleUpdateStatusBill(
+        id ? id : null,
+        "3",
+        user ? user : null,
+        ghiChu,
+        statusShip
+      );
+      setOpenModalPendingShip(false);
+    };
+
+    return (
+      <DialogAddUpdate
+        open={openModalPendingShip}
+        setOpen={setOpenModalPendingShip}
+        title={"Xác nhận đóng gói & vận chuyển"}
+        buttonSubmit={
+          <Button
+            style={{
+              boxShadow: "none",
+              textTransform: "none",
+              borderRadius: "8px",
+            }}
+            onClick={handleConfirmDelever}
+          >
+            Lưu
+          </Button>
+        }
+      >
+        <div>
+          <Input
+            size="small"
+            placeholder="Ghi chú"
+            value={ghiChu}
+            onChange={(e) => setGhiChu(e.target.value)}
+          />
+        </div>
+      </DialogAddUpdate>
+    );
+  }
+
+  // xác nhận đang giao hàng
+  function ModalConfirmDelive() {
+    const [ghiChu, setGhiChu] = useState("");
+    const handleConfirmReceived = () => {
+      handleUpdateStatusBill(
+        id ? id : null,
+        "4",
+        user ? user : null,
+        ghiChu,
+        statusShip
+      );
+      setOpenModalDelive(false);
+    };
+
+    return (
+      <DialogAddUpdate
+        open={openModalDelive}
+        setOpen={setOpenModalDelive}
+        title={"Xác nhận đang giao hàng"}
+        buttonSubmit={
+          <Button
+            style={{
+              boxShadow: "none",
+              textTransform: "none",
+              borderRadius: "8px",
+            }}
+            onClick={handleConfirmReceived}
+          >
+            Lưu
+          </Button>
+        }
+      >
+        <div>
+          <Input
+            size="small"
+            placeholder="Ghi chú"
+            value={ghiChu}
+            onChange={(e) => setGhiChu(e.target.value)}
+          />
+        </div>
+      </DialogAddUpdate>
+    );
+  }
+
+  // xác nhận đã giao hàng
+  function ModalConfirmReceived() {
+    const [ghiChu, setGhiChu] = useState("");
+    const handleConfirmReceived = async () => {
+      if (!billDetail || !user) {
+        toast.error("Không thể nhận hàng");
+        return;
+      }
+      if (listTransaction.filter((trans) => trans.status === true).length < 1) {
+        const confirmPaymentRequest: ITransaction = {
+          _id: null,
+          idUser: user._id,
+          idBill: billDetail._id,
+          transCode: "",
+          type: true, // tiền mặt
+          totalMoney: billDetail.totalPrice,
+          note: ghiChu,
+          status: true,
+          createdAt: "",
+        };
+
+        // xác nhận nhận hàng
+        try {
+          await axios.post(
+            "http://localhost:3001/api/trans/add",
+            confirmPaymentRequest
+          );
+          getTransBillByIdBill(billDetail._id);
+          // cập nhật trạng thái
+          toast.success("nhận hàng thành công");
+        } catch (error) {
+          toast.error("nhận hàng thất bại");
+        }
+      }
+      handleUpdateStatusBill(
+        id ? id : null,
+        "5",
+        user ? user : null,
+        ghiChu,
+        statusShip
+      );
+      setOpenModalReceived(false);
+    };
+
+    return (
+      <DialogAddUpdate
+        open={openModalReceived}
+        setOpen={setOpenModalReceived}
+        title={"Xác nhận đã giao hàng"}
+        buttonSubmit={
+          <Button
+            style={{
+              boxShadow: "none",
+              textTransform: "none",
+              borderRadius: "8px",
+            }}
+            onClick={handleConfirmReceived}
+          >
+            Lưu
+          </Button>
+        }
+      >
+        <div>
+          <Input
+            size="small"
+            placeholder="Ghi chú"
+            value={ghiChu}
+            onChange={(e) => setGhiChu(e.target.value)}
+          />
+        </div>
+      </DialogAddUpdate>
+    );
+  }
+
+  // hoàn thành
+  function ModalConfirmComplete() {
+    const [ghiChu, setGhiChu] = useState("");
+    const handleConfirmComplete = () => {
+      confirmStatus({
+        title: "Xác nhận",
+        text: "Xác nhận hoàn thành đơn hàng ?",
+      }).then((result) => {
+        if (result) {
+          handleUpdateStatusBill(
+            id ? id : null,
+            "6",
+            user ? user : null,
+            ghiChu,
+            statusShip
+          );
+          toast.success("Xác nhận hoàn thành đơn hàng thành công!");
+          setOpenModalComplete(false);
+        }
+      });
+    };
+
+    return (
+      <DialogAddUpdate
+        open={openModalComplete}
+        setOpen={setOpenModalComplete}
+        title={"Xác nhận hoàn thành đơn hàng"}
+        buttonSubmit={
+          <Button
+            style={{
+              boxShadow: "none",
+              textTransform: "none",
+              borderRadius: "8px",
+            }}
+            onClick={handleConfirmComplete}
+          >
+            Lưu
+          </Button>
+        }
+      >
+        <div>
+          <Input
+            size="small"
+            placeholder="Ghi chú"
+            value={ghiChu}
+            onChange={(e) => setGhiChu(e.target.value)}
+          />
+        </div>
+      </DialogAddUpdate>
+    );
+  }
+
   // trạng thái đơn hàng
   const genBtnHandleBill = (statusBill: string) => {
     if (
       listTransaction.filter((trans) => trans.status === true).length > 0 &&
-      Number(statusBill) === 6
+      Number(statusBill) === 5
     ) {
       return (
         <Button
           color="cam"
           style={{ marginRight: "5px" }}
-          onClick={() => setOpenModalConfirmComplete(true)}
+          onClick={() => setOpenModalComplete(true)}
         >
           Hoàn thành
         </Button>
@@ -769,7 +765,7 @@ export default function BillDetail() {
               <Button
                 color="cam"
                 style={{ marginRight: "5px" }}
-                onClick={() => setOpenModalConfirmDelive(true)}
+                onClick={() => setOpenModalPendingShip(true)}
               >
                 Xác nhận đóng gói & vận chuyển
               </Button>
@@ -789,7 +785,7 @@ export default function BillDetail() {
                 className="them-moi"
                 color="cam"
                 style={{ marginRight: "5px" }}
-                onClick={() => setOpenCodalConfirmReceived(true)}
+                onClick={() => setOpenModalDelive(true)}
               >
                 Xác nhận đang giao hàng
               </Button>
@@ -810,6 +806,14 @@ export default function BillDetail() {
                 className="them-moi"
                 color="cam"
                 style={{ marginRight: "5px" }}
+                onClick={() => setOpenModalReceived(true)}
+              >
+                Xác nhận đã giao hàng
+              </Button>
+              <Button
+                className="them-moi"
+                color="cam"
+                style={{ marginRight: "5px" }}
                 onClick={() => setOpenModalReturnBill(true)}
               >
                 Xác nhận hoàn đơn hàng
@@ -824,13 +828,20 @@ export default function BillDetail() {
 
   return (
     <div>
+      {/*xác nhận đơn hàng */}
       {openModalConfirm && <ModalConfirmBill />}
-      {openModalConfirmDelive && <ModalConfirmDeliver />}
-      {openCodalConfirmReceived && <ModalConfirmReceived />}
-      {openModalConfirmComplete && <ModalConfirmComplete />}
+      {/*đóng gói và vận chuyển */}
+      {openModalPendingShip && <ModalPendingShip />}
+      {/*đang giao hàng */}
+      {openModalDelive && <ModalConfirmDelive />}
+      {/*đã giao hàng */}
+      {openModalReceived && <ModalConfirmReceived />}
+      {/*hoàn thành */}
+      {openModalComplete && <ModalConfirmComplete />}
+      {/*hủy đơn */}
       {openModalCancelBill && <ModalCancelBill />}
+      {/*hoàn đơn */}
       {openModalReturnBill && <ModalReturnBill />}
-      {/* {openmodalReturnStt && <ModalReturnSttBill />} */}
 
       <BreadcrumbsCustom
         listLink={listHis}
@@ -857,29 +868,6 @@ export default function BillDetail() {
             )}
           </Col>
         </Row>
-        {/* <Row justify="end" style={{ marginTop: 16 }}>
-          <Col>
-            {billDetail && Number(statusBill) > 1 && Number(statusBill) < 7 && (
-              <Button
-                type="default"
-                style={{
-                  marginRight: 5,
-                  cursor: Number(statusBill) === 1 ? "not-allowed" : "pointer",
-                  opacity: Number(statusBill) === 1 ? 0.5 : 1,
-                }}
-                onClick={() => {
-                  if (Number(statusBill) !== 1) {
-                    setOpenModalReturnStt(true);
-                  }
-                }}
-                disabled={Number(statusBill) === 1}
-              >
-                <IoReturnUpBack style={{ fontSize: 20 }} />
-                Quay lại trạng thái trước
-              </Button>
-            )}
-          </Col>
-        </Row> */}
       </Card>
 
       <Card
@@ -1012,23 +1000,7 @@ export default function BillDetail() {
           <Space direction="vertical" style={{ width: "100%" }}>
             <Row justify="space-between" align="middle">
               <Typography.Title level={4}>Lịch sử thanh toán</Typography.Title>
-              {/* {Number(statusBill) > 3 &&
-                Number(statusBill) < 7 &&
-                listTransaction.filter((trans) => trans.status === true)
-                  .length === 0 && (
-                  <Button
-                    style={{
-                      boxShadow: "none",
-                      textTransform: "none",
-                      borderRadius: "8px",
-                    }}
-                    onClick={() => setOpenModalConfirmPayment(true)}
-                  >
-                    Xác nhận thanh toán
-                  </Button>
-                )} */}
             </Row>
-
             {listTransaction.length > 0 ? (
               <div>
                 <Divider style={{ margin: "16px 0" }} />
@@ -1100,6 +1072,7 @@ export default function BillDetail() {
                     <>
                       <p>Tên: {name}</p>
                       <p>kích cỡ: {record?.size}</p>
+                      <p>Phụ kiện: {record?.optionName}</p>
                     </>
                   );
                 }}
@@ -1108,7 +1081,7 @@ export default function BillDetail() {
                 title="Số lượng"
                 dataIndex="quantity"
                 key="quantity"
-                width={"25%"}
+                width={"10%"}
                 render={(value: number) => (
                   <div
                     style={{
@@ -1128,7 +1101,7 @@ export default function BillDetail() {
                 )}
               />
               <Table.Column
-                title="Giá tiền"
+                title="Giá sản phẩm"
                 dataIndex="price"
                 key="price"
                 width={"15%"}
@@ -1139,13 +1112,25 @@ export default function BillDetail() {
                 }
               />
               <Table.Column
+                title="Giá phụ kiện"
+                key="priceOption"
+                width={"15%"}
+                render={(record: IProductBill) =>
+                  formatCurrency({
+                    money: String(record.optionPrice || 0),
+                  })
+                }
+              />
+              <Table.Column
                 title="Thành tiền"
                 key="totalPrice"
-                width={"15%"}
-                render={(row: IProduct) => (
+                width={"20%"}
+                render={(row: IProductBill) => (
                   <span style={{ fontWeight: "bold", color: "red" }}>
                     {formatCurrency({
-                      money: String((row.price || 0) * row.quantity),
+                      money: String(
+                        (row.price + (row.optionPrice || 0)) * row.quantity
+                      ),
                     })}
                   </span>
                 )}

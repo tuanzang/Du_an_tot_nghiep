@@ -2,15 +2,7 @@ export interface IBill {
   _id: string;
   userId: string;
   code: string;
-  products: {
-    id_: string;
-    name: string;
-    price: number;
-    quantity: number;
-    image: string;
-    size: string;
-    variantId: string;
-  }[];
+  products: IProductBill[];
   totalPrice: number;
   status: string;
   customerName: string;
@@ -32,4 +24,7 @@ export interface IProductBill {
   image: string;
   size: string;
   variantId: string;
+  optionId: string;
+  optionName: string;
+  optionPrice: number;
 }

@@ -20,13 +20,19 @@ import * as XLSX from "xlsx";
 import { socket } from "../../../socket";
 import axiosInstance from "../../../config/axios";
 
-const customTableHeaderCellStyle = {
+const customTableHeaderCellStyle: React.CSSProperties = {
   backgroundColor: "#c29957",
   color: "white",
   fontWeight: "bold",
   textAlign: "center",
   height: "10px",
 };
+
+type CustomTableHeaderCellProps = React.ComponentProps<"th">;
+
+const CustomHeaderCell: React.FC<CustomTableHeaderCellProps> = (props) => (
+  <th {...props} style={customTableHeaderCellStyle} />
+);
 
 export default function Product() {
   // const { id } = useParams<{ id: string }>(); // Lấy ID sản phẩm từ URL
@@ -69,39 +75,7 @@ export default function Product() {
     setFilteredProducts(results);
   }, [searchTerm, products]);
 
-  // const deleteProduct = async (id: number) => {
-  //   try {
-  //     confirmAlert({
-  //       title: "Xác nhận xoá",
-  //       message: "Bạn có chắc muốn xoá sản phẩm này?",
-  //       buttons: [
-  //         {
-  //           label: "Có",
-  //           onClick: async () => {
-  //             const response = await axios.delete(
-  //               `http://localhost:3001/api/products/${id}`
-  //             );
-  //             if (response.status === 200) {
-  //               const newArr = products.filter((item) => item["_id"] !== id);
-  //               setProducts(newArr);
-  //               setFilteredProducts(newArr); // Update filtered products as well
-  //               toast.success("Xoá sản phẩm thành công!");
-  //             }
-  //           },
-  //         },
-  //         {
-  //           label: "Không",
-  //           onClick: () => {},
-  //         },
-  //       ],
-  //     });
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
   const onChangeRadio = (e: RadioChangeEvent) => {
-    console.log("radio checked", e.target.value);
     setValue(Number(e.target.value));
 
     if (e.target.value === 1) {
@@ -118,10 +92,6 @@ export default function Product() {
 
   const onChangeSwitch = async (checked: boolean, productId: string) => {
     updateStatusProduct(productId, checked ? 1 : 0);
-
-    if (!checked) {
-      socket.emit("hidden product", productId);
-    }
   };
 
   const updateStatusProduct = async (productId: string, status: number) => {
@@ -131,6 +101,7 @@ export default function Product() {
       });
 
       fetchData();
+      socket.emit("hidden product", productId);
     } catch (error) {
       toast.error("Có lỗi xảy ra, vui lòng thử lại");
     }
@@ -209,10 +180,10 @@ export default function Product() {
       width: "20%",
       render: (images: string[]) => (
         <div style={{ display: "flex", gap: "10px" }}>
-          {images.slice(0, 2).map((image, index) => (
+          {images.slice(0, 1).map((image, index) => (
             <img
               key={index}
-              style={{ height: "70px", width: "70px", objectFit: "cover" }}
+              style={{ height: "100px", width: "100px", objectFit: "cover", marginLeft: "50px" }}
               src={image}
               alt={`product-image-${index}`}
             />
@@ -252,16 +223,6 @@ export default function Product() {
         />
       ),
     },
-    // {
-    //   title: "Xóa",
-    //   dataIndex: "key",
-    //   key: "key",
-    //   align: "center",
-    //   width: "10%",
-    //   render: (value: any) => (
-    //     <Button onClick={() => deleteProduct(value!)}>Xóa</Button>
-    //   ),
-    // },
     {
       title: "Chi tiết",
       align: "center",
@@ -352,12 +313,10 @@ export default function Product() {
       </Card>
 
       <Card style={{ marginTop: "12px" }}>
-        <Table 
+        <Table
           components={{
             header: {
-              cell: (props: any) => (
-                <th {...props} style={customTableHeaderCellStyle} />
-              ),
+              cell: CustomHeaderCell,
             },
           }}
           dataSource={data}
