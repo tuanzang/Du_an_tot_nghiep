@@ -271,7 +271,7 @@ const Checkout = () => {
                 }
                 value={dataBill.paymentMethod}
               >
-                <Space direction="vertical">
+                <Space direction="vertical" className="cod">
                   <Radio value={"COD"}>Thanh toán sau khi nhận hàng</Radio>
                   <Radio value={"VNPAY"}>Thanh toán ngay</Radio>
                 </Space>
@@ -311,7 +311,7 @@ const Checkout = () => {
               </tr>
             </thead>
             <tbody>
-              {productSelected?.map((item:ICartItem) => (
+              {productSelected?.map((item: ICartItem) => (
                 <tr key={item._id}>
                   <td>
                     {item.product.name} (Size: {item.variant?.sizeName})
@@ -413,7 +413,8 @@ const Checkout = () => {
                 <Card
                   key={code._id}
                   style={{
-                    backgroundColor: "#66FF66",
+                    backgroundColor: "#ECE0D2",
+                    fontFamily: "PlayFair",
                     marginBottom: 10,
                     opacity:
                       code.minPurchaseAmount !== undefined &&
