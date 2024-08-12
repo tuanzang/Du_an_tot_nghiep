@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from "react";
+import { useLayoutEffect } from "react";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5percent from "@amcharts/amcharts5/percent";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
@@ -12,10 +12,10 @@ interface PieChartDashBoardProps {
   data: ChartData[];
 }
 
-export default function PieChartDashBoard({ data } : PieChartDashBoardProps) {
+export default function PieChartDashBoard({ data }: PieChartDashBoardProps) {
   useLayoutEffect(() => {
     // Filter out data with value 0%
-    const filteredData = data.filter(item => item.value > 0);
+    const filteredData = data.filter((item) => item.value > 0);
 
     let root = am5.Root.new("chartdiv1");
 
@@ -62,6 +62,6 @@ export default function PieChartDashBoard({ data } : PieChartDashBoardProps) {
       root.dispose();
     };
   }, [data]);
-  
+
   return <div id="chartdiv1" style={{ width: "100%", height: "400px" }}></div>;
 }

@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
-  decreaseProductSize,
+  decreaseProductSizeAndOption,
   detailBill,
   getAllBill,
   getAllBillByIdUser,
-  increaseProductSize,
+  increaseProductSizeAndOption,
   updateStatusBill,
 } from "../controller/bill";
 
@@ -14,7 +14,7 @@ billRouter.post("/", getAllBill);
 billRouter.post("/byUserId", getAllBillByIdUser);
 billRouter.get("/:id", detailBill);
 billRouter.post("/update-status", updateStatusBill);
-billRouter.post("/decrease-product-size", decreaseProductSize);
-billRouter.post("/increase-product-size", increaseProductSize);
+billRouter.post("/decrease-data", decreaseProductSizeAndOption);
+billRouter.post("/increase-data", increaseProductSizeAndOption);
 
 export default billRouter;

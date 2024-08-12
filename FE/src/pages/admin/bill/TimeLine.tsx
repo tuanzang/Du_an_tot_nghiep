@@ -1,10 +1,10 @@
 import { Timeline, Typography } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
-import { FaRegFileAlt, FaTruck } from "react-icons/fa";
+import { FaBoxOpen, FaRegFileAlt, FaTruck } from "react-icons/fa";
 import { GiConfirmed } from "react-icons/gi";
-import { IoCloudDoneSharp } from "react-icons/io5";
-import { MdPaid } from "react-icons/md";
-import { AiFillCheckCircle, AiOutlineDeliveredProcedure } from "react-icons/ai";
+import { IoReturnDownBackSharp } from "react-icons/io5";
+import { MdCheckCircle } from "react-icons/md";
+import { AiFillCheckCircle } from "react-icons/ai";
 import dayjs from "dayjs";
 import statusHoaDon from "../../../services/constants/statusHoaDon";
 import { IHistoryBill } from "../../../interface/HistoryBill";
@@ -26,21 +26,21 @@ const TimeLine = ({ orderTimeLine }: Props) => {
       case 0:
         return { color: "red", icon: <DeleteOutlined /> }; // Đã hủy
       case 1:
-        return { color: "#00CC00", icon: <FaRegFileAlt /> }; // Chờ xác nhận
+        return { color: "gold", icon: <FaRegFileAlt /> }; // Chờ xác nhận
       case 2:
-        return { color: "#FFD700", icon: <GiConfirmed /> }; // Chờ giao hàng
+        return { color: "orange", icon: <GiConfirmed /> }; // đã xác nhận
       case 3:
-        return { color: "#FF5733", icon: <FaTruck /> }; // Đang vận chuyển
+        return { color: "#ff4500", icon: <FaBoxOpen /> }; // đóng gói và vận chuyển
       case 4:
-        return { color: "#FF9933", icon: <AiOutlineDeliveredProcedure /> }; // Đã giao hàng
+        return { color: "blue", icon: <FaTruck /> }; // đang giao hàng
       case 5:
-        return { color: "#FFC733", icon: <MdPaid /> }; // Chờ thanh toán
+        return { color: "#ff00ff", icon: <MdCheckCircle /> }; // đã giao hàng
       case 6:
-        return { color: "#FFAA33", icon: <AiFillCheckCircle /> }; // Đã thanh toán
+        return { color: "rgb(23, 150, 23)", icon: <AiFillCheckCircle /> }; // hoàn thành
       case 7:
-        return { color: "#00BB00", icon: <IoCloudDoneSharp /> }; // Hoàn thành
+        return { color: "gray", icon: <IoReturnDownBackSharp /> }; // hoàn đơn
       default:
-        return { color: "#000000", icon: <FaRegFileAlt /> }; // Mặc định
+        return { color: "magenta", icon: <FaRegFileAlt /> }; // Mặc định
     }
   };
 

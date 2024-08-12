@@ -1,5 +1,5 @@
 export interface ISize {
-  _id: number;
+  _id: string | null;
   sizeCode: string;
   name: string;
 }

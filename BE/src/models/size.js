@@ -7,16 +7,10 @@ const Size = new Schema(
     sizeCode: {
       type: String,
       required: true,
-      unique: true,
     },
     name: {
       type: String,
       required: true,
-    },
-    status: {
-      type: Boolean,
-      required: true,
-      default: true,
     },
   },
   {
@@ -25,4 +19,4 @@ const Size = new Schema(
   }
 );
 
-export default mongoose.model("size", Size);
+export default mongoose.model("Size", Size);

@@ -6,6 +6,7 @@ import crypto from "crypto";
 import dateFormat from "dayjs";
 import dotenv from "dotenv";
 import dayjs from "dayjs";
+import DiscountCode from "../models/DiscountCode.js";
 
 dotenv.config();
 
@@ -17,7 +18,8 @@ dotenv.config();
 export const createOrder = async (req, res) => {
   try {
     const { productSelectedIds, ...bodyData } = req.body;
-    const { customerName, phone, address, paymentMethod, discountCode } = bodyData;
+    const { customerName, phone, address, paymentMethod, discountCode } =
+      bodyData;
 
     // Xác thực các trường dữ liệu
     if (!customerName) {
@@ -110,11 +112,10 @@ export const createOrder = async (req, res) => {
       optionName: item?.option?.name,
       optionPrice: item?.option?.price,
 
-      optionId: item?.option?._id
-
+      optionId: item?.option?._id,
     }));
 
-    const totalPrice =
+    let totalPrice =
       cartProducts.reduce((total, curr) => {
         let priceTotal = curr.variant.price * curr.quantity;
 
@@ -123,14 +124,21 @@ export const createOrder = async (req, res) => {
         }
 
         return (total += priceTotal);
-      }, 0) -
-      bodyData.discouVoucher +
-      bodyData.shippingCost;
+      }, 0);
+      
+    const totalPriceWithDiscount = totalPrice - bodyData.discouVoucher;
 
-    
+    if (totalPriceWithDiscount < 0) {
+      totalPrice = 0;
+    }
+
+    totalPrice += bodyData.shippingCost;
+
     // add user id to voucher
-    await Discount.findOneAndUpdate({ code: discountCode }, { $push: { userIds: userId }, $inc: { usedCount: 1 } })
-
+    await Discount.findOneAndUpdate(
+      { code: discountCode },
+      { $push: { userIds: userId }, $inc: { usedCount: 1 } }
+    );
 
     const orders = await new Order({
       ...req.body,
@@ -141,6 +149,7 @@ export const createOrder = async (req, res) => {
       quantity: cart.products.length,
       products,
       status: "1",
+      discountCode
     }).save();
 
     cart.products = cart.products.filter(
@@ -205,8 +214,7 @@ export const detailOrder = async (req, res) => {
   }
 };
 
-const getOrdersByDate = async (dateStart, dateEnd, status) => {
-};
+const getOrdersByDate = async (dateStart, dateEnd, status) => {};
 export const getTotalOrdersByDate = async (req, res) => {
   const { dateStart, dateEnd, status } = req.query;
   try {
@@ -331,6 +339,11 @@ export const updateOrderStatus = async (req, res) => {
       { $set: { status: status } },
       { new: true }
     ).exec();
+
+    // hủy đơn hàng
+    if (status === '0' && updatedOrder.discountCode) {
+      await DiscountCode.findOneAndUpdate({ code: updatedOrder.discountCode }, {  $inc: { usedCount: -1 }})
+    }
 
     if (!updatedOrder) {
       return res.status(404).json({

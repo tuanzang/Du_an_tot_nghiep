@@ -17,13 +17,13 @@ import {
   updateStatus,
 } from "../../store/cartSlice";
 import { USER_INFO_STORAGE_KEY } from "../../services/constants";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { socket } from "../../socket";
 import { IVoucher } from "../../interface/Voucher";
 import dayjs from "dayjs";
 import axios from "axios";
-import "./checkout.css"
-const SHIPPING_COST = 30000; 
+import "./checkout.css";
+const SHIPPING_COST = 30000;
 // import { useLocation } from "react-router-dom";
 const { Text } = Typography;
 
@@ -48,7 +48,6 @@ const Checkout = () => {
     paymentMethod: "COD",
   });
 
-
   const { data, refetch: refetchCart } = useMyCartQuery();
   const dispatch = useDispatch();
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
@@ -62,11 +61,22 @@ const Checkout = () => {
   const [totalDiscount, setTotalDiscount] = useState<number>(0);
 
   useEffect(() => {
-    dispatch(updateStatus({
-      prevData: productSelected,
-      newData: data?.data?.products
-    }))
-  }, [data])
+    dispatch(
+      updateStatus({
+        prevData: productSelected,
+        newData: data?.data?.products,
+      })
+    );
+  }, [data]);
+
+  useEffect(() => {
+    dispatch(
+      updateStatus({
+        prevData: productSelected,
+        newData: data?.data?.products,
+      })
+    );
+  }, [data]);
 
   // initial socket
   useEffect(() => {
@@ -75,23 +85,29 @@ const Checkout = () => {
     };
 
     const onProductUpdate = () => {
-      refetchCart()
+      refetchCart();
       // console.log('client update', data);
-    }
+    };
 
     const onUpdateVoucherQnt = (code: string) => {
-      console.log('client update', code)
+      console.log("client update", code);
       fetchDiscountCode();
+    };
+
+    const onOptionUpdate = () => {
+      navigate(-1);
     }
 
     socket.on("hidden product", onHiddenProduct);
-    socket.on('update product', onProductUpdate);
-    socket.on('update voucher quantity', onUpdateVoucherQnt)
+    socket.on("update product", onProductUpdate);
+    socket.on("update voucher", onUpdateVoucherQnt);
+    socket.on('option update', onOptionUpdate);
 
     return () => {
       socket.off("hidden product", onHiddenProduct);
       socket.off("update product", onProductUpdate);
-      socket.off("update voucher quantity", onUpdateVoucherQnt);
+      socket.off("update voucher", onUpdateVoucherQnt);
+      socket.off('option update', onOptionUpdate);
     };
   }, [dispatch, navigate, productSelected.length]);
 
@@ -114,7 +130,7 @@ const Checkout = () => {
         productSelectedIds,
         shippingCost: SHIPPING_COST,
         discouVoucher: totalDiscount,
-        discountCode: selectedDiscountCode
+        discountCode: selectedDiscountCode,
       });
       console.log(res);
 
@@ -123,7 +139,11 @@ const Checkout = () => {
       }
 
       if (selectedDiscountCode) {
-        socket.emit('update voucher quantity', selectedDiscountCode)
+        socket.emit("update voucher", selectedDiscountCode);
+      }
+
+      if (selectedDiscountCode) {
+        socket.emit("update voucher quantity", selectedDiscountCode);
       }
 
       if (data?.paymentMethod === "COD") {
@@ -177,7 +197,11 @@ const Checkout = () => {
     }
   };
 
-  const discountedPrice = totalPrice - totalDiscount;
+  const discountedPrice = useMemo(() => {
+    const discountedPrice = totalPrice - totalDiscount;
+    return discountedPrice < 0 ? 0 : discountedPrice;
+  }, [totalPrice, totalDiscount]);
+
   const totalPriceWithShipping = discountedPrice + SHIPPING_COST;
 
   useEffect(() => {
@@ -193,7 +217,7 @@ const Checkout = () => {
       .catch((error) => {
         console.error("Error fetching discount codes:", error);
       });
-  }
+  };
 
   const showDiscountModal = () => {
     setIsModalVisible(true);
@@ -313,6 +337,12 @@ const Checkout = () => {
                   totalDiscount
                 )
               }
+              disabled={!productSelected.every((item) => item.variant.status)}
+              style={{
+                opacity: productSelected.every((item) => item.variant.status)
+                  ? 1
+                  : 0.5,
+              }}
             >
               Hoàn tất đơn hàng
             </button>
@@ -323,7 +353,7 @@ const Checkout = () => {
           <table className="table">
             <thead>
               <tr>
-                <th style={{ width: 250 }}>Tên sản phẩm</th>
+                <th style={{ width: 180 }}>Tên sản phẩm</th>
                 {/* <th>ảnh</th> */}
                 <th>Giá</th>
                 <th>Số lượng</th>
@@ -333,20 +363,29 @@ const Checkout = () => {
             </thead>
             <tbody>
               {productSelected?.map((item: ICartItem) => (
-                <tr key={item._id}>
+                <tr
+                  key={item._id}
+                  style={{ opacity: item.variant.status ? 1 : 0.5 }}
+                >
                   <td>
                     {item.product.name} (Size: {item.variant?.sizeName})
-                    {item.variant.status}
+                    {/* {item.variant.status} */}
+                    {!item.variant.status && (
+                      <p className="out-of-stock-text">
+                        Sản phẩm đang ngừng hoạt động
+                      </p>
+                    )}
                   </td>
                   <td>{formatPrice(item.variant.price)}</td>
                   <td>{item.quantity}</td>
 
-                  <td>{item.option?.name}<br/>
-
+                  <td>
+                    {item.option?.name}
+                    <br />
                     {item.option?.price}
                   </td>
-                  <td>{formatPrice(item.variant.price * item.quantity)}</td>
-                  <td> {formatPrice(SHIPPING_COST)}</td>
+                  <td>{formatPrice(totalPrice)}</td>
+                  {/* <td> {formatPrice(SHIPPING_COST)}</td> */}
                 </tr>
               ))}
             </tbody>
@@ -399,7 +438,7 @@ const Checkout = () => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              marginTop: "20px",
+              marginTop: "10px",
             }}
           >
             <span
@@ -413,13 +452,21 @@ const Checkout = () => {
                 borderRadius: "5px",
                 padding: "5px 10px",
                 boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+                margin: "0 0 5px 5px",
+                opacity: productSelected.every((item) => item.variant.status)
+                  ? 1
+                  : 0.5,
+                pointerEvents: productSelected.every(
+                  (item) => item.variant.status
+                )
+                  ? "auto"
+                  : "none",
               }}
             >
               Chọn mã giảm giá
             </span>
           </div>
 
-          {/* <span style={{float:"right"}}>- 10.000 VNĐ</span> */}
           <Modal
             title="Mã giảm giá"
             visible={isModalVisible}
@@ -431,7 +478,12 @@ const Checkout = () => {
               value={selectedDiscountCode}
             >
               {discountCodes.map((code: IVoucher) => {
-                const isDisable = !code.minPurchaseAmount || totalPrice < code.minPurchaseAmount || (user && code.userIds.includes(user?._id)) || code.quantity === code.usedCount;
+                const isDisable = !code.minPurchaseAmount ||
+                totalPrice < code.minPurchaseAmount ||
+                (user && code.userIds.includes(user?._id)) ||
+                code.quantity === code.usedCount ||
+                code.status === 'inactive'
+                ;
 
                 return <Card
                   key={code._id}
@@ -488,8 +540,12 @@ const Checkout = () => {
             }}
           >
             {selectedDiscountCode ? (
-              <div className="d-flex justify-content-between">
-                <p>{selectedDiscountCode}</p>
+              <div className="d-flex justify-content-between px-3">
+                <p style={{
+                  opacity: productSelected.every((item) => item.variant.status)
+                    ? 1
+                    : 0.5,
+                }}>{selectedDiscountCode}</p>
                 <p>- {totalDiscount > 0 ? formatPrice(totalDiscount) : null}</p>
               </div>
             ) : null}

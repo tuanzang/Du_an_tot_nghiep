@@ -9,7 +9,7 @@ export interface IVoucher {
     expirationDate: Date;
     quantity: number;
     usedCount?: number;
-    status?: 'active' | 'expired' | 'disabled';
+    status?: 'active' | 'inactive' | 'disabled';
     minPurchaseAmount?: number;
     userIds: string[]
   }

@@ -11,6 +11,7 @@ import {
   getProductSizesByProductId,
   updateProductSizes,
   filterProductByCategory,
+  adminGetDetailProduct,
 } from "../controller/products.js";
 
 const productRouter = Router();
@@ -18,6 +19,7 @@ const productRouter = Router();
 productRouter.get("/", getAllProduct);
 productRouter.post("/search", searchProducts);
 productRouter.get("/:id", getDetailProduct);
+productRouter.get("/:id/admin", adminGetDetailProduct);
 productRouter.post("/add", createProduct);
 productRouter.post("/:productId/add/size", createProductSizes);
 productRouter.get("/productSize/:idProduct", getProductSizesByProductId);

@@ -14,7 +14,10 @@ const transactionSchema = new mongoose.Schema(
     },
     transCode: {
       type: String,
-      required: true,
+    },
+    type: {
+      type: Boolean,
+      required: true, // true - tiền mặt | false - chuyển khoản
     },
     totalMoney: {
       type: String,

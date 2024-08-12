@@ -100,7 +100,7 @@ const BillHistoryDialog = ({
   return (
     <Modal
       title="Lịch sử đơn hàng"
-      visible={openDialog}
+      open={openDialog}
       onCancel={handleClose}
       footer={[
         <Button key="ok" onClick={handleClose}>

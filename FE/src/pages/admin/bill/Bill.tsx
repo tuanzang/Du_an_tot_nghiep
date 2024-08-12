@@ -1,15 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Button,
-  Input,
-  Card,
-  Col,
-  Row,
-  Table,
-  Tabs,
-  DatePicker,
-  Tag,
-} from "antd";
+import { Input, Card, Col, Row, Table, Tabs, DatePicker, Tag } from "antd";
 import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
 import TabPane from "antd/es/tabs/TabPane";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
@@ -30,21 +20,11 @@ interface IFilterBill {
   page: number;
 }
 
-interface IDateSearch {
-  createAtFrom: string;
-  createAtTo: string;
-}
-
 export default function Bill() {
   const [valueTabHD, setValueTabHD] = useState<string>("");
   const [totalBill, setTotalBill] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
-  const [codeSearch, setCodeSearch] = useState<string>("");
-  const [dateSearch, setDateSearch] = useState<IDateSearch>({
-    createAtFrom: "",
-    createAtTo: "",
-  });
   const [filter, setFilter] = useState<IFilterBill>({
     code: "",
     createAtFrom: "",
@@ -75,15 +55,6 @@ export default function Bill() {
   const handleChangeTab = (newValue: string) => {
     setValueTabHD(newValue);
     setFilter({ ...filter, status: newValue });
-  };
-
-  const handleFilter = (codeSearch: string, dateSearch: IDateSearch) => {
-    setFilter({
-      ...filter,
-      code: codeSearch,
-      createAtFrom: dateSearch.createAtFrom,
-      createAtTo: dateSearch.createAtTo,
-    });
   };
 
   const columns = [
@@ -150,7 +121,7 @@ export default function Bill() {
     },
   ];
 
-  const listSttHD = ["1", "2", "3", "4", "5", "6", "7", "8", "0"];
+  const listSttHD = ["1", "2", "3", "4", "5", "6", "7", "0"];
 
   return (
     <div className="bill-container">
@@ -168,7 +139,7 @@ export default function Bill() {
               size="middle"
               placeholder="Tìm kiếm hoá đơn theo mã hóa đơn"
               prefix={<SearchOutlined style={{ color: "#1890ff" }} />}
-              onChange={(e) => setCodeSearch(e.target.value)}
+              onChange={(e) => setFilter({ ...filter, code: e.target.value })}
             />
           </Col>
           <Col span={5}>
@@ -184,8 +155,8 @@ export default function Bill() {
             <DatePicker
               format={"DD-MM-YYYY"}
               onChange={(e) =>
-                setDateSearch({
-                  ...dateSearch,
+                setFilter({
+                  ...filter,
                   createAtFrom: e ? dayjs(e).format("YYYY-MM-DD") : "",
                 })
               }
@@ -204,33 +175,16 @@ export default function Bill() {
             <DatePicker
               format={"DD-MM-YYYY"}
               onChange={(e) =>
-                setDateSearch({
-                  ...dateSearch,
+                setFilter({
+                  ...filter,
                   createAtTo: e ? dayjs(e).format("YYYY-MM-DD") : "",
                 })
               }
             />
           </Col>
-          <Col span={2}></Col>
-          <Col span={2}>
-            <Button
-              type="default"
-              icon={<SearchOutlined />}
-              style={{
-                float: "right",
-                borderColor: "#c29957",
-                color: "#c29957",
-                fontFamily: "PlayFair",
-                fontSize: "15px",
-              }}
-              onClick={() => handleFilter(codeSearch, dateSearch)}
-            >
-              Tìm kiếm
-            </Button>
-          </Col>
         </Row>
       </Card>
-      <Card style={{ marginTop: "12px" }} >
+      <Card style={{ marginTop: "12px" }}>
         <Tabs activeKey={valueTabHD} onChange={handleChangeTab}>
           <TabPane tab="Tất cả" key="" />
           {listSttHD.map((row) => (

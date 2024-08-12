@@ -50,6 +50,7 @@
     "redux": "^5.0.1",
     "socket.io-client": "^4.7.5",
     "use-history": "^1.4.1",
+    "wd18205": "file:",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

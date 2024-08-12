@@ -3,16 +3,36 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useRef } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
-import { Button, Card, Form, Input, Select, Space, Switch, Upload } from "antd";
+import { Button, Card, Form, Input, Select, Switch, Upload } from "antd";
 import { EditOutlined, UploadOutlined } from "@ant-design/icons";
 import { UploadFile } from "antd/lib";
 import { IProduct } from "../../../interface/Products";
 import { IProductSize } from "../../../interface/ProductSize";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import {
-  ClassicEditor, AccessibilityHelp, Alignment, Autosave, Bold, Essentials, GeneralHtmlSupport, Highlight, Italic, Link,
-  Paragraph, SelectAll, SpecialCharacters, Table, TableCaption, TableCellProperties, TableColumnResize, TableProperties,
-  TableToolbar, TextPartLanguage, Title, Underline, Undo,
+  ClassicEditor,
+  AccessibilityHelp,
+  Alignment,
+  Autosave,
+  Bold,
+  Essentials,
+  GeneralHtmlSupport,
+  Highlight,
+  Italic,
+  Link,
+  Paragraph,
+  SelectAll,
+  SpecialCharacters,
+  Table,
+  TableCaption,
+  TableCellProperties,
+  TableColumnResize,
+  TableProperties,
+  TableToolbar,
+  TextPartLanguage,
+  Title,
+  Underline,
+  Undo,
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 import { uploadImage } from "../../../services/upload/upload";
@@ -40,21 +60,24 @@ export default function ProductDetailAndEdit() {
   const [isChanged1, setIsChanged1] = useState(false);
   const [isChanged2, setIsChanged2] = useState(false);
   const [productSizeForm] = Form.useForm();
-  const [form] = Form.useForm()
-  const [categories, setCategories] = useState<ICategory[]>([])
-  const [options, setOptions] = useState<IOption[]>([])
+  const [form] = Form.useForm();
+  const [categories, setCategories] = useState<ICategory[]>([]);
+  const [options, setOptions] = useState<IOption[]>([]);
 
-  const categoryId = Form.useWatch('categoryId', form);
+  const categoryId = Form.useWatch("categoryId", form);
 
   useEffect(() => {
     // Gọi API để lấy chi tiết sản phẩm
     const fetchProductDetails = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:3001/api/products/${id}`
+          `http://localhost:3001/api/products/${id}/admin`
         );
-        form.setFieldValue('categoryId', data.data.categoryId[0]);
-        form.setFieldValue('options', data.data.options?.map((it: any) => it._id));
+        form.setFieldValue("categoryId", data.data.categoryId[0]);
+        form.setFieldValue(
+          "options",
+          data.data.options?.map((it: any) => it._id)
+        );
         setProduct(data.data);
         setName(data.data.name);
         setPrice(data.data.price);
@@ -83,9 +106,18 @@ export default function ProductDetailAndEdit() {
         setProductSizes(data.data);
 
         data?.data?.forEach((it) => {
-          productSizeForm.setFieldValue(`price-${it.idSize}-${it._id}`, it.price);
-          productSizeForm.setFieldValue(`quantity-${it.idSize}-${it._id}`, it.quantity);
-          productSizeForm.setFieldValue(`status-${it.idSize}-${it._id}`, !!it.status);
+          productSizeForm.setFieldValue(
+            `price-${it.idSize}-${it._id}`,
+            it.price
+          );
+          productSizeForm.setFieldValue(
+            `quantity-${it.idSize}-${it._id}`,
+            it.quantity
+          );
+          productSizeForm.setFieldValue(
+            `status-${it.idSize}-${it._id}`,
+            !!it.status
+          );
         });
       } catch (error) {
         console.error("Error fetching product sizes:", error);
@@ -97,30 +129,30 @@ export default function ProductDetailAndEdit() {
   }, [id]);
 
   useEffect(() => {
-    fetchCategories()
-  }, [])
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     categoryId && fetchOptions(categoryId);
-  }, [categoryId])
+  }, [categoryId]);
 
   const fetchOptions = async (categoryId: string) => {
     try {
       const { data } = await axiosInstance.get(`/options/${categoryId}`);
       setOptions(data.data);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const fetchCategories = async () => {
     try {
-      const { data } = await axiosInstance.get('/categories');
+      const { data } = await axiosInstance.get("/categories");
       setCategories(data.data);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const onFieldsChange = () => {
     setIsChanged1(true);
@@ -167,6 +199,8 @@ export default function ProductDetailAndEdit() {
       });
       toast.success("Cập nhật sản phẩm thành công");
       navigate("/admin/product");
+
+      socket.emit('option update', id);
     } catch (error) {
       console.error("Error updating product:", error);
       toast.error("Cập nhật sản phẩm thất bại");
@@ -181,8 +215,7 @@ export default function ProductDetailAndEdit() {
       );
       toast.success("Cập nhật sản phẩm thành công");
       navigate("/admin/product");
-
-      socket.emit('update product', id);
+      socket.emit("update product", id);
     } catch (error) {
       console.error("Error updating product sizes:", error);
       toast.error("Cập nhật sản phẩm thất bại");
@@ -223,9 +256,29 @@ export default function ProductDetailAndEdit() {
       ],
       shouldNotGroupWhenFull: false,
     },
-    plugins: [AccessibilityHelp, Alignment, Autosave, Bold, Essentials, GeneralHtmlSupport, Highlight, Italic, Link, Paragraph,
-      SelectAll, SpecialCharacters, Table, TableCaption, TableCellProperties, TableColumnResize, TableProperties, TableToolbar,
-      TextPartLanguage, Title, Underline, Undo,
+    plugins: [
+      AccessibilityHelp,
+      Alignment,
+      Autosave,
+      Bold,
+      Essentials,
+      GeneralHtmlSupport,
+      Highlight,
+      Italic,
+      Link,
+      Paragraph,
+      SelectAll,
+      SpecialCharacters,
+      Table,
+      TableCaption,
+      TableCellProperties,
+      TableColumnResize,
+      TableProperties,
+      TableToolbar,
+      TextPartLanguage,
+      Title,
+      Underline,
+      Undo,
     ],
     htmlSupport: {
       allow: [
@@ -268,10 +321,11 @@ export default function ProductDetailAndEdit() {
       await axiosInstance.put(`/products/${id}`, values);
       toast.success("Cập nhật sản phẩm thành công");
       navigate("/admin/product");
+      socket.emit('option update', id);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   return (
     <div>
@@ -352,7 +406,7 @@ export default function ProductDetailAndEdit() {
                     <td>{it.sizeName}</td>
                     <td>
                       <Form.Item
-                        name={"quantity" + "-" + it.idSize + '-' + it._id}
+                        name={"quantity" + "-" + it.idSize + "-" + it._id}
                         rules={[
                           { required: true, message: "Vui lòng nhập số lượng" },
                         ]}
@@ -362,14 +416,19 @@ export default function ProductDetailAndEdit() {
                     </td>
                     <td>
                       <Form.Item
-                        name={"price" + "-" + it.idSize + '-' + it._id}
-                        rules={[{ required: true, message: "Vui lòng nhập giá" }]}
+                        name={"price" + "-" + it.idSize + "-" + it._id}
+                        rules={[
+                          { required: true, message: "Vui lòng nhập giá" },
+                        ]}
                       >
                         <Input placeholder="Giá" type="number" />
                       </Form.Item>
                     </td>
                     <th scope="col">
-                      <Form.Item name={"status" + "-" + it.idSize + '-' + it._id} valuePropName="checked">
+                      <Form.Item
+                        name={"status" + "-" + it.idSize + "-" + it._id}
+                        valuePropName="checked"
+                      >
                         <Switch />
                       </Form.Item>
                     </th>
@@ -392,16 +451,24 @@ export default function ProductDetailAndEdit() {
         </Card>
 
         <Card className="my-3">
-          <Form form={form} layout='vertical' onFinish={onFinish}>
-            <Form.Item name='categoryId' label="Danh mục Sản Phẩm">
-              <Select onChange={() => form.setFieldValue('options', [])} options={categories.map(it => ({ label: it.loai, value: it._id }))} />
+          <Form form={form} layout="vertical" onFinish={onFinish}>
+            <Form.Item name="categoryId" label="Danh mục SP">
+              <Select
+                onChange={() => form.setFieldValue("options", [])}
+                options={categories.map((it) => ({
+                  label: it.loai,
+                  value: it._id,
+                }))}
+              />
             </Form.Item>
 
-            <Form.Item name='options'>
+            <Form.Item name="options">
               <OptionFormItem options={options} />
             </Form.Item>
 
-            <Button type='primary' htmlType='submit'>Update</Button>
+            <Button type="primary" htmlType="submit">
+              Update
+            </Button>
           </Form>
         </Card>
 
@@ -409,10 +476,7 @@ export default function ProductDetailAndEdit() {
           <label style={{ fontSize: "18px" }} className="mb-2">
             Mô tả sản phẩm
           </label>
-          <div
-            className="editor-container editor-container_classic-editor"
-            ref={editorContainerRef}
-          >
+          <div ref={editorContainerRef}>
             <div className="editor-container__editor">
               <div ref={editorRef}>
                 {isLayoutReady && (
