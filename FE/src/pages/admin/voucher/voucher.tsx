@@ -74,6 +74,13 @@ export default function Voucher() {
       width: "10%",
     },
     {
+      title: "Đã sử dụng ",
+      dataIndex: "usedCount",
+      key: "usedCount",
+      align: "center",
+      width: "10%",
+    },
+    {
       title: "Giảm giá",
       dataIndex: "discountType",
       key: "discountType",
@@ -161,6 +168,7 @@ export default function Voucher() {
             <span>Trạng thái: </span>
             <Radio.Group onChange={onChangeRadio} value={value}>
               <Radio value={1}>Tất cả</Radio>
+
               <Radio value={2}>Hoạt động</Radio>
               <Radio value={3}>Ngưng hoạt động</Radio>
             </Radio.Group>
