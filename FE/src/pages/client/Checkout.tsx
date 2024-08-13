@@ -24,7 +24,6 @@ import dayjs from "dayjs";
 import axios from "axios";
 import "./checkout.css";
 const SHIPPING_COST = 30000;
-// import { useLocation } from "react-router-dom";
 const { Text } = Typography;
 
 interface IDataBill {

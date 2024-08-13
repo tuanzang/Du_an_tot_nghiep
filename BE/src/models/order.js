@@ -1,10 +1,10 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
+      ref: "User",
     },
     code: {
       type: String,
@@ -17,10 +17,17 @@ const orderSchema = new mongoose.Schema(
         quantity: Number,
         image: String,
         size: String,
-        variantId: String,
+        variantId: {
+          type: Schema.Types.ObjectId,
+          ref: 'ProductSize'
+        },
         optionName: String,
         optionPrice: Number,
-        optionId: String,
+        optionId: {
+          type: Schema.Types.ObjectId,
+          ref: 'option',
+          default: null
+        },
       },
     ],
     totalPrice: {
