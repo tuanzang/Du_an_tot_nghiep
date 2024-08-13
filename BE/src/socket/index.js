@@ -31,15 +31,19 @@ const initialSocket = (server) => {
     });
 
     // listen option update
-    socket.on('option update', (productId) => {
-      io.emit('option update', productId)
+    socket.on("option update", (productId) => {
+      io.emit("option update", productId);
     });
 
     // listen update order status
-    socket.on('update order status', orderId => {
+    socket.on("update order status", (orderId) => {
       console.log(orderId);
-      io.emit('update order status', orderId);
-    })
+      io.emit("update order status", orderId);
+    });
+    socket.on("user update order status", (orderId) => {
+      console.log(orderId);
+      io.emit("user update order status", orderId);
+    });
   });
 
   io.listen(4000);

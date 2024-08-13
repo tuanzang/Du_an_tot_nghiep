@@ -203,18 +203,29 @@ export default function ProfileBillDetail() {
           "http://localhost:3001/api/orders/update-status",
           { id: id, status: status, statusShip: true }
         );
-        createNewHistory(response.data.data, user, note);
-        getBillHistoryByIdBill(id);
+        await createNewHistory(response.data.data, user, note);
+        await getBillHistoryByIdBill(id);
         setStatusBill(status);
 
         if (status === "0") {
           socket.emit("update voucher");
         }
+
+        socket.emit("user update order status", id);
       } catch (error) {
         toast.error("Không tìm thấy hóa đơn");
       }
     }
     setLoadingBill(false);
+  };
+
+  // hoàn thành đơn hàng
+  const onOrderComplete = async () => {
+    try {
+      handleUpdateStatusBill(id ? id : null, "6", user, "");
+    } catch (error) {
+      toast.error("Có lỗi xảy ra, vui lòng thử lại!");
+    }
   };
 
   // hủy hóa đơn
@@ -573,6 +584,12 @@ export default function ProfileBillDetail() {
     );
   }
 
+  const refetch = (id: string) => {
+    getBillHistoryByIdBill(id);
+    getTransBillByIdBill(id);
+    fetchDetailBill(id);
+  };
+
   // useEffect
   useEffect(() => {
     fetchDetailBill(id ? id : null);
@@ -585,15 +602,16 @@ export default function ProfileBillDetail() {
 
   useEffect(() => {
     const onOrderStatusUpdate = (orderId: string) => {
-      console.log(orderId, 'client update');
-      id && id === orderId && getBillHistoryByIdBill(id); 
+      if (id && id === orderId) {
+        refetch(id);
+      }
     };
 
-    socket.on('update order status', onOrderStatusUpdate);
+    socket.on("update order status", onOrderStatusUpdate);
 
     return () => {
-      socket.off('update order status', onOrderStatusUpdate);
-    }
+      socket.off("update order status", onOrderStatusUpdate);
+    };
   }, [id]);
 
   //
@@ -669,7 +687,11 @@ export default function ProfileBillDetail() {
                   {loadingHistory ? (
                     <Spin tip="Loading..." />
                   ) : (
-                    <TimeLine orderTimeLine={listHistoryBill} isClient />
+                    <TimeLine
+                      orderTimeLine={listHistoryBill}
+                      isClient
+                      onOrderComplete={onOrderComplete}
+                    />
                   )}
                 </Col>
               </Row>

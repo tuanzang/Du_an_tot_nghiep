@@ -1,4 +1,4 @@
-import { Button, Timeline, Typography } from "antd";
+import { Button, Popconfirm, Timeline, Typography } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { FaBoxOpen, FaRegFileAlt, FaTruck } from "react-icons/fa";
 import { GiConfirmed } from "react-icons/gi";
@@ -14,32 +14,44 @@ const { Text } = Typography;
 
 type Props = {
   orderTimeLine: IHistoryBill[];
-  isClient?: boolean
+  isClient?: boolean;
+  onOrderComplete?: () => Promise<void>;
 };
 
-const TIME_TO_EXPIRE = 60;
+const TIME_TO_EXPIRE = 1; // minute
 
-const TimeLine = ({ orderTimeLine, isClient = false }: Props) => {
-  const [isExpiredTime, setIsExpiredTime] = useState(false)
+const TimeLine = ({
+  orderTimeLine,
+  isClient = false,
+  onOrderComplete,
+}: Props) => {
+  const [isExpiredTime, setIsExpiredTime] = useState(false);
 
   const filteredTimeLine = orderTimeLine.filter(
     (item) =>
       Number(item.statusBill) !== null && Number(Number(item.statusBill)) !== 10
   );
+  const latestStatus = filteredTimeLine[filteredTimeLine.length - 1];
 
   useEffect(() => {
-    const latestStatus = filteredTimeLine[filteredTimeLine.length - 1];
-
-    if (latestStatus.statusBill !== '5') return;
+    if (!latestStatus || latestStatus.statusBill !== "5") return;
 
     const timerId = setInterval(() => {
-      // console.log(123, dayjs(latestStatus.createdAt).diff(dayjs(), 's'))
+      const expireTime = dayjs(latestStatus.createdAt).add(TIME_TO_EXPIRE, "m");
+
+      const isExpiredTime = dayjs(expireTime).diff(dayjs()) <= 0;
+
+      if (isExpiredTime && onOrderComplete) {
+        clearInterval(timerId);
+        setIsExpiredTime(true);
+        onOrderComplete();
+      }
     }, 1000);
 
     return () => {
       clearInterval(timerId);
-    }
-  }, [filteredTimeLine.length])
+    };
+  }, [filteredTimeLine.length, latestStatus, onOrderComplete]);
 
   const getIconAndColor = (statusBill: number) => {
     switch (statusBill) {
@@ -65,11 +77,27 @@ const TimeLine = ({ orderTimeLine, isClient = false }: Props) => {
   };
 
   const renderReceivedBtn = (status: string) => {
-    if (!isClient || status !== '5') return;
+    if (
+      !isClient ||
+      status !== "5" ||
+      latestStatus?.statusBill !== "5" ||
+      isExpiredTime
+    )
+      return;
 
-    return <div style={{ marginTop: 12 }}>
-      <Button>Đã nhận hàng</Button>
-    </div>
+    return (
+      <div style={{ marginTop: 12 }}>
+        <Popconfirm
+          title="Đã nhận hàng"
+          description="Xác nhận đã nhận hàng?"
+          onConfirm={() => {
+            onOrderComplete && onOrderComplete();
+          }}
+        >
+          <Button>Đã nhận hàng</Button>
+        </Popconfirm>
+      </div>
+    );
   };
 
   return (
