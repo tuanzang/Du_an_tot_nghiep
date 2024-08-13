@@ -34,6 +34,12 @@ const initialSocket = (server) => {
     socket.on('option update', (productId) => {
       io.emit('option update', productId)
     });
+
+    // listen update order status
+    socket.on('update order status', orderId => {
+      console.log(orderId);
+      io.emit('update order status', orderId);
+    })
   });
 
   io.listen(4000);

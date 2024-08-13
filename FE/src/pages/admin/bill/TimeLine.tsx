@@ -1,4 +1,4 @@
-import { Timeline, Typography } from "antd";
+import { Button, Timeline, Typography } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { FaBoxOpen, FaRegFileAlt, FaTruck } from "react-icons/fa";
 import { GiConfirmed } from "react-icons/gi";
@@ -8,18 +8,38 @@ import { AiFillCheckCircle } from "react-icons/ai";
 import dayjs from "dayjs";
 import statusHoaDon from "../../../services/constants/statusHoaDon";
 import { IHistoryBill } from "../../../interface/HistoryBill";
+import { useEffect, useState } from "react";
 
 const { Text } = Typography;
 
 type Props = {
   orderTimeLine: IHistoryBill[];
+  isClient?: boolean
 };
 
-const TimeLine = ({ orderTimeLine }: Props) => {
+const TIME_TO_EXPIRE = 60;
+
+const TimeLine = ({ orderTimeLine, isClient = false }: Props) => {
+  const [isExpiredTime, setIsExpiredTime] = useState(false)
+
   const filteredTimeLine = orderTimeLine.filter(
     (item) =>
       Number(item.statusBill) !== null && Number(Number(item.statusBill)) !== 10
   );
+
+  useEffect(() => {
+    const latestStatus = filteredTimeLine[filteredTimeLine.length - 1];
+
+    if (latestStatus.statusBill !== '5') return;
+
+    const timerId = setInterval(() => {
+      // console.log(123, dayjs(latestStatus.createdAt).diff(dayjs(), 's'))
+    }, 1000);
+
+    return () => {
+      clearInterval(timerId);
+    }
+  }, [filteredTimeLine.length])
 
   const getIconAndColor = (statusBill: number) => {
     switch (statusBill) {
@@ -42,6 +62,14 @@ const TimeLine = ({ orderTimeLine }: Props) => {
       default:
         return { color: "magenta", icon: <FaRegFileAlt /> }; // Mặc định
     }
+  };
+
+  const renderReceivedBtn = (status: string) => {
+    if (!isClient || status !== '5') return;
+
+    return <div style={{ marginTop: 12 }}>
+      <Button>Đã nhận hàng</Button>
+    </div>
   };
 
   return (
@@ -70,6 +98,8 @@ const TimeLine = ({ orderTimeLine }: Props) => {
               <Text type="secondary">
                 {dayjs(item.createdAt).format("DD-MM-YYYY HH:mm:ss")}
               </Text>
+
+              {renderReceivedBtn(item.statusBill)}
             </Timeline.Item>
           );
         })}

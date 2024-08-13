@@ -33,6 +33,7 @@ import "./BillStyle.css";
 import { IBill, IProductBill } from "../../../interface/Bill";
 import { USER_INFO_STORAGE_KEY } from "../../../services/constants";
 import dayjs from "dayjs";
+import { socket } from "../../../socket";
 
 const listHis = [{ link: "/admin/bill", name: "Quản lý đơn hàng" }];
 export default function BillDetail() {
@@ -210,6 +211,8 @@ export default function BillDetail() {
         createNewHistory(response.data.data, user, note);
         setStatusBill(status);
         toast.success(response.data.message);
+
+        socket.emit('update order status', id);
       } catch (error) {
         toast.error("Không tìm thấy hóa đơn");
       }

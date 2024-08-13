@@ -583,6 +583,19 @@ export default function ProfileBillDetail() {
     getTransBillByIdBill(id ? id : null);
   }, [id, idCustomer]);
 
+  useEffect(() => {
+    const onOrderStatusUpdate = (orderId: string) => {
+      console.log(orderId, 'client update');
+      id && id === orderId && getBillHistoryByIdBill(id); 
+    };
+
+    socket.on('update order status', onOrderStatusUpdate);
+
+    return () => {
+      socket.off('update order status', onOrderStatusUpdate);
+    }
+  }, [id]);
+
   //
   const handleFindData = (row: IProductBill) => {
     detailComment(user, row?.variantId);
@@ -656,7 +669,7 @@ export default function ProfileBillDetail() {
                   {loadingHistory ? (
                     <Spin tip="Loading..." />
                   ) : (
-                    <TimeLine orderTimeLine={listHistoryBill} />
+                    <TimeLine orderTimeLine={listHistoryBill} isClient />
                   )}
                 </Col>
               </Row>
