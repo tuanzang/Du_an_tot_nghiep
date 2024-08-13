@@ -159,25 +159,28 @@ export const updateStatusBill = async (req, res) => {
       });
     }
 
-    // const updatedOrder = await Order.findByIdAndUpdate(
-    //   id,
-    //   { $set: { status: status, statusShip: statusShip } },
-    //   { new: true }
-    // ).exec();
+    const updatedOrder = await Order
+      .findByIdAndUpdate(
+        id,
+        { $set: { status: status, statusShip: statusShip } },
+        { new: true }
+      )
+      .populate('userId')
+      .populate({
+        path: 'products.variantId',
+        model: 'ProductSize'
+      })
+      .populate({
+        path: 'products.optionId',
+        model: 'option'
+      })
+      .exec();
 
-    // if (!updatedOrder) {
-    //   return res.status(404).json({
-    //     message: "Không tìm thấy hóa đơn",
-    //   });
-    // }
-
-    const updatedOrder = await Order.findById(id).populate('userId').populate({
-      path: 'products.variantId',
-      model: 'ProductSize'
-    }).populate({
-      path: 'products.optionId',
-      model: 'option'
-    });
+    if (!updatedOrder) {
+      return res.status(404).json({
+        message: "Không tìm thấy hóa đơn",
+      });
+    }
 
     // xác nhận đơn hàng
     if (status === '2') {
