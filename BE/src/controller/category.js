@@ -129,10 +129,18 @@ export const updateCategory = async (req, res) => {
     });
 
     const updateOptionPromise = options.map(async (it) => {
-      const optionUpdated = await Option.findByIdAndUpdate(it._id, it, {
+      let optionUpdateOrCreate = await Option.findByIdAndUpdate(it._id, it, {
         new: true,
       });
-      return optionUpdated;
+
+      if (!optionUpdateOrCreate) {
+        optionUpdateOrCreate = await new Option({
+          ...it,
+          category: categoryId,
+        }).save();
+      }
+
+      return optionUpdateOrCreate;
     });
 
     const optionUpdated = await Promise.all(updateOptionPromise);
