@@ -33,6 +33,7 @@ import "./BillStyle.css";
 import { IBill, IProductBill } from "../../../interface/Bill";
 import { USER_INFO_STORAGE_KEY } from "../../../services/constants";
 import dayjs from "dayjs";
+import { socket } from "../../../socket";
 
 const listHis = [{ link: "/admin/bill", name: "Quản lý đơn hàng" }];
 export default function BillDetail() {
@@ -180,6 +181,12 @@ export default function BillDetail() {
     }
   };
 
+  const refetch = (id: string) => {
+    getBillHistoryByIdBill(id);
+    getTransBillByIdBill(id);
+    fetchDetailBill(id);
+  };
+
   // useEffect
   useEffect(() => {
     fetchDetailBill(id ? id : null);
@@ -189,6 +196,20 @@ export default function BillDetail() {
     }
     getTransBillByIdBill(id ? id : null);
   }, [id, idCustomer]);
+
+  useEffect(() => {
+    const onOrderStatusUpdate = (orderId: string) => {
+      if (id && id === orderId) {
+        refetch(id);
+      }
+    };
+
+    socket.on("user update order status", onOrderStatusUpdate);
+
+    return () => {
+      socket.off("user update order status", onOrderStatusUpdate);
+    };
+  }, [id]);
 
   // cập nhật trạng thái hóa đơn
   const handleUpdateStatusBill = async (
@@ -207,9 +228,11 @@ export default function BillDetail() {
           "http://localhost:3001/api/bills/update-status",
           { id: id, status: status, statusShip: statusShip }
         );
-        createNewHistory(response.data.data, user, note);
+        await createNewHistory(response.data.data, user, note);
         setStatusBill(status);
         toast.success(response.data.message);
+
+        socket.emit("update order status", id);
       } catch (error) {
         toast.error("Không tìm thấy hóa đơn");
       }
