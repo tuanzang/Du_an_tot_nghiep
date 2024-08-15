@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer"
 
-const sendMail = async ({ mailTo, title, content }) => {
+const sendMail = async ({ mailTo, title, content, attachmentFile }) => {
     try {
         const transporter = nodemailer.createTransport({
             host: 'smtp.gmail.com',
@@ -12,12 +12,27 @@ const sendMail = async ({ mailTo, title, content }) => {
             },
         });
 
-        const info = await transporter.sendMail({
+        let config = {
             from: `"FBEE" <${process.env.MAIL_USER}>`, // sender address
             to: mailTo, // list of receivers
             subject: title, // Subject line
             html: content, // html body
-        });
+        };
+
+        if (attachmentFile) {
+            config = {
+                ...config,
+                attachments: [
+                    {
+                        filename: 'file.pdf',
+                        path: attachmentFile,
+                        contentType: 'application/pdf'
+                    }
+                ]
+            }
+        }
+
+        const info = await transporter.sendMail(config);
 
         return info;
     } catch (error) {

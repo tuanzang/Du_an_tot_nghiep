@@ -1,4 +1,4 @@
-import DiscountCode from '../models/DiscountCode';
+import DiscountCode from '../models/DiscountCode.js';
 
 import { StatusCodes } from 'http-status-codes';
 import Joi from 'joi';

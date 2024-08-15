@@ -4,7 +4,7 @@ import productRouter from "./products.js";
 import categoryRouter from "./category.js";
 import cartRouter from "./carts.js";
 import orderRouter from "./order.js";
-import sizeRouter from "./size";
+import sizeRouter from "./size.js";
 import commentRouter from "./comment.js";
 import historyBillRouter from "./historyBill.js";
 import transBillRouter from "./transaction.js";

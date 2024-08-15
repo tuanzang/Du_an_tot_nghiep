@@ -3,7 +3,7 @@ import {
   createTransBill,
   findAndUpdateTransBill,
   getTransBillByIdBill,
-} from "../controller/transaction";
+} from "../controller/transaction.js";
 
 const transBillRouter = Router();
 

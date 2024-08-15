@@ -1,4 +1,4 @@
-import transaction from "../models/transaction";
+import transaction from "../models/transaction.js";
 
 /**
  * Tìm kiếm lịch sử thanh toán

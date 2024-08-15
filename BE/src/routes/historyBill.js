@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   createHistoryBill,
   getHistoryBillByIdBill,
-} from "../controller/historyBill";
+} from "../controller/historyBill.js";
 
 const historyBillRouter = Router();
 

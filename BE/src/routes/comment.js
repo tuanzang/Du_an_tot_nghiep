@@ -10,7 +10,7 @@ import {
   getAllComment,
   getCommentByIdProduct,
   updateComment,
-} from "../controller/comment";
+} from "../controller/comment.js";
 
 const commentRouter = Router();
 

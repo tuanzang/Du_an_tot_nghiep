@@ -89,8 +89,8 @@ export default function ProductDetail() {
     }
   };
 
-   // Gọi API để lấy số lượng sản phẩm theo kích cỡ
-   const fetchProductSizes = async () => {
+  // Gọi API để lấy số lượng sản phẩm theo kích cỡ
+  const fetchProductSizes = async () => {
     try {
       const { data } = await axios.get(
         `http://localhost:3001/api/products/productSize/${id}`
@@ -286,6 +286,7 @@ export default function ProductDetail() {
                           width={"100%"}
                           src={productImage}
                           alt="product-details"
+                          className={!product?.status ? "grayscale" : ""}
                         />
                       </div>
 
@@ -307,9 +308,6 @@ export default function ProductDetail() {
                     </div>
                     <div className="col-lg-7">
                       <div className="product-details-des">
-                        {/* <div className="manufacturer-name">
-                          <a>HOT</a>
-                        </div> */}
                         <h3
                           className="product-name"
                           style={{ fontWeight: "300", fontSize: "30px" }}
@@ -325,7 +323,8 @@ export default function ProductDetail() {
                           />
                         </h3>
 
-                        {!product?.status && 'Tạm ngừng kinh doanh'}
+                        {!product?.status && <p className="status-red">Tạm ngừng kinh doanh</p>}
+
                         <div className="price-box">
                           <span
                             className="price-regular"
@@ -344,7 +343,7 @@ export default function ProductDetail() {
                                   ? "selected"
                                   : ""
                                   }`}
-                                  disabled={!size.status}
+                                disabled={!size.status}
                                 style={{
                                   padding: "10px 20px",
                                   fontSize: "16px",
@@ -431,6 +430,7 @@ export default function ProductDetail() {
                               <button
                                 className="btn btn-cart2"
                                 onClick={onAddCart}
+                                disabled={!product?.status}
                               >
                                 Thêm vào giỏ hàng
                               </button>

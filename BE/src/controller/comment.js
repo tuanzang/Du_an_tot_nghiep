@@ -1,7 +1,7 @@
-import Comment from "../models/comment";
-import product from "../models/product";
-import productSize from "../models/productSize";
-import user from "../models/user";
+import Comment from "../models/comment.js";
+import product from "../models/product.js";
+import productSize from "../models/productSize.js";
+import user from "../models/user.js";
 
 /**
  * API lấy ra danh sách bình luận

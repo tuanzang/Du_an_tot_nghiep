@@ -5,7 +5,7 @@ import {
   findSizeById,
   getAllSize,
   getPageSize,
-} from "../controller/size";
+} from "../controller/size.js";
 
 const sizeRouter = Router();
 sizeRouter.get("/", getAllSize);
