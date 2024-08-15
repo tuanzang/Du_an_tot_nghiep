@@ -1,5 +1,15 @@
 import { PlusSquareOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Card, Col, Input, Radio, Row, Table, Switch, message } from "antd";
+import {
+  Button,
+  Card,
+  Col,
+  Input,
+  Radio,
+  Row,
+  Table,
+  Switch,
+  message,
+} from "antd";
 import { useEffect, useState } from "react";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import axios from "axios";
@@ -21,34 +31,47 @@ export default function Voucher() {
   const [vouchers, setVouchers] = useState([]);
 
   const onChangeRadio = (e: any) => {
-    console.log("radio checked", e.target.value);
     setValue(e.target.value);
   };
 
   const onChangeStatus = (checked: boolean, record: any) => {
-    onUpdateStatus(record._id, checked ? 'active' : 'inactive')
+    onUpdateStatus(record._id, checked ? "active" : "inactive");
   };
 
   const onUpdateStatus = async (id: string, status: string) => {
     try {
       await axiosInstance.put(`/discountCode/discountCodes/${id}`, {
-        status
-      })
-      message.success('Cập nhật trạng thái thành công');
-      socket.emit('update voucher')
-      fetchVouchers()
+        status,
+      });
+      message.success("Cập nhật trạng thái thành công");
+      socket.emit("update voucher");
+      fetchVouchers();
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const fetchVouchers = async () => {
     try {
       const response = await axios.get(
         "http://localhost:3001/api/discountCode/discountCodes"
       );
-      setVouchers(response.data);
-      console.log(response.data);
+
+      // Kiểm tra ngày hết hạn và cập nhật trạng thái nếu cần
+      const updatedVouchers = await Promise.all(
+        response.data.map(async (voucher: any) => {
+          const isExpired = dayjs().isAfter(dayjs(voucher.expirationDate));
+          if (isExpired && voucher.status !== "inactive") {
+            await onUpdateStatus(voucher._id, "inactive");
+            return { ...voucher, status: "inactive" };
+          }
+          return voucher;
+        })
+      );
+      updatedVouchers.sort(
+        (a, b) => dayjs(b.createdAt).valueOf() - dayjs(a.createdAt).valueOf()
+      );
+      setVouchers(updatedVouchers);
     } catch (error) {
       console.error("Failed to fetch vouchers:", error);
     }
@@ -57,6 +80,13 @@ export default function Voucher() {
   useEffect(() => {
     fetchVouchers();
   }, []);
+
+  const filteredVouchers = vouchers.filter((voucher) => {
+    if (value === 1) return true; // Tất cả
+    if (value === 2) return voucher.status === "active"; // Hoạt động
+    if (value === 3) return voucher.status === "inactive"; // Ngưng hoạt động
+    return false;
+  });
 
   const columns = [
     {
@@ -89,7 +119,7 @@ export default function Voucher() {
       width: "10%",
     },
     {
-      title: "Đã sử dụng ",
+      title: "Đã sử dụng",
       dataIndex: "usedCount",
       key: "usedCount",
       align: "center",
@@ -134,7 +164,7 @@ export default function Voucher() {
       width: "10%",
       render: (status: string, record: any) => (
         <Switch
-          checked={status === 'active'}
+          checked={status === "active"}
           onChange={(checked) => onChangeStatus(checked, record)}
         />
       ),
@@ -183,7 +213,6 @@ export default function Voucher() {
             <span>Trạng thái: </span>
             <Radio.Group onChange={onChangeRadio} value={value}>
               <Radio value={1}>Tất cả</Radio>
-
               <Radio value={2}>Hoạt động</Radio>
               <Radio value={3}>Ngưng hoạt động</Radio>
             </Radio.Group>
@@ -199,7 +228,7 @@ export default function Voucher() {
               ),
             },
           }}
-          dataSource={vouchers}
+          dataSource={filteredVouchers}
           columns={columns}
         />
       </Card>
