@@ -1,5 +1,5 @@
 import express from 'express';
-import { addOption, updateOption, deleteOption, getOptionsByCategoryId } from '../controller/option';
+import { addOption, updateOption, deleteOption, getOptionsByCategoryId } from '../controller/option.js';
 
 const optionRouter = express.Router();
 

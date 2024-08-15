@@ -7,6 +7,9 @@ import dateFormat from "dayjs";
 import dotenv from "dotenv";
 import dayjs from "dayjs";
 import DiscountCode from "../models/DiscountCode.js";
+import convertHtmlToPdf from "../utils/pdf.js";
+import uploadFileToCloudinary from "../utils/cloudinary.js";
+import { completedOrderMailContent } from "../constants/const.js";
 
 dotenv.config();
 
@@ -334,15 +337,35 @@ export const updateOrderStatus = async (req, res) => {
       });
     }
 
-    const updatedOrder = await Order.findByIdAndUpdate(
+    const updatedOrder = await Order
+    .findByIdAndUpdate(
       id,
       { $set: { status: status } },
       { new: true }
-    ).exec();
+    )
+    .populate('userId')
+    .exec();
 
     // hủy đơn hàng
     if (status === '0' && updatedOrder.discountCode) {
       await DiscountCode.findOneAndUpdate({ code: updatedOrder.discountCode }, {  $inc: { usedCount: -1 }})
+    }
+
+    // hoàn thành đơn hàng
+    if (status === '6') {
+      // convert html to pdf
+      const filePath = await convertHtmlToPdf('<h1>Hello World1!</h1>')
+
+      // upload file to cloud
+      const fileUploaded = await uploadFileToCloudinary(filePath);
+
+      // send mail
+      await sendMail({
+        mailTo: updatedOrder?.userId?.email,
+        title: 'Cảm Ơn Bạn Đã Mua Sắm Tại FBEE',
+        content: completedOrderMailContent({ customerName: updatedOrder?.customerName }),
+        attachmentFile: fileUploaded.secure_url
+      })
     }
 
     if (!updatedOrder) {
