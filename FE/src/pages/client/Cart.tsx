@@ -338,6 +338,8 @@ export default function Cart() {
                                 quantity
                               )
                             }
+                            onKeyDown={(e) => e.preventDefault()} // Ngăn chặn nhập bằng bàn phím
+                            onPaste={(e) => e.preventDefault()} // Ngăn chặn dán nội dung vào trường
                           />
                         )}
                         width={150}

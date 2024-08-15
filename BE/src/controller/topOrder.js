@@ -70,7 +70,7 @@ export const getTopOrderedProducts = async (req, res) => {
         
       },
     ]);
-    console.log("topProducts:", topProducts);
+    // console.log("topProducts:", topProducts);
     if (!topProducts || topProducts.length === 0) {
       return res.status(200).json({
         message: "Không tìm thấy sản phẩm nào!",

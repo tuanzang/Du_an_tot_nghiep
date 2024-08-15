@@ -482,7 +482,11 @@ const Checkout = () => {
                 (user && code.userIds.includes(user?._id)) ||
                 code.quantity === code.usedCount ||
                 code.status === 'inactive'
-                ;
+                
+                // Nếu số lượng bằng số lượng đã sử dụng, bỏ tick radio
+                if (code.quantity === code.usedCount && selectedDiscountCode === code.code) {
+                  setSelectedDiscountCode(null);
+                }
 
                 return <Card
                   key={code._id}
