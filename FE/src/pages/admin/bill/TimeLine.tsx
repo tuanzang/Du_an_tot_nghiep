@@ -34,7 +34,7 @@ const TimeLine = ({
   const latestStatus = filteredTimeLine[filteredTimeLine.length - 1];
 
   useEffect(() => {
-    if (!latestStatus || latestStatus.statusBill !== "5") return;
+    if (!latestStatus || latestStatus.statusBill !== "5" || isExpiredTime) return;
 
     const timerId = setInterval(() => {
       const expireTime = dayjs(latestStatus.createdAt).add(TIME_TO_EXPIRE, "m");
@@ -51,7 +51,7 @@ const TimeLine = ({
     return () => {
       clearInterval(timerId);
     };
-  }, [filteredTimeLine.length, latestStatus, onOrderComplete]);
+  }, [filteredTimeLine.length, isExpiredTime, latestStatus, onOrderComplete]);
 
   const getIconAndColor = (statusBill: number) => {
     switch (statusBill) {
