@@ -30,6 +30,7 @@ const orderRouter = Router();
 
 orderRouter.post("/add-order", checkAuth, createOrder);
 orderRouter.post("/", getAllOrders);
+orderRouter.get("/", getAllOrders);
 orderRouter.get("/", getTotalOrdersByDate);
 // orderRouter.put("/:id", updateOrder);
 orderRouter.delete("/:id", deleteOrder);

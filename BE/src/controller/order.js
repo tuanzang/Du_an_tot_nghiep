@@ -291,12 +291,13 @@ export const getAllOrders = async (req, res) => {
         total: 0,
       });
     }
-
+    console.log(orders);
     return res.status(200).json({
       message: "Success",
       data: orders,
       total: total,
       size: pageSize,
+      
     });
   } catch (error) {
     console.error("Lỗi:", error);
