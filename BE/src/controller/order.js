@@ -9,7 +9,8 @@ import dayjs from "dayjs";
 import DiscountCode from "../models/DiscountCode.js";
 import convertHtmlToPdf from "../utils/pdf.js";
 import uploadFileToCloudinary from "../utils/cloudinary.js";
-import { completedOrderMailContent } from "../constants/const.js";
+import { CERTIFICATE_HTML_STR, completedOrderMailContent } from "../constants/const.js";
+import sendMail from "../utils/sendMail.js";
 
 dotenv.config();
 
@@ -354,7 +355,7 @@ export const updateOrderStatus = async (req, res) => {
     // hoàn thành đơn hàng
     if (status === '6') {
       // convert html to pdf
-      const filePath = await convertHtmlToPdf('<h1>Hello World1!</h1>')
+      const filePath = await convertHtmlToPdf(CERTIFICATE_HTML_STR)
 
       // upload file to cloud
       const fileUploaded = await uploadFileToCloudinary(filePath);
