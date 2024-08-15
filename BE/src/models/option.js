@@ -35,4 +35,4 @@ const optionCategorios = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("option", optionCategorios);
+export default mongoose.model("Option", optionCategorios);

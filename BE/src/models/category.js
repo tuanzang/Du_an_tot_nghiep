@@ -7,6 +7,11 @@ const categorySchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    status: { type: String },
+    options: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Option",
+    }],
   },
   {
     timestamps: true,

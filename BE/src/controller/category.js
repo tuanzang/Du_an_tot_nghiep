@@ -1,4 +1,5 @@
 import category from "../models/category.js";
+import option from "../models/option.js";
 import Option from "../models/option.js";
 
 export const getAllCategory = async (req, res) => {
@@ -26,35 +27,51 @@ export const getAllCategory = async (req, res) => {
 export const getPageCategory = async (req, res) => {
   const { loai, page = 1 } = req.body;
   const pageSize = 5;
-
   try {
     let query = {};
-
     if (loai) {
       query.loai = { $regex: loai, $options: "i" };
     }
+
     const totalCategories = await category.countDocuments(query);
-    const data = await category
-      .find(query)
+
+    // lấy ra tất cả category
+    // dùng lean() để lấy ra dữ liệu dạng javascript chứ ko phải mongo db -> tối ưu hiệu nặng
+    const categoryList = await category.find(query)
+      .lean()
       .skip((page - 1) * pageSize)
       .limit(pageSize);
 
-    if (!data || data.length === 0) {
+    // validate và trả ra danh sách rỗng
+    if (!categoryList || categoryList.length === 0) {
       return res.status(200).json({
         message: "Không tìm thấy danh sách danh mục!",
         data: [],
-        total: 0,
-        size: pageSize,
       });
     }
 
+    // dùng promise.all() để lấy ra option theo từng id category cùng 1 lúc
+    const data = await Promise.all(
+      categoryList.map(async (cate) => {
+        const options = await option.find({ category: cate._id }).select('_id name image quantity price').lean();
+        return {
+          _id: cate._id,
+          loai: cate.loai,
+          optionList: options,
+        };
+      })
+    );
+
+    // trả ra response
     return res.status(200).json({
       message: "Danh sách danh mục",
       data: data,
+      page: page,
       total: totalCategories,
       size: pageSize,
     });
   } catch (error) {
+    console.error('Error in getPageCategory:', error);
     return res.status(500).json({
       message: error.message,
     });
