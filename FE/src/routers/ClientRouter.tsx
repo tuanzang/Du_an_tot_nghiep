@@ -15,6 +15,7 @@ import ProfileBill from "../pages/client/profile/ProfileBill";
 import ProfileChangePass from "../pages/client/profile/ProfileChangePass";
 import ProfileBillDetail from "../pages/client/profile/ProfileBillDetail";
 import BlogJewelry from "../pages/client/BlogJewelry";
+import ProfileAddress from "../pages/client/profile/ProfileAddress";
 
 export default function ClientRouter() {
   return (
@@ -40,6 +41,7 @@ export default function ClientRouter() {
         <Route path="/profile/change-pass" element={<ProfileChangePass />} />
         <Route path="/forgotPass" element={<ForgotPass />} />
         <Route path="/resetPass" element={<ResetPass />} />
+        <Route path="/profile/address" element={<ProfileAddress />} />
       </Routes>
       <Footer />
     </div>

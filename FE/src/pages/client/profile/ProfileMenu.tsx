@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Menu } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  AimOutlined,
   CodeSandboxOutlined,
   EditOutlined,
   ProfileOutlined,
@@ -52,6 +53,11 @@ export default function ProfileMenu({ small }: Props) {
       key: "password",
       icon: <EditOutlined />,
       label: <Link to="/profile/change-pass">Đổi mật khẩu</Link>,
+    },
+    {
+      key: "address",
+      icon: <AimOutlined />,
+      label: <Link to="/profile/address">Địa chỉ</Link>,
     },
   ];
 
