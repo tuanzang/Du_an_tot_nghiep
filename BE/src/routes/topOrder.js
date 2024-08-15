@@ -1,5 +1,5 @@
 import express from "express";
-import { getTopOrderedProducts } from "../controller/topOrder";
+import { getTopOrderedProducts } from "../controller/topOrder.js";
 
 const topOrderRouter = express.Router();
 

@@ -6,7 +6,7 @@ import {
   getAllBillByIdUser,
   increaseProductSizeAndOption,
   updateStatusBill,
-} from "../controller/bill";
+} from "../controller/bill.js";
 
 const billRouter = Router();
 

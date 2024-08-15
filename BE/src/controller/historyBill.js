@@ -1,4 +1,4 @@
-import historyBill from "../models/historyBill";
+import historyBill from "../models/historyBill.js";
 
 /**
  * Tìm kiếm lịch sử đơn hàng
