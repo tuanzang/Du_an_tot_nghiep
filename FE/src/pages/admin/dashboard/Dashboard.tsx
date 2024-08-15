@@ -359,18 +359,17 @@ export default function Dashboard() {
           status: "8",
         },
       });
-      console.log(dateStart, dateEnd);
 
       setDataBieuDo([
-        { label: "Thành công", value: resCompleted.data.totalOrders },
-        { label: "Đã hủy", value: resCanceled.data.totalOrders },
-        { label: "Hoàn trả", value: resReturned.data.totalOrders },
-        { label: "Chờ xác nhận", value: resWaitConfirmed.data.totalOrders },
-        { label: "Đã xác nhận", value: resConfirmed.data.totalOrders },
-        { label: "Đang đóng gói", value: resPacking.data.totalOrders },
-        { label: "Đang giao đơn", value: resShipping.data.totalOrders },
-        { label: "Đã giao đơn", value: resDelivered.data.totalOrders },
-        { label: "Đã thanh toán", value: resPaid.data.totalOrders },
+        { label: "Thành công", value: resCompleted.data.total },
+        { label: "Đã hủy", value: resCanceled.data.total },
+        { label: "Hoàn trả", value: resReturned.data.total },
+        { label: "Chờ xác nhận", value: resWaitConfirmed.data.total },
+        { label: "Đã xác nhận", value: resConfirmed.data.total },
+        { label: "Đang đóng gói", value: resPacking.data.total },
+        { label: "Đang giao đơn", value: resShipping.data.total },
+        { label: "Đã giao đơn", value: resDelivered.data.total },
+        { label: "Đã thanh toán", value: resPaid.data.total },
       ]);
     } catch (error) {
       console.error("Error fetching statistics:", error);
@@ -458,20 +457,18 @@ export default function Dashboard() {
           },
         }
       );
-
+      console.log(resCompletedByDay.data);
+      
       setDataBieuDo([
-        { label: "Thành công", value: resCompletedByDay.data.totalOrders },
-        { label: "Đã hủy", value: resCanceledByDay.data.totalOrders },
-        { label: "Hoàn trả", value: resReturnedByDay.data.totalOrders },
-        {
-          label: "Chờ xác nhận",
-          value: resWaitConfirmedByDay.data.totalOrders,
-        },
-        { label: "Đã xác nhận", value: resConfirmedByDay.data.totalOrders },
-        { label: "Đang đóng gói", value: resPackingByDay.data.totalOrders },
-        { label: "Đang giao đơn", value: resShippingByDay.data.totalOrders },
-        { label: "Đã giao đơn", value: resDeliveredByDay.data.totalOrders },
-        { label: "Đã thanh toán", value: resPaidByDay.data.totalOrders },
+        { label: "Thành công", value: resCompletedByDay.data.total },
+        { label: "Đã hủy", value: resCanceledByDay.data.total },
+        { label: "Hoàn trả", value: resReturnedByDay.data.total },
+        {label: "Chờ xác nhận",value: resWaitConfirmedByDay.data.total},
+        { label: "Đã xác nhận", value: resConfirmedByDay.data.total },
+        { label: "Đang đóng gói", value: resPackingByDay.data.total },
+        { label: "Đang giao đơn", value: resShippingByDay.data.total },
+        { label: "Đã giao đơn", value: resDeliveredByDay.data.total },
+        { label: "Đã thanh toán", value: resPaidByDay.data.total },
       ]);
     } catch (error) {
       console.log(error);
@@ -547,17 +544,18 @@ export default function Dashboard() {
           dateEnd: endDate,
         },
       });
-
+      console.log(resCompleted.data);
+      
       setDataBieuDo([
-        { label: "Thành công", value: resCompleted.data.totalOrders },
-        { label: "Đã hủy", value: resCanceled.data.totalOrders },
-        { label: "Hoàn trả", value: resReturned.data.totalOrders },
-        { label: "Chờ xác nhận", value: resWaitConfirmed.data.totalOrders },
-        { label: "Đã xác nhận", value: resConfirmed.data.totalOrders },
-        { label: "Đang đóng gói", value: resPacking.data.totalOrders },
-        { label: "Đang giao đơn", value: resShipping.data.totalOrders },
-        { label: "Đã giao đơn", value: resDelivered.data.totalOrders },
-        { label: "Đã thanh toán", value: resPaid.data.totalOrders },
+        { label: "Thành công", value: resCompleted.data.total },
+        { label: "Đã hủy", value: resCanceled.data.total },
+        { label: "Hoàn trả", value: resReturned.data.total },
+        { label: "Chờ xác nhận", value: resWaitConfirmed.data.total },
+        { label: "Đã xác nhận", value: resConfirmed.data.total },
+        { label: "Đang đóng gói", value: resPacking.data.total },
+        { label: "Đang giao đơn", value: resShipping.data.total },
+        { label: "Đã giao đơn", value: resDelivered.data.total },
+        { label: "Đã thanh toán", value: resPaid.data.total },
       ]);
     } catch (error) {
       console.log(error);
@@ -649,15 +647,15 @@ export default function Dashboard() {
         },
       });
       setDataBieuDo([
-        { label: "Thành công", value: resCompleted.data.totalOrders },
-        { label: "Đã hủy", value: resCanceled.data.totalOrders },
-        { label: "Hoàn trả", value: resReturned.data.totalOrders },
-        { label: "Chờ xác nhận", value: resWaitConfirmed.data.totalOrders },
-        { label: "Đã xác nhận", value: resConfirmed.data.totalOrders },
-        { label: "Đang đóng gói", value: resPacking.data.totalOrders },
-        { label: "Đang giao đơn", value: resShipping.data.totalOrders },
-        { label: "Đã giao đơn", value: resDelivered.data.totalOrders },
-        { label: "Đã thanh toán", value: resPaid.data.totalOrders },
+        { label: "Thành công", value: resCompleted.data.total },
+        { label: "Đã hủy", value: resCanceled.data.total },
+        { label: "Hoàn trả", value: resReturned.data.total },
+        { label: "Chờ xác nhận", value: resWaitConfirmed.data.total },
+        { label: "Đã xác nhận", value: resConfirmed.data.total },
+        { label: "Đang đóng gói", value: resPacking.data.total },
+        { label: "Đang giao đơn", value: resShipping.data.total },
+        { label: "Đã giao đơn", value: resDelivered.data.total },
+        { label: "Đã thanh toán", value: resPaid.data.total },
       ]);
     } catch (error) {
       console.log(error);
@@ -753,15 +751,15 @@ export default function Dashboard() {
         },
       });
       setDataBieuDo([
-        { label: "Thành công", value: resCompleted.data.totalOrders },
-        { label: "Đã hủy", value: resCanceled.data.totalOrders },
-        { label: "Hoàn trả", value: resReturned.data.totalOrders },
-        { label: "Chờ xác nhận", value: resWaitConfirmed.data.totalOrders },
-        { label: "Đã xác nhận", value: resConfirmed.data.totalOrders },
-        { label: "Đang đóng gói", value: resPacking.data.totalOrders },
-        { label: "Đang giao đơn", value: resShipping.data.totalOrders },
-        { label: "Đã giao đơn", value: resDelivered.data.totalOrders },
-        { label: "Đã thanh toán", value: resPaid.data.totalOrders },
+        { label: "Thành công", value: resCompleted.data.total },
+        { label: "Đã hủy", value: resCanceled.data.total },
+        { label: "Hoàn trả", value: resReturned.data.total },
+        { label: "Chờ xác nhận", value: resWaitConfirmed.data.total },
+        { label: "Đã xác nhận", value: resConfirmed.data.total },
+        { label: "Đang đóng gói", value: resPacking.data.total },
+        { label: "Đang giao đơn", value: resShipping.data.total },
+        { label: "Đã giao đơn", value: resDelivered.data.total },
+        { label: "Đã thanh toán", value: resPaid.data.total },
       ]);
     } catch (error) {
       console.log(error);
