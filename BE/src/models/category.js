@@ -10,7 +10,7 @@ const categorySchema = new mongoose.Schema(
     status: { type: String },
     options: [{
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Option",
+      ref: "option",
     }],
   },
   {
