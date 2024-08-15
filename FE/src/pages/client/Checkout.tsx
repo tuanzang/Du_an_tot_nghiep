@@ -486,12 +486,14 @@ const Checkout = () => {
                 totalPrice < code.minPurchaseAmount ||
                 (user && code.userIds.includes(user?._id)) ||
                 code.quantity === code.usedCount ||
-                code.status === 'inactive'
+                code.status === 'inactive';
                 
                 // Nếu số lượng bằng số lượng đã sử dụng, bỏ tick radio
                 if (code.quantity === code.usedCount && selectedDiscountCode === code.code) {
                   setSelectedDiscountCode(null);
                 }
+
+              
 
                 return <Card
                   key={code._id}
@@ -509,7 +511,7 @@ const Checkout = () => {
                     className="discount-radio"
                     disabled={totalPrice < !code.minPurchaseAmount}
                   >
-                      <strong className="discount-code">{code.code}</strong>
+                    <strong className="discount-code">{code.code}</strong>
                       {code.discountType === "percentage" ? (
                         <span className="discount-detail">
                           {" "}
@@ -537,7 +539,6 @@ const Checkout = () => {
                       </span>
                     </Radio>
                   </Card>
-                );
               })}
             </Radio.Group>
           </Modal>
