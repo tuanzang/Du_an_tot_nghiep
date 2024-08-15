@@ -63,3 +63,16 @@
   width: 100%;
   height: 100%;
 }
+
+/* sp ngung hoat dong detail product */
+.grayscale {
+  filter: grayscale(100%);
+}
+.status-red {
+  color: red;
+}
+.btn .btn-cart2{
+  background-color: #ccc; /* Màu nền khi nút bị disable */
+  cursor: not-allowed; /* Hiệu ứng chuột */
+  opacity: 0.6; /* Giảm độ trong suốt */
+}

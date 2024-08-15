@@ -482,27 +482,33 @@ const Checkout = () => {
               value={selectedDiscountCode}
             >
               {discountCodes.map((code: IVoucher) => {
-                const isDisable =
-                  !code.minPurchaseAmount ||
-                  totalPrice < code.minPurchaseAmount ||
-                  (user && code.userIds.includes(user?._id)) ||
-                  code.quantity === code.usedCount ||
-                  code.status === "inactive";
-                return (
-                  <Card
-                    key={code._id}
-                    style={{
-                      backgroundColor: "#66FF66",
-                      marginBottom: 10,
-                      opacity: isDisable ? 0.5 : 1,
-                      pointerEvents: isDisable ? "none" : "auto",
-                    }}
+                const isDisable = !code.minPurchaseAmount ||
+                totalPrice < code.minPurchaseAmount ||
+                (user && code.userIds.includes(user?._id)) ||
+                code.quantity === code.usedCount ||
+                code.status === 'inactive'
+                
+                // Nếu số lượng bằng số lượng đã sử dụng, bỏ tick radio
+                if (code.quantity === code.usedCount && selectedDiscountCode === code.code) {
+                  setSelectedDiscountCode(null);
+                }
+
+                return <Card
+                  key={code._id}
+                  style={{
+                    backgroundColor: "#66FF66",
+                    marginBottom: 10,
+                    opacity:
+                      isDisable ? 0.5 : 1,
+                    pointerEvents:
+                      isDisable ? 'none' : 'auto',
+                  }}
+                >
+                  <Radio
+                    value={code.code}
+                    className="discount-radio"
+                    disabled={totalPrice < !code.minPurchaseAmount}
                   >
-                    <Radio
-                      value={code.code}
-                      className="discount-radio"
-                      disabled={totalPrice < !code.minPurchaseAmount}
-                    >
                       <strong className="discount-code">{code.code}</strong>
                       {code.discountType === "percentage" ? (
                         <span className="discount-detail">
