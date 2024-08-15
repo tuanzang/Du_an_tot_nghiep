@@ -192,7 +192,7 @@ export const updateQuantity = async (req, res) => {
         .reduce((total, curr) => {
           return (total += curr.quantity);
         }, 0);
-
+      
       // console.log(allProductOptionQnt);
 
       const findOption = await Option.findById(option);
