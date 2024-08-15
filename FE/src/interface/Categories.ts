@@ -2,6 +2,13 @@ export interface ICategory {
   _id: string;
   loai: string;
   status: string;
-  products: string[];
-  options: { image: File | string }[];
+  optionList: optionData[];
+}
+
+export interface optionData {
+  _id: string;
+  image: string;
+  name: string;
+  quantity: number;
+  price: number;
 }

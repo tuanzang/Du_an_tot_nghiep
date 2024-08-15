@@ -302,7 +302,7 @@ export default function Cart() {
                       />
                       <Table.Column
                         title="Option"
-                        dataIndex="option"
+                        dataIndex="options"
                         key="option"
                         render={(option, record: any) => {
                           if (option) {

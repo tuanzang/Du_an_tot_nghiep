@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMyCartQuery } from "../../hooks/useCart";
-import { Typography, Modal, Radio, Card, Space } from "antd";
+import { Typography, Modal, Radio, Card, Space, Button, Row, Col } from "antd";
 import { formatPrice } from "../../services/common/formatCurrency";
 import OrderApi from "../../config/orderApi";
 import { useNavigate } from "react-router-dom";
@@ -23,10 +23,12 @@ import { IVoucher } from "../../interface/Voucher";
 import dayjs from "dayjs";
 import axios from "axios";
 import "./checkout.css";
+import { IAddress } from "../../interface/Address";
 const SHIPPING_COST = 30000;
 const { Text } = Typography;
 
 interface IDataBill {
+  idAddress: string | null;
   customerName: string;
   phone: string;
   address: string;
@@ -39,13 +41,155 @@ const Checkout = () => {
   const isLogged = localStorage.getItem(USER_INFO_STORAGE_KEY);
   const user: IUser | null = isLogged ? JSON.parse(isLogged) : null;
 
+  const [openAddress, setOpenAddress] = useState<boolean>(false);
+  const [addressList, setAddressList] = useState<IAddress[]>([]);
   const [dataBill, setDataBill] = useState<IDataBill>({
-    customerName: user ? user.name : "",
-    phone: user ? user.phoneNumber : "",
+    idAddress: "",
+    customerName: "",
+    phone: "",
     address: "",
     message: "",
     paymentMethod: "COD",
   });
+
+  const fetchAddressByUser = async () => {
+    if (user === null) {
+      return;
+    } else {
+      try {
+        const response = await axios.post("http://localhost:3001/api/address", {
+          idUser: user._id,
+        });
+        const data = response.data.data;
+        setAddressList(data);
+
+        // tìm địa chỉ mặc định
+        const defaultAddress = data.find(
+          (address: IAddress) => address.isDefault === true
+        );
+
+        // nếu có set vào addressData
+        if (defaultAddress) {
+          setDataBill({
+            ...dataBill,
+            idAddress: defaultAddress._id,
+            customerName: defaultAddress.fullName,
+            phone: defaultAddress.phoneNumber,
+            address:
+              defaultAddress.specifically +
+              ", " +
+              defaultAddress.wardName +
+              ", " +
+              defaultAddress.districtName +
+              ", " +
+              defaultAddress.provinceName,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+  };
+
+  // modal chọn địa chỉ
+  function ModalAddress() {
+    return (
+      <Modal
+        title="Chọn địa chỉ"
+        onCancel={() => setOpenAddress(false)}
+        open={openAddress}
+        footer={null}
+      >
+        <div
+          style={{
+            maxHeight: "400px",
+            overflowY: "auto",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
+        >
+          {addressList.map((address) => (
+            <Card>
+              <Typography.Title level={5}>
+                <span style={{ color: "#c29957" }}>
+                  {`${address.fullName} | ${address.phoneNumber}`}
+                </span>
+                <span
+                  style={{
+                    marginLeft: "10px",
+                    border: address.isDefault ? "1px solid #c29957" : "",
+                    fontWeight: 500,
+                    fontSize: "10px",
+                    color: "#c29957",
+                    padding: "5px",
+                  }}
+                >
+                  {address.isDefault ? "Mặc đinh" : ""}
+                </span>
+                {dataBill.idAddress === address._id ? (
+                  <span
+                    style={{
+                      marginLeft: "10px",
+                      border:
+                        dataBill.idAddress === address._id
+                          ? "1px solid #c29957"
+                          : "",
+                      fontWeight: 600,
+                      fontSize: "10px",
+                      color: "#c29957",
+                      padding: "5px",
+                      float: "right",
+                    }}
+                  >
+                    Đang chọn
+                  </span>
+                ) : (
+                  <Button
+                    style={{ float: "right" }}
+                    onClick={() => handleSelectAddress(address)}
+                  >
+                    Chọn
+                  </Button>
+                )}
+              </Typography.Title>
+              <Row gutter={16}>
+                <Col span={7}>
+                  <p>Tỉnh/Thành Phố:</p>
+                  <p>Quận/Huyện:</p>
+                  <p>Xã/Phường: </p>
+                  <p>Địa chỉ cụ thể: </p>
+                </Col>
+                <Col span={17}>
+                  <p>{address.provinceName}</p>
+                  <p>{address.districtName}</p>
+                  <p>{address.wardName}</p>
+                  <p>{address.specifically}</p>
+                </Col>
+              </Row>
+            </Card>
+          ))}
+        </div>
+      </Modal>
+    );
+  }
+
+  const handleSelectAddress = (address: IAddress) => {
+    setDataBill({
+      ...dataBill,
+      idAddress: address._id,
+      customerName: address.fullName,
+      phone: address.phoneNumber,
+      address:
+        address.specifically +
+        ", " +
+        address.wardName +
+        ", " +
+        address.districtName +
+        ", " +
+        address.provinceName,
+    });
+    setOpenAddress(false);
+  };
 
   const { data, refetch: refetchCart } = useMyCartQuery();
   const dispatch = useDispatch();
@@ -66,6 +210,7 @@ const Checkout = () => {
         newData: data?.data?.products,
       })
     );
+    fetchAddressByUser();
   }, [data]);
 
   useEffect(() => {
@@ -266,14 +411,38 @@ const Checkout = () => {
     <div className="container mt-5">
       <div className="row">
         <div className="col-md-5 mb-3">
-          <h2>Thanh Toán Đơn Hàng</h2>
           <div className="mb-3">
-            <label htmlFor="email" className="form-label"></label>
+            <span
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignContent: "center",
+                fontSize: "18pt",
+                fontWeight: "550",
+                color: "black",
+                float: "left",
+              }}
+            >
+              Thanh Toán Đơn Hàng
+            </span>
+            <Button
+              style={{
+                float: "right",
+                color: "black",
+                border: "1px solid black",
+              }}
+              onClick={() => setOpenAddress(true)}
+            >
+              Chọn địa chỉ
+            </Button>
+            {/* Modal chọn địa chỉ */}
+            {openAddress && <ModalAddress />}
             <input
               type="text"
               className="form-control"
               id="customerName"
               placeholder="Họ và tên"
+              style={{ fontSize: "15px" }}
               value={dataBill.customerName}
               onChange={(e) =>
                 setDataBill({ ...dataBill, customerName: e.target.value })
@@ -286,6 +455,7 @@ const Checkout = () => {
               className="form-control"
               id="number"
               placeholder="Số điện thoại"
+              style={{ fontSize: "15px" }}
               value={dataBill.phone}
               onChange={(e) =>
                 setDataBill({ ...dataBill, phone: e.target.value })
@@ -299,6 +469,7 @@ const Checkout = () => {
               className="form-control"
               id="address"
               placeholder="Địa chỉ"
+              style={{ fontSize: "15px" }}
               value={dataBill.address}
               onChange={(e) =>
                 setDataBill({ ...dataBill, address: e.target.value })
@@ -498,7 +669,7 @@ const Checkout = () => {
                 return <Card
                   key={code._id}
                   style={{
-                    backgroundColor: "#66FF66",
+                    backgroundColor: "#ECE0D2",
                     marginBottom: 10,
                     opacity:
                       isDisable ? 0.5 : 1,
