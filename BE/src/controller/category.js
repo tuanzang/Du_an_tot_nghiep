@@ -145,11 +145,32 @@ export const updateCategory = async (req, res) => {
       new: true,
     });
 
+    const currentOptions = await Option.find({ category: categoryId }).exec();
+    const newOptionIds = options
+      .filter((it) => it._id)
+      .map((it) => it._id.toString());
+
+    const deletedOption = currentOptions.filter(
+      (it) => !newOptionIds.includes(it._id.toString())
+    );
+
+    await Promise.all(
+      deletedOption.map((it) => Option.findByIdAndDelete(it._id))
+    );
+
     const updateOptionPromise = options.map(async (it) => {
-      const optionUpdated = await Option.findByIdAndUpdate(it._id, it, {
+      let optionUpdateOrCreate = await Option.findByIdAndUpdate(it._id, it, {
         new: true,
       });
-      return optionUpdated;
+
+      if (!optionUpdateOrCreate) {
+        optionUpdateOrCreate = await new Option({
+          ...it,
+          category: categoryId,
+        }).save();
+      }
+
+      return optionUpdateOrCreate;
     });
 
     const optionUpdated = await Promise.all(updateOptionPromise);

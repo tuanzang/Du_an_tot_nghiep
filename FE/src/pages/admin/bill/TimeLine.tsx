@@ -1,4 +1,4 @@
-import { Timeline, Typography } from "antd";
+import { Button, Popconfirm, Timeline, Typography } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { FaBoxOpen, FaRegFileAlt, FaTruck } from "react-icons/fa";
 import { GiConfirmed } from "react-icons/gi";
@@ -8,18 +8,50 @@ import { AiFillCheckCircle } from "react-icons/ai";
 import dayjs from "dayjs";
 import statusHoaDon from "../../../services/constants/statusHoaDon";
 import { IHistoryBill } from "../../../interface/HistoryBill";
+import { useEffect, useState } from "react";
 
 const { Text } = Typography;
 
 type Props = {
   orderTimeLine: IHistoryBill[];
+  isClient?: boolean;
+  onOrderComplete?: () => Promise<void>;
 };
 
-const TimeLine = ({ orderTimeLine }: Props) => {
+const TIME_TO_EXPIRE = 1; // minute
+
+const TimeLine = ({
+  orderTimeLine,
+  isClient = false,
+  onOrderComplete,
+}: Props) => {
+  const [isExpiredTime, setIsExpiredTime] = useState(false);
+
   const filteredTimeLine = orderTimeLine.filter(
     (item) =>
       Number(item.statusBill) !== null && Number(Number(item.statusBill)) !== 10
   );
+  const latestStatus = filteredTimeLine[filteredTimeLine.length - 1];
+
+  useEffect(() => {
+    if (!latestStatus || latestStatus.statusBill !== "5") return;
+
+    const timerId = setInterval(() => {
+      const expireTime = dayjs(latestStatus.createdAt).add(TIME_TO_EXPIRE, "m");
+
+      const isExpiredTime = dayjs(expireTime).diff(dayjs()) <= 0;
+
+      if (isExpiredTime && onOrderComplete) {
+        clearInterval(timerId);
+        setIsExpiredTime(true);
+        onOrderComplete();
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(timerId);
+    };
+  }, [filteredTimeLine.length, latestStatus, onOrderComplete]);
 
   const getIconAndColor = (statusBill: number) => {
     switch (statusBill) {
@@ -42,6 +74,30 @@ const TimeLine = ({ orderTimeLine }: Props) => {
       default:
         return { color: "magenta", icon: <FaRegFileAlt /> }; // Mặc định
     }
+  };
+
+  const renderReceivedBtn = (status: string) => {
+    if (
+      !isClient ||
+      status !== "5" ||
+      latestStatus?.statusBill !== "5" ||
+      isExpiredTime
+    )
+      return;
+
+    return (
+      <div style={{ marginTop: 12 }}>
+        <Popconfirm
+          title="Đã nhận hàng"
+          description="Xác nhận đã nhận hàng?"
+          onConfirm={() => {
+            onOrderComplete && onOrderComplete();
+          }}
+        >
+          <Button>Đã nhận hàng</Button>
+        </Popconfirm>
+      </div>
+    );
   };
 
   return (
@@ -70,6 +126,8 @@ const TimeLine = ({ orderTimeLine }: Props) => {
               <Text type="secondary">
                 {dayjs(item.createdAt).format("DD-MM-YYYY HH:mm:ss")}
               </Text>
+
+              {renderReceivedBtn(item.statusBill)}
             </Timeline.Item>
           );
         })}

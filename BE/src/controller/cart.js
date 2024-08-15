@@ -33,7 +33,6 @@ export const getMyCarts = async (req, res) => {
     const tempProducts = [];
     for await (let product of newProducts) {
       const findProduct = await Product.findById(product.product._id);
-      console.log(findProduct.options);
       if (product.option && !findProduct.options.includes(product.option._id.toJSON())) {
         tempProducts.push({
           ...product.toJSON(),
@@ -192,8 +191,6 @@ export const updateQuantity = async (req, res) => {
         .reduce((total, curr) => {
           return (total += curr.quantity);
         }, 0);
-
-      console.log(allProductOptionQnt);
 
       const findOption = await Option.findById(option);
       if (allProductOptionQnt + quantity > findOption.quantity) {

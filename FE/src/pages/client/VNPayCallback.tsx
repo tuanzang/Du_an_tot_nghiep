@@ -24,7 +24,7 @@ const VNPayCallback = () => {
   const statusCode = searchParams.get("vnp_ResponseCode");
 
   const updateOrderStatus = useCallback(
-    async (orderId: string, transCode: string | null) => {
+    async (orderId: string, status: string, transCode: string | null) => {
       try {
         const res = await OrderApi.detailOrder({
           id: orderId,
@@ -32,10 +32,21 @@ const VNPayCallback = () => {
 
         const data = res.data.data;
         if (data) {
-          createNewHistory(res.data.data._id, "1", user);
-          handleConfirmPayment(res.data.data, user, transCode);
-          toast.success("Thanh toán thành công");
+          await axios.post(
+            "http://localhost:3001/api/orders/update-status",
+            { id: res.data.data._id, status: status, statusShip: true }
+          );
+
+          await createNewHistory(res.data.data._id, status, user);
+
+          if (status === '1') {
+            await handleConfirmPayment(res.data.data, user, transCode);
+            toast.success("Thanh toán thành công");
+          } else {
+            toast.success('Đã huỷ đơn hàng')
+          }
         }
+        
         navigate("/");
       } catch (error) {
         console.log(error);
@@ -114,11 +125,16 @@ const VNPayCallback = () => {
   };
 
   useEffect(() => {
-    if (statusCode === "00" && txnRef && transCode) {
-      const [, orderId] = txnRef.split("_");
-      updateOrderStatus(orderId, transCode);
+    if (!txnRef || !transCode || !statusCode) return;
+    const [, orderId] = txnRef.split("_");
+
+    if (statusCode === "00") {
+      updateOrderStatus(orderId, "1", transCode);
+    } else {
+      // thanh toán thất bại
+      updateOrderStatus(orderId, "0", transCode);
     }
-  }, [statusCode, txnRef, updateOrderStatus]);
+  }, [statusCode, transCode, txnRef, updateOrderStatus]);
 
   return <div>Loading...</div>;
 };

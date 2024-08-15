@@ -1,6 +1,9 @@
 import Order from "../models/order.js";
 import optionCategorios from "../models/option.js";
 import productSize from "../models/productSize.js";
+import sendMail from "../utils/sendMail.js";
+import { confirmOrderMailContent } from "../constants/const.js";
+import dayjs from "dayjs"
 
 /**
  * API xem chi tiết đơn hàng
@@ -156,11 +159,22 @@ export const updateStatusBill = async (req, res) => {
       });
     }
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      id,
-      { $set: { status: status, statusShip: statusShip } },
-      { new: true }
-    ).exec();
+    const updatedOrder = await Order
+      .findByIdAndUpdate(
+        id,
+        { $set: { status: status, statusShip: statusShip } },
+        { new: true }
+      )
+      .populate('userId')
+      .populate({
+        path: 'products.variantId',
+        model: 'ProductSize'
+      })
+      .populate({
+        path: 'products.optionId',
+        model: 'option'
+      })
+      .exec();
 
     if (!updatedOrder) {
       return res.status(404).json({
@@ -168,11 +182,28 @@ export const updateStatusBill = async (req, res) => {
       });
     }
 
+    // xác nhận đơn hàng
+    if (status === '2') {
+      await sendMail({
+        mailTo: updatedOrder?.userId?.email,
+        title: `Xác Nhận Đơn Hàng #${updatedOrder.code} - Cảm ơn bạn đã mua sắm tại FBEE`,
+        content: confirmOrderMailContent({
+          name: updatedOrder?.customerName,
+          orderId: updatedOrder?.code,
+          orderDate: dayjs(updatedOrder?.createdAt).format('DD/MM/YYYY HH:mm:ss'),
+          totalPrice: updatedOrder?.totalPrice,
+          products: updatedOrder?.products
+        })
+      })
+      return res.json(123);
+    }
+
     return res.status(200).json({
       message: "Cập nhật trạng thái thành công",
       data: updatedOrder,
     });
   } catch (error) {
+    // console.log(error)
     res.status(500).json({
       message: "Internal server error",
     });
