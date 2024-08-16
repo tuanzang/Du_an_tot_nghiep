@@ -237,7 +237,7 @@ export const getTotalOrdersByDate = async (req, res) => {
  */
 export const getAllOrders = async (req, res) => {
   const { status, code, createAtFrom, createAtTo, page = 1 } = req.body;
-
+  const { dateStart, dateEnd } = req.query;
   const statusReq = req.query.status;
   const dateNowReq = req.query.dateNow;
   const pageSize = 10;
@@ -267,7 +267,15 @@ export const getAllOrders = async (req, res) => {
         $lte: endOfDay,
       };
     }
-
+    if (dateStart || dateEnd) {
+      query.createdAt = {};
+      if (dateStart) {
+        query.createdAt.$gte = new Date(dateStart);
+      }
+      if (dateEnd) {
+        query.createdAt.$lte = new Date(dateEnd);
+      }
+    }
     if (createAtFrom || createAtTo) {
       query.createdAt = {};
       if (createAtFrom) {
