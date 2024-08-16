@@ -71,32 +71,15 @@ export default function Dashboard() {
           },
         }
       );
-      const resPriceRefundByDay = await axios.get(
-        `http://localhost:3001/api/orders/price-refund/day`,
-        {
-          params: {
-            dateNow: date,
-          },
-        }
-      );
-      const resPriceCancelByDay = await axios.get(
-        `http://localhost:3001/api/orders/price-cancel/day`,
-        {
-          params: {
-            dateNow: date,
-          },
-        }
-      );
+      const resPriceShippingByDay = await axios.get(`http://localhost:3001/api/orders/price-shipping/day`, {
+        params: {
+          dateNow: date,
+        },
+      })
       setDataBieuDo2([
-        { label: "Lợi nhuận", value: resTotalPriceByDay.data.totalPrice },
-        {
-          label: "Số tiền đơn hoàn",
-          value: resPriceRefundByDay.data.totalPrice,
-        },
-        {
-          label: "Số tiền đơn hủy",
-          value: resPriceCancelByDay.data.totalPrice,
-        },
+        { label: "Doanh thu ", value: resTotalPriceByDay.data.totalPrice },
+        { label: "Bồi hoàn ",value: resPriceShippingByDay.data.totalShippingCost},
+        { label: "Thực nhận ", value: resTotalPriceByDay.data.totalPrice - resPriceShippingByDay.data.totalShippingCost},
       ]);
     } catch (error) {
       console.log(error);
@@ -115,35 +98,17 @@ export default function Dashboard() {
           },
         }
       );
-      const resPriceRefundByWeek = await axios.get(
-        `http://localhost:3001/api/orders/price-refund/week`,
-        {
-          params: {
-            dateStart: startDate,
-            dateEnd: endDate,
-          },
-        }
-      );
-      const resPriceCancelByWeek = await axios.get(
-        `http://localhost:3001/api/orders/price-cancel/week`,
-        {
-          params: {
-            dateStart: startDate,
-            dateEnd: endDate,
-          },
-        }
-      );
+      const resPriceShippingByWeek = await axios.get(`http://localhost:3001/api/orders/price-shipping/week`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        },
+      })
 
       setDataBieuDo2([
-        { label: "Lợi nhuận", value: resTotalPriceByWeek.data.totalPrice },
-        {
-          label: "Số tiền đơn hoàn",
-          value: resPriceRefundByWeek.data.totalPrice,
-        },
-        {
-          label: "Số tiền đơn hủy",
-          value: resPriceCancelByWeek.data.totalPrice,
-        },
+        { label: "Doanh thu ", value: resTotalPriceByWeek.data.totalPrice },
+        { label: "Bồi hoàn ",value: resPriceShippingByWeek.data.totalShippingCost},
+        { label: "Thực nhận ", value: resTotalPriceByWeek.data.totalPrice - resPriceShippingByWeek.data.totalShippingCost},
       ]);
     } catch (error) {
       console.log(error);
@@ -162,34 +127,17 @@ export default function Dashboard() {
           },
         }
       );
-      const resPriceRefundByMonth = await axios.get(
-        `http://localhost:3001/api/orders/price-refund/month`,
-        {
-          params: {
-            dateStart: startDate,
-            dateEnd: endDate,
-          },
-        }
-      );
-      const resPriceCancelByMonth = await axios.get(
-        `http://localhost:3001/api/orders/price-cancel/month`,
-        {
-          params: {
-            dateStart: startDate,
-            dateEnd: endDate,
-          },
-        }
-      );
+
+      const resPriceShippingByMonth = await axios.get(`http://localhost:3001/api/orders/price-shipping/month`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        },
+      })
       setDataBieuDo2([
-        { label: "Lợi nhuận", value: resTotalPriceByMonth.data.totalPrice },
-        {
-          label: "Số tiền đơn hoàn",
-          value: resPriceRefundByMonth.data.totalPrice,
-        },
-        {
-          label: "Số tiền đơn hủy",
-          value: resPriceCancelByMonth.data.totalPrice,
-        },
+        { label: "Doanh thu ", value: resTotalPriceByMonth.data.totalPrice },
+        { label: "Bồi hoàn ",value: resPriceShippingByMonth.data.totalShippingCost},
+        { label: "Thực nhận ", value: resTotalPriceByMonth.data.totalPrice - resPriceShippingByMonth.data.totalShippingCost},
       ]);
     } catch (error) {
       console.log(error);
@@ -208,34 +156,16 @@ export default function Dashboard() {
           },
         }
       );
-      const resPriceRefundByYear = await axios.get(
-        `http://localhost:3001/api/orders/price-refund/year`,
-        {
-          params: {
-            dateStart: startDate,
-            dateEnd: endDate,
-          },
-        }
-      );
-      const resPriceCancelByYear = await axios.get(
-        `http://localhost:3001/api/orders/price-cancel/year`,
-        {
-          params: {
-            dateStart: startDate,
-            dateEnd: endDate,
-          },
-        }
-      );
+      const resPriceShippingByYear = await axios.get(`http://localhost:3001/api/orders/price-shipping/year`, {
+        params: {
+          dateStart: startDate,
+          dateEnd: endDate,
+        },
+      })
       setDataBieuDo2([
-        { label: "Lợi nhuận", value: resTotalPriceByYear.data.totalPrice },
-        {
-          label: "Số tiền đơn hoàn",
-          value: resPriceRefundByYear.data.totalPrice,
-        },
-        {
-          label: "Số tiền đơn hủy",
-          value: resPriceCancelByYear.data.totalPrice,
-        },
+        { label: "Doanh thu ", value: resTotalPriceByYear.data.totalPrice },
+        { label: "Bồi hoàn ",value: resPriceShippingByYear.data.totalShippingCost},
+        { label: "Thực nhận ", value: resTotalPriceByYear.data.totalPrice - resPriceShippingByYear.data.totalShippingCost},
       ]);
     } catch (error) {
       console.log(error);
@@ -254,34 +184,17 @@ export default function Dashboard() {
           },
         }
       );
-      const resPriceRefundByCustomDay = await axios.get(
-        `http://localhost:3001/api/orders/price-refund/custom-day`,
-        {
-          params: {
-            dateStart,
-            dateEnd,
-          },
-        }
-      );
-      const resPriceCancelByCustomDay = await axios.get(
-        `http://localhost:3001/api/orders/price-cancel/custom-day`,
-        {
-          params: {
-            dateStart,
-            dateEnd,
-          },
-        }
-      );
+      const resPriceShippingByCustomDay = await axios.get(`http://localhost:3001/api/orders/price-shipping/custom-day`, {
+        params: {
+          dateStart,
+          dateEnd,
+        },
+      })
       setDataBieuDo2([
-        { label: "Lợi nhuận", value: resTotalPriceByCustomDay.data.totalPrice },
-        {
-          label: "Số tiền đơn hoàn",
-          value: resPriceRefundByCustomDay.data.totalPrice,
-        },
-        {
-          label: "Số tiền đơn hủy",
-          value: resPriceCancelByCustomDay.data.totalPrice,
-        },
+        
+        { label: "Doanh thu ", value: resTotalPriceByCustomDay.data.totalPrice },
+        { label: "Bồi hoàn ",value: resPriceShippingByCustomDay.data.totalShippingCost},
+        { label: "Thực nhận ", value: resTotalPriceByCustomDay.data.totalPrice - resPriceShippingByCustomDay.data.totalShippingCost},
       ]);
     } catch (error) {
       console.log(error);
@@ -338,38 +251,30 @@ export default function Dashboard() {
           status: "5",
         },
       });
-      const resPaid = await axios.get("http://localhost:3001/api/orders", {
+      const resCompleted = await axios.get("http://localhost:3001/api/orders", {
         params: {
           dateStart,
           dateEnd,
           status: "6",
         },
       });
-      const resCompleted = await axios.get("http://localhost:3001/api/orders", {
+      const resReturned = await axios.get("http://localhost:3001/api/orders", {
         params: {
           dateStart,
           dateEnd,
           status: "7",
         },
       });
-      const resReturned = await axios.get("http://localhost:3001/api/orders", {
-        params: {
-          dateStart,
-          dateEnd,
-          status: "8",
-        },
-      });
 
       setDataBieuDo([
         { label: "Thành công", value: resCompleted.data.total },
         { label: "Đã hủy", value: resCanceled.data.total },
-        { label: "Hoàn trả", value: resReturned.data.total },
+        { label: "Đơn hoàn", value: resReturned.data.total },
         { label: "Chờ xác nhận", value: resWaitConfirmed.data.total },
         { label: "Đã xác nhận", value: resConfirmed.data.total },
         { label: "Đang đóng gói", value: resPacking.data.total },
         { label: "Đang giao đơn", value: resShipping.data.total },
-        { label: "Đã giao đơn", value: resDelivered.data.total },
-        { label: "Đã thanh toán", value: resPaid.data.total },
+        { label: "Đã giao đơn", value: resDelivered.data.total }
       ]);
     } catch (error) {
       console.error("Error fetching statistics:", error);
@@ -433,17 +338,11 @@ export default function Dashboard() {
           },
         }
       );
-      const resPaidByDay = await axios.get(`http://localhost:3001/api/orders`, {
-        params: {
-          status: "6",
-          dateNow: date,
-        },
-      });
       const resCompletedByDay = await axios.get(
         `http://localhost:3001/api/orders`,
         {
           params: {
-            status: "7",
+            status: "6",
             dateNow: date,
           },
         }
@@ -452,7 +351,7 @@ export default function Dashboard() {
         `http://localhost:3001/api/orders`,
         {
           params: {
-            status: "8",
+            status: "7",
             dateNow: date,
           },
         }
@@ -462,13 +361,12 @@ export default function Dashboard() {
       setDataBieuDo([
         { label: "Thành công", value: resCompletedByDay.data.total },
         { label: "Đã hủy", value: resCanceledByDay.data.total },
-        { label: "Hoàn trả", value: resReturnedByDay.data.total },
+        { label: "Đơn hoàn", value: resReturnedByDay.data.total },
         {label: "Chờ xác nhận",value: resWaitConfirmedByDay.data.total},
         { label: "Đã xác nhận", value: resConfirmedByDay.data.total },
         { label: "Đang đóng gói", value: resPackingByDay.data.total },
         { label: "Đang giao đơn", value: resShippingByDay.data.total },
         { label: "Đã giao đơn", value: resDeliveredByDay.data.total },
-        { label: "Đã thanh toán", value: resPaidByDay.data.total },
       ]);
     } catch (error) {
       console.log(error);
@@ -523,23 +421,16 @@ export default function Dashboard() {
           dateEnd: endDate,
         },
       });
-      const resPaid = await axios.get(`http://localhost:3001/api/orders`, {
+      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "6",
           dateStart: startDate,
           dateEnd: endDate,
         },
       });
-      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
-        params: {
-          status: "7",
-          dateStart: startDate,
-          dateEnd: endDate,
-        },
-      });
       const resReturned = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
-          status: "8",
+          status: "7",
           dateStart: startDate,
           dateEnd: endDate,
         },
@@ -555,7 +446,6 @@ export default function Dashboard() {
         { label: "Đang đóng gói", value: resPacking.data.total },
         { label: "Đang giao đơn", value: resShipping.data.total },
         { label: "Đã giao đơn", value: resDelivered.data.total },
-        { label: "Đã thanh toán", value: resPaid.data.total },
       ]);
     } catch (error) {
       console.log(error);
@@ -625,23 +515,16 @@ export default function Dashboard() {
           dateEnd: endDate,
         },
       });
-      const resPaid = await axios.get(`http://localhost:3001/api/orders`, {
+      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "6",
           dateStart: startDate,
           dateEnd: endDate,
         },
       });
-      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
-        params: {
-          status: "7",
-          dateStart: startDate,
-          dateEnd: endDate,
-        },
-      });
       const resReturned = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
-          status: "8",
+          status: "7",
           dateStart: startDate,
           dateEnd: endDate,
         },
@@ -655,7 +538,6 @@ export default function Dashboard() {
         { label: "Đang đóng gói", value: resPacking.data.total },
         { label: "Đang giao đơn", value: resShipping.data.total },
         { label: "Đã giao đơn", value: resDelivered.data.total },
-        { label: "Đã thanh toán", value: resPaid.data.total },
       ]);
     } catch (error) {
       console.log(error);
@@ -729,23 +611,16 @@ export default function Dashboard() {
           dateEnd: endDate,
         },
       });
-      const resPaid = await axios.get(`http://localhost:3001/api/orders`, {
+      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
           status: "6",
           dateStart: startDate,
           dateEnd: endDate,
         },
       });
-      const resCompleted = await axios.get(`http://localhost:3001/api/orders`, {
-        params: {
-          status: "7",
-          dateStart: startDate,
-          dateEnd: endDate,
-        },
-      });
       const resReturned = await axios.get(`http://localhost:3001/api/orders`, {
         params: {
-          status: "8",
+          status: "7",
           dateStart: startDate,
           dateEnd: endDate,
         },
@@ -759,7 +634,6 @@ export default function Dashboard() {
         { label: "Đang đóng gói", value: resPacking.data.total },
         { label: "Đang giao đơn", value: resShipping.data.total },
         { label: "Đã giao đơn", value: resDelivered.data.total },
-        { label: "Đã thanh toán", value: resPaid.data.total },
       ]);
     } catch (error) {
       console.log(error);
