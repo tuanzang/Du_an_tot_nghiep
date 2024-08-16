@@ -195,7 +195,7 @@ export const updateStatusBill = async (req, res) => {
           products: updatedOrder?.products
         })
       })
-      return res.json(123);
+      // return res.json(123);
     }
 
     return res.status(200).json({

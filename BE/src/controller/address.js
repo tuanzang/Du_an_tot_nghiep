@@ -1,4 +1,4 @@
-import address from "../models/address";
+import address from "../models/address.js";
 
 /**
  * API tạo 1 địa chỉ
