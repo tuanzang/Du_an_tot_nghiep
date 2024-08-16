@@ -5,7 +5,7 @@ import {
   findAddressById,
   getAddressByIdUser,
   updateAddress,
-} from "../controller/address";
+} from "../controller/address.js";
 
 const addressRouter = Router();
 
