@@ -454,16 +454,46 @@ export const getTotalPriceByDay = async (req, res) => {
         $gte: startOfDay,
         $lte: endOfDay,
       },
+      status: "6",
+    });
+
+    const totalPrice = orders.reduce(
+      (total, order) => total + order.totalPrice,
+      0
+    );
+    return res.status(200).json({
+      message: "Success",
+      totalPrice,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+export const getTotalShippingCostByDay = async (req, res) => {
+  const { dateNow } = req.query;
+
+  try {
+    const date = new Date(dateNow);
+    const startOfDay = new Date(date.setUTCHours(0, 0, 0, 0));
+    const endOfDay = new Date(date.setUTCHours(23, 59, 59, 999));
+
+    const orders = await Order.find({
+      createdAt: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
       status: "7",
     });
 
-    const totalPrice = orders.reduce(
-      (total, order) => total + order.totalPrice,
-      0
-    );
+    const totalShippingCost = orders.reduce((total, order) => {
+      return total + (order.shippingCost || 0);
+    }, 0);
+
     return res.status(200).json({
       message: "Success",
-      totalPrice,
+      totalShippingCost,
     });
   } catch (error) {
     return res.status(500).json({
@@ -471,66 +501,8 @@ export const getTotalPriceByDay = async (req, res) => {
     });
   }
 };
-export const getPriceRefundByDay = async (req, res) => {
-  const { dateNow } = req.query;
 
-  try {
-    const date = new Date(dateNow);
-    const startOfDay = new Date(date.setUTCHours(0, 0, 0, 0));
-    const endOfDay = new Date(date.setUTCHours(23, 59, 59, 999));
 
-    const orders = await Order.find({
-      createdAt: {
-        $gte: startOfDay,
-        $lte: endOfDay,
-      },
-      status: "8",
-    });
-
-    const totalPrice = orders.reduce(
-      (total, order) => total + order.totalPrice,
-      0
-    );
-    return res.status(200).json({
-      message: "Success",
-      totalPrice,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-    });
-  }
-};
-export const getPriceCancelByDay = async (req, res) => {
-  const { dateNow } = req.query;
-
-  try {
-    const date = new Date(dateNow);
-    const startOfDay = new Date(date.setUTCHours(0, 0, 0, 0));
-    const endOfDay = new Date(date.setUTCHours(23, 59, 59, 999));
-
-    const orders = await Order.find({
-      createdAt: {
-        $gte: startOfDay,
-        $lte: endOfDay,
-      },
-      status: "0",
-    });
-
-    const totalPrice = orders.reduce(
-      (total, order) => total + order.totalPrice,
-      0
-    );
-    return res.status(200).json({
-      message: "Success",
-      totalPrice,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-    });
-  }
-};
 export const getTotalPriceByWeek = async (req, res) => {
   const { dateStart, dateEnd } = req.query;
 
@@ -540,7 +512,7 @@ export const getTotalPriceByWeek = async (req, res) => {
         $gte: new Date(dateStart),
         $lte: new Date(dateEnd),
       },
-      status: "7",
+      status: "6",
     });
 
     const totalPrice = orders.reduce(
@@ -558,7 +530,7 @@ export const getTotalPriceByWeek = async (req, res) => {
     });
   }
 };
-export const getPriceRefundByWeek = async (req, res) => {
+export const getTotalShippingCostByWeek = async (req, res) => {
   const { dateStart, dateEnd } = req.query;
 
   try {
@@ -567,44 +539,16 @@ export const getPriceRefundByWeek = async (req, res) => {
         $gte: new Date(dateStart),
         $lte: new Date(dateEnd),
       },
-      status: "8",
+      status: "6",
     });
 
-    const totalPrice = orders.reduce(
-      (total, order) => total + order.totalPrice,
-      0
-    );
+    const totalShippingCost = orders.reduce((total, order) => {
+      return total + (order.shippingCost || 0);
+    }, 0);
 
     return res.status(200).json({
       message: "Success",
-      totalPrice,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-    });
-  }
-};
-export const getPriceCancelByWeek = async (req, res) => {
-  const { dateStart, dateEnd } = req.query;
-
-  try {
-    const orders = await Order.find({
-      createdAt: {
-        $gte: new Date(dateStart),
-        $lte: new Date(dateEnd),
-      },
-      status: "0",
-    });
-
-    const totalPrice = orders.reduce(
-      (total, order) => total + order.totalPrice,
-      0
-    );
-
-    return res.status(200).json({
-      message: "Success",
-      totalPrice,
+      totalShippingCost,
     });
   } catch (error) {
     return res.status(500).json({
@@ -621,7 +565,7 @@ export const getTotalPriceByMonth = async (req, res) => {
         $gte: new Date(dateStart),
         $lte: new Date(dateEnd),
       },
-      status: "7",
+      status: "6",
     });
 
     const totalPrice = orders.reduce(
@@ -639,7 +583,7 @@ export const getTotalPriceByMonth = async (req, res) => {
     });
   }
 };
-export const getPriceRefundByMonth = async (req, res) => {
+export const getTotalShippingCostByMonth = async (req, res) => {
   const { dateStart, dateEnd } = req.query;
 
   try {
@@ -648,44 +592,16 @@ export const getPriceRefundByMonth = async (req, res) => {
         $gte: new Date(dateStart),
         $lte: new Date(dateEnd),
       },
-      status: "8",
+      status: "6",
     });
 
-    const totalPrice = orders.reduce(
-      (total, order) => total + order.totalPrice,
-      0
-    );
+    const totalShippingCost = orders.reduce((total, order) => {
+      return total + (order.shippingCost || 0);
+    }, 0);
 
     return res.status(200).json({
       message: "Success",
-      totalPrice,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-    });
-  }
-};
-export const getPriceCancelByMonth = async (req, res) => {
-  const { dateStart, dateEnd } = req.query;
-
-  try {
-    const orders = await Order.find({
-      createdAt: {
-        $gte: new Date(dateStart),
-        $lte: new Date(dateEnd),
-      },
-      status: "0",
-    });
-
-    const totalPrice = orders.reduce(
-      (total, order) => total + order.totalPrice,
-      0
-    );
-
-    return res.status(200).json({
-      message: "Success",
-      totalPrice,
+      totalShippingCost,
     });
   } catch (error) {
     return res.status(500).json({
@@ -702,7 +618,7 @@ export const getTotalPriceByYear = async (req, res) => {
         $gte: new Date(dateStart),
         $lte: new Date(dateEnd),
       },
-      status: "7",
+      status: "6",
     });
 
     const totalPrice = orders.reduce(
@@ -720,7 +636,7 @@ export const getTotalPriceByYear = async (req, res) => {
     });
   }
 };
-export const getPriceRefundByYear = async (req, res) => {
+export const getTotalShippingCostByYear = async (req, res) => {
   const { dateStart, dateEnd } = req.query;
 
   try {
@@ -729,44 +645,16 @@ export const getPriceRefundByYear = async (req, res) => {
         $gte: new Date(dateStart),
         $lte: new Date(dateEnd),
       },
-      status: "8",
+      status: "6",
     });
 
-    const totalPrice = orders.reduce(
-      (total, order) => total + order.totalPrice,
-      0
-    );
+    const totalShippingCost = orders.reduce((total, order) => {
+      return total + (order.shippingCost || 0);
+    }, 0);
 
     return res.status(200).json({
       message: "Success",
-      totalPrice,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-    });
-  }
-};
-export const getPriceCancelByYear = async (req, res) => {
-  const { dateStart, dateEnd } = req.query;
-
-  try {
-    const orders = await Order.find({
-      createdAt: {
-        $gte: new Date(dateStart),
-        $lte: new Date(dateEnd),
-      },
-      status: "0",
-    });
-
-    const totalPrice = orders.reduce(
-      (total, order) => total + order.totalPrice,
-      0
-    );
-
-    return res.status(200).json({
-      message: "Success",
-      totalPrice,
+      totalShippingCost,
     });
   } catch (error) {
     return res.status(500).json({
@@ -803,7 +691,7 @@ export const getTotalPriceByCustomDay = async (req, res) => {
         $gte: startDate,
         $lte: endDate,
       },
-      status: "7",
+      status: "6",
     });
 
     // Tính tổng giá trị của các đơn hàng
@@ -823,7 +711,7 @@ export const getTotalPriceByCustomDay = async (req, res) => {
     });
   }
 };
-export const getPriceRefundByCustomDay = async (req, res) => {
+export const getTotalShippingCostByCustomDay = async (req, res) => {
   const { dateStart, dateEnd } = req.query;
 
   // Kiểm tra xem có các tham số ngày hợp lệ không
@@ -852,18 +740,17 @@ export const getPriceRefundByCustomDay = async (req, res) => {
         $gte: startDate,
         $lte: endDate,
       },
-      status: "8",
+      status: "6",
     });
 
     // Tính tổng giá trị của các đơn hàng
-    const totalPrice = orders.reduce(
-      (total, order) => total + order.totalPrice,
-      0
-    );
+    const totalShippingCost = orders.reduce((total, order) => {
+      return total + (order.shippingCost || 0);
+    }, 0);
 
     return res.status(200).json({
       message: "Success",
-      totalPrice,
+      totalShippingCost,
     });
   } catch (error) {
     console.error(error); // In lỗi ra console để dễ dàng kiểm tra
@@ -872,52 +759,4 @@ export const getPriceRefundByCustomDay = async (req, res) => {
     });
   }
 };
-export const getPriceCancelByCustomDay = async (req, res) => {
-  const { dateStart, dateEnd } = req.query;
 
-  // Kiểm tra xem có các tham số ngày hợp lệ không
-  if (!dateStart || !dateEnd) {
-    return res.status(400).json({
-      message: "Thiếu tham số ngày bắt đầu hoặc ngày kết thúc",
-      providedParams: { dateStart, dateEnd }, // Thêm thông tin tham số đã gửi để debug
-    });
-  }
-
-  // Kiểm tra định dạng của ngày có hợp lệ không
-  const startDate = new Date(dateStart);
-  const endDate = new Date(dateEnd);
-
-  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-    return res.status(400).json({
-      message: "Ngày không hợp lệ",
-      providedParams: { dateStart, dateEnd }, // Thêm thông tin tham số đã gửi để debug
-    });
-  }
-
-  try {
-    // Tìm các đơn hàng trong khoảng thời gian
-    const orders = await Order.find({
-      createdAt: {
-        $gte: startDate,
-        $lte: endDate,
-      },
-      status: "0",
-    });
-
-    // Tính tổng giá trị của các đơn hàng
-    const totalPrice = orders.reduce(
-      (total, order) => total + order.totalPrice,
-      0
-    );
-
-    return res.status(200).json({
-      message: "Success",
-      totalPrice,
-    });
-  } catch (error) {
-    console.error(error); // In lỗi ra console để dễ dàng kiểm tra
-    return res.status(500).json({
-      message: "Internal server error",
-    });
-  }
-};

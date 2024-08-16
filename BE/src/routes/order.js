@@ -12,21 +12,17 @@ import {
   getTotalPriceByMonth,
   getTotalPriceByYear,
   getTotalPriceByCustomDay,
-  getPriceRefundByDay,
-  getPriceCancelByDay,
-  getPriceRefundByWeek,
-  getPriceCancelByWeek,
-  getPriceRefundByMonth,
-  getPriceCancelByMonth,
-  getPriceRefundByYear,
-  getPriceCancelByYear,
-  getPriceRefundByCustomDay,
-  getPriceCancelByCustomDay,
   getTotalOrdersByDate,
+  getTotalShippingCostByDay,
+  getTotalShippingCostByWeek,
+  getTotalShippingCostByMonth,
+  getTotalShippingCostByYear,
+  getTotalShippingCostByCustomDay,
 
 } from "../controller/order.js";
 import { checkAuth } from "../middleware/checkAuth.js";
 const orderRouter = Router();
+
 
 orderRouter.post("/add-order", checkAuth, createOrder);
 orderRouter.post("/", getAllOrders);
@@ -37,19 +33,14 @@ orderRouter.delete("/:id", deleteOrder);
 orderRouter.get("/:id", detailOrder);
 orderRouter.post("/update-status", updateOrderStatus);
 orderRouter.get("/total-price/day", getTotalPriceByDay);
-orderRouter.get("/price-refund/day", getPriceRefundByDay);
-orderRouter.get("/price-cancel/day", getPriceCancelByDay);
+orderRouter.get("/price-shipping/day", getTotalShippingCostByDay)
 orderRouter.get("/total-price/week", getTotalPriceByWeek);
-orderRouter.get("/price-refund/week", getPriceRefundByWeek);
-orderRouter.get("/price-cancel/week", getPriceCancelByWeek);
+orderRouter.get("/price-shipping/week", getTotalShippingCostByWeek);
 orderRouter.get("/total-price/month", getTotalPriceByMonth);
-orderRouter.get("/price-refund/month", getPriceRefundByMonth);
-orderRouter.get("/price-cancel/month", getPriceCancelByMonth);
+orderRouter.get("/price-shipping/month", getTotalShippingCostByMonth)
 orderRouter.get("/total-price/year", getTotalPriceByYear);
-orderRouter.get("/price-refund/year", getPriceRefundByYear);
-orderRouter.get("/price-cancel/year", getPriceCancelByYear);
+orderRouter.get("/price-shipping/year", getTotalShippingCostByYear)
 orderRouter.get("/total-price/custom-day", getTotalPriceByCustomDay);
-orderRouter.get("/price-refund/custom-day", getPriceRefundByCustomDay);
-orderRouter.get("/price-cancel/custom-day", getPriceCancelByCustomDay);
+orderRouter.get("/price-shipping/custom-day", getTotalShippingCostByCustomDay)
 
 export default orderRouter;
