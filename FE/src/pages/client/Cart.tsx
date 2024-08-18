@@ -20,6 +20,8 @@ import {
   updateProductSelected,
 } from "../../store/cartSlice";
 import { socket } from "../../socket";
+import classnames from "classnames"
+import classNames from "classnames";
 // import { IProduct } from "../../interface/Products";
 
 const { Text } = Typography;
@@ -230,7 +232,7 @@ export default function Cart() {
                           .filter((item) => item.variant.status)
                           .map((it) => it._id),
                         getCheckboxProps: (record: any) => ({
-                          disabled: !record.variant.status,
+                          disabled: !record.variant.status || !record.variant.quantity,
                         }),
                       }}
                     >
@@ -241,9 +243,9 @@ export default function Cart() {
                         render={(images: string[], record: any) => (
                           <Link to={`/product/${record.product._id}`}>
                             <img
-                              className={
-                                record.variant.status ? "" : "out-of-stock"
-                              }
+                              className={classNames({
+                                'out-of-stock': !record.variant.status || !record.variant.quantity
+                              })}
                               src={images[0]}
                               alt="Product"
                               style={{
@@ -263,11 +265,13 @@ export default function Cart() {
                         dataIndex="name"
                         key="name"
                         render={(_, record: any) => {
+                          console.log(123, record);
+
                           return (
                             <div
-                              className={
-                                record.variant.status ? "" : "out-of-stock"
-                              }
+                            className={classNames({
+                              'out-of-stock': !record.variant.status || !record.variant.quantity
+                            })}
                             >
                               <Link to={`/product/${record.product._id}`}>
                                 {record.name}
@@ -278,6 +282,12 @@ export default function Cart() {
                               {!record.variant.status && (
                                 <p className="out-of-stock-text">
                                   Sản phẩm đang ngừng hoạt động
+                                </p>
+                              )}
+
+                              {!record.variant.quantity && (
+                                <p className="out-of-stock-text">
+                                  Size này đang hết hàng
                                 </p>
                               )}
                             </div>
@@ -291,9 +301,9 @@ export default function Cart() {
                         key="price"
                         render={(_, record: any) => (
                           <div
-                            className={
-                              record.variant.status ? "" : "out-of-stock"
-                            }
+                          className={classNames({
+                            'out-of-stock': !record.variant.status || !record.variant.quantity
+                          })}
                           >
                             {formatPrice(record.variant.price)}
                           </div>
@@ -302,18 +312,23 @@ export default function Cart() {
                       />
                       <Table.Column
                         title="Option"
-                        dataIndex="options"
+                        dataIndex="option"
                         key="option"
                         render={(option, record: any) => {
                           if (option) {
                             return (
                               <div
-                                className={
-                                  record.variant.status ? "" : "out-of-stock"
-                                }
+                                className={classNames({
+                                  'out-of-stock': !record.variant.status || !record.variant.quantity
+                                })}
                               >
                                 <p>{option.name}</p>
-                                <p>{!option.status && 'Ẩn SP'}</p>
+                                
+                                {!option.quantity && (
+                                  <p className="out-of-stock-text">
+                                    Option đã hết
+                                  </p>
+                                )}
                               </div>
                             );
                           }
@@ -330,7 +345,7 @@ export default function Cart() {
                           <InputNumber
                             min={1}
                             value={value}
-                            disabled={!record.variant.status}
+                            disabled={!record.variant.status || !record.variant.quantity}
                             onChange={(quantity) =>
                               handleUpdateQuantity(
                                 record.variant._id,

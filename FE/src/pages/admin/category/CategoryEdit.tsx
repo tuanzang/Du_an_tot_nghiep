@@ -9,6 +9,7 @@ import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
 import { toast } from "react-toastify";
 import FormImageItem from "./FormImageItem";
 import { uploadImage } from "../../../services/upload/upload";
+import { socket } from "../../../socket";
 
 const listHis = [{ link: "/admin/category", name: "Danh mục" }];
 
@@ -46,6 +47,7 @@ const CategoryEdit = () => {
         ...values,
         options,
       });
+      socket.emit('option update');
       toast("Cập nhật thành công");
       navigate("/admin/category");
     } catch (err) {

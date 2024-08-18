@@ -44,6 +44,11 @@ const initialSocket = (server) => {
       console.log(orderId);
       io.emit("user update order status", orderId);
     });
+
+    // listen block user event
+    socket.on('block user', userId => {
+      io.emit('block user', userId);
+    });
   });
 
   io.listen(4000);

@@ -25,6 +25,7 @@
     "bcryptjs": "^2.4.3",
     "bootstrap": "^5.3.3",
     "ckeditor5": "^42.0.2",
+    "classnames": "^2.5.1",
     "dayjs": "^1.11.11",
     "hook-form": "^0.0.1",
     "html5-qrcode": "^2.3.8",
