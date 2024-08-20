@@ -300,7 +300,7 @@ export const getAllOrders = async (req, res) => {
         total: 0,
       });
     }
-    console.log(orders);
+    // console.log(orders);
     return res.status(200).json({
       message: "Success",
       data: orders,
