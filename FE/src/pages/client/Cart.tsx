@@ -17,10 +17,10 @@ import {
   removeProduct,
   selectProductSelected,
   selectTotalPrice,
+  unCheckProduct,
   updateProductSelected,
 } from "../../store/cartSlice";
 import { socket } from "../../socket";
-import classnames from "classnames"
 import classNames from "classnames";
 // import { IProduct } from "../../interface/Products";
 
@@ -107,6 +107,10 @@ export default function Cart() {
       socket.off("option update", onProductUpdate);
     };
   }, [refetch]);
+
+  useEffect(() => {
+    dispatch(unCheckProduct(data?.data));
+  }, [data]);
 
   const productsFormatted = useMemo(() => {
     return data?.data?.products?.map((it) => ({
@@ -229,10 +233,10 @@ export default function Cart() {
                           dispatch(updateProductSelected(selectedRows));
                         },
                         selectedRowKeys: productSelected
-                          .filter((item) => item.variant.status)
+                          .filter((item:any) => item.variant.status || (item.option && item.option?.status))
                           .map((it) => it._id),
                         getCheckboxProps: (record: any) => ({
-                          disabled: !record.variant.status || !record.variant.quantity,
+                          disabled: !record.variant.status || !record.variant.quantity || (record.option && !record.option?.status),
                         }),
                       }}
                     >
@@ -240,37 +244,41 @@ export default function Cart() {
                         title="Hình ảnh"
                         dataIndex="image"
                         key="image"
-                        render={(images: string[], record: any) => (
-                          <Link to={`/product/${record.product._id}`}>
-                            <img
-                              className={classNames({
-                                'out-of-stock': !record.variant.status || !record.variant.quantity
-                              })}
-                              src={images[0]}
-                              alt="Product"
-                              style={{
-                                width: "60%",
-                                height: "60%",
-                                objectFit: "cover",
-                              }}
-                              onError={(e) =>
-                                (e.currentTarget.src = "/images/default.jpg")
-                              }
-                            />
-                          </Link>
-                        )}
+                        render={(images: string[], record: any) => {
+                          const isDisable = !record.variant.status || !record.variant.quantity || (record.option && !record.option?.status);
+
+                          return (
+                            <Link to={`/product/${record.product._id}`}>
+                              <img
+                                className={classNames({
+                                  'out-of-stock': isDisable
+                                })}
+                                src={images[0]}
+                                alt="Product"
+                                style={{
+                                  width: "60%",
+                                  height: "60%",
+                                  objectFit: "cover",
+                                }}
+                                onError={(e) =>
+                                  (e.currentTarget.src = "/images/default.jpg")
+                                }
+                              />
+                            </Link>
+                          )
+                        }}
                       />
                       <Table.Column
                         title="Sản phẩm"
                         dataIndex="name"
                         key="name"
                         render={(_, record: any) => {
-                          console.log(123, record);
+                          const isDisable = !record.variant.status || !record.variant.quantity || (record.option && !record.option?.status)
 
                           return (
                             <div
                             className={classNames({
-                              'out-of-stock': !record.variant.status || !record.variant.quantity
+                              'out-of-stock': isDisable
                             })}
                             >
                               <Link to={`/product/${record.product._id}`}>
@@ -281,7 +289,7 @@ export default function Cart() {
 
                               {!record.variant.status && (
                                 <p className="out-of-stock-text">
-                                  Sản phẩm đang ngừng hoạt động
+                                  Ngừng hoạt động
                                 </p>
                               )}
 
@@ -302,7 +310,7 @@ export default function Cart() {
                         render={(_, record: any) => (
                           <div
                           className={classNames({
-                            'out-of-stock': !record.variant.status || !record.variant.quantity
+                            'out-of-stock': !record.variant.status || !record.variant.quantity || (record.option && !record.option?.status)
                           })}
                           >
                             {formatPrice(record.variant.price)}
@@ -319,10 +327,11 @@ export default function Cart() {
                             return (
                               <div
                                 className={classNames({
-                                  'out-of-stock': !record.variant.status || !record.variant.quantity
+                                  'out-of-stock': !record.variant.status || !record.variant.quantity || !record.option?.status
                                 })}
                               >
                                 <p>{option.name}</p>
+                                <p className="out-of-stock-text">{!option.status && 'Ngừng hoạt động'}</p>
                                 
                                 {!option.quantity && (
                                   <p className="out-of-stock-text">
@@ -345,7 +354,7 @@ export default function Cart() {
                           <InputNumber
                             min={1}
                             value={value}
-                            disabled={!record.variant.status || !record.variant.quantity}
+                            disabled={!record.variant.status || !record.variant.quantity || (record.option && !record.option?.status)}
                             onChange={(quantity) =>
                               handleUpdateQuantity(
                                 record.variant._id,
@@ -374,7 +383,7 @@ export default function Cart() {
                           return (
                             <div
                               className={
-                                record.variant.status ? "" : "out-of-stock"
+                                record.variant.status || !record.option?.status ? "" : "out-of-stock"
                               }
                             >
                               {formatPrice(totalPrice)}

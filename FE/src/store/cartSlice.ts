@@ -60,11 +60,35 @@ export const cartSlice = createSlice({
 
         return it;
       }) as any;
+    },
+
+    unCheckProduct: (state, { payload }) => {
+      if (payload) {
+        const curentProductSelectedIds = state.productSelected.map((it: any) => it._id);
+        const newProducts = payload.products.filter((it: any) => curentProductSelectedIds.includes(it._id)).filter((it: any) => {
+          if (it.option) {
+            return it.option.status && it.variant.status && it.option.quantity > 0 && it.variant.quantity > 0;
+          };
+
+          return it.variant.status && it.variant.quantity > 0;
+        });
+        state.productSelected = newProducts;
+
+        state.totalPrice = (newProducts as ICartItem[]).reduce((res, curr) => {
+          let price = curr.variant.price * curr.quantity;
+  
+          if (curr.option) {
+            price += curr.quantity * curr.option.price;
+          }
+  
+          return res += price;
+        }, 0);
+      }
     }
   },
 });
 
-export const { updateProductSelected, resetProductSelected, removeProduct, updateStatus } =
+export const { updateProductSelected, resetProductSelected, removeProduct, updateStatus, unCheckProduct } =
   cartSlice.actions;
 export const selectProductSelected = (state: any) => state.cart.productSelected;
 export const selectTotalPrice = (state: any) => state.cart.totalPrice;
