@@ -8,7 +8,7 @@ import {
   Typography,
 } from "antd";
 import { useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import useCartMutation, { useMyCartQuery } from "../../hooks/useCart";
 import { formatPrice } from "../../services/common/formatCurrency";
@@ -22,6 +22,8 @@ import {
 import { socket } from "../../socket";
 import classnames from "classnames"
 import classNames from "classnames";
+import { useMutation } from "@tanstack/react-query";
+import axiosInstance from "../../config/axios";
 // import { IProduct } from "../../interface/Products";
 
 const { Text } = Typography;
@@ -63,8 +65,24 @@ export interface ICartItem {
   };
 }
 
+interface ICheckProductQuantityBody {
+  variants: [
+    {
+      id: string;
+      quantity: number;
+    }
+  ],
+  options: [
+    {
+      id: string;
+      quantity: number;
+    }
+  ]
+}
+
 export default function Cart() {
   const dispatch = useDispatch();
+  const navigate = useNavigate()
   const productSelected: ICartItem[] = useSelector(selectProductSelected);
   const totalPrice = useSelector(selectTotalPrice);
   const { data, refetch } = useMyCartQuery();
@@ -78,6 +96,19 @@ export default function Cart() {
   });
   const { mutate: onDeleteProduct } = useCartMutation({
     action: "DELETE",
+  });
+  const { mutate: onCheckProductQuantity } = useMutation({
+    mutationFn: (data: ICheckProductQuantityBody) => {
+      return axiosInstance.post('/carts/check-product-quantity', data);
+    },
+    onSuccess: () => {
+      navigate('/checkout');
+    },
+    onError: (error: any) => {
+      message.error(
+        error?.response?.data?.message || "Đã có lỗi xảy ra, vui lòng thử lại"
+      );
+    }
   });
 
   // initial socket
@@ -158,9 +189,64 @@ export default function Cart() {
     );
   };
 
-  // const totalPriceWithShipping = totalPrice + SHIPPING_COST;
 
-  // Tính tổng tiền bao gồm phí ship nếu có sản phẩm đã chọn
+  const onCheckout = () => {
+    const body = productSelected.reduce((res, curr) => {
+      if (!res.variants) {
+        res.variants = [
+          {
+            id: curr.variant._id,
+            quantity: curr.quantity
+          }
+        ]
+      } else {
+        const findVariant = res.variants.find(it => it.id === curr.variant._id);
+
+        if (findVariant) {
+          const newVariants = res.variants.map(it => it.id === findVariant.id
+            ? ({ ...it, quantity: it.quantity + curr.quantity })
+            : it
+          );
+          res.variants = newVariants as any;
+        } else {
+          res.variants.push({
+            id: curr.variant._id,
+            quantity: curr.quantity
+          })
+        }
+      }
+
+      if (curr.option) {
+        if (!res.options) {
+          res.options = [
+            {
+              id: curr.option._id,
+              quantity: curr.quantity
+            }
+          ]
+        } else {
+          const findOption = res.options.find(it => it.id === curr.option._id);
+  
+          if (findOption) {
+            const newOptions = res.options.map(it => it.id === findOption.id
+              ? ({ ...it, quantity: it.quantity + curr.quantity })
+              : it
+            );
+            res.options = newOptions as any;
+          } else {
+            res.options.push({
+              id: curr.option._id,
+              quantity: curr.quantity
+            })
+          }
+        }
+      }
+
+      return res;
+    }, {} as ICheckProductQuantityBody);
+
+    onCheckProductQuantity(body);
+  }
 
   return (
     <div>
@@ -429,15 +515,16 @@ export default function Cart() {
                   {formatPrice(totalPrice)}
                 </Text>
               </div>
-              <Link to="/checkout">
+              
+              <div>
                 <Button
                   type="primary"
-                  style={{ float: "right" }}
                   disabled={!productSelected.length}
+                  onClick={onCheckout}
                 >
                   Thanh toán
                 </Button>
-              </Link>
+              </div>
             </div>
           </div>
         </div>
