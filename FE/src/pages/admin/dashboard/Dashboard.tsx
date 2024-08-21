@@ -1050,7 +1050,6 @@ export default function Dashboard() {
               style={{ borderColor: "#c29957" }}
             />
           )}
-          <ToastContainer />
         </div>
         <Row gutter={16} style={{ padding: "0 8px" }}>
 
