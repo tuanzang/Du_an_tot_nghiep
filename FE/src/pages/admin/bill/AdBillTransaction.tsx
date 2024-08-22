@@ -32,7 +32,7 @@ const AdBillTransaction = ({ listTransaction }: Props) => {
           ),
         },
         {
-          title: "Loại thanh toán",
+          title: "Kiểu thanh toán",
           dataIndex: "type",
           key: "type",
           align: "center",
