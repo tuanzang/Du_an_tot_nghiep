@@ -322,7 +322,7 @@ export default function Cart() {
                           .filter((item:any) => item.variant.status || (item.option && item.option?.status))
                           .map((it) => it._id),
                         getCheckboxProps: (record: any) => ({
-                          disabled: !record.variant.status || !record.variant.quantity || (record.option && !record.option?.status),
+                          disabled: !record.variant.status || !record.variant.quantity || (record.option && (!record.option?.status || !record.option?.quantity)),
                         }),
                       }}
                     >
@@ -331,7 +331,7 @@ export default function Cart() {
                         dataIndex="image"
                         key="image"
                         render={(images: string[], record: any) => {
-                          const isDisable = !record.variant.status || !record.variant.quantity || (record.option && !record.option?.status);
+                          const isDisable = !record.variant.status || !record.variant.quantity || (record.option && (!record.option?.status || !record.option?.quantity));
 
                           return (
                             <Link to={`/product/${record.product._id}`}>
@@ -359,7 +359,7 @@ export default function Cart() {
                         dataIndex="name"
                         key="name"
                         render={(_, record: any) => {
-                          const isDisable = !record.variant.status || !record.variant.quantity || (record.option && !record.option?.status)
+                          const isDisable = !record.variant.status || !record.variant.quantity || (record.option && (!record.option?.status || !record.option?.quantity))
 
                           return (
                             <div
@@ -396,7 +396,7 @@ export default function Cart() {
                         render={(_, record: any) => (
                           <div
                           className={classNames({
-                            'out-of-stock': !record.variant.status || !record.variant.quantity || (record.option && !record.option?.status)
+                            'out-of-stock': !record.variant.status || !record.variant.quantity || (record.option && (!record.option?.status || !record.option?.quantity))
                           })}
                           >
                             {formatPrice(record.variant.price)}
@@ -413,7 +413,7 @@ export default function Cart() {
                             return (
                               <div
                                 className={classNames({
-                                  'out-of-stock': !record.variant.status || !record.variant.quantity || !record.option?.status
+                                  'out-of-stock': !record.variant.status || !record.variant.quantity || (record.option && (!record.option?.status || !record.option?.quantity))
                                 })}
                               >
                                 <p>{option.name}</p>
@@ -440,7 +440,7 @@ export default function Cart() {
                           <InputNumber
                             min={1}
                             value={value}
-                            disabled={!record.variant.status || !record.variant.quantity || (record.option && !record.option?.status)}
+                            disabled={!record.variant.status || !record.variant.quantity || (record.option && (!record.option?.status || !record.option?.quantity))}
                             onChange={(quantity) =>
                               handleUpdateQuantity(
                                 record.variant._id,
@@ -469,7 +469,7 @@ export default function Cart() {
                           return (
                             <div
                               className={
-                                record.variant.status || !record.option?.status ? "" : "out-of-stock"
+                                record.variant.status || (record.option && (!record.option?.status || !record.option?.quantity)) ? "" : "out-of-stock"
                               }
                             >
                               {formatPrice(totalPrice)}
