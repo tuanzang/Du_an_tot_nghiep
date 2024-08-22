@@ -107,7 +107,7 @@ const Header = () => {
                       <nav className="desktop-menu">
                         <ul>
                           <li>
-                            <NavLink to="/home">Home</NavLink>
+                            <NavLink to="/home">Trang chủ</NavLink>
                           </li>
                           <li>
                             <NavLink to="/product">Sản phẩm</NavLink>
@@ -284,7 +284,7 @@ const Header = () => {
                 <nav>
                   <ul className="mobile-menu">
                     <li className="menu-item-has-children">
-                      <a href="/home">Home</a>
+                      <a href="/home">Trang chủ</a>
                     </li>
                     <li className="menu-item-has-children">
                       <a href="/product">Sản phẩm</a>

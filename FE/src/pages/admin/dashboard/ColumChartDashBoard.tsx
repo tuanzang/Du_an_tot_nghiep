@@ -45,7 +45,7 @@ export default function ColumChartDashBoard({
     // Tạo series cột
     let series = chart.series.push(
       am5xy.ColumnSeries.new(root, {
-        name: "Series 1",
+        name: "Tổng doanh thu",
         xAxis: xAxis,
         yAxis: yAxis,
         valueYField: "value",

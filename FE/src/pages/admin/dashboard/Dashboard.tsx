@@ -925,8 +925,8 @@ export default function Dashboard() {
   ];
 
   const StockOrder = [
-    { title: "STT", dataIndex: "stt", key: "stt" },
-    { title: "Tên sản phẩm", dataIndex: "name", key: "name", width: "35%" },
+    { title: "STT", dataIndex: "stt", key: "stt", width: "15%" },
+    { title: "Tên sản phẩm", dataIndex: "name", key: "name", width: "50%" },
     {
       title: "Ảnh",
       dataIndex: "image",
@@ -1027,7 +1027,7 @@ export default function Dashboard() {
           Bộ lọc
         </Title>
         <div style={{ padding: "0 8px" }}>
-          {["ngày", "tuần", "tháng", "năm", "tùy chỉnh"].map((type, index) => (
+          {["Ngày", "Tuần", "Tháng", "Năm", "Tùy chỉnh"].map((type, index) => (
             <Button
               key={type}
               style={{

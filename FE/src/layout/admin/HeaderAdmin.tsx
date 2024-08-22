@@ -61,9 +61,14 @@ export default function HeaderAdmin({ children }: HeaderAdminProps) {
 
   const menu = (
     <Menu>
-      <Menu.Item key="1">
+      {/* <Menu.Item key="1">
         <Link to={`/admin/infomation/`}>
           <Avatar /> Tài khoản của tôi
+        </Link>
+      </Menu.Item> */}
+      <Menu.Item key="4">
+        <Link to={`/home`}>
+          <HomeOutlined /> Trang chủ
         </Link>
       </Menu.Item>
       <Menu.Item key="2">
@@ -74,11 +79,7 @@ export default function HeaderAdmin({ children }: HeaderAdminProps) {
       <Menu.Item key="3" onClick={() => handleLogout()}>
         <AiOutlineLogout style={{ marginRight: "8px" }} /> Đăng xuất
       </Menu.Item>
-      <Menu.Item key="4">
-        <Link to={`/home`}>
-          <HomeOutlined /> Trang chủ
-        </Link>
-      </Menu.Item>
+      
     </Menu>
   );
 
