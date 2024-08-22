@@ -265,20 +265,22 @@ export const checkProductQuantity = async (req, res) => {
       }
     }
 
-    for await (const option of options) {
-      const findOption = await Option.findById(option.id);
+    if (options && options.length > 0) {
+      for (const option of options) {
+        const findOption = await Option.findById(option.id);
 
-      if (findOption.quantity < option.quantity) {
-        return res.status(400).json({
-          message: `${findOption.name} không đủ số lượng!`,
-        });
+        if (findOption.quantity < option.quantity) {
+          return res.status(400).json({
+            message: `${findOption.name} không đủ số lượng!`,
+          });
+        }
       }
     }
-
     res.json({
       status: true,
     });
-  } catch (error) {
+  } 
+  catch (error) {
     res.status(500).json({
       message: "Internal server error",
       error: error.message,

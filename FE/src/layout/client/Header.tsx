@@ -107,7 +107,7 @@ const Header = () => {
                       <nav className="desktop-menu">
                         <ul>
                           <li>
-                            <NavLink to="/home">Home</NavLink>
+                            <NavLink to="/home">Trang chủ</NavLink>
                           </li>
                           <li>
                             <NavLink to="/product">Sản phẩm</NavLink>
