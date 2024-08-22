@@ -165,8 +165,8 @@ export default function Category() {
                   src={image}
                   alt="option"
                   style={{
-                    width: "100px",
-                    height: "100px",
+                    width: "70px",
+                    height: "70px",
                     objectFit: "cover",
                   }}
                 />
