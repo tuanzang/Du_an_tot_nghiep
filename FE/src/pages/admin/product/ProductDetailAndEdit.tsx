@@ -459,6 +459,7 @@ export default function ProductDetailAndEdit() {
                   label: it.loai,
                   value: it._id,
                 }))}
+                disabled={true}
               />
             </Form.Item>
 

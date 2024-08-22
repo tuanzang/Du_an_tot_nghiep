@@ -57,6 +57,7 @@ export default function ColumChartDashBoard({
     series.columns.template.setAll({
       tooltipText: "{categoryX}: {valueY}",
       width: am5.percent(60),
+      
     });
 
     series.data.setAll(data);
