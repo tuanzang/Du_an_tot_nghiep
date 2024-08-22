@@ -1,7 +1,7 @@
 import Cart from "../models/cart.js";
 import ProductVariant from "../models/productSize.js";
 import Option from "../models/option.js";
-import Product from "../models/product.js"
+import Product from "../models/product.js";
 
 export const getMyCarts = async (req, res) => {
   const userId = req.profile._id;
@@ -34,14 +34,17 @@ export const getMyCarts = async (req, res) => {
     for await (let product of newProducts) {
       const findProduct = await Product.findById(product.product._id);
       // console.log(findProduct.options);
-      if (product.option && !findProduct.options.includes(product.option._id.toJSON())) {
+      if (
+        product.option &&
+        !findProduct.options.includes(product.option._id.toJSON())
+      ) {
         tempProducts.push({
           ...product.toJSON(),
           option: {
             ...product.option.toJSON(),
-            status: 0
-          }
-        })
+            status: 0,
+          },
+        });
       } else {
         tempProducts.push(product);
       }
@@ -192,7 +195,7 @@ export const updateQuantity = async (req, res) => {
         .reduce((total, curr) => {
           return (total += curr.quantity);
         }, 0);
-      
+
       // console.log(allProductOptionQnt);
 
       const findOption = await Option.findById(option);
@@ -244,6 +247,41 @@ export const removeProduct = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Internal server error",
+    });
+  }
+};
+
+export const checkProductQuantity = async (req, res) => {
+  try {
+    const { variants, options } = req.body;
+
+    for await (const variant of variants) {
+      const findVariant = await ProductVariant.findById(variant.id);
+
+      if (findVariant.quantity < variant.quantity) {
+        return res.status(400).json({
+          message: `${findVariant.sizeName} không đủ số lượng!`,
+        });
+      }
+    }
+
+    for await (const option of options) {
+      const findOption = await Option.findById(option.id);
+
+      if (findOption.quantity < option.quantity) {
+        return res.status(400).json({
+          message: `${findOption.name} không đủ số lượng!`,
+        });
+      }
+    }
+
+    res.json({
+      status: true,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal server error",
+      error: error.message,
     });
   }
 };

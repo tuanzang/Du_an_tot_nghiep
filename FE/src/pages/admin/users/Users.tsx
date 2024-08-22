@@ -27,6 +27,7 @@ import dayjs from "dayjs";
 import { ColumnType } from "antd/es/table";
 import { ColumnGroupType } from "antd/lib/table";
 import * as XLSX from "xlsx";
+import { socket } from "../../../socket";
 
 const customTableHeaderCellStyle: React.CSSProperties = {
   backgroundColor: "#c29957",
@@ -89,6 +90,7 @@ export default function Users() {
   const handleBlockUser = async (userId: string) => {
     try {
       const response = await UserApi.blockUser(userId);
+      socket.emit('block user', userId);
       message.success("Chặn người dùng thành công");
 
       setUserList((prevUserList) =>

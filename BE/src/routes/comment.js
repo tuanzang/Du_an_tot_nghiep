@@ -9,7 +9,7 @@ import {
   findProductSizeById,
   getAllComment,
   getCommentByIdProduct,
-  updateComment,
+  // updateComment,
 } from "../controller/comment.js";
 
 const commentRouter = Router();
@@ -17,7 +17,7 @@ const commentRouter = Router();
 commentRouter.post("/", getAllComment);
 commentRouter.post("/findByIdProduct", getCommentByIdProduct);
 commentRouter.post("/add", createComment);
-commentRouter.post("/update", updateComment);
+// commentRouter.post("/update", updateComment);
 commentRouter.post("/delete", deleteComment);
 commentRouter.post("/detail/:id", detailComment);
 commentRouter.post("/detailByUserAndProductSize", detailByUserAndProductSize);

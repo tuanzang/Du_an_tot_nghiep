@@ -427,6 +427,9 @@ export default function ProfileBillDetail() {
 
   // detail comment
   const [commentDetail, setCommentDetail] = useState<IComment | null>(null);
+
+  const isDisableCmt = !!commentDetail;
+
   const detailComment = async (
     user: IUser | null,
     idProductSize: string | null
@@ -534,18 +537,7 @@ export default function ProfileBillDetail() {
         setOpen={setOpenModelComment}
         title={"Bình luận sản phẩm"}
         buttonSubmit={
-          commentDetail !== null ? (
-            <Button
-              style={{
-                boxShadow: "none",
-                textTransform: "none",
-                borderRadius: "8px",
-              }}
-              onClick={handleUpdateContent}
-            >
-              Cập nhật
-            </Button>
-          ) : (
+          !isDisableCmt && (
             <Button
               style={{
                 boxShadow: "none",
@@ -565,7 +557,7 @@ export default function ProfileBillDetail() {
             style={{ marginTop: 16, marginBottom: 16, padding: "16px" }}
             bordered={false}
           >
-            <Rate allowHalf value={rate} onChange={(e) => setRate(e)} />
+            <Rate allowHalf value={rate} onChange={(e) => setRate(e)} disabled={isDisableCmt} />
           </Card>
           <Card
             title="Bình luận của bạn"
@@ -577,6 +569,7 @@ export default function ProfileBillDetail() {
               placeholder="Nội dung bình luận"
               value={content}
               onChange={(e) => setContent(e.target.value)}
+              disabled={isDisableCmt}
             />
           </Card>
         </div>
