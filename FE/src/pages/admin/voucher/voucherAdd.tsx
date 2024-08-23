@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
+import dayjs from "dayjs";
 
 const VoucherAdd = () => {
   const navigate = useNavigate();
@@ -59,6 +60,28 @@ const VoucherAdd = () => {
   const onFinishFailed = (errorInfo: any) => {
     console.log("Failed:", errorInfo);
     toast.error("Vui lòng điền đầy đủ thông tin!");
+  };
+
+  const disabledHours = () => {
+    const hours = [];
+    const currentHour = dayjs().hour();
+  
+    for (let i = currentHour - 1; i >= 0; i--) {
+      hours.push(i);
+    }
+
+    return hours;
+  };
+  
+  const disabledMinutes = (selectedHour: number) => {
+    const minutes = [];
+    const currentMinute = dayjs().minute();
+    if (selectedHour === dayjs().hour()) {
+      for (let i = currentMinute; i >= 0; i--) {
+        minutes.push(i);
+      }
+    }
+    return minutes;
   };
 
   return (
@@ -115,7 +138,22 @@ const VoucherAdd = () => {
             <Form.Item
               label="Giảm"
               name="discountVal"
-              rules={[{ required: true, message: "Vui lòng nhập!" }]}
+              dependencies={['discountType']}
+              rules={[
+                { required: true, message: "Vui lòng nhập!" },
+                { min: 0, message: 'Giá trị phải là số dương', transform: val => Number(val) },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    const discountType = getFieldValue('discountType');
+
+                    if (discountType === 'percentage' && value > 100) {
+                      return Promise.reject('Phần trăm giảm giá < 100%');
+                    }
+
+                    return Promise.resolve();
+                  },
+                })
+              ]}
             >
               <Input placeholder="Giảm" type="number" />
             </Form.Item>
@@ -130,7 +168,23 @@ const VoucherAdd = () => {
                   { required: true, message: "Vui lòng nhập ngày bắt đầu!" },
                 ]}
               >
-                <DatePicker onChange={onStartDateChange} showTime />
+                <DatePicker
+                  onChange={onStartDateChange}
+                  showTime
+                  disabledDate={date => {
+                    return dayjs(date).add(1, 'd').isBefore(dayjs());
+                  }}
+                  disabledTime={time => {
+                    if (!time.isSame(dayjs(), 'D')) {
+                      return {};
+                    };
+
+                    return {
+                      disabledHours,
+                      disabledMinutes: () => disabledMinutes(time.get('hour'))
+                    }
+                  }}
+                />
               </Form.Item>
 
               <Form.Item
