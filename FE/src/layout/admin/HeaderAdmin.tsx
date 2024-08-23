@@ -268,9 +268,9 @@ export default function HeaderAdmin({ children }: HeaderAdminProps) {
                     .length
                 }
               >
-                <Tooltip title="Notifications">
+                {/* <Tooltip title="Notifications">
                   <Button icon={<AiOutlineBell />} />
-                </Tooltip>
+                </Tooltip> */}
               </Badge>
             </Dropdown>
             <Dropdown overlay={menu} trigger={["click"]}>
