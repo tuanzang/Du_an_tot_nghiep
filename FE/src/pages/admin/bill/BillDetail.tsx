@@ -746,20 +746,20 @@ export default function BillDetail() {
 
   // trạng thái đơn hàng
   const genBtnHandleBill = (statusBill: string) => {
-    if (
-      listTransaction.filter((trans) => trans.status === true).length > 0 &&
-      Number(statusBill) === 5
-    ) {
-      return (
-        <Button
-          color="cam"
-          style={{ marginRight: "5px" }}
-          onClick={() => setOpenModalComplete(true)}
-        >
-          Hoàn thành
-        </Button>
-      );
-    }
+    // if (
+    //   listTransaction.filter((trans) => trans.status === true).length > 0 &&
+    //   Number(statusBill) === 5
+    // ) {
+    //   return (
+    //     <Button
+    //       color="cam"
+    //       style={{ marginRight: "5px" }}
+    //       onClick={() => setOpenModalComplete(true)}
+    //     >
+    //       Hoàn thành
+    //     </Button>
+    //   );
+    // }
     //billDetail.type: giao hàng
     if (Number(statusBill) !== 0) {
       switch (statusBill) {

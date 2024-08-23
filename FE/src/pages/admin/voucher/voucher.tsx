@@ -169,14 +169,7 @@ export default function Voucher() {
         />
       ),
     },
-    {
-      title: "Action",
-      dataIndex: "key",
-      key: "key",
-      align: "center",
-      width: "5%",
-      render: (value: any) => <Button>Xóa</Button>,
-    },
+    
   ];
 
   return (
