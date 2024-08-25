@@ -2,7 +2,7 @@ import type { FormProps } from "antd";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button, Card, Col, Form, Input, InputNumber, Row } from "antd";
+import { Button, Card, Col, Form, Input, InputNumber, message, Row } from "antd";
 import { ICategory } from "../../../interface/Categories";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
@@ -50,8 +50,9 @@ const CategoryEdit = () => {
       socket.emit('option update');
       toast("Cập nhật thành công");
       navigate("/admin/category");
-    } catch (err) {
-      toast.error("Error");
+    } catch (err: any) {
+      console.log(err)
+      message.error(err?.response?.data?.message || 'Đã có lỗi xảy ra, vui lòng thử lại');
     }
   };
 

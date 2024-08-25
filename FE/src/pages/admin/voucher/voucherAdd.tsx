@@ -204,7 +204,22 @@ const VoucherAdd = () => {
                   }),
                 ]}
               >
-                <DatePicker onChange={onEndDateChange} showTime />
+                <DatePicker
+                  onChange={onEndDateChange}
+                  showTime
+                  disabledDate={date => {
+                    return dayjs(date).add(1, 'd').isBefore(dayjs());
+                  }}
+                  disabledTime={time => {
+                    if (!time.isSame(dayjs(), 'D')) {
+                      return {};
+                    };
+
+                    return {
+                      disabledHours,
+                      disabledMinutes: () => disabledMinutes(time.get('hour'))
+                    }
+                  }} />
               </Form.Item>
             </div>
           </Card>

@@ -109,10 +109,29 @@ export const createCategory = async (req, res) => {
   try {
     const { loai, options } = req.body;
 
+    // validate name
+    const findByName = await category.findOne({ loai }).exec();
+    if (findByName) {
+      return res.status(400).json({
+        message: "Tên danh mục đã tồn tại"
+      });
+    }
+
+    // validate option name
+    for await (const item of options) {
+      const isExists = await Option.findOne({ name: item.name });
+
+      if (isExists) {
+        return res.status(400).json({
+          message: "Option đã tồn tại"
+        });
+      }
+    }
+
     // create category
     const data = await category.create({ loai });
 
-    // create options
+    // create option
     const optionFormat = options.map((it) => ({ ...it, category: data._id }));
     const optionCreated = await Option.insertMany(optionFormat);
 
@@ -141,6 +160,31 @@ export const updateCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
     const { options, ...rest } = req.body;
+
+    // validate name
+    const findByName = await category.findOne({ loai: rest.loai, _id: { $ne: categoryId } }).exec();
+    if (findByName) {
+      return res.status(400).json({
+        message: "Tên danh mục đã tồn tại"
+      });
+    }
+
+    // validate option name
+    for await (const item of options) {
+      let isExists = false;
+      if (item._id) {
+        isExists = await Option.findOne({ name: item.name, _id: { $ne: item._id } }).exec();
+      } else {
+        isExists = await Option.findOne({ name: item.name }).exec();
+      }
+
+      if (isExists) {
+        return res.status(400).json({
+          message: "Option đã tồn tại"
+        })
+      }
+    }
+
     const data = await category.findByIdAndUpdate(categoryId, rest, {
       new: true,
     });

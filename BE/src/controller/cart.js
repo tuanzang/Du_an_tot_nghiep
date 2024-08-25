@@ -62,7 +62,7 @@ export const getMyCarts = async (req, res) => {
       totalPrice,
     });
   } catch (error) {
-    return res.status(500).json({
+     res.status(500).json({
       message: error.message,
     });
   }
