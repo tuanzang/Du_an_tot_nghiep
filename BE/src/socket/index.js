@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+import initialCronJob from "../cron-job/cron-job.js";
 
 const initialSocket = (server) => {
   const io = new Server(server, {
@@ -50,6 +51,9 @@ const initialSocket = (server) => {
       io.emit('block user', userId);
     });
   });
+
+  // cron job
+  initialCronJob(io);
 
   io.listen(4000);
 };

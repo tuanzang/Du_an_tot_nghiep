@@ -2,7 +2,7 @@ import Size from "../models/size.js";
 
 export const createSize = async (req, res) => {
   try {
-    const { sizeCode, name } = req.body;
+    const { sizeCode, name, status } = req.body;
 
     // Các điều kiện xác thực
     if (!sizeCode) {

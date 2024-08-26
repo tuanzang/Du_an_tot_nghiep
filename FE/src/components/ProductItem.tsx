@@ -60,14 +60,14 @@ const ProductItem = ({ data }: IProductItemProps) => {
           </div>
         )}
         <div className="button-group">
-          <a
+          {/* <a
             href="#"
             data-bs-toggle="tooltip"
             data-bs-placement="left"
             title="Yêu thích"
           >
             <i className="pe-7s-like"></i>
-          </a>
+          </a> */}
           <a
             href="#"
             data-bs-toggle="tooltip"

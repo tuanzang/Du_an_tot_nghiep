@@ -3,9 +3,10 @@ import mongoose from "mongoose";
 const historyBillSchema = new mongoose.Schema(
   {
     idUser: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      // type: mongoose.Schema.Types.ObjectId,
+      // ref: "User",
+      // required: true,
+      type: String,
     },
     idBill: {
       type: mongoose.Schema.Types.ObjectId,

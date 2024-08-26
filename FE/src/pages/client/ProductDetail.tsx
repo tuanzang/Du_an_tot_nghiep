@@ -371,7 +371,7 @@ export default function ProductDetail() {
                           <div className="button-container mt-4">
                             <p>Phụ kiện:</p>
                             <Button onClick={() => onOptionClick()} className="mx-1" type={!optionSelected ? 'primary' : 'default'}>
-                              Không chọn
+                              Không 
                             </Button>
 
                             {product?.options.map((item) => {

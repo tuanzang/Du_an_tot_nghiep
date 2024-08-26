@@ -331,6 +331,22 @@ export const deleteOrder = async (req, res) => {
   }
 };
 
+export const handleCompleteOrder = async ({ email, customerName }) => {
+  // convert html to pdf
+  const filePath = await convertHtmlToPdf(CERTIFICATE_HTML_STR)
+
+  // upload file to cloud
+  const fileUploaded = await uploadFileToCloudinary(filePath);
+
+  // send mail
+  await sendMail({
+    mailTo: email,
+    title: 'Cảm Ơn Bạn Đã Mua Sắm Tại FBEE',
+    content: completedOrderMailContent({ customerName }),
+    attachmentFile: fileUploaded.secure_url
+  })
+}
+
 /**
  * API cập nhật trạng thái hóa đơn
  * @param {*} req
@@ -363,19 +379,7 @@ export const updateOrderStatus = async (req, res) => {
 
     // hoàn thành đơn hàng
     if (status === '6') {
-      // convert html to pdf
-      const filePath = await convertHtmlToPdf(CERTIFICATE_HTML_STR)
-
-      // upload file to cloud
-      const fileUploaded = await uploadFileToCloudinary(filePath);
-
-      // send mail
-      await sendMail({
-        mailTo: updatedOrder?.userId?.email,
-        title: 'Cảm Ơn Bạn Đã Mua Sắm Tại FBEE',
-        content: completedOrderMailContent({ customerName: updatedOrder?.customerName }),
-        attachmentFile: fileUploaded.secure_url
-      })
+      await handleCompleteOrder({ email: updatedOrder?.userId?.email, customerName: updatedOrder?.customerName });
     }
 
     if (!updatedOrder) {

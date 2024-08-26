@@ -1,7 +1,7 @@
 import type { FormProps } from "antd";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Col, Form, Input, InputNumber, Row } from "antd";
+import { Button, Card, Col, Form, Input, InputNumber, Row, message } from "antd";
 import { ICategory } from "../../../interface/Categories";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import BreadcrumbsCustom from "../../../components/BreadcrumbsCustom";
@@ -15,18 +15,23 @@ const CategoryAdd = () => {
 
   const onFinish: FormProps<ICategory>["onFinish"] = async (values) => {
     try {
-      const options = await Promise.all(
-        values?.options?.map(async (it) => {
-          if (typeof it.image === "string") return it;
+      let options = [];
 
-          const imageUploaded = await uploadImage([it.image]);
-
-          return {
-            ...it,
-            image: imageUploaded[0],
-          };
-        })
-      );
+      if (values?.options) {
+        options = await Promise.all(
+          values?.options?.map(async (it) => {
+            if (typeof it.image === "string") return it;
+  
+            const imageUploaded = await uploadImage([it.image]);
+  
+            return {
+              ...it,
+              image: imageUploaded[0],
+            };
+          })
+        );
+      }
+      
 
       await axios.post(`http://localhost:3001/api/categories/add`, {
         ...values,
@@ -34,7 +39,8 @@ const CategoryAdd = () => {
       });
       alert("Add category success");
       navigate("/admin/category");
-    } catch (err) {
+    } catch (err: any) {
+      message.error(err?.response?.data?.message || 'Đã có lỗi xảy ra, vui lòng thử lại');
       console.log(err);
     }
   };
@@ -93,12 +99,12 @@ const CategoryAdd = () => {
                           <Form.Item
                             {...restField}
                             name={[name, "name"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Vui lòng nhập tên phụ kiện",
-                              },
-                            ]}
+                            // rules={[
+                            //   {
+                            //     required: true,
+                            //     message: "Vui lòng nhập tên phụ kiện",
+                            //   },
+                            // ]}
                           >
                             <Input placeholder="Tên phụ kiện" />
                           </Form.Item>
@@ -106,12 +112,12 @@ const CategoryAdd = () => {
                           <Form.Item
                             {...restField}
                             name={[name, "price"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Vui lòng nhập giá phụ kiện",
-                              },
-                            ]}
+                            // rules={[
+                            //   {
+                            //     required: true,
+                            //     message: "Vui lòng nhập giá phụ kiện",
+                            //   },
+                            // ]}
                           >
                             <InputNumber
                               placeholder="Giá phụ kiện"
@@ -122,12 +128,12 @@ const CategoryAdd = () => {
                           <Form.Item
                             {...restField}
                             name={[name, "quantity"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Vui lòng nhập số lượng phụ kiện",
-                              },
-                            ]}
+                            // rules={[
+                            //   {
+                            //     required: true,
+                            //     message: "Vui lòng nhập số lượng phụ kiện",
+                            //   },
+                            // ]}
                           >
                             <InputNumber
                               placeholder="Số lượng phụ kiện"
@@ -138,12 +144,12 @@ const CategoryAdd = () => {
                           <Form.Item
                             {...restField}
                             name={[name, "image"]}
-                            rules={[
-                              {
-                                required: true,
-                                message: "Vui lòng chọn ảnh phụ kiện",
-                              },
-                            ]}
+                            // rules={[
+                            //   {
+                            //     required: true,
+                            //     message: "Vui lòng chọn ảnh phụ kiện",
+                            //   },
+                            // ]}
                           >
                             <FormImageItem />
                           </Form.Item>

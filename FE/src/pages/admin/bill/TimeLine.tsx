@@ -33,25 +33,25 @@ const TimeLine = ({
   );
   const latestStatus = filteredTimeLine[filteredTimeLine.length - 1];
 
-  useEffect(() => {
-    if (!latestStatus || latestStatus.statusBill !== "5" || isExpiredTime) return;
+  // useEffect(() => {
+  //   if (!latestStatus || latestStatus.statusBill !== "5" || isExpiredTime) return;
 
-    const timerId = setInterval(() => {
-      const expireTime = dayjs(latestStatus.createdAt).add(TIME_TO_EXPIRE, "m");
+  //   const timerId = setInterval(() => {
+  //     const expireTime = dayjs(latestStatus.createdAt).add(TIME_TO_EXPIRE, "m");
 
-      const isExpiredTime = dayjs(expireTime).diff(dayjs()) <= 0;
+  //     const isExpiredTime = dayjs(expireTime).diff(dayjs()) <= 0;
 
-      if (isExpiredTime && onOrderComplete) {
-        clearInterval(timerId);
-        setIsExpiredTime(true);
-        onOrderComplete();
-      }
-    }, 1000);
+  //     if (isExpiredTime && onOrderComplete) {
+  //       clearInterval(timerId);
+  //       setIsExpiredTime(true);
+  //       onOrderComplete();
+  //     }
+  //   }, 1000);
 
-    return () => {
-      clearInterval(timerId);
-    };
-  }, [filteredTimeLine.length, isExpiredTime, latestStatus, onOrderComplete]);
+  //   return () => {
+  //     clearInterval(timerId);
+  //   };
+  // }, [filteredTimeLine.length, isExpiredTime, latestStatus, onOrderComplete]);
 
   const getIconAndColor = (statusBill: number) => {
     switch (statusBill) {
