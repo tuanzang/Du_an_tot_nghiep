@@ -45,7 +45,7 @@ export default function ColumChartDashBoard({
     // Tạo series cột
     let series = chart.series.push(
       am5xy.ColumnSeries.new(root, {
-        name: "Tổng doanh thu",
+        // name: "Series 1",
         xAxis: xAxis,
         yAxis: yAxis,
         valueYField: "value",
@@ -57,7 +57,6 @@ export default function ColumChartDashBoard({
     series.columns.template.setAll({
       tooltipText: "{categoryX}: {valueY}",
       width: am5.percent(60),
-      
     });
 
     series.data.setAll(data);
