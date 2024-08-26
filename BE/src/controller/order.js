@@ -408,7 +408,7 @@ const createPaymentUrl = (ipAddr, orderId, orderInfo, amount) => {
   const date = new Date();
 
   const createDate = dateFormat(date).format("YYYYMMDDHHmmss");
-  const expiredDate = dateFormat(date).add(10, "m").format("YYYYMMDDHHmmss");
+  const expiredDate = dateFormat(date).add(2, "m").format("YYYYMMDDHHmmss");
 
   const currCode = "VND";
   let vnp_Params = {};

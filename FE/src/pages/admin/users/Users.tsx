@@ -28,6 +28,8 @@ import { ColumnType } from "antd/es/table";
 import { ColumnGroupType } from "antd/lib/table";
 import * as XLSX from "xlsx";
 import { socket } from "../../../socket";
+import { USER_INFO_STORAGE_KEY } from "../../../services/constants";
+import { IUser } from "../../../interface/Users";
 
 const customTableHeaderCellStyle: React.CSSProperties = {
   backgroundColor: "#c29957",
@@ -37,6 +39,9 @@ const customTableHeaderCellStyle: React.CSSProperties = {
 };
 
 export default function Users() {
+  const isLogged = localStorage.getItem(USER_INFO_STORAGE_KEY);
+  const user: IUser | null = isLogged ? JSON.parse(isLogged) : null;
+
   const [openAdd, setOpenAdd] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
   const [updateUser, setUpdateUser] = useState<IUserResponseData | null>(null);
@@ -193,26 +198,29 @@ export default function Users() {
             }}
             style={{ border: "none" }}
           />
-          {record.blocked ? (
-            <Button
-              icon={
-                <CheckOutlined style={{ fontSize: "20px", color: "#52c41a" }} />
-              }
-              onClick={() => handleUnblockUser(record._id)}
-              style={{ border: "none", marginLeft: "10px" }}
-            >
-              Bỏ chặn
-            </Button>
-          ) : (
-            <Button
-              icon={
-                <StopOutlined style={{ fontSize: "20px", color: "#ff4d4f" }} />
-              }
-              onClick={() => handleBlockUser(record._id)}
-              style={{ border: "none", marginLeft: "10px" }}
-            >
-              Chặn
-            </Button>
+
+          {record._id !== user?._id && (
+            record.blocked ? (
+              <Button
+                icon={
+                  <CheckOutlined style={{ fontSize: "20px", color: "#52c41a" }} />
+                }
+                onClick={() => handleUnblockUser(record._id)}
+                style={{ border: "none", marginLeft: "10px" }}
+              >
+                Bỏ chặn
+              </Button>
+            ) : (
+              <Button
+                icon={
+                  <StopOutlined style={{ fontSize: "20px", color: "#ff4d4f" }} />
+                }
+                onClick={() => handleBlockUser(record._id)}
+                style={{ border: "none", marginLeft: "10px" }}
+              >
+                Chặn
+              </Button>
+            )
           )}
         </div>
       ),
